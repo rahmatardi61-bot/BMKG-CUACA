@@ -396,7 +396,7 @@ onUnmounted(() => {
             ? 'bg-blue-50/85 text-blue-600 border-blue-200/50 shadow-sm shadow-blue-500/5 dark:bg-brand-cyan/10 dark:text-brand-cyan dark:border-brand-cyan/30 dark:shadow-brand-cyan/5 font-bold' 
             : 'bg-white/45 text-slate-500 hover:bg-slate-50/70 hover:text-slate-700 border-slate-200/30 dark:bg-brand-navy-900/35 dark:text-slate-400 dark:hover:bg-brand-navy-850/60 dark:hover:text-slate-100 dark:border-brand-navy-800/20'"
         >
-          <span>{{ selectedCity !== cities[0] ? selectedCity.split(',')[0] : 'Kota Lain' }}</span>
+          <span>{{ selectedCity !== cities[0] ? selectedCity.split(',')[0] : 'Wilayah Lain' }}</span>
           <ChevronDown class="w-3.5 h-3.5 transition-transform duration-300" :class="{ 'rotate-180': showCityDropdown }" />
         </button>
 
@@ -451,7 +451,7 @@ onUnmounted(() => {
             v-if="cities.length <= 1"
             class="px-4 py-3 text-[10px] text-slate-400 dark:text-slate-500 text-center font-bold uppercase tracking-wider"
           >
-            Tidak ada kota lain
+            Tidak ada wilayah lain
           </div>
         </div>
       </div>

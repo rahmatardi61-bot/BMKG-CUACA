@@ -183,7 +183,7 @@ const deleteCity = (cityToDelete: string) => {
 };
 
 // Login State
-const showLogin = ref(true); // Default to true to force login on first load
+const showLogin = ref(false); // Default to false to bypass login screen on first load
 const isLoggedIn = ref(false);
 const userProfile = ref<{ name: string; username: string } | null>(null);
 
@@ -232,14 +232,14 @@ onMounted(() => {
       } else {
         // Session expired or invalid format
         localStorage.removeItem('bmkg-session');
-        showLogin.value = true;
+        showLogin.value = false;
       }
     } catch (e) {
       localStorage.removeItem('bmkg-session');
-      showLogin.value = true;
+      showLogin.value = false;
     }
   } else {
-    showLogin.value = true;
+    showLogin.value = false;
   }
 
   // Trigger geolocation immediately on open

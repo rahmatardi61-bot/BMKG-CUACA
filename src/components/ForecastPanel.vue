@@ -1,0 +1,224 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { 
+  ChevronDown,
+  Droplet,
+  Sunrise,
+  Sunset,
+  Wind,
+  Thermometer,
+  Cloud,
+  Activity,
+  Moon
+} from 'lucide-vue-next';
+import type { HourlyForecast } from '../types/weather';
+import ForecastTemperatureChart from './forecast/ForecastTemperatureChart.vue';
+import ForecastPrecipitationChart from './forecast/ForecastPrecipitationChart.vue';
+import ForecastAirQualityChart from './forecast/ForecastAirQualityChart.vue';
+
+const props = defineProps<{
+  forecasts: HourlyForecast[];
+}>();
+
+// Navigation tab state
+const activeTab = ref('Suhu');
+const hourlyTabs = ['Suhu', 'Presipitasi', 'Angin', 'Kelembapan', 'Kualitas Udara'];
+const isDropdownOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+// Header Date updated reactively by active chart scroll/selected states
+const headerDate = ref('');
+
+const updateHeaderDate = (dateStr: string) => {
+  headerDate.value = dateStr;
+};
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const selectTab = (tab: string) => {
+  activeTab.value = tab;
+  isDropdownOpen.value = false;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isDropdownOpen.value = false;
+  }
+};
+
+const getTabIcon = (tabName: string) => {
+  switch (tabName) {
+    case 'Suhu': return Thermometer;
+    case 'Presipitasi': return Droplet;
+    case 'Angin': return Wind;
+    case 'Kelembapan': return Cloud;
+    case 'Kualitas Udara': return Activity;
+    default: return Thermometer;
+  }
+};
+
+// ── Real-time clock ────────────────────────────────────────────────────────────
+const currentTime = ref(new Date());
+let clockIntervalId: any = null;
+
+onMounted(async () => {
+  await nextTick();
+  window.addEventListener('click', handleClickOutside);
+  // Tick every minute to update current hour calculations
+  clockIntervalId = setInterval(() => {
+    currentTime.value = new Date();
+  }, 60000);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleClickOutside);
+  if (clockIntervalId) clearInterval(clockIntervalId);
+});
+</script>
+
+<template>
+  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl shadow-sm backdrop-blur-md overflow-hidden transition-all duration-300">
+    
+    <!-- ── Header ─────────────────────────────── -->
+    <div class="px-6 pt-6 pb-4 flex items-center justify-between gap-3 border-b border-slate-100/40 dark:border-brand-navy-800/30">
+      <!-- Left: Title -->
+      <div>
+        <div class="flex items-center gap-2">
+          <!-- Hourly forecast clock icon -->
+          <svg class="w-4 h-4 text-blue-500 dark:text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Prakiraan Perjam
+          </h3>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 transition-all duration-300">{{ headerDate }}</p>
+      </div>
+
+      <!-- Right: Dropdown with glassmorphism and dynamic icon -->
+      <div ref="dropdownRef" class="relative z-50 shrink-0">
+        <button
+          @click="toggleDropdown"
+          class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer select-none
+            bg-slate-100/60 border-transparent hover:bg-slate-200/50 text-slate-700
+            dark:bg-brand-navy-900/60 dark:hover:bg-brand-navy-800/50 dark:text-slate-200"
+        >
+          <component 
+            :is="getTabIcon(activeTab)" 
+            class="w-3.5 h-3.5 text-blue-500 dark:text-brand-cyan"
+          />
+          <span class="text-xs tracking-wide">{{ activeTab }}</span>
+          <ChevronDown class="w-3 h-3 text-slate-400 transition-transform duration-300" :class="{ 'rotate-180': isDropdownOpen }" />
+        </button>
+
+        <!-- Dropdown Menu -->
+        <transition
+          enter-active-class="transition duration-100 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-75 ease-in"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <div
+            v-if="isDropdownOpen"
+            class="absolute right-0 mt-2 w-48 rounded-xl shadow-lg border overflow-hidden py-1.5 z-50
+              bg-white/95 border-slate-100 backdrop-blur-md
+              dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
+          >
+            <button
+              v-for="tab in hourlyTabs"
+              :key="tab"
+              @click="selectTab(tab)"
+              class="w-full text-left px-4 py-2.5 text-xs hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center justify-between"
+              :class="activeTab === tab ? 'font-bold text-blue-600 dark:text-brand-cyan' : 'text-slate-600 dark:text-slate-300'"
+            >
+              <span class="flex items-center gap-2">
+                <component :is="getTabIcon(tab)" class="w-3.5 h-3.5" />
+                {{ tab }}
+              </span>
+              <span v-if="activeTab === tab" class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
+            </button>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <!-- ── Hourly Chart Section (Suhu / Angin / Kelembapan) ────────── -->
+    <ForecastTemperatureChart
+      v-if="activeTab !== 'Presipitasi' && activeTab !== 'Kualitas Udara'"
+      :forecasts="forecasts"
+      :active-tab="activeTab"
+      :current-time="currentTime"
+      @date-change="updateHeaderDate"
+    />
+
+    <!-- ── Precipitation View ────────────────────────────────────────── -->
+    <ForecastPrecipitationChart
+      v-else-if="activeTab === 'Presipitasi'"
+      :forecasts="forecasts"
+      :current-time="currentTime"
+      @date-change="updateHeaderDate"
+    />
+
+    <!-- ── Air Quality View ────────────────────────────────────────── -->
+    <ForecastAirQualityChart
+      v-else-if="activeTab === 'Kualitas Udara'"
+      :forecasts="forecasts"
+      :current-time="currentTime"
+      @date-change="updateHeaderDate"
+    />
+
+    <!-- ── Legend footer ─────────────────────── -->
+    <div v-if="activeTab !== 'Presipitasi' && activeTab !== 'Kualitas Udara'" class="px-6 pb-4 flex items-center justify-between flex-wrap gap-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 select-none">
+      <div v-if="activeTab !== 'Presipitasi'" class="flex items-center gap-4">
+        <!-- If Wind (Angin) tab -->
+        <template v-if="activeTab === 'Angin'">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 dark:bg-brand-cyan block"></span>
+            <span>Kecepatan Angin</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-4 h-0.5 bg-blue-400 dark:bg-brand-cyan/60 block" style="border-top: 1.5px dashed currentColor"></span>
+            <span>Hembusan Angin</span>
+          </div>
+        </template>
+        <!-- Standard legend for Suhu / Kelembapan -->
+        <template v-else>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-0.5 rounded-full bg-blue-500 dark:bg-brand-cyan block"></span>
+            <span>{{ activeTab }}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <Droplet class="w-2.5 h-2.5 text-blue-500 dark:text-brand-cyan" />
+            <span>Peluang Hujan</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <Moon class="w-2.5 h-2.5 text-indigo-500 dark:text-indigo-400" />
+            <span>Fase Bulan: Sabit Tua</span>
+          </div>
+        </template>
+      </div>
+      <div v-else class="flex items-center gap-4">
+        <!-- Static placeholders just to align legends in Presipitasi mode -->
+        <span class="block"></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <Sunrise class="w-2.5 h-2.5 text-amber-400" />
+        <span class="text-amber-500 dark:text-amber-400 font-bold">05:51</span>
+        <span class="mx-0.5 text-slate-300 dark:text-slate-600">·</span>
+        <Sunset class="w-2.5 h-2.5 text-orange-400" />
+        <span class="text-orange-500 dark:text-orange-400 font-bold">17:34</span>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<style scoped>
+/* Scoped styles are kept minimal as visual layouts are handled in child components */
+</style>

@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  height: 100%;
+}
+
+body {
+  @apply bg-brand-sky-100 text-slate-800 dark:bg-brand-navy-950 dark:text-slate-100;
+  overflow-x: hidden;
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-brand-navy-700/50 rounded-full transition-colors hover:bg-slate-400 dark:hover:bg-brand-navy-600;
+}
+
+/* Custom Glassmorphism styles */
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+  background: rgba(28, 37, 65, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Glow effects */
+.border-glow-cyan {
+  border-color: rgba(0, 245, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.15);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Helper to instantly suppress all transitions and animations during theme swaps */
+.no-transitions,
+.no-transitions * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Futuristic Logo Mask - Matches the PNG logo shape and fills it with dynamic gradient */
+.lsn-logo-mask-desktop {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #2563eb 100%);
+  -webkit-mask: url('./assets/lsn_logo.png') no-repeat center;
+  mask: url('./assets/lsn_logo.png') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: all 0.3s ease;
+}
+
+.dark .lsn-logo-mask-desktop {
+  background: linear-gradient(135deg, #00f5ff 0%, #3b82f6 50%, #8b5cf6 100%);
+}
+
+.lsn-logo-mask-mobile {
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #2563eb 100%);
+  -webkit-mask: url('./assets/lsn_logo.png') no-repeat center;
+  mask: url('./assets/lsn_logo.png') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: all 0.3s ease;
+}
+
+.dark .lsn-logo-mask-mobile {
+  background: linear-gradient(135deg, #00f5ff 0%, #3b82f6 50%, #8b5cf6 100%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOUCH HOVER SIMULATION
+   The .touch-hovering class is added via JavaScript on touchstart.
+   These rules mirror Tailwind hover: utilities so taps on mobile feel
+   identical to hover on desktop.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Scale transforms */
+.touch-hovering.hover\:scale-105,
+.touch-hovering[class*="hover:scale-105"] { transform: scale(1.05) !important; }
+.touch-hovering.hover\:scale-110,
+.touch-hovering[class*="hover:scale-110"] { transform: scale(1.10) !important; }
+
+/* Opacity */
+.touch-hovering.hover\:opacity-90 { opacity: 0.9 !important; }
+.touch-hovering.hover\:opacity-95 { opacity: 0.95 !important; }
+.touch-hovering.hover\:opacity-100 { opacity: 1 !important; }
+
+/* Background highlights – light mode */
+.touch-hovering.hover\:bg-slate-100\/50,
+.touch-hovering.hover\:bg-slate-100 { background-color: rgb(241 245 249 / 0.5) !important; }
+.touch-hovering.hover\:bg-slate-200\/50 { background-color: rgb(226 232 240 / 0.5) !important; }
+
+/* Background highlights – dark mode (applied when .dark is on <html>) */
+.dark .touch-hovering.hover\:bg-brand-navy-800\/50,
+.dark .touch-hovering[class*="dark:hover:bg-brand-navy-800"] { background-color: rgb(15 23 42 / 0.5) !important; }
+.dark .touch-hovering[class*="dark:hover:bg-brand-navy-900"] { background-color: rgb(9 14 26 / 0.4) !important; }
+
+/* Shadow glow on cards */
+.touch-hovering.hover\:shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; }
+.touch-hovering[class*="hover:shadow-lg"] { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important; }
+
+/* Text color changes */
+.touch-hovering.hover\:text-slate-800 { color: rgb(30 41 59) !important; }
+.dark .touch-hovering[class*="dark:hover:text-white"] { color: rgb(255 255 255) !important; }
+
+/* Border highlight */
+.touch-hovering[class*="hover:border-orange-500"] { border-color: rgb(249 115 22 / 0.25) !important; }
+.touch-hovering[class*="hover:border-blue-500"] { border-color: rgb(59 130 246 / 0.4) !important; }
+
+/* ── Group hover children ──────────────────────────────────────────────────
+   When a .group ancestor has .touch-hovering, child group-hover: classes fire */
+
+/* Opacity reveal on group-hover children */
+.touch-hovering .group-hover\:opacity-\[0\.45\] { opacity: 0.45 !important; }
+
+/* Scale on group-hover icon badge */
+.touch-hovering .group-hover\:scale-105 { transform: scale(1.05) !important; }
+
+/* Shadow glow reveal on group-hover badge */
+.touch-hovering .group-hover\:shadow-\[0_4px_12px_rgba\(37\,99\,235\,0\.12\)\] {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* Background ambient glow on group-hover */
+.touch-hovering .group-hover\:bg-orange-500\/25 { background-color: rgb(249 115 22 / 0.25) !important; }
+.touch-hovering .group-hover\:scale-125 { transform: scale(1.25) !important; }
+.touch-hovering .group-hover\:bg-blue-500\/20 { background-color: rgb(59 130 246 / 0.2) !important; }
+
+/* Illustration opacity reveal on card group-hover */
+.touch-hovering .group-hover\:opacity-\[0\.55\] { opacity: 0.55 !important; }
+.touch-hovering .group-hover\:opacity-100 { opacity: 1 !important; }
+
+/* Text color on group-hover children */
+.touch-hovering .group-hover\:text-slate-600 { color: rgb(71 85 105) !important; }
+.dark .touch-hovering .group-hover\:text-white { color: white !important; }
+
+/* Disable scroll and block interactions on app content when drawer/modal is open */
+body.drawer-open {
+  overflow: hidden !important;
+}
+body.drawer-open #app {
+  pointer-events: none !important;
+  user-select: none !important;
+}

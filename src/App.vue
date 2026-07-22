@@ -111,7 +111,8 @@ const detectRealtimeLocation = () => {
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
           {
             headers: {
-              'Accept-Language': 'id'
+              'Accept-Language': 'id',
+              'User-Agent': 'BMKGCuacaApp/1.0 (https://bmkg-cuaca-rho.vercel.app)'
             }
           }
         );

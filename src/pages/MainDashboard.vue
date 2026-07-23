@@ -620,7 +620,7 @@ onUnmounted(() => {
         <SatelliteMap :selected-city="selectedCity" @select-city="$emit('select-city', $event)" />
 
         <!-- Weather & Geophysics News Grid -->
-        <NewsSection :articles="articles" />
+        <NewsSection :articles="articles" class="hidden lg:block" />
       </div>
 
       <!-- Right Column: Sidebar alerts & Transportation status (Span 1) -->

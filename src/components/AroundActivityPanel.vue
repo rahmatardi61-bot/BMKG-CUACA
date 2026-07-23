@@ -154,6 +154,7 @@ const isExpanded = (name: string) => {
   return expandedStates.value[name] ?? false;
 };
 
+// ── Static Fallback mapping ──────────────────────────────────────────────────
 const golfCourses = computed<GolfCourse[]>(() => {
   const cityLower = props.selectedCity.toLowerCase();
   
@@ -342,7 +343,7 @@ const golfCourses = computed<GolfCourse[]>(() => {
         location: props.selectedCity.split(',').slice(1).join(', ').trim() || props.selectedCity,
         comfortIndex: 'Nyaman',
         comfortEmoji: '😊',
-        rainWarning: 'Kondisi udara sejuk dan tidak ada potensi hujan.',
+        rainWarning: 'Kondisi udara sejuk and tidak ada potensi hujan.',
         uvWarning: 'Sangat baik untuk jalan santai dan rekreasi keluarga lokal.',
         hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim')
       },

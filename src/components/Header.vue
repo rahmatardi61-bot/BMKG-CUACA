@@ -168,7 +168,7 @@ const handleLogout = () => {
         </button>
 
         <!-- User Profile (Clickable Login Trigger / Profile Dropdown) -->
-        <div class="relative">
+        <div v-if="isLoggedIn" class="relative">
           <button 
             id="user-profile-button"
             @click="handleUserClick" 

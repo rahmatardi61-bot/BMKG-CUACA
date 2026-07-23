@@ -206,7 +206,7 @@ const handleLogout = () => {
   isLoggedIn.value = false;
   userProfile.value = null;
   localStorage.removeItem('bmkg-session');
-  showLogin.value = true; // Redirect back to login screen on logout
+  showLogin.value = false; // Bypass redirecting to login page on logout
 };
 
 onMounted(() => {

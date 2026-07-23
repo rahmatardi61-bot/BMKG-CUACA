@@ -8,7 +8,6 @@ import {
   CloudRain, 
   Sun, 
   Cloud,
-  Accessibility,
   ArrowDown,
   ArrowDownLeft,
   ArrowDownRight,
@@ -411,7 +410,12 @@ const navigateToGolf = (name: string, location: string) => {
         <!-- Index Kenyamanan Row -->
         <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-brand-navy-950/40 rounded-xl border border-slate-100 dark:border-brand-navy-700/10 mb-3">
           <div class="flex items-center gap-2">
-            <Accessibility class="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <!-- Custom thermal stress / comfort index icon -->
+            <svg class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.15" />
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M17.66 6.34l-1.41 1.41M7.76 16.24l-1.41 1.41M6.34 6.34l1.41 1.41M16.24 16.24l1.41 1.41" />
+            </svg>
             <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Index Kenyamanan</span>
           </div>
           <div class="flex items-center gap-2">

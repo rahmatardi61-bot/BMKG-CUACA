@@ -560,12 +560,12 @@ onUnmounted(() => {
           </p>
         </div>
 
-        <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel -->
-        <div class="relative group/carousel w-full mt-1">
+        <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
+        <div class="relative group/carousel w-full mt-1 bg-white/20 dark:bg-brand-navy-900/10 border border-slate-200/30 dark:border-brand-navy-800/20 backdrop-blur-md rounded-3xl p-3.5 shadow-sm">
           <!-- Left Arrow Button -->
           <button 
             @click="scrollCarousel('left')"
-            class="absolute -left-3 top-[42%] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            class="absolute -left-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
             aria-label="Previous cities"
           >
             <ChevronLeft class="w-4 h-4 text-slate-800 dark:text-white" />
@@ -574,7 +574,7 @@ onUnmounted(() => {
           <!-- Right Arrow Button -->
           <button 
             @click="scrollCarousel('right')"
-            class="absolute -right-3 top-[42%] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            class="absolute -right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
             aria-label="Next cities"
           >
             <ChevronRight class="w-4 h-4 text-slate-800 dark:text-white" />
@@ -583,7 +583,7 @@ onUnmounted(() => {
           <!-- Scrollable Row -->
           <div 
             ref="carouselContainer"
-            class="flex items-center gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 pb-1"
+            class="flex items-center gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-0.5"
           >
             <button
               v-for="landmark in cityLandmarks"

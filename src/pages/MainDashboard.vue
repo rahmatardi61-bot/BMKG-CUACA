@@ -662,9 +662,9 @@ onUnmounted(() => {
                 </defs>
                 <rect x="0" y="0" width="320" height="80" fill="url(#landGradA)"/>
                 <!-- Mountain range far -->
-                <path d="M0 55 L30 28 L55 48 L80 20 L110 45 L135 30 L160 50 L185 18 L215 42 L240 25 L265 48 L290 32 L320 52 L320 80 L0 80Z" fill="#f97316" opacity="0.4"/>
+                <path d="M0 55 Q 30 15, 55 48 Q 80 5, 110 45 Q 135 18, 160 50 Q 187 2, 215 42 Q 240 12, 265 48 Q 292 20, 320 52 L320 80 L0 80Z" fill="#f97316" opacity="0.4"/>
                 <!-- Mountain range near -->
-                <path d="M0 68 L25 48 L50 60 L75 40 L100 58 L130 44 L155 62 L180 38 L210 58 L240 46 L270 60 L300 50 L320 62 L320 80 L0 80Z" fill="#ea580c" opacity="0.55"/>
+                <path d="M0 68 Q 25 38, 50 60 Q 75 30, 100 58 Q 127 34, 155 62 Q 180 26, 210 58 Q 240 38, 270 60 Q 297 42, 320 62 L320 80 L0 80Z" fill="#ea580c" opacity="0.55"/>
                 <!-- Ground base -->
                 <rect x="0" y="73" width="320" height="7" fill="#9a3412" opacity="0.6"/>
                 <!-- Road center line -->

@@ -570,7 +570,8 @@ onUnmounted(() => {
               <div class="min-w-0">
                 <h4 class="text-[9px] font-black uppercase tracking-wider text-blue-500 dark:text-brand-cyan">Aplikasi Mobile Resmi</h4>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">
-                  Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan notifikasi cuaca & gempa secara realtime.
+                  Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan <br />
+                  notifikasi cuaca & gempa secara realtime.
                 </p>
               </div>
               <div class="flex items-center gap-2 shrink-0">

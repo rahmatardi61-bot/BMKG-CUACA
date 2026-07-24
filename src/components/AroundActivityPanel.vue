@@ -41,10 +41,11 @@ interface GolfCourse {
 }
 
 const getTimezoneInfoForCity = (cityName: string) => {
+  if (!cityName) return { offset: 7, suffix: 'WIB' };
   const name = cityName.toLowerCase();
   
   if (name.includes('jakarta') || name.includes('gambir') || 
-      name.includes('yogyakarta') || name.includes('sleman') || name.includes('bantul') || name.includes('mergangsan') || name.includes('brontokusuman') || name.includes('bangunjiwo') ||
+      name.includes('yogyakarta') || name.includes('sleman') || name.includes('bantul') || name.includes('mergangsan') || name.includes('brontokusuman') || name.includes('bangunjiwo') || name.includes('tamanan') ||
       name.includes('surabaya') || name.includes('gubeng') || 
       name.includes('bandung') || name.includes('braga') || 
       name.includes('medan') || name.includes('sikambing')) {
@@ -72,12 +73,13 @@ const getTimezoneInfoForCity = (cityName: string) => {
 };
 
 const tzSuffix = computed(() => {
+  if (!props.selectedCity) return 'WIB';
   return getTimezoneInfoForCity(props.selectedCity).suffix;
 });
 
 const getCurrentHoursList = () => {
   const now = new Date();
-  const targetOffset = getTimezoneInfoForCity(props.selectedCity).offset;
+  const targetOffset = props.selectedCity ? getTimezoneInfoForCity(props.selectedCity).offset : 7;
   const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
   const targetTime = new Date(utcMs + (targetOffset * 3600000));
   const currentHour = targetTime.getHours();
@@ -153,12 +155,44 @@ const isExpanded = (name: string) => {
   return expandedStates.value[name] ?? false;
 };
 
+// ── Helper to calculate dynamic distance relative to Tamanan, Bantul (user's home) ──
+const getDistance = (cityFull: string, baseLocalDistanceStr: string) => {
+  if (!cityFull) return baseLocalDistanceStr;
+  const city = cityFull.toLowerCase();
+  
+  // Extract number from local distance (e.g. "Radius • 3.2 km" -> 3.2)
+  const numericMatch = baseLocalDistanceStr.match(/[\d.]+/);
+  const localDist = numericMatch ? parseFloat(numericMatch[0]) : 0;
+  
+  let baseDist = 0;
+  if (city.includes('jakarta')) baseDist = 440;
+  else if (city.includes('surabaya')) baseDist = 265;
+  else if (city.includes('bandung')) baseDist = 330;
+  else if (city.includes('medan')) baseDist = 1850;
+  else if (city.includes('semarang')) baseDist = 90;
+  else if (city.includes('makassar')) baseDist = 1050;
+  else if (city.includes('palembang')) baseDist = 870;
+  else if (city.includes('batam')) baseDist = 1380;
+  else if (city.includes('pekanbaru')) baseDist = 1340;
+  else if (city.includes('denpasar')) baseDist = 550;
+  
+  if (baseDist === 0) {
+    // Local Yogyakarta / Bantul area
+    return `Radius • ${localDist} km`;
+  }
+  
+  const totalDist = baseDist + localDist;
+  return `Radius • ${totalDist.toFixed(1)} km dari lokasi Anda`;
+};
+
 // ── Static Fallback mapping ──────────────────────────────────────────────────
 const golfCourses = computed<GolfCourse[]>(() => {
+  if (!props.selectedCity) return [];
   const cityLower = props.selectedCity.toLowerCase();
+  let rawCourses: GolfCourse[] = [];
   
   if (cityLower.includes('jakarta') || cityLower.includes('gambir')) {
-    return [
+    rawCourses = [
       {
         id: 101,
         name: 'Monumen Nasional (Monas)',
@@ -183,7 +217,7 @@ const golfCourses = computed<GolfCourse[]>(() => {
       }
     ];
   } else if (cityLower.includes('surabaya') || cityLower.includes('gubeng')) {
-    return [
+    rawCourses = [
       {
         id: 201,
         name: 'Taman Bungkul',
@@ -208,7 +242,7 @@ const golfCourses = computed<GolfCourse[]>(() => {
       }
     ];
   } else if (cityLower.includes('bandung') || cityLower.includes('braga')) {
-    return [
+    rawCourses = [
       {
         id: 301,
         name: 'Dago Heritage 1917 Golf',
@@ -233,7 +267,7 @@ const golfCourses = computed<GolfCourse[]>(() => {
       }
     ];
   } else if (cityLower.includes('medan') || cityLower.includes('sikambing')) {
-    return [
+    rawCourses = [
       {
         id: 401,
         name: 'Taman Cadika Pramuka',
@@ -257,8 +291,33 @@ const golfCourses = computed<GolfCourse[]>(() => {
         hourly: generateHourlyForGolf('Cukup', 30, 'Cloud')
       }
     ];
+  } else if (cityLower.includes('semarang') || cityLower.includes('pandanaran')) {
+    rawCourses = [
+      {
+        id: 411,
+        name: 'Lawang Sewu',
+        distance: 'Radius • 1.5 km',
+        location: 'Semarang Tengah, Kota Semarang, Jawa Tengah',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Cuaca berawan sejuk sore hari.',
+        uvWarning: 'Sangat cocok untuk wisata sejarah outdoor.',
+        hourly: generateHourlyForGolf('Nyaman', 28, 'Cloud')
+      },
+      {
+        id: 412,
+        name: 'Gombel Golf Semarang',
+        distance: 'Radius • 8.0 km',
+        location: 'Banyumanik, Kota Semarang, Jawa Tengah',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Kondisi berawan sejuk tanpa curah hujan.',
+        uvWarning: 'Permainan golf sangat ideal dengan angin bukit yang menyegarkan.',
+        hourly: generateHourlyForGolf('Nyaman', 27, 'Cloud')
+      }
+    ];
   } else if (cityLower.includes('makassar') || cityLower.includes('mariso')) {
-    return [
+    rawCourses = [
       {
         id: 501,
         name: 'Pantai Losari Makassar',
@@ -282,8 +341,83 @@ const golfCourses = computed<GolfCourse[]>(() => {
         hourly: generateHourlyForGolf('Cukup', 32, 'Sun')
       }
     ];
+  } else if (cityLower.includes('palembang') || cityLower.includes('ilir barat')) {
+    rawCourses = [
+      {
+        id: 511,
+        name: 'Jembatan Ampera & Benteng Kuto Besak',
+        distance: 'Radius • 0.5 km',
+        location: 'Ilir Barat I, Kota Palembang, Sumatera Selatan',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Cerah berawan tanpa potensi hujan.',
+        uvWarning: 'Angin sungai Musi sepoi-sepoi mendukung jalan santai sore.',
+        hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim')
+      },
+      {
+        id: 512,
+        name: 'Palembang Golf Club',
+        distance: 'Radius • 5.0 km',
+        location: 'Kota Palembang, Sumatera Selatan',
+        comfortIndex: 'Cukup',
+        comfortEmoji: '😐',
+        rainWarning: 'Mendung tipis berawan.',
+        uvWarning: 'Suhu siang terik basah, terapkan tabir surya.',
+        hourly: generateHourlyForGolf('Cukup', 33, 'Cloud')
+      }
+    ];
+  } else if (cityLower.includes('batam') || cityLower.includes('belian')) {
+    rawCourses = [
+      {
+        id: 521,
+        name: 'Jembatan Barelang Batam',
+        distance: 'Radius • 20 km',
+        location: 'Batam Kota, Kota Batam, Kepulauan Riau',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Angin kencang mendukung wisata pemandangan.',
+        uvWarning: 'Suhu laut bersahabat, siapkan kacamata hitam.',
+        hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim')
+      },
+      {
+        id: 522,
+        name: 'SouthLinks Country Club Batam',
+        distance: 'Radius • 6.0 km',
+        location: 'Sekupang, Kota Batam, Kepulauan Riau',
+        comfortIndex: 'Cukup',
+        comfortEmoji: '😐',
+        rainWarning: 'Potensi gerimis ringan di sore hari.',
+        uvWarning: 'Kelembapan tinggi, disarankan hidrasi berkala.',
+        hourly: generateHourlyForGolf('Cukup', 31, 'Cloud')
+      }
+    ];
+  } else if (cityLower.includes('pekanbaru') || cityLower.includes('tampan')) {
+    rawCourses = [
+      {
+        id: 531,
+        name: 'Labersa Golf & Country Club',
+        distance: 'Radius • 8.0 km',
+        location: 'Siak Hulu, Dekat Pekanbaru, Riau',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Cuaca cerah berawan sangat bersahabat.',
+        uvWarning: 'Aman beraktivitas golf dengan tingkat paparan UV sedang.',
+        hourly: generateHourlyForGolf('Nyaman', 32, 'SunDim')
+      },
+      {
+        id: 532,
+        name: 'Taman Wisata Alam Mayang',
+        distance: 'Radius • 6.0 km',
+        location: 'Tenayan Raya, Kota Pekanbaru, Riau',
+        comfortIndex: 'Nyaman',
+        comfortEmoji: '😊',
+        rainWarning: 'Udara bersih teduh berawan.',
+        uvWarning: 'Ideal untuk rekreasi keluarga di bawah pepohonan hijau rindang.',
+        hourly: generateHourlyForGolf('Nyaman', 30, 'Cloud')
+      }
+    ];
   } else if (cityLower.includes('denpasar') || cityLower.includes('dauh puri') || cityLower.includes('bali') || cityLower.includes('kuta')) {
-    return [
+    rawCourses = [
       {
         id: 601,
         name: 'Bali National Golf Club',
@@ -307,8 +441,8 @@ const golfCourses = computed<GolfCourse[]>(() => {
         hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim')
       }
     ];
-  } else if (cityLower.includes('yogyakarta') || cityLower.includes('sleman') || cityLower.includes('bantul') || cityLower.includes('mergangsan') || cityLower.includes('brontokusuman') || cityLower.includes('bangunjiwo')) {
-    return [
+  } else if (cityLower.includes('yogyakarta') || cityLower.includes('sleman') || cityLower.includes('bantul') || cityLower.includes('mergangsan') || cityLower.includes('brontokusuman') || cityLower.includes('bangunjiwo') || cityLower.includes('tamanan')) {
+    rawCourses = [
       {
         id: 1,
         name: 'Merapi Golf',
@@ -334,7 +468,7 @@ const golfCourses = computed<GolfCourse[]>(() => {
     ];
   } else {
     const mainName = props.selectedCity.split(',')[0].trim();
-    return [
+    rawCourses = [
       {
         id: 901,
         name: `${mainName} Central Park`,
@@ -359,6 +493,12 @@ const golfCourses = computed<GolfCourse[]>(() => {
       }
     ];
   }
+
+  // Map raw courses to output dynamic distance relative to Tamanan, Bantul (user's realtime location)
+  return rawCourses.map(course => ({
+    ...course,
+    distance: getDistance(props.selectedCity, course.distance)
+  }));
 });
 
 const navigateToGolf = (name: string, location: string) => {

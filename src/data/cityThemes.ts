@@ -4,7 +4,7 @@ export interface CityTheme {
 }
 
 const jakartaTheme: CityTheme = {
-  cardBg: 'from-indigo-50/90 via-purple-50/90 to-pink-50/90 text-indigo-950 border border-purple-100/50 shadow-purple-500/5 dark:from-indigo-950/85 dark:via-purple-950/75 dark:to-pink-950/40 dark:text-pink-100 dark:border-purple-900/30 dark:shadow-purple-950/40',
+  cardBg: 'bg-gradient-to-r from-[#1c0b36] via-[#2e0e4b] to-[#1a092b] text-white border border-purple-500/30 shadow-xl shadow-purple-950/40',
   landmarkSvg: `
     <defs>
       <linearGradient id="jkSun" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -47,7 +47,7 @@ const jakartaTheme: CityTheme = {
 };
 
 const surabayaTheme: CityTheme = {
-  cardBg: 'from-teal-50/90 via-cyan-50/90 to-blue-50/90 text-cyan-950 border border-cyan-100/50 shadow-cyan-500/5 dark:from-teal-950/80 dark:via-cyan-950/75 dark:to-blue-950/40 dark:text-cyan-100 dark:border-cyan-900/30 dark:shadow-cyan-950/40',
+  cardBg: 'bg-gradient-to-r from-teal-900 via-cyan-950 to-blue-950 text-cyan-100 border border-cyan-500/30 shadow-xl shadow-cyan-950/40',
   landmarkSvg: `
     <defs>
       <radialGradient id="sbyGlow" cx="50%" cy="50%" r="50%">
@@ -97,7 +97,7 @@ const surabayaTheme: CityTheme = {
 };
 
 const bandungTheme: CityTheme = {
-  cardBg: 'from-emerald-50/90 via-teal-50/90 to-cyan-50/90 text-emerald-950 border border-emerald-100/50 shadow-emerald-500/5 dark:from-emerald-950/80 dark:via-teal-950/75 dark:to-cyan-950/40 dark:text-emerald-100 dark:border-teal-900/30 dark:shadow-teal-950/40',
+  cardBg: 'bg-gradient-to-r from-emerald-900 via-teal-950 to-cyan-950 text-emerald-100 border border-emerald-500/30 shadow-xl shadow-emerald-950/40',
   landmarkSvg: `
     <defs>
       <linearGradient id="bdSun" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -146,7 +146,7 @@ const bandungTheme: CityTheme = {
 };
 
 const medanTheme: CityTheme = {
-  cardBg: 'from-amber-50/95 via-orange-50/90 to-yellow-50/95 text-amber-950 border border-amber-100/50 shadow-amber-500/5 dark:from-amber-950/80 dark:via-orange-950/75 dark:to-yellow-950/30 dark:text-amber-100 dark:border-amber-900/30 dark:shadow-amber-950/40',
+  cardBg: 'bg-gradient-to-r from-amber-900 via-orange-950 to-yellow-950 text-amber-100 border border-amber-500/30 shadow-xl shadow-amber-950/40',
   landmarkSvg: `
     <defs>
       <radialGradient id="mdAura" cx="50%" cy="50%" r="50%">
@@ -195,7 +195,7 @@ const medanTheme: CityTheme = {
 };
 
 const makassarTheme: CityTheme = {
-  cardBg: 'from-blue-50/90 via-indigo-50/90 to-slate-100/90 text-indigo-950 border border-blue-100/50 shadow-blue-500/5 dark:from-blue-950/80 dark:via-indigo-950/75 dark:to-slate-900/50 dark:text-blue-100 dark:border-blue-900/30 dark:shadow-indigo-950/40',
+  cardBg: 'bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-950 text-blue-100 border border-blue-500/30 shadow-xl shadow-indigo-950/40',
   landmarkSvg: `
     <defs>
       <linearGradient id="mkSun" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -243,7 +243,7 @@ const makassarTheme: CityTheme = {
 };
 
 const yogyakartaTheme: CityTheme = {
-  cardBg: 'from-violet-50/90 via-indigo-50/90 to-purple-50/90 text-violet-950 border border-violet-100/50 shadow-violet-500/5 dark:from-violet-950/80 dark:via-indigo-950/75 dark:to-purple-950/40 dark:text-violet-100 dark:border-violet-900/30 dark:shadow-violet-950/40',
+  cardBg: 'bg-gradient-to-r from-violet-900 via-indigo-950 to-purple-950 text-violet-100 border border-violet-500/30 shadow-xl shadow-violet-950/40',
   landmarkSvg: `
     <defs>
       <radialGradient id="ygMoon" cx="50%" cy="50%" r="50%">
@@ -340,8 +340,166 @@ const yogyakartaTheme: CityTheme = {
   `
 };
 
-const defaultTheme: CityTheme = {
-  cardBg: 'from-orange-50/90 via-red-50/90 to-pink-50/90 text-red-950 border border-orange-100/50 shadow-orange-500/5 dark:from-orange-950/80 dark:via-red-950/75 dark:to-pink-950/40 dark:text-orange-100 dark:border-orange-900/30 dark:shadow-orange-950/40',
+const semarangTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-violet-950 via-purple-950 to-indigo-950 text-purple-100 border border-purple-500/30 shadow-xl shadow-purple-950/40',
+  landmarkSvg: `
+    <defs>
+      <linearGradient id="srSun" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#fae8ff" stop-opacity="0.85" />
+        <stop offset="100%" stop-color="#c084fc" stop-opacity="0.1" />
+      </linearGradient>
+      <linearGradient id="srRoof" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#d946ef" />
+        <stop offset="100%" stop-color="#701a75" />
+      </linearGradient>
+      <linearGradient id="srWalls" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f3e8ff" />
+        <stop offset="50%" stop-color="#ffffff" />
+        <stop offset="100%" stop-color="#e9d5ff" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="48" r="35" fill="url(#srSun)" />
+    <!-- Lawang Sewu Colonial Fasad -->
+    <rect x="5" y="78" width="90" height="10" rx="1.5" fill="url(#srWalls)" />
+    <!-- Central Building -->
+    <rect x="18" y="58" width="64" height="20" fill="url(#srWalls)" />
+    <!-- Arches -->
+    <path d="M 22 78 V 65 A 3 3 0 0 1 28 65 V 78 M 32 78 V 65 A 3 3 0 0 1 38 65 V 78 M 42 78 V 65 A 3 3 0 0 1 48 65 V 78 M 52 78 V 65 A 3 3 0 0 1 58 65 V 78 M 62 78 V 65 A 3 3 0 0 1 68 65 V 78 M 72 78 V 65 A 3 3 0 0 1 78 65 V 78" stroke="#701a75" stroke-width="1.2" fill="none" />
+    <path d="M 18 58 L 82 58 L 76 50 L 24 50 Z" fill="url(#srRoof)" />
+    <!-- Left Tower -->
+    <rect x="10" y="44" width="10" height="34" fill="url(#srWalls)" />
+    <path d="M 8 44 L 22 44 L 15 32 Z" fill="url(#srRoof)" />
+    <rect x="13" y="52" width="4" height="12" rx="1" fill="#701a75" opacity="0.6" />
+    <!-- Right Tower -->
+    <rect x="80" y="44" width="10" height="34" fill="url(#srWalls)" />
+    <path d="M 78 44 L 92 44 L 85 32 Z" fill="url(#srRoof)" />
+    <rect x="83" y="52" width="4" height="12" rx="1" fill="#701a75" opacity="0.6" />
+  `
+};
+
+const palembangTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-red-950 via-rose-950 to-orange-950 text-red-100 border border-red-500/30 shadow-xl shadow-red-950/40',
+  landmarkSvg: `
+    <defs>
+      <linearGradient id="plSun" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ffedd5" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#fdba74" stop-opacity="0.1" />
+      </linearGradient>
+      <linearGradient id="plBridge" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f43f5e" />
+        <stop offset="50%" stop-color="#e11d48" />
+        <stop offset="100%" stop-color="#9f1239" />
+      </linearGradient>
+      <linearGradient id="plWater" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.2" />
+        <stop offset="100%" stop-color="#9f1239" stop-opacity="0.8" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="46" r="32" fill="url(#plSun)" />
+    <!-- Ampera Bridge towers -->
+    <rect x="25" y="24" width="6" height="52" fill="url(#plBridge)" />
+    <rect x="69" y="24" width="6" height="52" fill="url(#plBridge)" />
+    <!-- Tower connections and details -->
+    <rect x="22" y="34" width="12" height="4" fill="#be123c" />
+    <rect x="66" y="34" width="12" height="4" fill="#be123c" />
+    <rect x="22" y="48" width="12" height="4" fill="#be123c" />
+    <rect x="66" y="48" width="12" height="4" fill="#be123c" />
+    <path d="M 28 24 L 25 15 L 31 15 Z" fill="#9f1239" />
+    <path d="M 72 24 L 69 15 L 75 15 Z" fill="#9f1239" />
+    <!-- Bridge Deck -->
+    <rect x="2" y="60" width="96" height="6" rx="1" fill="url(#plBridge)" />
+    <!-- Cable Stays -->
+    <line x1="28" y1="34" x2="8" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="28" y1="34" x2="18" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="28" y1="34" x2="38" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="28" y1="34" x2="48" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="72" y1="34" x2="52" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="72" y1="34" x2="62" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="72" y1="34" x2="82" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <line x1="72" y1="34" x2="92" y2="60" stroke="#f43f5e" stroke-width="1" opacity="0.75" />
+    <!-- Musi River -->
+    <rect x="0" y="66" width="100" height="34" fill="url(#plWater)" />
+    <path d="M 0 66 Q 25 64 50 67 Q 75 70 100 66 L 100 100 L 0 100 Z" fill="#e11d48" opacity="0.25" />
+  `
+};
+
+const batamTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-sky-100 border border-sky-500/30 shadow-xl shadow-sky-950/40',
+  landmarkSvg: `
+    <defs>
+      <linearGradient id="btSun" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.8" />
+        <stop offset="100%" stop-color="#bae6fd" stop-opacity="0.15" />
+      </linearGradient>
+      <linearGradient id="btPylon" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#38bdf8" />
+        <stop offset="50%" stop-color="#ffffff" />
+        <stop offset="100%" stop-color="#0284c7" />
+      </linearGradient>
+      <linearGradient id="btSea" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#0284c7" stop-opacity="0.3" />
+        <stop offset="100%" stop-color="#0369a1" stop-opacity="0.7" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="42" r="30" fill="url(#btSun)" />
+    <!-- Barelang Cable Bridge Tower (Pylon) -->
+    <path d="M 45 76 L 49 20 L 51 20 L 55 76 Z" fill="url(#btPylon)" />
+    <path d="M 48 45 L 52 45 M 47 56 L 53 56 M 46 66 L 54 66" stroke="#ffffff" stroke-width="1.5" />
+    <!-- Bridge Deck -->
+    <rect x="2" y="66" width="96" height="5" rx="1" fill="#0284c7" />
+    <rect x="2" y="71" width="96" height="1.5" fill="#38bdf8" />
+    <!-- Suspension Cables -->
+    <line x1="50" y1="26" x2="8" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="18" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="28" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="38" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="62" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="72" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="82" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <line x1="50" y1="26" x2="92" y2="66" stroke="#38bdf8" stroke-width="0.8" opacity="0.85" />
+    <!-- Sea water -->
+    <rect x="0" y="72.5" width="100" height="27.5" fill="url(#btSea)" />
+  `
+};
+
+const pekanbaruTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-teal-950 via-emerald-950 to-green-950 text-emerald-100 border border-emerald-500/30 shadow-xl shadow-emerald-950/40',
+  landmarkSvg: `
+    <defs>
+      <linearGradient id="pkSun" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ecfdf5" stop-opacity="0.8" />
+        <stop offset="100%" stop-color="#a7f3d0" stop-opacity="0.15" />
+      </linearGradient>
+      <linearGradient id="pkDome" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#eab308" />
+        <stop offset="50%" stop-color="#fef08a" />
+        <stop offset="100%" stop-color="#ca8a04" />
+      </linearGradient>
+      <linearGradient id="pkWalls" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f0fdf4" />
+        <stop offset="100%" stop-color="#dcfce7" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="48" r="35" fill="url(#pkSun)" />
+    <!-- Masjid Raya An-Nur Pekanbaru Melayu-style Mosque -->
+    <rect x="5" y="78" width="90" height="10" rx="1.5" fill="url(#pkWalls)" />
+    <!-- Main Hall -->
+    <rect x="22" y="60" width="56" height="18" fill="url(#pkWalls)" />
+    <rect x="28" y="64" width="44" height="14" fill="#15803d" opacity="0.15" />
+    <!-- Grand Yellow Dome -->
+    <path d="M 33 60 C 33 40, 67 40, 67 60 Z" fill="url(#pkDome)" />
+    <path d="M 50 43 L 50 34" stroke="#eab308" stroke-width="1.8" />
+    <circle cx="50" cy="33" r="1.5" fill="#fef08a" />
+    <!-- Minarets -->
+    <rect x="12" y="44" width="6" height="34" fill="url(#pkWalls)" />
+    <path d="M 10 44 L 20 44 L 15 38 Z" fill="url(#pkDome)" />
+    <rect x="82" y="44" width="6" height="34" fill="url(#pkWalls)" />
+    <path d="M 80 44 L 90 44 L 85 38 Z" fill="url(#pkDome)" />
+  `
+};
+
+const denpasarTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-amber-950 via-[#7c2d12] to-amber-950 text-orange-100 border border-orange-500/30 shadow-xl shadow-orange-950/40',
   landmarkSvg: `
     <defs>
       <radialGradient id="dpSun" cx="50%" cy="50%" r="50%">
@@ -369,6 +527,7 @@ const defaultTheme: CityTheme = {
     <path d="M 95 22 Q 104 22 108 28" stroke="#0f172a" stroke-width="1.8" fill="none" opacity="0.25" stroke-linecap="round" />
     <rect x="5" y="82" width="90" height="6" rx="1" fill="url(#dpStone)" />
     <rect x="12" y="80" width="76" height="2" fill="#94a3b8" />
+    <!-- Balinese Split Gate Candi Bentar -->
     <rect x="15" y="70" width="20" height="10" fill="url(#dpBrick)" />
     <rect x="17" y="58" width="16" height="12" fill="url(#dpBrick)" />
     <rect x="17" y="56" width="16" height="2" fill="url(#dpStone)" />
@@ -390,6 +549,23 @@ const defaultTheme: CityTheme = {
   `
 };
 
+const defaultTheme: CityTheme = {
+  cardBg: 'bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 text-slate-100 border border-slate-700/30 shadow-xl shadow-slate-950/40',
+  landmarkSvg: `
+    <defs>
+      <linearGradient id="dfSun" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.6" />
+        <stop offset="100%" stop-color="#312e81" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <!-- Neutral skyline landscape for fallback -->
+    <circle cx="50" cy="50" r="32" fill="url(#dfSun)" />
+    <!-- City silhouette lines -->
+    <path d="M 5 82 L 15 72 L 25 78 L 35 62 L 45 74 L 55 58 L 65 72 L 75 64 L 85 76 L 95 82 Z M 5 82 L 95 82" stroke="#475569" stroke-width="2" stroke-linejoin="round" fill="none" opacity="0.4" />
+    <rect x="5" y="82" width="90" height="6" rx="1" fill="#475569" opacity="0.5" />
+  `
+};
+
 export const getCityTheme = (cityName: string): CityTheme => {
   const city = cityName.toLowerCase();
   if (city.includes('jakarta')) return jakartaTheme;
@@ -398,5 +574,10 @@ export const getCityTheme = (cityName: string): CityTheme => {
   if (city.includes('medan')) return medanTheme;
   if (city.includes('makassar')) return makassarTheme;
   if (city.includes('yogyakarta')) return yogyakartaTheme;
+  if (city.includes('semarang')) return semarangTheme;
+  if (city.includes('palembang')) return palembangTheme;
+  if (city.includes('batam')) return batamTheme;
+  if (city.includes('pekanbaru')) return pekanbaruTheme;
+  if (city.includes('denpasar')) return denpasarTheme;
   return defaultTheme;
 };

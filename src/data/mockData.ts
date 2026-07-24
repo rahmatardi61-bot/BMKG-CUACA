@@ -49,18 +49,22 @@ const TODAY = (() => {
 })();
 
 export const citiesList = [
-  'Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta',
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta',
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur',
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat',
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara',
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan',
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali'
+  'Tamanan, Kec. Bantul, Banguntapan, Daerah Istimewa Yogyakarta',
+  'DKI Jakarta',
+  'Surabaya',
+  'Bandung',
+  'Medan',
+  'Semarang',
+  'Makassar',
+  'Palembang',
+  'Batam',
+  'Pekanbaru',
+  'Denpasar'
 ];
 
 export const weatherDataMap: Record<string, WeatherData> = {
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta': {
-    city: 'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta',
+  'DKI Jakarta': {
+    city: 'DKI Jakarta',
     temp: 34,
     status: 'Cerah',
     feelLike: 36,
@@ -72,8 +76,8 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 9,
     icon: 'Sun'
   },
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur': {
-    city: 'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur',
+  'Surabaya': {
+    city: 'Surabaya',
     temp: 35,
     status: 'Cerah Berawan',
     feelLike: 38,
@@ -85,8 +89,8 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 10,
     icon: 'SunDim'
   },
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat': {
-    city: 'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat',
+  'Bandung': {
+    city: 'Bandung',
     temp: 26,
     status: 'Hujan Ringan',
     feelLike: 27,
@@ -98,8 +102,8 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 7,
     icon: 'CloudRain'
   },
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara': {
-    city: 'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara',
+  'Medan': {
+    city: 'Medan',
     temp: 30,
     status: 'Berawan',
     feelLike: 33,
@@ -111,8 +115,8 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 8,
     icon: 'Cloud'
   },
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan': {
-    city: 'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan',
+  'Makassar': {
+    city: 'Makassar',
     temp: 32,
     status: 'Hujan Sedang',
     feelLike: 35,
@@ -124,8 +128,8 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 6,
     icon: 'CloudLightning'
   },
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali': {
-    city: 'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali',
+  'Denpasar': {
+    city: 'Denpasar',
     temp: 31,
     status: 'Cerah Berawan',
     feelLike: 34,
@@ -137,25 +141,77 @@ export const weatherDataMap: Record<string, WeatherData> = {
     visibility: 10,
     icon: 'SunDim'
   },
-  'Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta': {
-    city: 'Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta',
-    temp: 31,
+  'Semarang': {
+    city: 'Semarang',
+    temp: 32,
+    status: 'Berawan',
+    feelLike: 35,
+    tempMin: 24,
+    tempMax: 34,
+    humidity: 78,
+    windSpeed: 11,
+    uvIndex: 6,
+    visibility: 8,
+    icon: 'Cloud'
+  },
+  'Palembang': {
+    city: 'Palembang',
+    temp: 33,
     status: 'Cerah Berawan',
-    feelLike: 33,
-    tempMin: 23,
-    tempMax: 33,
-    humidity: 70,
-    windSpeed: 10,
-    uvIndex: 7,
+    feelLike: 36,
+    tempMin: 25,
+    tempMax: 35,
+    humidity: 75,
+    windSpeed: 9,
+    uvIndex: 8,
     visibility: 9,
     icon: 'SunDim'
+  },
+  'Batam': {
+    city: 'Batam',
+    temp: 31,
+    status: 'Hujan Ringan',
+    feelLike: 34,
+    tempMin: 25,
+    tempMax: 33,
+    humidity: 88,
+    windSpeed: 16,
+    uvIndex: 5,
+    visibility: 7,
+    icon: 'CloudRain'
+  },
+  'Pekanbaru': {
+    city: 'Pekanbaru',
+    temp: 34,
+    status: 'Cerah',
+    feelLike: 37,
+    tempMin: 26,
+    tempMax: 36,
+    humidity: 68,
+    windSpeed: 10,
+    uvIndex: 9,
+    visibility: 10,
+    icon: 'Sun'
+  },
+  'Tamanan, Kec. Bantul, Banguntapan, Daerah Istimewa Yogyakarta': {
+    city: 'Tamanan, Kec. Bantul, Banguntapan, Daerah Istimewa Yogyakarta',
+    temp: 30,
+    status: 'Cerah',
+    feelLike: 32,
+    tempMin: 22,
+    tempMax: 32,
+    humidity: 72,
+    windSpeed: 8,
+    uvIndex: 7,
+    visibility: 10,
+    icon: 'Sun'
   }
 };
 
 // Private single-day base data (no date field needed)
 const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   // Gambir, Jakarta Pusat – Cerah (hot, humid capital, typical dry season)
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta': [
+  'DKI Jakarta': [
     { time: '00:00', temp: 26, status: 'Cerah', icon: 'Moon', precipitation: 3, humidity: 82, windSpeed: 8 },
     { time: '01:00', temp: 25, status: 'Cerah', icon: 'Moon', precipitation: 2, humidity: 84, windSpeed: 7 },
     { time: '02:00', temp: 25, status: 'Cerah', icon: 'Moon', precipitation: 2, humidity: 85, windSpeed: 6 },
@@ -183,7 +239,7 @@ const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   ],
 
   // Gubeng, Surabaya – Cerah Berawan (hot & very dry coast)
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur': [
+  'Surabaya': [
     { time: '00:00', temp: 27, status: 'Cerah', icon: 'Moon', precipitation: 1, humidity: 75, windSpeed: 12 },
     { time: '01:00', temp: 27, status: 'Cerah', icon: 'Moon', precipitation: 1, humidity: 76, windSpeed: 11 },
     { time: '02:00', temp: 26, status: 'Cerah', icon: 'Moon', precipitation: 1, humidity: 77, windSpeed: 10 },
@@ -211,7 +267,7 @@ const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   ],
 
   // Braga, Bandung – Hujan Ringan (highland cool, afternoon rain pattern)
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat': [
+  'Bandung': [
     { time: '00:00', temp: 18, status: 'Cerah Berawan', icon: 'Moon', precipitation: 8, humidity: 88, windSpeed: 6 },
     { time: '01:00', temp: 17, status: 'Cerah Berawan', icon: 'Moon', precipitation: 7, humidity: 89, windSpeed: 5 },
     { time: '02:00', temp: 17, status: 'Cerah Berawan', icon: 'Moon', precipitation: 6, humidity: 90, windSpeed: 5 },
@@ -239,7 +295,7 @@ const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   ],
 
   // Sei Sikambing C II, Medan – Berawan (equatorial, frequent cloud, afternoon showers)
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara': [
+  'Medan': [
     { time: '00:00', temp: 23, status: 'Berawan', icon: 'Moon', precipitation: 15, humidity: 90, windSpeed: 7 },
     { time: '01:00', temp: 23, status: 'Berawan', icon: 'Moon', precipitation: 12, humidity: 91, windSpeed: 6 },
     { time: '02:00', temp: 22, status: 'Cerah Berawan', icon: 'Moon', precipitation: 10, humidity: 91, windSpeed: 6 },
@@ -267,7 +323,7 @@ const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   ],
 
   // Mariso, Makassar – Hujan Sedang (transitional, active wet season)
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan': [
+  'Makassar': [
     { time: '00:00', temp: 24, status: 'Berawan', icon: 'Moon', precipitation: 28, humidity: 85, windSpeed: 14 },
     { time: '01:00', temp: 24, status: 'Berawan', icon: 'Moon', precipitation: 25, humidity: 86, windSpeed: 13 },
     { time: '02:00', temp: 23, status: 'Cerah Berawan', icon: 'Moon', precipitation: 22, humidity: 87, windSpeed: 12 },
@@ -295,7 +351,7 @@ const hourlyBase: Record<string, Omit<HourlyForecast, 'date'>[]> = {
   ],
 
   // Dauh Puri Kaja, Denpasar – Cerah Berawan (Bali, coastal warmth, moderate humidity)
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali': [
+  'Denpasar': [
     { time: '00:00', temp: 25, status: 'Cerah', icon: 'Moon', precipitation: 3, humidity: 78, windSpeed: 10 },
     { time: '01:00', temp: 25, status: 'Cerah', icon: 'Moon', precipitation: 2, humidity: 79, windSpeed: 9 },
     { time: '02:00', temp: 24, status: 'Cerah', icon: 'Moon', precipitation: 2, humidity: 80, windSpeed: 9 },
@@ -357,7 +413,7 @@ export const hourlyForecastsMap: Record<string, HourlyForecast[]> = Object.fromE
 );
 
 export const transportStatusesMap: Record<string, TransportStatus[]> = {
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta': [
+  'DKI Jakarta': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -380,7 +436,7 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
       description: 'Gelombang Teluk Jakarta tenang (0.1–0.5 m). Penyeberangan ke Kepulauan Seribu aman dan kondusif bagi kapal cepat maupun perahu tradisional.'
     }
   ],
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur': [
+  'Surabaya': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -403,7 +459,7 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
       description: 'Selat Madura dan Pelabuhan Tanjung Perak kondusif dengan gelombang 0.5–1.25 m. Penyeberangan feri domestik Surabaya–Madura berjalan normal.'
     }
   ],
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat': [
+  'Bandung': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -426,7 +482,7 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
       description: 'Aktivitas di Waduk Saguling dan Cirata cukup aman pagi hari. Waspadai perubahan cuaca lokal yang cepat saat sore hari. Hindari berada di danau saat petir.'
     }
   ],
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara': [
+  'Medan': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -449,7 +505,7 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
       description: 'Perairan Selat Malaka terpantau tenang (0.5–1.0 m). Aman bagi kapal kargo dan nelayan tradisional. Kondisi angin Barat Daya mendukung pelayaran niaga regional.'
     }
   ],
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan': [
+  'Makassar': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -472,7 +528,7 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
       description: 'Peringatan dini gelombang sedang-tinggi (1.25–2.5 m) di Selat Makassar selatan dan Teluk Bone. Nelayan kecil dan kapal tradisional DILARANG melaut hingga kondisi membaik.'
     }
   ],
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali': [
+  'Denpasar': [
     {
       type: 'road',
       title: 'Jalan Raya',
@@ -521,10 +577,10 @@ export const transportStatusesMap: Record<string, TransportStatus[]> = {
 };
 
 // Backwards-compatible export (fallback to Jakarta if needed)
-export const transportStatuses: TransportStatus[] = transportStatusesMap['Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta'];
+export const transportStatuses: TransportStatus[] = transportStatusesMap['DKI Jakarta'];
 
 export const warningAlertsMap: Record<string, WarningAlert[]> = {
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta': [
+  'DKI Jakarta': [
     {
       id: 'jkt-alert-1',
       severity: 'Waspada',
@@ -550,7 +606,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
       date: 'Jumat, 20 Juni 2026'
     }
   ],
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur': [
+  'Surabaya': [
     {
       id: 'sby-alert-1',
       severity: 'Waspada',
@@ -576,7 +632,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
       date: 'Kamis, 19 Juni 2026'
     }
   ],
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat': [
+  'Bandung': [
     {
       id: 'bdg-alert-1',
       severity: 'Siaga',
@@ -602,7 +658,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
       date: 'Kamis, 19 Juni 2026'
     }
   ],
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara': [
+  'Medan': [
     {
       id: 'mdn-alert-1',
       severity: 'Waspada',
@@ -628,7 +684,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
       date: 'Kamis, 19 Juni 2026'
     }
   ],
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan': [
+  'Makassar': [
     {
       id: 'mks-alert-1',
       severity: 'Awas',
@@ -654,7 +710,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
       date: 'Kamis, 19 Juni 2026'
     }
   ],
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali': [
+  'Denpasar': [
     {
       id: 'dps-alert-1',
       severity: 'Waspada',
@@ -709,7 +765,7 @@ export const warningAlertsMap: Record<string, WarningAlert[]> = {
 };
 
 // Backwards-compatible export (fallback to Jakarta if needed)
-export const warningAlerts: WarningAlert[] = warningAlertsMap['Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta'];
+export const warningAlerts: WarningAlert[] = warningAlertsMap['DKI Jakarta'];
 
 export const newsArticles: NewsArticle[] = [
   {
@@ -739,7 +795,7 @@ export const newsArticles: NewsArticle[] = [
 ];
 
 export const cityAnalysisMap: Record<string, CityAnalysis> = {
-  'Gambir, Kec. Gambir, Jakarta Pusat, DKI Jakarta': {
+  'DKI Jakarta': {
     locationName: 'Daerah Khusus Ibukota Jakarta',
     land: {
       title: 'Aktivitas Darat',
@@ -754,7 +810,7 @@ export const cityAnalysisMap: Record<string, CityAnalysis> = {
       desc: 'Kondisi operasional Bandara Soekarno-Hatta dan Halim Perdanakusuma aman dengan visibilitas di atas 9 km. Tidak ada awan Cumulonimbus (Cb) signifikan di atas wilayah udara Jakarta.'
     }
   },
-  'Gubeng, Kec. Gubeng, Kota Surabaya, Jawa Timur': {
+  'Surabaya': {
     locationName: 'Kota Surabaya, Jawa Timur',
     land: {
       title: 'Aktivitas Darat',
@@ -769,7 +825,7 @@ export const cityAnalysisMap: Record<string, CityAnalysis> = {
       desc: 'Operasional Bandara Juanda aman. Harap waspadai potensi turbulensi termal tingkat ringan di rute penerbangan siang hari karena pemanasan permukaan daratan yang cukup intens.'
     }
   },
-  'Braga, Kec. Sumur Bandung, Kota Bandung, Jawa Barat': {
+  'Bandung': {
     locationName: 'Kota Bandung, Jawa Barat',
     land: {
       title: 'Aktivitas Darat',
@@ -784,7 +840,7 @@ export const cityAnalysisMap: Record<string, CityAnalysis> = {
       desc: 'Bandara Husein Sastranegara aman secara umum, namun rute penerbangan sore hari perlu mewaspadai awan hujan lokal yang dapat menurunkan jarak pandang.'
     }
   },
-  'Sei Sikambing C II, Kec. Medan Helvetia, Kota Medan, Sumatera Utara': {
+  'Medan': {
     locationName: 'Kota Medan, Sumatera Utara',
     land: {
       title: 'Aktivitas Darat',
@@ -799,7 +855,67 @@ export const cityAnalysisMap: Record<string, CityAnalysis> = {
       desc: 'Bandara Internasional Kualanamu beroperasi normal dengan jarak pandang 8 km. Waspadai pertumbuhan awan sel sel kecil di rute penerbangan utara Sumatera.'
     }
   },
-  'Mariso, Kec. Mariso, Kota Makassar, Sulawesi Selatan': {
+  'Semarang': {
+    locationName: 'Kota Semarang, Jawa Tengah',
+    land: {
+      title: 'Aktivitas Darat',
+      desc: 'Cuaca Semarang diprakirakan berawan (25°C - 33°C). Kondisi nyaman untuk berwisata sejarah ke Lawang Sewu dan Kota Lama Semarang.'
+    },
+    sea: {
+      title: 'Aktivitas Pesisir & Laut',
+      desc: 'Tinggi gelombang di perairan Utara Jawa Tengah (Laut Jawa) terpantau tenang (0,25 - 0,75 meter). Aktivitas pelayaran di Pelabuhan Tanjung Emas Semarang aman.'
+    },
+    air: {
+      title: 'Penerbangan (SRG)',
+      desc: 'Bandara Internasional Jenderal Ahmad Yani (SRG) beroperasi normal. Jarak pandang mendatar 8 km, tidak ada pertumbuhan awan hujan signifikan di sekitar kawasan landasan.'
+    }
+  },
+  'Palembang': {
+    locationName: 'Kota Palembang, Sumatera Selatan',
+    land: {
+      title: 'Aktivitas Darat',
+      desc: 'Cuaca Palembang diprakirakan cerah berawan (24°C - 33°C). Sangat mendukung aktivitas luar ruangan dan mobilitas transportasi darat.'
+    },
+    sea: {
+      title: 'Aktivitas Pesisir & Sungai',
+      desc: 'Aliran Sungai Musi dan perairan Selat Bangka terpantau aman untuk aktivitas kapal penyeberangan feri dengan tinggi gelombang rendah (0,5 - 1,0 meter).'
+    },
+    air: {
+      title: 'Penerbangan (PLM)',
+      desc: 'Operasional Bandara Internasional Sultan Mahmud Badaruddin II (PLM) berjalan lancar dengan jarak pandang di atas 9 km.'
+    }
+  },
+  'Batam': {
+    locationName: 'Kota Batam, Kepulauan Riau',
+    land: {
+      title: 'Aktivitas Darat',
+      desc: 'Diprakirakan hujan ringan pada siang hari (25°C - 31°C). Siapkan payung sebelum beraktivitas di luar ruangan dan waspadai jalanan yang licin.'
+    },
+    sea: {
+      title: 'Aktivitas Pesisir & Laut',
+      desc: 'Tinggi gelombang di perairan Batam dan Selat Singapura berkisar tenang hingga rendah (0,5 - 1,25 meter). Aman untuk pelayaran feri internasional.'
+    },
+    air: {
+      title: 'Penerbangan (BTH)',
+      desc: 'Bandara Internasional Hang Nadim (BTH) beroperasi normal dengan jarak pandang 10 km. Tidak ada kendala cuaca untuk pendaratan dan lepas landas.'
+    }
+  },
+  'Pekanbaru': {
+    locationName: 'Kota Pekanbaru, Riau',
+    land: {
+      title: 'Aktivitas Darat',
+      desc: 'Cuaca Pekanbaru diprakirakan berawan tebal (23°C - 32°C). Cukup nyaman untuk mobilitas perkotaan, namun siapkan payung jika bepergian.'
+    },
+    sea: {
+      title: 'Aktivitas Pesisir & Sungai',
+      desc: 'Kondisi perairan Selat Panjang dan muara Sungai Siak terpantau kondusif dengan gelombang rendah (0,25 - 0,75 meter).'
+    },
+    air: {
+      title: 'Penerbangan (PKU)',
+      desc: 'Bandara Internasional Sultan Syarif Kasim II (PKU) beroperasi normal dengan jarak pandang 7 km. Bebas dari gangguan asap atau kabut tebal.'
+    }
+  },
+  'Makassar': {
     locationName: 'Kota Makassar, Sulawesi Selatan',
     land: {
       title: 'Aktivitas Darat',
@@ -814,7 +930,7 @@ export const cityAnalysisMap: Record<string, CityAnalysis> = {
       desc: 'Bandara Sultan Hasanuddin beroperasi dengan perhatian khusus terhadap potensi wind shear (perubahan arah angin mendadak) akibat awan hujan aktif.'
     }
   },
-  'Dauh Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali': {
+  'Denpasar': {
     locationName: 'Kota Denpasar, Bali',
     land: {
       title: 'Aktivitas Darat',

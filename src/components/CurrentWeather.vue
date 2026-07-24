@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { 
   Droplets, 
   Wind, 
@@ -25,7 +25,8 @@ import {
   Sunrise,
   Sunset,
   Moon,
-  ChevronDown
+  ChevronDown,
+  Search
 } from 'lucide-vue-next';
 import type { WeatherData } from '../types/weather';
 import { getCityTheme } from '../data/cityThemes';
@@ -334,6 +335,44 @@ const splitLocation = (fullName: string) => {
   return { main, sub };
 };
 
+const majorCitiesList = [
+  'DKI Jakarta',
+  'Surabaya',
+  'Bandung',
+  'Medan',
+  'Semarang',
+  'Makassar',
+  'Palembang',
+  'Batam',
+  'Pekanbaru',
+  'Denpasar'
+];
+
+const otherCities = computed(() => {
+  return props.cities.slice(1).filter(city => {
+    return !majorCitiesList.some(major => 
+      city.toLowerCase() === major.toLowerCase() || 
+      city.toLowerCase().startsWith(major.toLowerCase() + ',')
+    );
+  });
+});
+
+const handleSearchOtherLocation = () => {
+  showCityDropdown.value = false;
+  nextTick(() => {
+    const isMobile = window.innerWidth < 1024;
+    const searchInputId = isMobile ? 'search-input-mobile' : 'search-input-desktop';
+    const inputEl = document.getElementById(searchInputId);
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.classList.add('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
+      setTimeout(() => {
+        inputEl.classList.remove('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
+      }, 1500);
+    }
+  });
+};
+
 onMounted(() => {
   document.addEventListener('click', handleCityClickOutside);
   window.addEventListener('scroll', handleCityScroll, { passive: true });
@@ -407,7 +446,7 @@ onUnmounted(() => {
             bg-white/95 border-slate-100/80 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
         >
           <button 
-            v-for="city in cities.slice(1)"
+            v-for="city in otherCities"
             :key="city"
             :id="'city-dropdown-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
             @click="emit('select-city', city); showCityDropdown = false"
@@ -446,12 +485,27 @@ onUnmounted(() => {
             </span>
           </button>
 
-          <!-- If no other cities are saved, show a helper text -->
+          <!-- If no other custom cities are saved, show a modern & elegant empty state with search button -->
           <div 
-            v-if="cities.length <= 1"
-            class="px-4 py-3 text-[10px] text-slate-400 dark:text-slate-500 text-center font-bold uppercase tracking-wider"
+            v-if="otherCities.length === 0"
+            class="px-4 py-5 flex flex-col items-center justify-center text-center gap-2.5"
           >
-            Tidak ada wilayah lain
+            <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-brand-navy-950 flex items-center justify-center border border-slate-100 dark:border-brand-navy-800/40 text-slate-400 dark:text-slate-500 shrink-0">
+              <MapPin class="w-4 h-4 opacity-80" />
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <p class="text-xs font-black text-slate-700 dark:text-slate-200">Tidak Ada Wilayah Lain</p>
+              <p class="text-[9px] text-slate-400 dark:text-slate-500 font-bold leading-relaxed max-w-[210px] uppercase tracking-wider">
+                Simpan kelurahan atau desa favorit Anda untuk akses cepat.
+              </p>
+            </div>
+            <button
+              @click="handleSearchOtherLocation"
+              class="mt-1.5 w-full py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 dark:text-brand-navy-950 transition-all duration-300 shadow-md shadow-blue-500/10 dark:shadow-brand-cyan/10 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Search class="w-3.5 h-3.5" />
+              Cari Lokasi Lain
+            </button>
           </div>
         </div>
       </div>
@@ -460,7 +514,7 @@ onUnmounted(() => {
 
     <!-- Full Width: Large Hero Weather Card -->
     <div 
-      class="w-full rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-lg flex flex-col transition-all duration-500 gap-8"
+      class="w-full rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-lg flex flex-col transition-all duration-500 gap-8 group"
       :class="cityTheme.cardBg"
     >
       <!-- Decorative Glow Overlay -->
@@ -468,7 +522,7 @@ onUnmounted(() => {
       <div class="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-black/10 blur-2xl"></div>
 
       <!-- City Landmark Watermark SVG Overlay -->
-      <div class="absolute bottom-0 right-0 w-64 h-64 pointer-events-none opacity-[0.35] dark:opacity-[0.20] transition-all duration-500 transform translate-y-4 translate-x-2">
+      <div class="absolute bottom-0 right-0 w-64 h-64 pointer-events-none opacity-80 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 translate-x-2 drop-shadow-md">
         <svg viewBox="0 0 100 100" fill="none" class="w-full h-full" v-html="cityTheme.landmarkSvg"></svg>
       </div>
 
@@ -563,8 +617,12 @@ onUnmounted(() => {
             <h2 class="text-3xl md:text-4xl font-black mt-3 tracking-tight">
               {{ weatherData.city.split(',')[0] }}
             </h2>
-            <p class="text-[11px] font-bold opacity-80 mt-1.5 uppercase tracking-wider">
-              {{ weatherData.city.split(',').slice(1).map(x => x.trim()).join(', ') }}
+            <p class="text-[11px] font-bold opacity-80 mt-1.5 uppercase tracking-wider flex items-center gap-1 flex-wrap">
+              <span>{{ weatherData.city.split(',')[0] }}</span>
+              <template v-if="weatherData.city.split(',').length > 1 && weatherData.city.split(',')[1].trim()">
+                <span class="opacity-50">•</span>
+                <span>{{ weatherData.city.split(',').slice(1).map(x => x.trim()).join(', ') }}</span>
+              </template>
             </p>
           </div>
           
@@ -600,12 +658,17 @@ onUnmounted(() => {
           </div>
 
           <!-- Temperature status summary -->
-          <div class="border-t border-current/15 pt-4 w-full md:w-48">
-            <p class="text-2xl font-black tracking-tight leading-tight">{{ weatherData.status }}</p>
-            <p class="text-xs opacity-80 mt-0.5">Terasa seperti {{ weatherData.feelLike }}°C</p>
-            <div class="mt-3 text-xs flex justify-between items-center">
-              <span class="opacity-70 font-semibold">Min / Max</span>
-              <span class="font-bold">{{ weatherData.tempMax }}° / {{ weatherData.tempMin }}°</span>
+          <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
+            <!-- Upper Panel: Status & Feels Like -->
+            <div class="p-3.5 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
+              <p class="text-xl md:text-2xl font-black tracking-tight leading-tight">{{ weatherData.status }}</p>
+              <p class="text-[11px] opacity-90 mt-1 font-semibold">Terasa seperti {{ weatherData.feelLike }}°C</p>
+            </div>
+            
+            <!-- Lower Panel: Min / Max -->
+            <div class="py-2.5 px-3.5 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
+              <span class="opacity-75 font-bold">Min / Max</span>
+              <span class="font-black">{{ weatherData.tempMax }}° / {{ weatherData.tempMin }}°</span>
             </div>
           </div>
         </div>
@@ -694,7 +757,7 @@ onUnmounted(() => {
       <!-- Card 1: Suhu -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- 🌡️ Temperature Illustration: Village + sun/clouds + thermometer -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="suhuBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -764,7 +827,7 @@ onUnmounted(() => {
       <!-- Card 2: Angin -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- 💨 Wind Illustration: Turbines + hills + wind lines -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="anginBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -819,7 +882,7 @@ onUnmounted(() => {
       <!-- Card 3: Arah Angin -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- 🧭 Compass Illustration: Compass rose + countryside -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="arahBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -885,7 +948,7 @@ onUnmounted(() => {
       <!-- Card 4: Kelembapan -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- 💧 Humidity Illustration: Rainforest + water drops -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="humBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -934,7 +997,7 @@ onUnmounted(() => {
       <!-- Card 5: Indeks UV -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- ☀️ UV Illustration: Beach + palm + umbrella + intense sun -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="uvBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -999,7 +1062,7 @@ onUnmounted(() => {
       <!-- Card 6: Visibilitas -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
         <!-- 👁️ Visibility Illustration: Mountain road -->
-        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
             <defs>
               <linearGradient id="visBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1047,51 +1110,65 @@ onUnmounted(() => {
       <!-- Card 7: Fase Bulan -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-md relative overflow-hidden group">
         <!-- 🌙 Moon Illustration: Starry night + mountains + crescent moon -->
-        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
             <defs>
-              <linearGradient id="moonBgGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0" />
-                <stop offset="40%" stop-color="#1e1b4b" stop-opacity="0.3" />
-                <stop offset="70%" stop-color="#111033" stop-opacity="0.75" />
-                <stop offset="100%" stop-color="#09081a" stop-opacity="1" />
+              <linearGradient id="moonBgGradLight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#818cf8" stop-opacity="0" />
+                <stop offset="50%"  stop-color="#a5b4fc" stop-opacity="0.18" />
+                <stop offset="100%" stop-color="#6366f1" stop-opacity="0.32" />
+              </linearGradient>
+              <linearGradient id="moonBgGradDark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#1e1b4b" stop-opacity="0.6" />
+                <stop offset="60%"  stop-color="#312e81" stop-opacity="0.75" />
+                <stop offset="100%" stop-color="#09081a" stop-opacity="0.92" />
+              </linearGradient>
+              <linearGradient id="moonMtnGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#818cf8" stop-opacity="0" />
+                <stop offset="100%" stop-color="#312e81" stop-opacity="0.18" />
               </linearGradient>
               <radialGradient id="moonHalo4" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#fde68a" stop-opacity="0.5"/>
-                <stop offset="100%" stop-color="#fde68a" stop-opacity="0"/>
+                <stop offset="0%"   stop-color="#38bdf8" stop-opacity="0.6"/>
+                <stop offset="50%"  stop-color="#818cf8" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#818cf8" stop-opacity="0"/>
               </radialGradient>
             </defs>
-            <rect width="320" height="160" fill="url(#moonBgGrad)"/>
-            <!-- Stars (Scattered in visible night sky) -->
-            <circle cx="20"  cy="45" r="1.2" fill="#e0e7ff" opacity="0.90" class="animate-pulse"/>
-            <circle cx="55"  cy="35" r="1.8" fill="#fff"    opacity="1.00" class="animate-pulse"/>
-            <circle cx="95"  cy="50" r="1.0" fill="#c7d2fe" opacity="0.80"/>
-            <circle cx="140" cy="40" r="2.0" fill="#fff"    opacity="1.00" class="animate-pulse"/>
-            <circle cx="60"  cy="65" r="1.0" fill="#e0e7ff" opacity="0.75"/>
-            <circle cx="100" cy="55" r="1.3" fill="#fff"    opacity="0.85" class="animate-pulse"/>
-            <circle cx="185" cy="45" r="1.5" fill="#fff"    opacity="0.90"/>
-            <circle cx="230" cy="60" r="1.0" fill="#c7d2fe" opacity="0.70"/>
-            <circle cx="270" cy="40" r="1.8" fill="#fff"    opacity="0.95" class="animate-pulse"/>
-            <circle cx="310" cy="55" r="1.0" fill="#e0e7ff" opacity="0.75"/>
+
+            <!-- Sky background fill -->
+            <rect width="320" height="160" fill="url(#moonBgGradLight)" class="dark:hidden"/>
+            <rect width="320" height="160" fill="url(#moonBgGradDark)" class="hidden dark:block"/>
+
+            <!-- Stars (staggered twinkle) -->
+            <circle cx="20"  cy="40" r="1.4" fill="#818cf8" class="star-twinkle" style="animation-delay:0s;animation-duration:2.1s"/>
+            <circle cx="55"  cy="30" r="2.0" fill="#c7d2fe" class="star-twinkle" style="animation-delay:0.6s;animation-duration:1.7s"/>
+            <circle cx="95"  cy="45" r="1.2" fill="#6366f1" class="star-twinkle" style="animation-delay:1.2s;animation-duration:2.5s"/>
+            <circle cx="140" cy="35" r="2.2" fill="#38bdf8" class="star-twinkle" style="animation-delay:0.3s;animation-duration:1.9s"/>
+            <circle cx="185" cy="40" r="1.8" fill="#818cf8" class="star-twinkle" style="animation-delay:0.9s;animation-duration:2.3s"/>
+            <circle cx="230" cy="25" r="1.5" fill="#a5f3fc" class="star-twinkle" style="animation-delay:0.4s;animation-duration:2.8s"/>
+            <circle cx="270" cy="35" r="2.0" fill="#6366f1" class="star-twinkle" style="animation-delay:1.5s;animation-duration:1.6s"/>
+            <circle cx="310" cy="42" r="1.0" fill="#c7d2fe" class="star-twinkle" style="animation-delay:0.8s;animation-duration:2.0s"/>
+            <circle cx="120" cy="20" r="1.3" fill="#fde68a" class="star-twinkle" style="animation-delay:1.8s;animation-duration:2.6s"/>
+
             <!-- Moon halo glow -->
-            <circle cx="272" cy="42" r="28" fill="url(#moonHalo4)"/>
+            <circle cx="272" cy="42" r="30" fill="url(#moonHalo4)"/>
             <!-- Crescent moon -->
-            <circle cx="272" cy="42" r="16" fill="#fef3c7" opacity="0.92"/>
-            <circle cx="281" cy="38" r="14" fill="#09081a" opacity="0.97"/>
-            <!-- Shifted bottom vector elements -->
+            <circle cx="272" cy="42" r="15" fill="#fef3c7" opacity="0.95"/>
+            <circle cx="281" cy="38" r="13" fill="#6366f1" class="dark:fill-brand-navy-900" opacity="0.9"/>
+
+            <!-- Bottom vector elements -->
             <g transform="translate(0, 80)">
               <!-- Far mountain ridge -->
-              <path d="M0 72 L22 48 L52 64 L85 38 L120 58 L158 32 L195 55 L230 40 L265 58 L295 45 L320 58 L320 80 L0 80Z" fill="#312e81" opacity="0.65"/>
+              <path d="M0 72 L22 48 L52 64 L85 38 L120 58 L158 32 L195 55 L230 40 L265 58 L295 45 L320 58 L320 80 L0 80Z" fill="#818cf8" class="dark:fill-indigo-600" opacity="0.45"/>
               <!-- Near mountain ridge -->
-              <path d="M0 80 L15 65 L45 76 L80 60 L115 72 L155 58 L190 70 L225 62 L260 74 L295 66 L320 74 L320 80Z" fill="#0f172a" opacity="0.85"/>
+              <path d="M0 80 L15 65 L45 76 L80 60 L115 72 L155 58 L190 70 L225 62 L260 74 L295 66 L320 74 L320 80Z" fill="#6366f1" class="dark:fill-indigo-700" opacity="0.65"/>
               <!-- Pine trees left -->
-              <g fill="#0a0820" opacity="0.90">
+              <g fill="#10b981" opacity="0.85">
                 <polygon points="5,80 12,62 19,80"/>
                 <polygon points="13,80 20,65 27,80"/>
                 <polygon points="22,80 30,58 38,80"/>
               </g>
               <!-- Pine trees right -->
-              <g fill="#0a0820" opacity="0.90">
+              <g fill="#059669" opacity="0.85">
                 <polygon points="283,80 290,62 297,80"/>
                 <polygon points="292,80 299,65 306,80"/>
                 <polygon points="301,80 308,58 315,80"/>
@@ -1099,6 +1176,7 @@ onUnmounted(() => {
             </g>
           </svg>
         </div>
+
 
         <!-- Top Title Row -->
         <div class="flex items-start justify-between gap-3 relative z-10">
@@ -1171,40 +1249,54 @@ onUnmounted(() => {
 
       <!-- Card 8: Matahari -->
       <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-md relative overflow-hidden group">
-        <!-- Weather Illustration -->
-        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 opacity-[0.08] dark:opacity-[0.12] group-hover:opacity-[0.40] dark:group-hover:opacity-[0.50] transition-opacity duration-500 ease-in-out">
-          <svg viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
+        <!-- ☀️ Weather Illustration: Vibrant Golden Sunset / Ocean Bay / Bridge Artwork -->
+        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 opacity-80 group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
+          <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
             <defs>
-              <linearGradient :id="'sunSkyGrad-' + sunPosition.isDay" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" :stop-color="sunPosition.isDay ? '#ffedd5' : '#020617'" />
-                <stop offset="100%" :stop-color="sunPosition.isDay ? '#fdb981' : '#1e1b4b'" />
+              <linearGradient id="sunBgGradLight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffedd5" stop-opacity="0" />
+                <stop offset="50%" stop-color="#fed7aa" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#fdba74" stop-opacity="0.45" />
               </linearGradient>
+              <linearGradient id="sunBgGradDark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f97316" stop-opacity="0.15" />
+                <stop offset="40%" stop-color="#9333ea" stop-opacity="0.45" />
+                <stop offset="75%" stop-color="#1e1b4b" stop-opacity="0.85" />
+                <stop offset="100%" stop-color="#0f172a" stop-opacity="0.98" />
+              </linearGradient>
+              <radialGradient id="sunHorizonGlow2" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fde68a" stop-opacity="0.95"/>
+                <stop offset="30%" stop-color="#fbbf24" stop-opacity="0.75"/>
+                <stop offset="60%" stop-color="#f97316" stop-opacity="0.45"/>
+                <stop offset="85%" stop-color="#ea580c" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#c2410c" stop-opacity="0"/>
+              </radialGradient>
             </defs>
-            <rect width="240" height="120" :fill="`url(#sunSkyGrad-${sunPosition.isDay})`" :opacity="sunPosition.isDay ? 0.25 : 0.3" />
-            
-            <!-- Horizon Ocean/Bay -->
-            <rect x="0" y="98" width="240" height="22" :fill="sunPosition.isDay ? '#c2410c' : '#0e7490'" opacity="0.3" />
-            
-            <!-- Horizon Landscape Hills -->
-            <path d="M-20 98 Q50 90 110 98 T240 98" :stroke="sunPosition.isDay ? '#ea580c' : '#475569'" stroke-width="1.5" opacity="0.4" />
-            
-            <!-- Suspension Bridge Tower Silhouette -->
-            <g transform="translate(160, 60)" :fill="sunPosition.isDay ? '#ea580c' : '#334155'" opacity="0.45">
-              <!-- Main Towers -->
-              <rect x="0" y="0" width="4" height="38" />
-              <rect x="12" y="0" width="4" height="38" />
-              <!-- Crossbeams -->
-              <rect x="4" y="6" width="8" height="2" />
-              <rect x="4" y="18" width="8" height="2" />
-              <rect x="0" y="-3" width="16" height="3" rx="0.5" />
-              <!-- Cable curves -->
-              <path d="M-40 15 Q-12 35 8 10 T58 15" stroke="currentColor" stroke-width="1" fill="none" />
-            </g>
-            
-            <!-- Small sailboat in the bay -->
-            <g transform="translate(45, 90)" :fill="sunPosition.isDay ? '#c2410c' : '#64748b'" opacity="0.5">
-              <path d="M0 8 L-3 12 L15 12 L12 8 Z" />
-              <polygon points="3,8 11,8 3,0" />
+
+            <!-- Sky base fill -->
+            <rect width="320" height="160" fill="url(#sunBgGradLight)" class="dark:hidden"/>
+            <rect width="320" height="160" fill="url(#sunBgGradDark)" class="hidden dark:block"/>
+
+            <!-- Radiant Horizon Sun Aura -->
+            <circle cx="160" cy="115" r="88" fill="url(#sunHorizonGlow2)"/>
+
+            <g transform="translate(0, 75)">
+              <!-- Far Coastal Hills -->
+              <path d="M-20 60 Q40 40 100 52 T220 48 Q270 42 340 55 L340 85 L-20 85Z" fill="#fb923c" class="dark:fill-purple-600" opacity="0.75"/>
+
+              <!-- Ocean / Bay Water -->
+              <path d="M0 65 L320 65 L320 85 L0 85Z" fill="#0284c7" class="dark:fill-cyan-600" opacity="0.65"/>
+
+              <!-- Water Reflection Shimmer Lines -->
+              <ellipse cx="160" cy="71" rx="55" ry="3.5" fill="#fef08a" opacity="0.85" />
+              <ellipse cx="160" cy="77" rx="35" ry="2.5" fill="#fde047" opacity="0.7" />
+              <ellipse cx="160" cy="81" rx="18" ry="1.5" fill="#fbbf24" opacity="0.6" />
+
+              <!-- Sailboat in Bay -->
+              <g transform="translate(65, 52)" fill="#7c2d12" class="dark:fill-slate-900" opacity="0.95">
+                <path d="M0 10 L-4 16 L18 16 L14 10 Z" />
+                <polygon points="4,10 13,10 4,1" fill="#fef08a" opacity="0.95"/>
+              </g>
             </g>
           </svg>
         </div>
@@ -1232,13 +1324,14 @@ onUnmounted(() => {
           <!-- Animated Sun Arc SVG (Always visible, clean rendering) -->
           <div class="flex-1 flex justify-center items-center h-10 overflow-visible min-w-0 max-w-[96px]">
             <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible">
-              <!-- Sun/Moon path arc -->
+              <!-- Sun/Moon path arc – animated flowing dashes -->
               <path 
                 d="M 5 45 A 40 40 0 0 1 95 45" 
                 :stroke="sunPosition.isDay ? '#fbbf24' : '#818cf8'" 
-                :stroke-opacity="sunPosition.isDay ? '0.55' : '0.35'"
-                stroke-width="1.5" 
-                stroke-dasharray="3,3" 
+                :stroke-opacity="sunPosition.isDay ? '0.75' : '0.45'"
+                stroke-width="1.8" 
+                stroke-dasharray="5,4" 
+                class="sun-arc-flow"
                 fill="none" 
               />
               

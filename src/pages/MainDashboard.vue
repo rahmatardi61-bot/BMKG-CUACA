@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, defineAsyncComponent, nextTick } from 'vue';
 
 const CurrentWeather = defineAsyncComponent(() => import('../components/CurrentWeather.vue'));
 const ForecastPanel = defineAsyncComponent(() => import('../components/ForecastPanel.vue'));
@@ -21,16 +21,17 @@ import {
   Compass, 
   Waves, 
   Plane, 
-  Thermometer, 
-  Sun, 
-  Navigation, 
-  AlertTriangle, 
-  Eye, 
-  CloudLightning,
   Wind,
   Droplets,
   MapPin,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Thermometer,
+  Sun,
+  Navigation,
+  Eye,
+  Search
 } from 'lucide-vue-next';
 import { getAdditionalWeatherData } from '../data/weatherHelpers';
 
@@ -43,6 +44,7 @@ const props = defineProps<{
   cities: string[];
   selectedCity: string;
   isLocating: boolean;
+  isGeolocated?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -59,38 +61,176 @@ const additionalInfo = computed(() => {
   return getAdditionalWeatherData(props.selectedCity);
 });
 
-// ── Aviation portal URL (local dev vs production) ────────────────────────────
-const aviationUrl = computed(() => {
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  return isLocal ? 'http://localhost:5173/' : 'https://bmkg-aviation.vercel.app/';
-});
-
-// Geolocation state
-const isCustomGeolocated = ref(props.selectedCity === props.cities[0]);
-
-const detectLocation = () => {
-  emit('detect-location');
-};
-
-// ── Slide direction tracking for Analysis Cards transition ───────────────────
+// ── Slide transition direction logic ──
 const slideDirection = ref('slide-right');
+const isCustomGeolocated = computed(() => {
+  return !!props.isGeolocated && (props.selectedCity === props.cities[0]);
+});
 
 watch(
   () => props.selectedCity,
   (newCity, oldCity) => {
-    if (oldCity && newCity) {
-      const list = props.cities;
-      const oldIdx = list.indexOf(oldCity);
-      const newIdx = list.indexOf(newCity);
-      slideDirection.value = newIdx > oldIdx ? 'slide-left' : 'slide-right';
+    if (oldCity) {
+      const newIdx = props.cities.indexOf(newCity);
+      const oldIdx = props.cities.indexOf(oldCity);
+      
+      if (newIdx !== -1 && oldIdx !== -1) {
+        slideDirection.value = newIdx > oldIdx ? 'slide-left' : 'slide-right';
+      } else {
+        slideDirection.value = 'slide-left';
+      }
     }
-
-    isCustomGeolocated.value = (newCity === props.cities[0]);
   },
   { immediate: true }
 );
 
 const showDropdown = ref(false);
+
+const cityLandmarks = [
+  {
+    name: 'Jakarta',
+    fullName: 'DKI Jakarta',
+    color: 'text-blue-500 dark:text-blue-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <!-- Flame / Api Emas di puncak -->
+      <path d="M12 2c0 0 1.2 1.5 1 2.5-.2 1-1 1.2-1 1.2s-.8-.2-1-1.2C10.8 3.5 12 2 12 2z" fill="currentColor" opacity="0.9" stroke="none"/>
+      <!-- Obelisk body - tapered -->
+      <path d="M11 5.7h2v1.8h-2z"/>
+      <path d="M10.5 7.5h3v1.5h-3z"/>
+      <path d="M10 9h4l.5 8h-5z"/>
+      <!-- Pedestal base -->
+      <path d="M8.5 17h7v1.5h-7z"/>
+      <path d="M7 18.5h10V21H7z"/>
+    </svg>`
+  },
+  {
+    name: 'Surabaya',
+    fullName: 'Surabaya',
+    color: 'text-cyan-500 dark:text-cyan-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <!-- Jembatan Suramadu (cable-stayed bridge) -->
+      <!-- Left tower -->
+      <path d="M7 5v10"/>
+      <!-- Right tower -->
+      <path d="M17 5v10"/>
+      <!-- Tower crossbar -->
+      <path d="M6 7h2M16 7h2"/>
+      <!-- Left cables -->
+      <path d="M7 5L2 15M7 5L5 15M7 5L9 15"/>
+      <!-- Right cables -->
+      <path d="M17 5L22 15M17 5L19 15M17 5L15 15"/>
+      <!-- Bridge deck -->
+      <path d="M2 15h20"/>
+      <!-- Ground/base -->
+      <path d="M1 17h22" stroke-width="2"/>
+    </svg>`
+  },
+  {
+    name: 'Bandung',
+    fullName: 'Bandung',
+    color: 'text-emerald-500 dark:text-emerald-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M12 2v5"/>
+      <circle cx="12" cy="3" r="0.7" fill="currentColor"/>
+      <circle cx="12" cy="4.5" r="0.7" fill="currentColor"/>
+      <path d="M6 7h12v3H6z"/>
+      <path d="M4 10h16v6H4z"/>
+      <path d="M8 10v6M12 10v6M16 10v6"/>
+      <path d="M3 16h18v4H3z"/>
+    </svg>`
+  },
+  {
+    name: 'Medan',
+    fullName: 'Medan',
+    color: 'text-amber-500 dark:text-amber-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M3 14h18v6H3z"/>
+      <path d="M12 3v3"/>
+      <path d="M3 14c2-4 5-6 9-6s7 2 9 6"/>
+      <path d="M8 14v6M16 14v6"/>
+      <path d="M6 16a2 2 0 0 1 4 0M14 16a2 2 0 0 1 4 0"/>
+    </svg>`
+  },
+  {
+    name: 'Semarang',
+    fullName: 'Semarang',
+    color: 'text-purple-500 dark:text-purple-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <rect x="3" y="10" width="4" height="10" rx="0.5"/>
+      <rect x="17" y="10" width="4" height="10" rx="0.5"/>
+      <path d="M3 10V8a2 2 0 0 1 4 0v2"/>
+      <path d="M17 10V8a2 2 0 0 1 4 0v2"/>
+      <path d="M7 14h10"/>
+      <path d="M7 17h10"/>
+      <path d="M7 14c0-4 10-4 10 0"/>
+      <path d="M5 20h14"/>
+    </svg>`
+  },
+  {
+    name: 'Makassar',
+    fullName: 'Makassar',
+    color: 'text-red-500 dark:text-red-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M3 16c4 1 12 1 18 0l-2 5H5l-2-5z" fill="currentColor" opacity="0.15"/>
+      <path d="M11 3v13M16 6v10"/>
+      <path d="M11 3L3 13h8z" fill="currentColor" opacity="0.1"/>
+      <path d="M16 6l-4 8h4z"/>
+      <path d="M11 6l-6 7h6z"/>
+    </svg>`
+  },
+  {
+    name: 'Palembang',
+    fullName: 'Palembang',
+    color: 'text-orange-500 dark:text-orange-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M2 17h20M7 8v9M17 8v9"/>
+      <path d="M7 8h10M5 12h14"/>
+      <path d="M7 8l-5 4M17 8l5 4"/>
+      <path d="M2 21h20" stroke-width="1" opacity="0.6"/>
+    </svg>`
+  },
+  {
+    name: 'Batam',
+    fullName: 'Batam',
+    color: 'text-indigo-500 dark:text-indigo-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M2 16h20"/>
+      <path d="M8 16V8M16 16V8"/>
+      <path d="M8 8l-6 8M8 8l8 8M16 8l-8 8M16 8l6 8"/>
+      <path d="M2 19h20" stroke-width="1" opacity="0.5"/>
+      <path d="M6 19v2M18 19v2"/>
+      <rect x="7" y="6" width="2" height="2" rx="0.3" fill="currentColor" opacity="0.7"/>
+      <rect x="15" y="6" width="2" height="2" rx="0.3" fill="currentColor" opacity="0.7"/>
+    </svg>`
+  },
+  {
+    name: 'Pekanbaru',
+    fullName: 'Pekanbaru',
+    color: 'text-teal-500 dark:text-teal-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M6 15h12v5H6z"/>
+      <path d="M12 4v3"/>
+      <path d="M6 15a6 6 0 0 1 12 0H6z" fill="currentColor" opacity="0.2"/>
+      <path d="M20 8v12M4 8v12"/>
+      <path d="M20 8l-2 3M4 8l2 3"/>
+    </svg>`
+  },
+  {
+    name: 'Denpasar',
+    fullName: 'Denpasar',
+    color: 'text-rose-500 dark:text-rose-400',
+    svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+      <path d="M12 2l-1 2h2l-1-2z" fill="currentColor" opacity="0.8"/>
+      <path d="M10 4h4v1.5h-4z"/>
+      <path d="M9 5.5h6v2H9z"/>
+      <path d="M7.5 7.5h9v2h-9z"/>
+      <path d="M6 9.5h12v2H6z"/>
+      <path d="M5 11.5h14v2.5H5z"/>
+      <path d="M4 14h16v6H4z" rx="0.5"/>
+      <path d="M2 20h20"/>
+    </svg>`
+  }
+];
 
 const splitLocation = (fullName: string) => {
   if (!fullName) return { main: '', sub: '' };
@@ -98,6 +238,76 @@ const splitLocation = (fullName: string) => {
   const main = parts[0].trim();
   const sub = parts.slice(1).map(p => p.trim()).join(', ');
   return { main, sub };
+};
+
+// ── City landmark badge computed ──────────────────────────────────────────────
+const currentCityLandmarkSvg = computed(() => {
+  const cityName = props.selectedCity;
+  const match = cityLandmarks.find(
+    l => l.fullName === cityName || l.name === cityName.split(',')[0].trim()
+  );
+  if (match) return match.svg;
+  // Fallback: map-pin icon for personal location
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+});
+
+const currentCityShortName = computed(() => splitLocation(props.selectedCity).main);
+
+// ── Carousel Controls ─────────────────────────────────────────────────────────
+const carouselContainer = ref<HTMLElement | null>(null);
+
+const scrollCarousel = (direction: 'left' | 'right') => {
+  if (!carouselContainer.value) return;
+  const container = carouselContainer.value;
+  const scrollAmount = 320;
+  if (direction === 'left') {
+    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  } else {
+    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  }
+};
+
+const detectLocation = () => {
+  emit('detect-location');
+};
+
+const majorCitiesList = [
+  'DKI Jakarta',
+  'Surabaya',
+  'Bandung',
+  'Medan',
+  'Semarang',
+  'Makassar',
+  'Palenburg',
+  'Palembang',
+  'Batam',
+  'Pekanbaru',
+  'Denpasar'
+];
+
+const otherCities = computed(() => {
+  return props.cities.slice(1).filter(city => {
+    return !majorCitiesList.some(major => 
+      city.toLowerCase() === major.toLowerCase() || 
+      city.toLowerCase().startsWith(major.toLowerCase() + ',')
+    );
+  });
+});
+
+const handleSearchOtherLocation = () => {
+  showDropdown.value = false;
+  nextTick(() => {
+    const isMobile = window.innerWidth < 1024;
+    const searchInputId = isMobile ? 'search-input-mobile' : 'search-input-desktop';
+    const inputEl = document.getElementById(searchInputId);
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.classList.add('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
+      setTimeout(() => {
+        inputEl.classList.remove('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
+      }, 1500);
+    }
+  });
 };
 
 // ── Height lock: prevents container collapse when leaving el goes position:absolute ──
@@ -188,6 +398,8 @@ onUnmounted(() => {
                     {{ splitLocation(selectedCity).main }}
                   </h2>
                   
+                  <ChevronDown class="w-5 h-5 text-slate-400 transition-transform duration-300 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-350 ml-0.5" :class="{ 'rotate-180': showDropdown }" />
+
                   <!-- Lokasi Saya Badge (Clickable button) -->
                   <button 
                     type="button"
@@ -211,12 +423,32 @@ onUnmounted(() => {
                     <span>{{ isLocating ? 'Mencari...' : 'Lokasi Saya' }}</span>
                   </button>
 
-                  <ChevronDown class="w-5 h-5 text-slate-400 transition-transform duration-300 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-350 ml-0.5" :class="{ 'rotate-180': showDropdown }" />
+                  <!-- Cari Lokasi Saya Button (Clickable button, shown when not geolocated) -->
+                  <button 
+                    type="button"
+                    @click.stop="detectLocation"
+                    v-else
+                    class="shrink-0 inline-flex items-center gap-1.5 pl-2 pr-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none"
+                    title="Cari lokasi realtime Anda menggunakan GPS"
+                  >
+                    <!-- GPS Target Dot (pulsing if searching location) -->
+                    <span 
+                      class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30"
+                    >
+                      <span class="relative flex h-1 w-1 shrink-0">
+                        <span v-if="isLocating" class="animate-spin h-2 w-2 border border-current rounded-full border-t-transparent"></span>
+                        <template v-else>
+                          <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-500 dark:bg-brand-cyan"></span>
+                        </template>
+                      </span>
+                    </span>
+                    <span>{{ isLocating ? 'Mencari...' : 'Cari Lokasi Saya' }}</span>
+                  </button>
                 </div>
 
                 <!-- Sub location text placed below -->
                 <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0" style="margin-top: 0px;">
-                  {{ splitLocation(selectedCity).sub }}
+                  {{ splitLocation(selectedCity).sub || 'Indonesia' }}
                 </p>
               </div>
             </button>
@@ -227,8 +459,9 @@ onUnmounted(() => {
               class="absolute left-0 mt-2 w-72 sm:w-80 rounded-2xl shadow-xl border overflow-hidden py-2 z-50 animate-fade-in
                 bg-white/95 border-slate-100/80 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
             >
+              <!-- 1. The Realtime Location (cities[0]) -->
               <button 
-                v-for="city in cities" 
+                v-for="city in [cities[0]]" 
                 :key="city"
                 :id="'location-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
                 @click="$emit('select-city', city); showDropdown = false"
@@ -253,23 +486,155 @@ onUnmounted(() => {
                   </div>
                   
                   <span 
-                    v-if="city === cities[0]"
+                    v-if="isGeolocated && city === cities[0]"
                     class="px-1.5 py-0.5 text-[8px] font-black uppercase rounded bg-blue-50 text-blue-600 dark:bg-brand-cyan/15 dark:text-brand-cyan"
                   >
                     Lokasi Saya
                   </span>
                   <span v-else-if="city === selectedCity" class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
                 </div>
-                <span class="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate w-full pr-4">
+                <span v-if="splitLocation(city).sub" class="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate w-full pr-4">
                   {{ splitLocation(city).sub }}
                 </span>
               </button>
+
+              <!-- Divider line -->
+              <div class="h-px bg-slate-100 dark:bg-brand-navy-800/60 my-1"></div>
+
+              <!-- 2. Other custom cities (if any) -->
+              <template v-if="otherCities.length > 0">
+                <button 
+                  v-for="city in otherCities"
+                  :key="city"
+                  :id="'location-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
+                  @click="$emit('select-city', city); showDropdown = false"
+                  class="w-full text-left px-4 py-2.5 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-all flex flex-col gap-0.5 cursor-pointer relative"
+                  :class="city === selectedCity ? 'bg-slate-50/50 dark:bg-brand-navy-950/20' : ''"
+                >
+                  <div class="flex items-center justify-between w-full">
+                    <span 
+                      class="text-xs tracking-tight transition-colors"
+                      :class="city === selectedCity ? 'font-black text-blue-600 dark:text-brand-cyan' : 'font-bold text-slate-700 dark:text-slate-200'"
+                    >
+                      {{ splitLocation(city).main }}
+                    </span>
+                    <span v-if="city === selectedCity" class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
+                  </div>
+                  <span v-if="splitLocation(city).sub" class="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate w-full pr-4">
+                    {{ splitLocation(city).sub }}
+                  </span>
+                </button>
+              </template>
+
+              <!-- 3. Search Dropdown Empty State (if no other custom cities) -->
+              <div 
+                v-else
+                class="px-4 py-4 flex flex-col items-center justify-center text-center gap-2"
+              >
+                <div class="flex flex-col gap-0.5">
+                  <p class="text-[10px] font-black text-slate-700 dark:text-slate-200">Tidak Ada Wilayah Lain</p>
+                  <p class="text-[8.5px] text-slate-400 dark:text-slate-500 font-bold leading-relaxed max-w-[210px] uppercase tracking-wider">
+                    Simpan kelurahan atau desa favorit Anda untuk akses cepat.
+                  </p>
+                </div>
+                <button
+                  @click="handleSearchOtherLocation"
+                  class="mt-1 w-full py-1.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider text-white bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 dark:text-brand-navy-950 transition-all duration-300 shadow active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Search class="w-3.5 h-3.5" />
+                  Cari Lokasi Lain
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- Section indicator -->
           <div class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hidden sm:block">
             Panduan Aktivitas & Analisis Cuaca
+          </div>
+        </div>
+
+        <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel -->
+        <div class="relative group/carousel w-full mt-2">
+          <!-- Left Arrow Button -->
+          <button 
+            @click="scrollCarousel('left')"
+            class="absolute -left-3 top-[42%] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            aria-label="Previous cities"
+          >
+            <ChevronLeft class="w-4 h-4 text-slate-800 dark:text-white" />
+          </button>
+          
+          <!-- Right Arrow Button -->
+          <button 
+            @click="scrollCarousel('right')"
+            class="absolute -right-3 top-[42%] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            aria-label="Next cities"
+          >
+            <ChevronRight class="w-4 h-4 text-slate-800 dark:text-white" />
+          </button>
+
+          <!-- Scrollable Row -->
+          <div 
+            ref="carouselContainer"
+            class="flex items-center gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 pb-1"
+          >
+            <button
+              v-for="landmark in cityLandmarks"
+              :key="landmark.name"
+              :id="'landmark-card-' + landmark.name.toLowerCase()"
+              @click="$emit('select-city', landmark.fullName)"
+              class="snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] backdrop-blur-md relative overflow-hidden group/card shadow-sm"
+              :class="[
+                selectedCity === landmark.fullName
+                  ? 'bg-blue-500/10 text-blue-600 border-blue-500/40 dark:bg-brand-cyan/15 dark:text-brand-cyan dark:border-brand-cyan/40 shadow-sm shadow-blue-500/5 font-extrabold'
+                  : 'bg-white/50 text-slate-600 hover:bg-white/80 border-slate-200/40 dark:bg-brand-navy-900/50 dark:text-slate-300 dark:hover:bg-brand-navy-850/70 dark:border-brand-navy-700/40'
+              ]"
+            >
+              <!-- Animated background pulse highlight on active -->
+              <div 
+                v-if="selectedCity === landmark.fullName"
+                class="absolute -right-6 -top-6 w-16 h-16 rounded-full bg-blue-500/10 dark:bg-brand-cyan/15 blur-xl animate-pulse"
+              ></div>
+
+              <!-- Landmark Icon Container with dynamic background theme -->
+              <div 
+                class="w-8 h-8 p-1.5 rounded-xl shrink-0 transition-transform duration-300 group-hover/card:scale-110 flex items-center justify-center"
+                :class="[
+                  selectedCity === landmark.fullName
+                    ? 'bg-blue-500/20 text-blue-600 dark:bg-brand-cyan/25 dark:text-brand-cyan'
+                    : 'bg-slate-100 dark:bg-brand-navy-800/80 ' + landmark.color
+                ]"
+                v-html="landmark.svg"
+              ></div>
+
+              <!-- Location Label & Indicator -->
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs font-bold tracking-tight truncate leading-tight">
+                  {{ landmark.name }}
+                </span>
+                <span 
+                  class="text-[9px] font-semibold mt-0.5"
+                  :class="selectedCity === landmark.fullName ? 'text-blue-500/80 dark:text-brand-cyan/80' : 'text-slate-400 dark:text-slate-500'"
+                >
+                  {{ selectedCity === landmark.fullName ? 'Aktif' : 'Pilih Kota' }}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Dot Navigation -->
+          <div class="flex items-center justify-center gap-1.5 mt-3 mb-1">
+            <button
+              v-for="landmark in cityLandmarks"
+              :key="'dot-' + landmark.name"
+              @click="$emit('select-city', landmark.fullName)"
+              class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+              :class="selectedCity === landmark.fullName
+                ? 'w-5 bg-blue-500 dark:bg-brand-cyan'
+                : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500'"
+              :aria-label="'Pilih ' + landmark.name"
+            ></button>
           </div>
         </div>
 
@@ -282,12 +647,12 @@ onUnmounted(() => {
         >
         <div :key="selectedCity" class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Card 1: Darat -->
-          <div class="group relative bg-gradient-to-br from-white/50 to-white/30 dark:from-brand-navy-900/30 dark:to-brand-navy-950/15 border border-slate-200/20 dark:border-brand-navy-800/10 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/25 dark:hover:border-orange-400/25 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/35 dark:active:border-orange-400/35">
+          <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50">
             <!-- Colored Ambient Glow Overlay -->
-            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/8 dark:bg-orange-500/12 blur-2xl group-hover:bg-orange-500/25 dark:group-hover:bg-orange-500/30 group-hover:scale-125 group-active:bg-orange-500/25 dark:group-active:bg-orange-500/30 group-active:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
+            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/12 dark:bg-orange-500/18 blur-2xl group-hover:bg-orange-500/30 dark:group-hover:bg-orange-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
             <!-- 🏔️ Land Illustration: City skyline + road + mountains -->
-            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] group-active:opacity-[0.45] dark:group-active:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
               <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
                 <defs>
                   <linearGradient id="landGradA" x1="0" y1="0" x2="0" y2="1">
@@ -344,7 +709,7 @@ onUnmounted(() => {
             
             <div class="flex items-center justify-between z-10">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-orange-500/10 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+                <div class="w-9 h-9 rounded-xl bg-orange-500/15 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                   <Compass class="w-5 h-5 transition-transform duration-700 ease-out group-hover:rotate-[360deg] group-active:rotate-[360deg]" />
                 </div>
                 <h4 class="text-[11px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">
@@ -352,24 +717,25 @@ onUnmounted(() => {
                 </h4>
               </div>
               
-              <div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
-                <Thermometer class="w-3.5 h-3.5" title="Suhu" />
-                <Sun class="w-3.5 h-3.5" title="Cuaca" />
+              <!-- Futuristic City Badge -->
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/8 dark:bg-orange-500/12 border border-orange-500/20 dark:border-orange-500/25 text-[9px] font-black uppercase tracking-wider text-orange-600/80 dark:text-orange-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-orange-500/15 group-hover:border-orange-500/35">
+                <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
+                <span>{{ currentCityShortName }}</span>
               </div>
             </div>
             
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
+            <p class="text-xs leading-relaxed text-slate-800 dark:text-slate-100 font-medium flex-grow z-10">
               {{ currentAnalysis.land.desc }}
             </p>
 
             <!-- Card Footer Stats Row -->
-            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200/10 dark:border-white/5 text-[11px] font-bold text-slate-600 dark:text-slate-300 z-10">
+            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-brand-navy-700/40 text-[11px] font-bold text-slate-800 dark:text-slate-100 z-10">
               <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
                   <Thermometer class="w-3.5 h-3.5 text-orange-500 shrink-0" />
                   <span>{{ weatherData.temp }}°C</span>
                 </div>
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
                   <Sun class="w-3.5 h-3.5 text-amber-500 shrink-0" />
                   <span>UV {{ weatherData.uvIndex }}</span>
                 </div>
@@ -385,12 +751,12 @@ onUnmounted(() => {
           </div>
 
           <!-- Card 2: Pesisir & Laut -->
-          <div class="group relative bg-gradient-to-br from-white/50 to-white/30 dark:from-brand-navy-900/30 dark:to-brand-navy-950/15 border border-slate-200/20 dark:border-brand-navy-800/10 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/25 dark:hover:border-cyan-400/25 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/35 dark:active:border-cyan-400/35">
+          <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50">
             <!-- Colored Ambient Glow Overlay -->
-            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/8 dark:bg-cyan-500/12 blur-2xl group-hover:bg-cyan-500/25 dark:group-hover:bg-cyan-500/30 group-hover:scale-125 group-active:bg-cyan-500/25 dark:group-active:bg-cyan-500/30 group-active:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
+            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/12 dark:bg-cyan-500/18 blur-2xl group-hover:bg-cyan-500/30 dark:group-hover:bg-cyan-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
             <!-- 🌊 Sea Illustration: Ocean waves + ship + lighthouse -->
-            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] group-active:opacity-[0.45] dark:group-active:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
               <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
                 <defs>
                   <linearGradient id="seaGradA" x1="0" y1="0" x2="0" y2="1">
@@ -444,7 +810,7 @@ onUnmounted(() => {
 
             <div class="flex items-center justify-between z-10">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+                <div class="w-9 h-9 rounded-xl bg-cyan-500/15 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                   <Waves class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 group-active:-translate-y-0.5 group-active:scale-110" />
                 </div>
                 <h4 class="text-[11px] font-black uppercase tracking-widest text-cyan-600 dark:text-brand-cyan">
@@ -452,24 +818,25 @@ onUnmounted(() => {
                 </h4>
               </div>
               
-              <div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
-                <Navigation class="w-3.5 h-3.5 rotate-45" title="Arah angin laut" />
-                <AlertTriangle class="w-3.5 h-3.5" title="Peringatan gelombang" />
+              <!-- Futuristic City Badge -->
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/8 dark:bg-cyan-500/12 border border-cyan-500/20 dark:border-cyan-500/25 text-[9px] font-black uppercase tracking-wider text-cyan-600/80 dark:text-cyan-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-cyan-500/15 group-hover:border-cyan-500/35">
+                <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
+                <span>{{ currentCityShortName }}</span>
               </div>
             </div>
             
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
+            <p class="text-xs leading-relaxed text-slate-800 dark:text-slate-100 font-medium flex-grow z-10">
               {{ currentAnalysis.sea.desc }}
             </p>
 
             <!-- Card Footer Stats Row -->
-            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200/10 dark:border-white/5 text-[11px] font-bold text-slate-600 dark:text-slate-300 z-10">
+            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-brand-navy-700/40 text-[11px] font-bold text-slate-800 dark:text-slate-100 z-10">
               <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
                   <Wind class="w-3.5 h-3.5 text-teal-500 shrink-0" />
                   <span>{{ weatherData.windSpeed }} km/jam</span>
                 </div>
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
                   <Navigation class="w-3.5 h-3.5 text-indigo-500 shrink-0" :style="{ transform: `rotate(${additionalInfo.windAngle}deg)` }" />
                   <span>{{ additionalInfo.windDir }}</span>
                 </div>
@@ -485,12 +852,12 @@ onUnmounted(() => {
           </div>
 
           <!-- Card 3: Penerbangan -->
-          <div class="group relative bg-gradient-to-br from-white/50 to-white/30 dark:from-brand-navy-900/30 dark:to-brand-navy-950/15 border border-slate-200/20 dark:border-brand-navy-800/10 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/25 dark:hover:border-indigo-400/25 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/35 dark:active:border-indigo-400/35">
+          <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50">
             <!-- Colored Ambient Glow Overlay -->
-            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/8 dark:bg-indigo-500/12 blur-2xl group-hover:bg-indigo-500/25 dark:group-hover:bg-indigo-500/30 group-hover:scale-125 group-active:bg-indigo-500/25 dark:group-active:bg-indigo-500/30 group-active:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
+            <div class="absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/12 dark:bg-indigo-500/18 blur-2xl group-hover:bg-indigo-500/30 dark:group-hover:bg-indigo-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
             <!-- ✈️ Aviation Illustration: Runway + sky + flying plane -->
-            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-[0.06] dark:opacity-[0.08] group-hover:opacity-[0.45] dark:group-hover:opacity-[0.55] group-active:opacity-[0.45] dark:group-active:opacity-[0.55] transition-opacity duration-700 ease-in-out z-0">
+            <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
               <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
                 <defs>
                   <linearGradient id="airGradA" x1="0" y1="0" x2="0" y2="1">
@@ -548,53 +915,49 @@ onUnmounted(() => {
                 <!-- Radar on tower -->
                 <ellipse cx="272" cy="41" rx="6" ry="1.5" fill="#818cf8" opacity="0.6"/>
                 <line x1="272" y1="38" x2="272" y2="41" stroke="#a5b4fc" stroke-width="1" opacity="0.5"/>
-                <!-- Parked aircraft at terminal -->
-                <path d="M282 70 Q290 68 297 69 L302 69.5 L302 70.5 L297 71 Q290 72 282 71Z" fill="#c7d2fe" opacity="0.65"/>
-                <path d="M290 69 L286 74 L295 70.5 L297 70Z" fill="#a5b4fc" opacity="0.65"/>
-                <!-- Jet bridge -->
-                <rect x="264" y="67" width="20" height="3" fill="#818cf8" opacity="0.4" rx="1"/>
               </svg>
             </div>
 
             <div class="flex items-center justify-between z-10">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
-                  <Plane class="w-5 h-5 transition-all duration-500 ease-out group-hover:translate-x-1.5 group-hover:-translate-y-1 group-hover:scale-110 group-active:translate-x-1.5 group-active:-translate-y-1 group-active:scale-110" />
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+                  <Plane class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-rotate-12 group-hover:scale-110 group-active:-rotate-12 group-active:scale-110" />
                 </div>
                 <h4 class="text-[11px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
                   {{ currentAnalysis.air.title }}
                 </h4>
               </div>
               
-              <div class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
-                <Eye class="w-3.5 h-3.5" title="Jarak pandang" />
-                <CloudLightning class="w-3.5 h-3.5" title="Potensi turbulensi" />
+              <!-- Futuristic City Badge -->
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/8 dark:bg-indigo-500/12 border border-indigo-500/20 dark:border-indigo-500/25 text-[9px] font-black uppercase tracking-wider text-indigo-600/80 dark:text-indigo-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-indigo-500/15 group-hover:border-indigo-500/35">
+                <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
+                <span>{{ currentCityShortName }}</span>
               </div>
             </div>
             
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
+            <p class="text-xs leading-relaxed text-slate-800 dark:text-slate-100 font-medium flex-grow z-10">
               {{ currentAnalysis.air.desc }}
             </p>
 
             <!-- Card Footer Stats Row -->
-            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200/10 dark:border-white/5 text-[11px] font-bold text-slate-600 dark:text-slate-300 z-10">
+            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-brand-navy-700/40 text-[11px] font-bold text-slate-800 dark:text-slate-100 z-10">
               <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
                   <Eye class="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                   <span>{{ weatherData.visibility }} km</span>
                 </div>
-                <div class="flex items-center gap-1.5 bg-slate-100/50 dark:bg-brand-navy-950/40 px-2.5 py-1.5 rounded-lg border border-slate-200/10 dark:border-brand-navy-800/10">
-                  <Droplets class="w-3.5 h-3.5 text-blue-500 dark:text-brand-cyan shrink-0" />
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
+                  <Droplets class="w-3.5 h-3.5 text-blue-500 shrink-0" />
                   <span>{{ weatherData.humidity }}%</span>
                 </div>
               </div>
-              <a :href="aviationUrl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors font-black">
+              <span class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 cursor-not-allowed transition-colors font-black" title="Layanan belum tersedia">
                 Selengkapnya
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="7" y1="17" x2="17" y2="7"></line>
                   <polyline points="7 7 17 7 17 17"></polyline>
                 </svg>
-              </a>
+              </span>
             </div>
           </div>
         </div>
@@ -626,7 +989,7 @@ onUnmounted(() => {
       <!-- Right Column: Sidebar alerts & Transportation status (Span 1) -->
       <div class="lg:sticky lg:top-20 self-start space-y-8 animate-fade-in" style="animation-delay: 200ms;">
         <!-- Golf Course Weather Index -->
-        <AroundActivityPanel :selected-city="selectedCity" />
+        <AroundActivityPanel v-if="!(isGeolocated && selectedCity === cities[0])" :selected-city="selectedCity" />
 
         <!-- Emergency Alerts Cards -->
         <AlertsPanel :alerts="alerts" />

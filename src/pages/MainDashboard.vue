@@ -394,13 +394,9 @@ onUnmounted(() => {
               <div class="text-left space-y-2 min-w-0 max-w-[calc(100vw-110px)] md:max-w-none">
                 <!-- Location Text & Chevron Wrapper -->
                 <div class="flex items-center gap-2 flex-wrap">
-                  <h2 class="text-xl sm:text-2xl font-black tracking-tight text-slate-800 dark:text-white uppercase leading-tight flex items-baseline flex-wrap gap-x-1">
+                  <h2 class="text-xs sm:text-sm font-medium tracking-tight text-slate-500 dark:text-slate-400 normal-case leading-relaxed flex items-baseline flex-wrap gap-x-0.5">
                     <span>{{ splitLocation(selectedCity).main }}</span>
-                    <span 
-                      class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed normal-case"
-                    >
-                      , {{ splitLocation(selectedCity).sub || 'Indonesia' }}
-                    </span>
+                    <span>, {{ splitLocation(selectedCity).sub || 'Indonesia' }}</span>
                   </h2>
                   
                   <ChevronDown class="w-5 h-5 text-slate-400 transition-transform duration-300 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-350 ml-0.5" :class="{ 'rotate-180': showDropdown }" />

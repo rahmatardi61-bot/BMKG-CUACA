@@ -552,7 +552,7 @@ onUnmounted(() => {
 
         <!-- Carousel Title Section -->
         <div class="mt-4 mb-2 text-left">
-          <h3 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-800 dark:text-white">
+          <h3 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-800 dark:text-white">
             Kondisi Terkini
           </h3>
           <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 mt-0.5">

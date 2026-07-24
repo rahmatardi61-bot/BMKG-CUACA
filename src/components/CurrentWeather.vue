@@ -442,7 +442,7 @@ onUnmounted(() => {
         <!-- Dropdown Menu -->
         <div 
           v-if="showCityDropdown"
-          class="absolute left-0 mt-2 w-72 sm:w-80 rounded-2xl shadow-xl border overflow-hidden py-2 z-50 animate-fade-in
+          class="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] rounded-2xl shadow-xl border overflow-hidden py-2 z-50 animate-fade-in
             bg-white/95 border-slate-100/80 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
         >
           <button 

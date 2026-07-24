@@ -7,7 +7,7 @@ const MainDashboard = defineAsyncComponent(() => import('./pages/MainDashboard.v
 const Footer = defineAsyncComponent(() => import('./components/Footer.vue'));
 const LoginView = defineAsyncComponent(() => import('./pages/LoginView.vue'));
 const UnderMaintenance = defineAsyncComponent(() => import('./pages/UnderMaintenance.vue'));
-const NewsSection = defineAsyncComponent(() => import('./components/NewsSection.vue'));
+// const NewsSection = defineAsyncComponent(() => import('./components/NewsSection.vue'));
 
 // Import Mock Data
 import { 
@@ -374,12 +374,14 @@ onMounted(() => {
         class="flex-grow"
       />
 
-      <!-- News Section for Mobile (above footer) -->
+      <!-- News Section for Mobile (above footer) - Hidden -->
+      <!--
       <div v-if="activeTab === 'Beranda'" class="lg:hidden border-t border-slate-200/30 dark:border-brand-navy-800/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <NewsSection :articles="newsArticles" />
         </div>
       </div>
+      -->
 
       <!-- Footer -->
       <Footer />

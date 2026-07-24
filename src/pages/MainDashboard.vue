@@ -7,7 +7,7 @@ const TransportWeather = defineAsyncComponent(() => import('../components/Transp
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
 const AroundActivityPanel = defineAsyncComponent(() => import('../components/AroundActivityPanel.vue'));
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
-const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
+// const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
 
 import type { 
   WeatherData, 
@@ -581,12 +581,11 @@ onUnmounted(() => {
                 </div>
                 <div class="min-w-0">
                   <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">
-                    Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan <br />
-                    notifikasi cuaca & gempa secara realtime.
+                    Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan notifikasi cuaca & gempa secara realtime.
                   </p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 shrink-0 sm:ml-auto">
+              <div class="flex items-center justify-center gap-2 shrink-0 sm:ml-auto">
                 <!-- Google Play Button -->
                 <a 
                   href="https://play.google.com/store/apps/details?id=id.go.bmkg.infobmkg" 
@@ -1051,8 +1050,8 @@ onUnmounted(() => {
         <!-- Satellite Map Mockup Component -->
         <SatelliteMap :selected-city="selectedCity" @select-city="$emit('select-city', $event)" />
 
-        <!-- Weather & Geophysics News Grid -->
-        <NewsSection :articles="articles" class="hidden lg:block" />
+        <!-- Weather & Geophysics News Grid (Hidden) -->
+        <!-- <NewsSection :articles="articles" class="hidden lg:block" /> -->
       </div>
 
       <!-- Right Column: Sidebar alerts & Transportation status (Span 1) -->

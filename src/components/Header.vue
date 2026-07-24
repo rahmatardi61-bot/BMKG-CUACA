@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Search, Sun, Moon, Bell, User, X, LogOut, Settings } from 'lucide-vue-next';
 
 const props = withDefaults(defineProps<{
@@ -60,14 +60,34 @@ const handleLogout = () => {
   showProfileDropdown.value = false;
   emit('logout');
 };
+
+const profileDropdownContainer = ref<HTMLElement | null>(null);
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    showProfileDropdown.value &&
+    profileDropdownContainer.value &&
+    !profileDropdownContainer.value.contains(event.target as Node)
+  ) {
+    showProfileDropdown.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>
   <header class="sticky top-4 z-40 mx-auto w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)] max-w-[1216px] transition-all duration-300
-    bg-white/70 dark:bg-brand-navy-950/50 backdrop-blur-lg
-    border border-white/50 dark:border-white/10
-    shadow-[0_10px_30px_rgba(0,0,0,0.03),0_1px_3px_rgba(0,0,0,0.02),0_1px_1px_rgba(255,255,255,0.8)_inset]
-    dark:shadow-[0_12px_40px_rgba(0,0,0,0.25),0_1px_1px_rgba(255,255,255,0.05)_inset]
+    bg-white/85 dark:bg-brand-navy-950/75 backdrop-blur-[24px]
+    border border-white/60 dark:border-white/[0.08]
+    shadow-[0_12px_40px_rgba(0,0,0,0.03),0_1px_3px_rgba(0,0,0,0.01),0_1px_1px_rgba(255,255,255,0.85)_inset]
+    dark:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,0.08)_inset]
     rounded-full h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative">
       
       <!-- Left: Logo & Title -->
@@ -97,7 +117,7 @@ const handleLogout = () => {
             id="search-input-desktop"
             type="text" 
             placeholder="Cari kelurahan/desa..." 
-            class="w-full bg-transparent border-none outline-none text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
+            class="w-full bg-transparent border-none outline-none text-base lg:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
           />
           <!-- Elegant search button -->
           <button class="bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer">
@@ -112,7 +132,7 @@ const handleLogout = () => {
           id="search-input-mobile"
           type="text" 
           placeholder="Cari kelurahan/desa..." 
-          class="w-full pl-9 pr-4 py-2 text-xs rounded-full border outline-none transition-all
+          class="w-full pl-9 pr-4 py-2 text-base rounded-full border outline-none transition-all
             bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
             dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
         />
@@ -124,7 +144,7 @@ const handleLogout = () => {
 
 
         <!-- Notification Icon -->
-        <button id="notification-button" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-brand-navy-800 text-slate-500 dark:text-slate-300 relative transition-all active:scale-95 active:duration-75">
+        <button v-if="isLoggedIn" id="notification-button" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-brand-navy-800 text-slate-500 dark:text-slate-300 relative transition-all active:scale-95 active:duration-75">
           <Bell class="w-4 h-4" />
           <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 border border-white dark:border-brand-navy-950"></span>
         </button>
@@ -133,7 +153,7 @@ const handleLogout = () => {
         <button 
           id="theme-toggle-button"
           @click="emit('toggle-theme')" 
-          class="p-1.5 rounded-full border transition-all duration-300
+          class="px-3 py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5
             bg-slate-50 border-slate-200 hover:bg-slate-100 text-amber-500
             dark:bg-brand-navy-900 dark:border-brand-navy-700 dark:hover:bg-brand-navy-800 dark:text-brand-cyan
             active:scale-95 active:duration-75"
@@ -141,10 +161,13 @@ const handleLogout = () => {
         >
           <Sun v-if="darkMode" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
           <Moon v-else class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
+          <span class="text-[9px] font-black uppercase tracking-wider select-none text-amber-600 dark:text-brand-cyan">
+            {{ darkMode ? 'Tema Gelap' : 'Tema Terang' }}
+          </span>
         </button>
 
         <!-- User Profile (Clickable Login Trigger / Profile Dropdown) -->
-        <div class="relative">
+        <div ref="profileDropdownContainer" class="relative">
           <button 
             id="user-profile-button"
             @click="handleUserClick" 
@@ -255,7 +278,7 @@ const handleLogout = () => {
                 id="search-input-drawer"
                 type="text" 
                 placeholder="Cari kelurahan/desa..." 
-                class="w-full pl-9 pr-4 py-2 text-xs rounded-full border outline-none transition-all
+                class="w-full pl-9 pr-4 py-2 text-base rounded-full border outline-none transition-all
                   bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
                   dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
               />

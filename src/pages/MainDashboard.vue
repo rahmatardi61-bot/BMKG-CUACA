@@ -579,43 +579,15 @@ onUnmounted(() => {
                   href="https://play.google.com/store/apps/details?id=id.go.bmkg.infobmkg" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  class="shrink-0"
+                  class="h-9 px-3.5 rounded-lg border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-750 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800"
                 >
-                  <svg class="h-8 w-auto hover:opacity-90 active:scale-95 transition-all duration-200" viewBox="0 0 135 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="135" height="40" rx="7" fill="#0A0F18" stroke="#1E293B" stroke-width="0.8"/>
-                    <g transform="translate(10, 8)">
-                      <path d="M1.38 0.44C1.16 0.67 1.03 1.05 1.03 1.55v20.91c0 0.5 0.13 0.88 0.35 1.11l0.11 0.1 11.66-11.66v-0.27L1.49 0.34l-0.11 0.1z" fill="url(#gp_a)"/>
-                      <path d="M17.15 15.93l-3.99-3.99v-0.27l3.99-3.99 0.12 0.07 4.74 2.69c1.35 0.77 1.35 2.03 0 2.8l-4.74 2.69-0.12 0.01z" fill="url(#gp_b)"/>
-                      <path d="M13.28 11.8l-11.8 11.8c0.41 0.43 1.09 0.49 1.86 0.05l13.93-7.91-3.99-3.94z" fill="url(#gp_c)"/>
-                      <path d="M13.28 11.8l3.99-3.94-13.93-7.91c-0.77-0.44-1.45-0.38-1.86 0.05l11.8 11.8z" fill="url(#gp_d)"/>
-                    </g>
-                    <text x="40" y="15" fill="#A0AEC0" font-family="Inter, sans-serif" font-size="7" font-weight="800" letter-spacing="0.5">TEMUKAN DI</text>
-                    <text x="40" y="27" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="11" font-weight="900" letter-spacing="0.2">Google Play</text>
-                    <defs>
-                      <linearGradient id="gp_a" x1="12.01" y1="12.01" x2="-2.01" y2="-2.01" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#00A0FF"/>
-                        <stop offset="0.007" stop-color="#00A1FF"/>
-                        <stop offset="0.26" stop-color="#00C1FF"/>
-                        <stop offset="0.51" stop-color="#00D9FF"/>
-                        <stop offset="0.76" stop-color="#00E8FF"/>
-                        <stop offset="1" stop-color="#00EEFF"/>
-                      </linearGradient>
-                      <linearGradient id="gp_b" x1="22.62" y1="12.01" x2="2.62" y2="12.01" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#FFE000"/>
-                        <stop offset="0.4" stop-color="#FFC000"/>
-                        <stop offset="0.77" stop-color="#FF9000"/>
-                        <stop offset="1" stop-color="#FF7000"/>
-                      </linearGradient>
-                      <linearGradient id="gp_c" x1="15.82" y1="14.54" x2="-1.82" y2="-3.09" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#FF2F38"/>
-                        <stop offset="1" stop-color="#FF5A5F"/>
-                      </linearGradient>
-                      <linearGradient id="gp_d" x1="5.16" y1="3.88" x2="17.16" y2="15.88" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="#00E676"/>
-                        <stop offset="1" stop-color="#00B0FF"/>
-                      </linearGradient>
-                    </defs>
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-emerald-400">
+                    <path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.58-1.408V3.222c0-.528.22-1.01.58-1.408zM14.5 12.707l2.846 2.846-13.018 7.502a1.99 1.99 0 0 1-.718.131c-.52 0-.996-.2-1.378-.528L14.5 12.707zm7.558-.918l-3.328-1.92-2.176 2.176 2.176 2.176 3.328-1.92a1.144 1.144 0 0 0 0-2.022zM14.5 11.293L2.232 3.223c.382-.328.858-.528 1.378-.528.254 0 .5.048.718.131l13.018 7.502-2.846 2.965z"/>
                   </svg>
+                  <div class="text-left leading-none">
+                    <div class="text-[8px] uppercase font-bold text-slate-350">Temukan di</div>
+                    <div class="text-[11px] font-black text-white">Google Play</div>
+                  </div>
                 </a>
 
                 <!-- App Store Button -->
@@ -623,15 +595,15 @@ onUnmounted(() => {
                   href="https://apps.apple.com/id/app/info-bmkg/id1114372539" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  class="shrink-0"
+                  class="h-9 px-3.5 rounded-lg border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-750 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800"
                 >
-                  <svg class="h-8 w-auto hover:opacity-90 active:scale-95 transition-all duration-200" viewBox="0 0 135 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="135" height="40" rx="7" fill="#0A0F18" stroke="#1E293B" stroke-width="0.8"/>
-                    <path d="M20.25 15.65C20.23 12.3 22.95 10.66 23.07 10.58C21.52 8.31 19.11 7.97 18.28 7.94C16.29 7.74 14.39 9.12 13.38 9.12C12.37 9.12 10.82 7.96 9.17 7.99C7.01 8.02 5.03 9.25 3.92 11.17C1.68 15.06 3.34 20.8 5.51 23.94C6.57 25.47 7.78 27.17 9.44 27.11C11.03 27.04 11.64 26.09 13.56 26.09C15.47 26.09 16.03 27.11 17.7 27.08C19.41 27.04 20.47 25.53 21.52 23.98C22.73 22.21 23.23 20.5 23.26 20.41C23.18 20.38 20.28 19.27 20.25 15.65Z" fill="#FFFFFF"/>
-                    <path d="M16.92 5.37C17.81 4.29 18.42 2.79 18.25 1.29C16.96 1.34 15.4 2.15 14.47 3.23C13.68 4.14 12.99 5.67 13.19 7.15C14.62 7.26 16.03 6.45 16.92 5.37Z" fill="#FFFFFF"/>
-                    <text x="36" y="15" fill="#A0AEC0" font-family="Inter, sans-serif" font-size="7" font-weight="800" letter-spacing="0.5">UNDUH DI</text>
-                    <text x="36" y="27" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="11" font-weight="900" letter-spacing="0.2">App Store</text>
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-100">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.7-1.13 1.84-.99 2.94.12.01.24.02.36.02.94 0 2.01-.54 2.46-1.35z"/>
                   </svg>
+                  <div class="text-left leading-none">
+                    <div class="text-[8px] uppercase font-bold text-slate-350">Unduh di</div>
+                    <div class="text-[11px] font-black text-white">App Store</div>
+                  </div>
                 </a>
               </div>
             </div>

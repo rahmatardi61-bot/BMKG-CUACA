@@ -53,11 +53,7 @@ const userInitials = computed(() => {
 });
 
 const handleUserClick = () => {
-  if (props.isLoggedIn) {
-    showProfileDropdown.value = !showProfileDropdown.value;
-  } else {
-    emit('open-login');
-  }
+  showProfileDropdown.value = !showProfileDropdown.value;
 };
 
 const handleLogout = () => {
@@ -67,10 +63,12 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 w-full border-b transition-all duration-300
-    bg-white/80 dark:bg-brand-navy-950/80 backdrop-blur-md
-    border-slate-200 dark:border-brand-navy-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 relative">
+  <header class="sticky top-4 z-40 mx-auto w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)] max-w-[1216px] transition-all duration-300
+    bg-white/70 dark:bg-brand-navy-950/50 backdrop-blur-lg
+    border border-white/50 dark:border-white/10
+    shadow-[0_10px_30px_rgba(0,0,0,0.03),0_1px_3px_rgba(0,0,0,0.02),0_1px_1px_rgba(255,255,255,0.8)_inset]
+    dark:shadow-[0_12px_40px_rgba(0,0,0,0.25),0_1px_1px_rgba(255,255,255,0.05)_inset]
+    rounded-full h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative">
       
       <!-- Left: Logo & Title -->
       <div 
@@ -91,33 +89,22 @@ const handleLogout = () => {
         </div>
       </div>
 
-      <!-- Center: Nav Links -->
-      <nav class="hidden lg:flex items-center space-x-1.5 xl:space-x-2.5">
-        <a 
-          v-for="tab in ['Beranda', 'Weather for Traffic', 'Penerbangan', 'Maritim']" 
-          :key="tab"
-          :id="'nav-tab-desktop-' + tab.toLowerCase().replace(/ /g, '-')"
-          href="#" 
-          @click.prevent="handleTabClick(tab)"
-          :class="[
-            'px-3.5 py-2 text-xs tracking-wide rounded-full transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 font-bold hover:scale-105 active:scale-95 active:duration-75 border',
-            activeTab === tab 
-              ? 'bg-blue-50/90 text-blue-600 border-blue-200/40 shadow-sm shadow-blue-500/5 dark:bg-brand-cyan/10 dark:text-brand-cyan dark:border-brand-cyan/20 dark:shadow-brand-cyan/5' 
-              : 'border-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-brand-navy-900/40 hover:text-slate-800 dark:hover:text-white'
-          ]"
-        >
-          <span 
-            v-if="activeTab === tab" 
-            class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30 shrink-0"
-          >
-            <span class="relative flex h-1 w-1 shrink-0">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-brand-cyan opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-600 dark:bg-brand-cyan"></span>
-            </span>
-          </span>
-          {{ tab }}
-        </a>
-      </nav>
+      <!-- Center: Search bar (Desktop - centered & elevated) -->
+      <div class="hidden lg:block relative w-80 xl:w-96 transition-all duration-300 mx-auto group">
+        <div class="relative flex items-center bg-slate-100/50 dark:bg-brand-navy-900/50 border border-slate-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-brand-navy-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-sm">
+          <Search class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+          <input 
+            id="search-input-desktop"
+            type="text" 
+            placeholder="Cari kelurahan/desa..." 
+            class="w-full bg-transparent border-none outline-none text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
+          />
+          <!-- Elegant search button -->
+          <button class="bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer">
+            Cari
+          </button>
+        </div>
+      </div>
       
       <!-- Center: Search bar (Mobile/Tablet only - centered and flexible width) -->
       <div class="flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-8 lg:hidden relative transition-all duration-300">
@@ -134,18 +121,7 @@ const handleLogout = () => {
 
       <!-- Right: Search, Actions (Desktop Search visible only on lg+) -->
       <div class="flex items-center gap-2 md:gap-3 shrink-0 ml-auto lg:ml-0">
-        <!-- Search bar (Desktop only) -->
-        <div class="relative hidden lg:block w-44 xl:w-56 transition-all duration-300">
-          <input 
-            id="search-input-desktop"
-            type="text" 
-            placeholder="Cari kelurahan/desa..." 
-            class="w-full pl-9 pr-4 py-2 text-xs rounded-full border outline-none transition-all
-              bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
-              dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
-          />
-          <Search class="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-        </div>
+
 
         <!-- Notification Icon -->
         <button id="notification-button" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-brand-navy-800 text-slate-500 dark:text-slate-300 relative transition-all active:scale-95 active:duration-75">
@@ -168,7 +144,7 @@ const handleLogout = () => {
         </button>
 
         <!-- User Profile (Clickable Login Trigger / Profile Dropdown) -->
-        <div v-if="isLoggedIn" class="relative">
+        <div class="relative">
           <button 
             id="user-profile-button"
             @click="handleUserClick" 
@@ -190,36 +166,50 @@ const handleLogout = () => {
             class="absolute right-0 mt-2 w-48 rounded-xl shadow-lg border overflow-hidden py-1.5 z-50 animate-fade-in
               bg-white/95 border-slate-100 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
           >
-            <!-- User Info Summary Header -->
-            <div class="px-4 py-2 border-b border-slate-100 dark:border-brand-navy-800/60 text-left">
-              <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Terautentikasi</p>
-              <p class="text-xs font-black text-slate-800 dark:text-white truncate mt-0.5">{{ userProfile?.name }}</p>
-              <p class="text-[10px] text-slate-500 dark:text-brand-navy-600 truncate">@{{ userProfile?.username }}</p>
-            </div>
+            <!-- If Logged In -->
+            <template v-if="isLoggedIn">
+              <!-- User Info Summary Header -->
+              <div class="px-4 py-2 border-b border-slate-100 dark:border-brand-navy-800/60 text-left">
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Terautentikasi</p>
+                <p class="text-xs font-black text-slate-800 dark:text-white truncate mt-0.5">{{ userProfile?.name }}</p>
+                <p class="text-[10px] text-slate-500 dark:text-brand-navy-600 truncate">@{{ userProfile?.username }}</p>
+              </div>
 
-            <!-- Profile Menu Items -->
-            <button 
-              id="profile-settings-button"
-              @click="handleSettingsClick"
-              class="w-full text-left px-4 py-2.5 text-xs text-slate-600 dark:text-slate-350 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center gap-2 cursor-pointer font-semibold"
-            >
-              <Settings class="w-3.5 h-3.5 text-slate-400" />
-              <span>Pengaturan Akun</span>
-            </button>
+              <!-- Profile Menu Items -->
+              <button 
+                id="profile-settings-button"
+                @click="handleSettingsClick"
+                class="w-full text-left px-4 py-2.5 text-xs text-slate-600 dark:text-slate-350 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center gap-2 cursor-pointer font-semibold"
+              >
+                <Settings class="w-3.5 h-3.5 text-slate-400" />
+                <span>Pengaturan Akun</span>
+              </button>
 
-            <button 
-              id="profile-logout-button"
-              @click="handleLogout"
-              class="w-full text-left px-4 py-2.5 text-xs text-red-600 dark:text-rose-400 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center gap-2 cursor-pointer font-semibold border-t border-slate-100/80 dark:border-brand-navy-800/40"
-            >
-              <LogOut class="w-3.5 h-3.5" />
-              <span>Keluar</span>
-            </button>
+              <button 
+                id="profile-logout-button"
+                @click="handleLogout"
+                class="w-full text-left px-4 py-2.5 text-xs text-red-600 dark:text-rose-400 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center gap-2 cursor-pointer font-semibold border-t border-slate-100/80 dark:border-brand-navy-800/40"
+              >
+                <LogOut class="w-3.5 h-3.5" />
+                <span>Keluar</span>
+              </button>
+            </template>
+
+            <!-- If Not Logged In -->
+            <template v-else>
+              <button 
+                id="profile-login-trigger"
+                @click="emit('open-login'); showProfileDropdown = false"
+                class="w-full text-left px-4 py-3 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center gap-2 cursor-pointer font-black"
+              >
+                <User class="w-4 h-4 text-blue-500 dark:text-brand-cyan" />
+                <span>Masuk ke Akun Saya</span>
+              </button>
+            </template>
           </div>
         </div>
 
       </div>
-    </div>
   </header>
 
   <!-- Mobile Navigation Drawer (Teleport to body) -->

@@ -376,7 +376,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       
       <!-- 3 Analysis Cards (Activity Advisories) - Full Width (Col Span 3) -->
@@ -395,9 +395,9 @@ onUnmounted(() => {
               <div class="text-left space-y-2 min-w-0 max-w-[calc(100vw-110px)] md:max-w-none">
                 <!-- Location Text & Chevron Wrapper -->
                 <div class="flex items-center gap-2 flex-wrap">
-                  <h2 class="text-xs sm:text-sm font-medium tracking-tight text-slate-500 dark:text-slate-400 normal-case leading-relaxed flex items-baseline flex-wrap gap-x-0.5">
-                    <span>{{ splitLocation(selectedCity).main }}</span>
-                    <span>, {{ splitLocation(selectedCity).sub || 'Indonesia' }}</span>
+                  <h2 class="text-xs sm:text-sm tracking-tight normal-case leading-relaxed flex items-baseline flex-wrap gap-x-0.5">
+                    <span class="font-bold text-slate-800 dark:text-white">{{ splitLocation(selectedCity).main }}, </span>
+                    <span class="font-normal text-slate-500 dark:text-slate-400">{{ splitLocation(selectedCity).sub || 'Indonesia' }}</span>
                   </h2>
                   
                   <ChevronDown class="w-5 h-5 text-slate-400 transition-transform duration-300 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-350 ml-0.5" :class="{ 'rotate-180': showDropdown }" />
@@ -552,7 +552,13 @@ onUnmounted(() => {
         </div>
 
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
-        <div class="relative w-full mt-4 bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 backdrop-blur-md rounded-3xl p-5 shadow-sm">
+        <div class="relative w-full mt-4 bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 backdrop-blur-md rounded-3xl p-5 shadow-sm overflow-hidden">
+          <!-- Soft colorful illustrations / gradient glows in background -->
+          <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+            <div class="absolute -top-10 -left-10 w-44 h-44 rounded-full bg-gradient-to-br from-blue-400/25 to-indigo-500/25 dark:from-blue-500/15 dark:to-indigo-600/15 blur-3xl"></div>
+            <div class="absolute -bottom-12 -right-12 w-52 h-52 rounded-full bg-gradient-to-br from-cyan-400/25 to-emerald-400/25 dark:from-cyan-500/15 dark:to-emerald-600/15 blur-3xl"></div>
+            <div class="absolute top-1/3 left-1/3 w-36 h-36 rounded-full bg-gradient-to-br from-pink-400/15 to-rose-400/15 dark:from-pink-500/10 dark:to-rose-600/10 blur-3xl"></div>
+          </div>
           
           <!-- Header Row inside backdrop (Title + App Download) -->
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5 text-left">
@@ -574,13 +580,6 @@ onUnmounted(() => {
                   <Smartphone class="w-4 h-4" />
                 </div>
                 <div class="min-w-0">
-                  <div class="flex items-center gap-1.5">
-                    <h4 class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-brand-cyan">Aplikasi Mobile Resmi</h4>
-                    <span class="flex h-1.5 w-1.5 relative">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-brand-cyan opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500 dark:bg-brand-cyan"></span>
-                    </span>
-                  </div>
                   <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">
                     Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan <br />
                     notifikasi cuaca & gempa secara realtime.

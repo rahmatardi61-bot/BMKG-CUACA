@@ -550,19 +550,21 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- Carousel Title Section -->
-        <div class="mt-4 mb-2 text-left">
-          <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-white">
-            Kondisi Terkini
-          </h3>
-          <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
-            10 Kota Besar Indonesia
-          </p>
-        </div>
-
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
-        <div class="relative group/carousel w-full mt-1 bg-white/20 dark:bg-brand-navy-900/10 border border-slate-200/30 dark:border-brand-navy-800/20 backdrop-blur-md rounded-3xl p-3.5 shadow-sm">
-          <!-- Left Arrow Button -->
+        <div class="relative w-full mt-4 bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 backdrop-blur-md rounded-3xl p-5 shadow-sm">
+          <!-- Carousel Title Section inside backdrop -->
+          <div class="mb-4 text-left">
+            <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-white">
+              Kondisi Terkini
+            </h3>
+            <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+              10 Kota Besar Indonesia
+            </p>
+          </div>
+
+          <!-- Carousel Wrapper (for positioning arrows relative to cards only) -->
+          <div class="relative group/carousel w-full">
+            <!-- Left Arrow Button -->
           <button 
             @click="scrollCarousel('left')"
             class="absolute -left-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
@@ -642,7 +644,8 @@ onUnmounted(() => {
               :aria-label="'Pilih ' + landmark.name"
             ></button>
           </div>
-        </div>
+          </div> <!-- End of Carousel Wrapper -->
+        </div> <!-- End of backdrop container -->
 
         <!-- Slide transition wrapper: overflow-hidden clips the outgoing/incoming cards -->
         <div class="relative overflow-hidden">

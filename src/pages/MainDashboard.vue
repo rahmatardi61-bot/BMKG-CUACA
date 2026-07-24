@@ -566,7 +566,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Right: Mobile App Download CTA -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3.5 bg-slate-500/5 dark:bg-slate-400/5 border border-slate-200/10 dark:border-white/5 p-3 rounded-2xl max-w-full lg:max-w-md">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3.5 bg-slate-500/5 dark:bg-slate-400/5 border border-slate-200/10 dark:border-white/5 p-3 rounded-2xl max-w-full lg:max-w-xl">
               <div class="min-w-0">
                 <h4 class="text-[9px] font-black uppercase tracking-wider text-blue-500 dark:text-brand-cyan">Aplikasi Mobile Resmi</h4>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">

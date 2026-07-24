@@ -550,8 +550,18 @@ onUnmounted(() => {
           </div>
         </div>
 
+        <!-- Carousel Title Section -->
+        <div class="mt-4 mb-2 text-left">
+          <h3 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-800 dark:text-white">
+            Kondisi Terkini
+          </h3>
+          <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+            10 Kota Besar Indonesia
+          </p>
+        </div>
+
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel -->
-        <div class="relative group/carousel w-full mt-2">
+        <div class="relative group/carousel w-full mt-1">
           <!-- Left Arrow Button -->
           <button 
             @click="scrollCarousel('left')"

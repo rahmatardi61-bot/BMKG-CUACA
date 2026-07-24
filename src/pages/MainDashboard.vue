@@ -31,7 +31,8 @@ import {
   Sun,
   Navigation,
   Eye,
-  Search
+  Search,
+  Smartphone
 } from 'lucide-vue-next';
 import { getAdditionalWeatherData } from '../data/weatherHelpers';
 
@@ -566,28 +567,40 @@ onUnmounted(() => {
             </div>
 
             <!-- Right: Mobile App Download CTA -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3.5 bg-slate-500/5 dark:bg-slate-400/5 border border-slate-200/10 dark:border-white/5 p-3 rounded-2xl max-w-full lg:max-w-xl">
-              <div class="min-w-0">
-                <h4 class="text-[9px] font-black uppercase tracking-wider text-blue-500 dark:text-brand-cyan">Aplikasi Mobile Resmi</h4>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">
-                  Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan <br />
-                  notifikasi cuaca & gempa secara realtime.
-                </p>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 bg-gradient-to-br from-blue-500/[0.04] to-indigo-600/[0.04] dark:from-cyan-500/[0.06] dark:to-blue-600/[0.06] border border-blue-500/10 dark:border-cyan-500/15 p-3 rounded-2xl max-w-full lg:max-w-xl transition-all duration-300 hover:border-blue-500/25 dark:hover:border-cyan-500/30 hover:shadow-sm">
+              <div class="flex items-start gap-3 min-w-0">
+                <!-- Icon with circular glowing backdrop -->
+                <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-500/10 dark:bg-cyan-500/15 text-blue-600 dark:text-brand-cyan shrink-0">
+                  <Smartphone class="w-4 h-4" />
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-brand-cyan">Aplikasi Mobile Resmi</h4>
+                    <span class="flex h-1.5 w-1.5 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-brand-cyan opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500 dark:bg-brand-cyan"></span>
+                    </span>
+                  </div>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-normal mt-0.5">
+                    Unduh aplikasi <strong class="text-slate-800 dark:text-white font-extrabold">Info BMKG</strong> untuk mendapatkan <br />
+                    notifikasi cuaca & gempa secara realtime.
+                  </p>
+                </div>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center gap-2 shrink-0 sm:ml-auto">
                 <!-- Google Play Button -->
                 <a 
                   href="https://play.google.com/store/apps/details?id=id.go.bmkg.infobmkg" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  class="h-9 px-3.5 rounded-lg border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-750 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800"
+                  class="h-9 px-3.5 rounded-xl border flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-800/80 hover:bg-slate-950 dark:bg-slate-900/60 dark:border-white/10 dark:hover:bg-slate-900 dark:hover:border-white/20 text-white shadow-sm"
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-emerald-400">
                     <path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.58-1.408V3.222c0-.528.22-1.01.58-1.408zM14.5 12.707l2.846 2.846-13.018 7.502a1.99 1.99 0 0 1-.718.131c-.52 0-.996-.2-1.378-.528L14.5 12.707zm7.558-.918l-3.328-1.92-2.176 2.176 2.176 2.176 3.328-1.92a1.144 1.144 0 0 0 0-2.022zM14.5 11.293L2.232 3.223c.382-.328.858-.528 1.378-.528.254 0 .5.048.718.131l13.018 7.502-2.846 2.965z"/>
                   </svg>
                   <div class="text-left leading-none">
-                    <div class="text-[8px] uppercase font-bold text-slate-350">Temukan di</div>
-                    <div class="text-[11px] font-black text-white">Google Play</div>
+                    <div class="text-[7.5px] uppercase font-bold text-slate-400 dark:text-slate-450 tracking-wide">Temukan di</div>
+                    <div class="text-[11px] font-black text-white mt-0.5">Google Play</div>
                   </div>
                 </a>
 
@@ -596,14 +609,14 @@ onUnmounted(() => {
                   href="https://apps.apple.com/id/app/info-bmkg/id1114372539" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  class="h-9 px-3.5 rounded-lg border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-750 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800"
+                  class="h-9 px-3.5 rounded-xl border flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-800/80 hover:bg-slate-950 dark:bg-slate-900/60 dark:border-white/10 dark:hover:bg-slate-900 dark:hover:border-white/20 text-white shadow-sm"
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-100">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.7-1.13 1.84-.99 2.94.12.01.24.02.36.02.94 0 2.01-.54 2.46-1.35z"/>
                   </svg>
                   <div class="text-left leading-none">
-                    <div class="text-[8px] uppercase font-bold text-slate-350">Unduh di</div>
-                    <div class="text-[11px] font-black text-white">App Store</div>
+                    <div class="text-[7.5px] uppercase font-bold text-slate-400 dark:text-slate-450 tracking-wide">Unduh di</div>
+                    <div class="text-[11px] font-black text-white mt-0.5">App Store</div>
                   </div>
                 </a>
               </div>

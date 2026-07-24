@@ -136,7 +136,7 @@ onUnmounted(() => {
             bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
             dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
         />
-        <Search class="absolute left-3.5 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
       </div>
 
       <!-- Right: Search, Actions (Desktop Search visible only on lg+) -->
@@ -282,7 +282,7 @@ onUnmounted(() => {
                   bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
                   dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
               />
-              <Search class="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             </div>
 
             <!-- Drawer Navigation Links -->

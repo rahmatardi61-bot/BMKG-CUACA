@@ -626,7 +626,7 @@ onUnmounted(() => {
             <!-- Left Arrow Button -->
           <button 
             @click="scrollCarousel('left')"
-            class="absolute -left-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            class="absolute -left-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
             aria-label="Previous cities"
           >
             <ChevronLeft class="w-4 h-4 text-slate-800 dark:text-white" />
@@ -635,7 +635,7 @@ onUnmounted(() => {
           <!-- Right Arrow Button -->
           <button 
             @click="scrollCarousel('right')"
-            class="absolute -right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+            class="absolute -right-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
             aria-label="Next cities"
           >
             <ChevronRight class="w-4 h-4 text-slate-800 dark:text-white" />

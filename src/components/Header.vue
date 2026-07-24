@@ -117,7 +117,7 @@ onUnmounted(() => {
             id="search-input-desktop"
             type="text" 
             placeholder="Cari kelurahan/desa..." 
-            class="w-full bg-transparent border-none outline-none text-base lg:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
+            class="w-full bg-transparent border-none outline-none text-base lg:text-xs placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
           />
           <!-- Elegant search button -->
           <button class="bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer">
@@ -132,7 +132,7 @@ onUnmounted(() => {
           id="search-input-mobile"
           type="text" 
           placeholder="Cari kelurahan/desa..." 
-          class="w-full pl-9 pr-4 py-2 text-base rounded-full border outline-none transition-all
+          class="w-full pl-9 pr-4 py-2 text-base placeholder:text-xs rounded-full border outline-none transition-all
             bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
             dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
         />
@@ -153,7 +153,7 @@ onUnmounted(() => {
         <button 
           id="theme-toggle-button"
           @click="emit('toggle-theme')" 
-          class="px-3 py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5
+          class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5
             bg-slate-50 border-slate-200 hover:bg-slate-100 text-amber-500
             dark:bg-brand-navy-900 dark:border-brand-navy-700 dark:hover:bg-brand-navy-800 dark:text-brand-cyan
             active:scale-95 active:duration-75"
@@ -161,7 +161,7 @@ onUnmounted(() => {
         >
           <Sun v-if="darkMode" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
           <Moon v-else class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
-          <span class="text-[9px] font-black uppercase tracking-wider select-none text-amber-600 dark:text-brand-cyan">
+          <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider select-none text-amber-600 dark:text-brand-cyan">
             {{ darkMode ? 'Tema Gelap' : 'Tema Terang' }}
           </span>
         </button>
@@ -278,7 +278,7 @@ onUnmounted(() => {
                 id="search-input-drawer"
                 type="text" 
                 placeholder="Cari kelurahan/desa..." 
-                class="w-full pl-9 pr-4 py-2 text-base rounded-full border outline-none transition-all
+                class="w-full pl-9 pr-4 py-2 text-base placeholder:text-xs rounded-full border outline-none transition-all
                   bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
                   dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
               />

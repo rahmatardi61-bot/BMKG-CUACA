@@ -139,10 +139,12 @@ const closeEndSuggestionsDeferred = () => {
 
 // Leaflet Map instance references
 let map: L.Map | null = null;
+let tileLayer: L.TileLayer | null = null;
 let routePolyline: L.Polyline | null = null;
 let alternativePolylines: L.Polyline[] = [];
 let mapMarkers: L.Marker[] = [];
 let currentRouteTaskId = 0;
+let themeObserver: MutationObserver | null = null;
 
 // Alternative Routes State
 interface AlternativeRoute {
@@ -159,6 +161,7 @@ interface AlternativeRoute {
     weather: string;
     condition: 'cerah' | 'berawan' | 'hujan' | 'badai';
     tips: string;
+    eta: string;
   }>;
 }
 
@@ -176,6 +179,7 @@ const routeCheckpoints = ref<Array<{
   weather: string;
   condition: 'cerah' | 'berawan' | 'hujan' | 'badai';
   tips: string;
+  eta: string;
 }>>([]);
 
 // Weather Icons Helper
@@ -238,10 +242,30 @@ const createCustomMarker = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai', 
   });
 };
 
+// Update Leaflet tile layers based on dark/light mode
+const updateMapTheme = () => {
+  if (!map) return;
+
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const lightUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  const darkUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png';
+  const selectedUrl = isDarkMode ? darkUrl : lightUrl;
+
+  if (tileLayer) {
+    map.removeLayer(tileLayer);
+  }
+
+  tileLayer = L.tileLayer(selectedUrl, {
+    maxZoom: 18,
+    minZoom: 5
+  }).addTo(map);
+};
+
 // Initialize Leaflet Map
 const initMap = () => {
   if (map) {
     moveMapElement();
+    updateMapTheme();
     return;
   }
 
@@ -254,11 +278,8 @@ const initMap = () => {
     attributionControl: false
   }).setView([-7.0, 110.0], 7);
 
-  // CartoDB Voyager Style - clean and matches modern dashboard style
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18,
-    minZoom: 5
-  }).addTo(map);
+  // Set the theme tiles dynamically
+  updateMapTheme();
 
   // Custom Zoom Control positioning (bottom-right, matching Google Maps look)
   L.control.zoom({
@@ -266,6 +287,17 @@ const initMap = () => {
   }).addTo(map);
   
   calculateRoute();
+
+  // Initialize theme MutationObserver to watch html class changes
+  if (!themeObserver) {
+    themeObserver = new MutationObserver(() => {
+      updateMapTheme();
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
 };
 
 // Get predefined intermediate checkpoints based on route to avoid geographic naming anomalies
@@ -394,6 +426,7 @@ const calculateRoute = async () => {
   let primaryCoords: [number, number][] = [];
   let roadDist = 0;
   let durationText = '';
+  let primaryDurationSeconds = 0;
 
   try {
     // Try to fetch actual road routing from OSRM API (OpenStreetMap Routing Engine)
@@ -406,9 +439,9 @@ const calculateRoute = async () => {
       primaryCoords = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
       roadDist = Math.round(route.distance / 1000);
       
-      const totalSeconds = route.duration;
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.round((totalSeconds % 3600) / 60);
+      primaryDurationSeconds = route.duration;
+      const hours = Math.floor(primaryDurationSeconds / 3600);
+      const minutes = Math.round((primaryDurationSeconds % 3600) / 60);
       durationText = hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
     } else {
       throw new Error('No route found from OSRM');
@@ -450,6 +483,7 @@ const calculateRoute = async () => {
     roadDist = Math.round(totalDist / 1000);
     
     const totalHours = roadDist / 60;
+    primaryDurationSeconds = totalHours * 3600;
     const hours = Math.floor(totalHours);
     const minutes = Math.round((totalHours - hours) * 60);
     durationText = hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
@@ -476,8 +510,10 @@ const calculateRoute = async () => {
   const intermediateNames = getRouteCheckpoints(startCityId.value, endCityId.value);
   const numSteps = intermediateNames.length + 1;
 
-  const generateCheckpointsForOption = (coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry') => {
+  const generateCheckpointsForOption = (coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
     const list: AlternativeRoute['checkpoints'] = [];
+    const startTime = new Date();
+
     for (let i = 0; i <= numSteps; i++) {
       const ratio = i / numSteps;
       const coordIdx = Math.round(ratio * (coords.length - 1));
@@ -485,17 +521,32 @@ const calculateRoute = async () => {
       const lat = coord[0];
       const lng = coord[1];
 
+      // Calculate ETA clock time and cumulative travel time
+      const segmentSecs = Math.round((totalSecs * i) / numSteps);
+      const segmentTime = new Date(startTime.getTime() + segmentSecs * 1000);
+      const hh = String(segmentTime.getHours()).padStart(2, '0');
+      const mm = String(segmentTime.getMinutes()).padStart(2, '0');
+      const timeStr = `${hh}:${mm} WIB`;
+
+      const elapsedHours = Math.floor(segmentSecs / 3600);
+      const elapsedMins = Math.round((segmentSecs % 3600) / 60);
+      const elapsedStr = elapsedHours > 0 ? `+${elapsedHours}j ${elapsedMins}m` : `+${elapsedMins}m`;
+      
+      const etaText = i === 0 ? `Berangkat: ${timeStr}` : `Tiba: ${timeStr} (${elapsedStr})`;
+
       if (i === 0) {
         list.push({
           name: startCity.name, lat, lng,
           temp: startCity.temp, weather: startCity.weather, condition: startCity.condition,
-          tips: `Titik Keberangkatan: ${startCity.tips}`
+          tips: `Titik Keberangkatan: ${startCity.tips}`,
+          eta: etaText
         });
       } else if (i === numSteps) {
         list.push({
           name: endCity.name, lat, lng,
           temp: endCity.temp, weather: endCity.weather, condition: endCity.condition,
-          tips: `Titik Tujuan: ${endCity.tips}`
+          tips: `Titik Tujuan: ${endCity.tips}`,
+          eta: etaText
         });
       } else {
         const checkpointName = intermediateNames[i - 1];
@@ -526,7 +577,8 @@ const calculateRoute = async () => {
         const tipsText = dynamicCondition === 'cerah' ? 'Kondisi jalan kondusif.' : dynamicCondition === 'berawan' ? 'Mendung, pandangan stabil.' : dynamicCondition === 'hujan' ? 'Jalan basah. Reduksi kecepatan berkendara.' : 'Angin kencang & jalan licin. Hati-hati hydroplaning!';
 
         list.push({
-          name: checkpointName, lat, lng, temp: temperature, weather: weatherText, condition: dynamicCondition, tips: tipsText
+          name: checkpointName, lat, lng, temp: temperature, weather: weatherText, condition: dynamicCondition, tips: tipsText,
+          eta: etaText
         });
       }
     }
@@ -547,7 +599,7 @@ const calculateRoute = async () => {
       distance: roadDist,
       duration: durationText || getSimulatedDuration(roadDist),
       coords: primaryCoords,
-      checkpoints: generateCheckpointsForOption(primaryCoords, 'standard')
+      checkpoints: generateCheckpointsForOption(primaryCoords, 'standard', primaryDurationSeconds)
     },
     {
       id: 'safest',
@@ -555,7 +607,7 @@ const calculateRoute = async () => {
       distance: Math.round(roadDist * 1.05),
       duration: getSimulatedDuration(Math.round(roadDist * 1.05)),
       coords: safestCoords,
-      checkpoints: generateCheckpointsForOption(safestCoords, 'safe')
+      checkpoints: generateCheckpointsForOption(safestCoords, 'safe', primaryDurationSeconds * 1.05)
     },
     {
       id: 'least_rain',
@@ -563,7 +615,7 @@ const calculateRoute = async () => {
       distance: Math.round(roadDist * 1.08),
       duration: getSimulatedDuration(Math.round(roadDist * 1.08)),
       coords: leastRainCoords,
-      checkpoints: generateCheckpointsForOption(leastRainCoords, 'dry')
+      checkpoints: generateCheckpointsForOption(leastRainCoords, 'dry', primaryDurationSeconds * 1.08)
     }
   ];
 
@@ -622,6 +674,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   document.body.classList.remove('drawer-open');
+  if (themeObserver) {
+    themeObserver.disconnect();
+    themeObserver = null;
+  }
   if (map) {
     map.remove();
     map = null;
@@ -695,7 +751,7 @@ onUnmounted(() => {
                       @focus="showStartSuggestions = true"
                       @blur="closeStartSuggestionsDeferred"
                       placeholder="Cari Kota, Desa..."
-                      class="w-full text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
+                      class="w-full text-base lg:text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
                     />
                     <!-- Suggestions List -->
                     <div 
@@ -729,7 +785,7 @@ onUnmounted(() => {
                       @focus="showEndSuggestions = true"
                       @blur="closeEndSuggestionsDeferred"
                       placeholder="Cari Wisata, Desa..."
-                      class="w-full text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
+                      class="w-full text-base lg:text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
                     />
                     <!-- Suggestions List -->
                     <div 
@@ -884,6 +940,11 @@ onUnmounted(() => {
                           <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                             {{ index === 0 ? 'Titik Awal' : index === routeCheckpoints.length - 1 ? 'Titik Tujuan' : `Checkpoint ${index}` }}
                           </span>
+                          <!-- Estimasi Waktu Tiba (ETA) Badge -->
+                          <div class="text-[9px] font-black text-orange-600 dark:text-orange-400/90 mt-1 mb-1.5 bg-orange-550/8 dark:bg-orange-500/12 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 border border-orange-500/15 dark:border-orange-400/10">
+                            <Clock class="w-2.5 h-2.5" />
+                            <span>{{ cp.eta }}</span>
+                          </div>
                           <h4 class="text-[11.5px] font-black text-slate-800 dark:text-white mt-0.5 group-hover/item:text-orange-550 dark:group-hover/item:text-orange-400 transition-colors">
                             {{ cp.name }}
                           </h4>

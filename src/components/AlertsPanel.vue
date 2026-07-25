@@ -151,7 +151,7 @@ const transitionName = computed(() =>
               ]"
               @click="showMobileDetail = !showMobileDetail"
             >
-              <div class="flex items-center gap-3 px-3.5 py-3 pr-10 pl-10">
+              <div class="flex items-center gap-3 px-3.5 py-3 pr-8 pl-4">
                 <component
                   :is="getSeverityStyle(currentAlert.severity).icon"
                   class="w-4 h-4 shrink-0"

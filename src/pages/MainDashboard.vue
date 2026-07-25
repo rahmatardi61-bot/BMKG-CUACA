@@ -532,9 +532,9 @@ onUnmounted(() => {
         <div class="relative w-full mt-4 bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 backdrop-blur-md rounded-3xl p-5 shadow-sm overflow-hidden">
           <!-- Soft colorful illustrations / gradient glows in background -->
           <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div class="absolute -top-10 -left-10 w-44 h-44 rounded-full bg-gradient-to-br from-blue-400/25 to-indigo-500/25 dark:from-blue-500/15 dark:to-indigo-600/15 blur-3xl"></div>
-            <div class="absolute -bottom-12 -right-12 w-52 h-52 rounded-full bg-gradient-to-br from-cyan-400/25 to-emerald-400/25 dark:from-cyan-500/15 dark:to-emerald-600/15 blur-3xl"></div>
-            <div class="absolute top-1/3 left-1/3 w-36 h-36 rounded-full bg-gradient-to-br from-pink-400/15 to-rose-400/15 dark:from-pink-500/10 dark:to-rose-600/10 blur-3xl"></div>
+            <div class="absolute top-0 left-0 w-44 h-44 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 dark:from-blue-500/10 dark:to-indigo-600/10 blur-3xl translate-x-[-30%] translate-y-[-30%]"></div>
+            <div class="absolute bottom-0 right-0 w-52 h-52 rounded-full bg-gradient-to-br from-cyan-400/20 to-emerald-400/20 dark:from-cyan-500/10 dark:to-emerald-600/10 blur-3xl translate-x-[30%] translate-y-[30%]"></div>
+            <div class="absolute top-1/3 left-1/3 w-36 h-36 rounded-full bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-500/8 dark:to-rose-600/8 blur-3xl"></div>
           </div>
           
           <!-- Header Row inside backdrop (Title + App Download) -->

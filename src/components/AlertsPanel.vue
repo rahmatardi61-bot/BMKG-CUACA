@@ -22,12 +22,32 @@ const next = () => {
   slideDir.value = 'left';
   currentIndex.value++;
 };
-const goTo = (i: number) => {
-  slideDir.value = i > currentIndex.value ? 'left' : 'right';
-  currentIndex.value = i;
-};
+
 
 const currentAlert = computed(() => props.alerts[currentIndex.value]);
+
+// ── Touchscreen Swipe Handling ──────────────────────────────────────────────
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.changedTouches[0].screenX;
+};
+const handleTouchEnd = (e: TouchEvent) => {
+  touchEndX.value = e.changedTouches[0].screenX;
+  handleSwipe();
+};
+const handleSwipe = () => {
+  const threshold = 40; // minimum swipe distance in pixels
+  const diff = touchStartX.value - touchEndX.value;
+  if (Math.abs(diff) > threshold) {
+    if (diff > 0) {
+      next();
+    } else {
+      prev();
+    }
+  }
+};
 
 // ── Desktop Floating State ─────────────────────────────────────────────────
 const openDesktopIndex = ref<number | null>(null);
@@ -99,35 +119,39 @@ const transitionName = computed(() =>
   <div class="relative" ref="wrapperRef" v-if="alerts && alerts.length > 0">
 
     <!-- ─────────────────────────────────────────────────────────────────────────
-         1. MOBILE VIEW: Single Card Carousel with Slide Navigation
+         1. MOBILE VIEW: Single Card Carousel with Slide Navigation & Touch Swipe
          ───────────────────────────────────────────────────────────────────────── -->
     <div class="block sm:hidden space-y-2">
-      <div class="flex items-center gap-2">
-        <!-- Prev button -->
+      <div 
+        class="relative w-full"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
+      >
+        <!-- Prev button (floating, opacity 60%) -->
         <button
           type="button"
           @click="prev"
           :disabled="currentIndex === 0"
-          class="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:bg-brand-navy-800 border border-slate-200/60 dark:border-brand-navy-600/40 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shadow-sm transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+          class="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-brand-navy-800/90 border border-slate-200/60 dark:border-brand-navy-600/40 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 shadow-md opacity-60 hover:opacity-100 transition-all duration-200 disabled:opacity-0 disabled:pointer-events-none cursor-pointer"
         >
           <ChevronLeft class="w-4 h-4" />
         </button>
 
         <!-- Viewport -->
-        <div class="flex-1 overflow-hidden relative" style="min-height: 64px;">
+        <div class="w-full overflow-hidden relative p-0.5" style="min-height: 64px;">
           <Transition :name="transitionName" mode="out-in">
             <button
               v-if="currentAlert"
               :key="currentIndex"
               type="button"
-              class="w-full bg-white/80 dark:bg-brand-navy-900/70 rounded-r-2xl rounded-l-[5px] shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer"
+              class="w-full bg-white/80 dark:bg-brand-navy-900/70 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer w-full"
               :class="[
                 getSeverityStyle(currentAlert.severity).borderClass,
                 showMobileDetail ? getSeverityStyle(currentAlert.severity).activeRing : ''
               ]"
               @click="showMobileDetail = !showMobileDetail"
             >
-              <div class="flex items-center gap-3 px-3.5 py-3">
+              <div class="flex items-center gap-3 px-3.5 py-3 pr-10 pl-10">
                 <component
                   :is="getSeverityStyle(currentAlert.severity).icon"
                   class="w-4 h-4 shrink-0"
@@ -152,30 +176,17 @@ const transitionName = computed(() =>
           </Transition>
         </div>
 
-        <!-- Next button -->
+        <!-- Next button (floating, opacity 60%) -->
         <button
           type="button"
           @click="next"
           :disabled="currentIndex >= alerts.length - 1"
-          class="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:bg-brand-navy-800 border border-slate-200/60 dark:border-brand-navy-600/40 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shadow-sm transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+          class="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-brand-navy-800/90 border border-slate-200/60 dark:border-brand-navy-600/40 text-slate-500 hover:text-slate-700 dark:hover:text-slate-350 shadow-md opacity-60 hover:opacity-100 transition-all duration-200 disabled:opacity-0 disabled:pointer-events-none cursor-pointer"
         >
           <ChevronRight class="w-4 h-4" />
         </button>
       </div>
 
-      <!-- Dot indicators -->
-      <div class="flex items-center justify-center gap-1.5">
-        <button
-          v-for="(_, i) in alerts"
-          :key="i"
-          type="button"
-          @click="goTo(i)"
-          class="rounded-full transition-all duration-300 cursor-pointer"
-          :class="i === currentIndex
-            ? 'w-4 h-1.5 bg-blue-500 dark:bg-brand-cyan'
-            : 'w-1.5 h-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'"
-        ></button>
-      </div>
 
       <!-- Mobile Floating Detail Panel -->
       <Transition name="float-drop">
@@ -218,7 +229,7 @@ const transitionName = computed(() =>
     </div>
 
     <!-- ─────────────────────────────────────────────────────────────────────────
-         2. DESKTOP VIEW: Multi-Card Side-by-Side Flex Layout (Previous Style)
+         2. DESKTOP VIEW: Multi-Card Side-by-Side Flex Layout
          ───────────────────────────────────────────────────────────────────────── -->
     <div class="hidden sm:flex sm:flex-row-reverse gap-2.5">
       <button

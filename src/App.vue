@@ -2,11 +2,20 @@
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
 import { X } from 'lucide-vue-next';
 
+// ── Skeleton (tiny, load synchronously) ───────────────────────────────────────
+import SkeletonDashboard from './components/skeletons/SkeletonDashboard.vue';
+
+// ── Lazy loaded pages ─────────────────────────────────────────────────────────
 const Header = defineAsyncComponent(() => import('./components/Header.vue'));
-const MainDashboard = defineAsyncComponent(() => import('./pages/MainDashboard.vue'));
+const MainDashboard = defineAsyncComponent({
+  loader: () => import('./pages/MainDashboard.vue'),
+  loadingComponent: SkeletonDashboard,
+  delay: 100,
+});
 const Footer = defineAsyncComponent(() => import('./components/Footer.vue'));
 const LoginView = defineAsyncComponent(() => import('./pages/LoginView.vue'));
 const UnderMaintenance = defineAsyncComponent(() => import('./pages/UnderMaintenance.vue'));
+
 
 // Import Mock Data
 import { 

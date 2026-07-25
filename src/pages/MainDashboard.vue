@@ -1,12 +1,35 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, defineAsyncComponent, nextTick } from 'vue';
 
-const CurrentWeather = defineAsyncComponent(() => import('../components/CurrentWeather.vue'));
-const ForecastPanel = defineAsyncComponent(() => import('../components/ForecastPanel.vue'));
+// ── Skeleton loaders (imported directly — tiny, no lazy needed) ──────────────
+import SkeletonWeatherCard from '../components/skeletons/SkeletonWeatherCard.vue';
+import SkeletonForecast from '../components/skeletons/SkeletonForecast.vue';
+import SkeletonSidebar from '../components/skeletons/SkeletonSidebar.vue';
+
+// ── Heavy components — lazy loaded with skeleton placeholders ─────────────────
+const CurrentWeather = defineAsyncComponent({
+  loader: () => import('../components/CurrentWeather.vue'),
+  loadingComponent: SkeletonWeatherCard,
+  delay: 80,
+});
+const ForecastPanel = defineAsyncComponent({
+  loader: () => import('../components/ForecastPanel.vue'),
+  loadingComponent: SkeletonForecast,
+  delay: 80,
+});
+const WeatherActivity = defineAsyncComponent({
+  loader: () => import('../components/WeatherActivity.vue'),
+  loadingComponent: SkeletonSidebar,
+  delay: 80,
+});
+const AroundActivityPanel = defineAsyncComponent({
+  loader: () => import('../components/AroundActivityPanel.vue'),
+  delay: 80,
+});
+
+// ── Lighter components — lazy loaded without skeleton (loads fast enough) ─────
 const TransportWeather = defineAsyncComponent(() => import('../components/TransportWeather.vue'));
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
-const AroundActivityPanel = defineAsyncComponent(() => import('../components/AroundActivityPanel.vue'));
-const WeatherActivity = defineAsyncComponent(() => import('../components/WeatherActivity.vue'));
 
 import type { 
   WeatherData, 
@@ -603,19 +626,45 @@ onUnmounted(() => {
             <button
               v-for="landmark in cityLandmarks"
               :key="landmark.name"
+              v-memo="[selectedCity === landmark.fullName]"
               :id="'landmark-card-' + landmark.name.toLowerCase()"
               @click="$emit('select-city', landmark.fullName)"
               class="snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] backdrop-blur-md relative overflow-hidden group/card shadow-sm"
               :class="[
                 selectedCity === landmark.fullName
-                  ? 'bg-blue-500/10 text-blue-600 border-blue-500/40 dark:bg-brand-cyan/15 dark:text-brand-cyan dark:border-brand-cyan/40 shadow-sm shadow-blue-500/5 font-extrabold'
+                  ? {
+                      'Jakarta': 'bg-blue-500/10 text-blue-600 border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/45 shadow-sm shadow-blue-500/5 font-extrabold',
+                      'Surabaya': 'bg-cyan-500/10 text-cyan-600 border-cyan-500/40 dark:bg-cyan-500/15 dark:text-cyan-400 dark:border-cyan-500/45 shadow-sm shadow-cyan-500/5 font-extrabold',
+                      'Bandung': 'bg-emerald-500/10 text-emerald-600 border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/45 shadow-sm shadow-emerald-500/5 font-extrabold',
+                      'Medan': 'bg-amber-500/10 text-amber-600 border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/45 shadow-sm shadow-amber-500/5 font-extrabold',
+                      'Semarang': 'bg-purple-500/10 text-purple-600 border-purple-500/40 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/45 shadow-sm shadow-purple-500/5 font-extrabold',
+                      'Makassar': 'bg-red-500/10 text-red-600 border-red-500/40 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/45 shadow-sm shadow-red-500/5 font-extrabold',
+                      'Palembang': 'bg-orange-500/10 text-orange-600 border-orange-500/40 dark:bg-orange-500/15 dark:text-orange-400 dark:border-orange-500/45 shadow-sm shadow-orange-500/5 font-extrabold',
+                      'Batam': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/40 dark:bg-indigo-500/15 dark:text-indigo-400 dark:border-indigo-500/45 shadow-sm shadow-indigo-500/5 font-extrabold',
+                      'Pekanbaru': 'bg-teal-500/10 text-teal-600 border-teal-500/40 dark:bg-teal-500/15 dark:text-teal-400 dark:border-teal-500/45 shadow-sm shadow-teal-500/5 font-extrabold',
+                      'Denpasar': 'bg-rose-500/10 text-rose-600 border-rose-500/40 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/45 shadow-sm shadow-rose-500/5 font-extrabold'
+                    }[landmark.name] || 'bg-blue-500/10 text-blue-600 border-blue-500/40 dark:bg-brand-cyan/15 dark:text-brand-cyan dark:border-brand-cyan/40 shadow-sm shadow-blue-500/5 font-extrabold'
                   : 'bg-white/50 text-slate-600 hover:bg-white/80 border-slate-200/40 dark:bg-brand-navy-900/50 dark:text-slate-300 dark:hover:bg-brand-navy-850/70 dark:border-brand-navy-700/40'
               ]"
             >
               <!-- Animated background pulse highlight on active -->
               <div 
                 v-if="selectedCity === landmark.fullName"
-                class="absolute -right-6 -top-6 w-16 h-16 rounded-full bg-blue-500/10 dark:bg-brand-cyan/15 blur-xl animate-pulse"
+                class="absolute -right-6 -top-6 w-16 h-16 rounded-full blur-xl animate-pulse"
+                :class="[
+                  {
+                    'Jakarta': 'bg-blue-500/10 dark:bg-blue-500/15',
+                    'Surabaya': 'bg-cyan-500/10 dark:bg-cyan-500/15',
+                    'Bandung': 'bg-emerald-500/10 dark:bg-emerald-500/15',
+                    'Medan': 'bg-amber-500/10 dark:bg-amber-500/15',
+                    'Semarang': 'bg-purple-500/10 dark:bg-purple-500/15',
+                    'Makassar': 'bg-red-500/10 dark:bg-red-500/15',
+                    'Palembang': 'bg-orange-500/10 dark:bg-orange-500/15',
+                    'Batam': 'bg-indigo-500/10 dark:bg-indigo-500/15',
+                    'Pekanbaru': 'bg-teal-500/10 dark:bg-teal-500/15',
+                    'Denpasar': 'bg-rose-500/10 dark:bg-rose-500/15'
+                  }[landmark.name] || 'bg-blue-500/10 dark:bg-brand-cyan/15'
+                ]"
               ></div>
 
               <!-- Landmark Icon Container with dynamic background theme -->
@@ -623,7 +672,18 @@ onUnmounted(() => {
                 class="w-8 h-8 p-1.5 rounded-xl shrink-0 transition-transform duration-300 group-hover/card:scale-110 flex items-center justify-center"
                 :class="[
                   selectedCity === landmark.fullName
-                    ? 'bg-blue-500/20 text-blue-600 dark:bg-brand-cyan/25 dark:text-brand-cyan'
+                    ? {
+                        'Jakarta': 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/25 dark:text-blue-400',
+                        'Surabaya': 'bg-cyan-500/20 text-cyan-600 dark:bg-cyan-500/25 dark:text-cyan-400',
+                        'Bandung': 'bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/25 dark:text-emerald-400',
+                        'Medan': 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/25 dark:text-amber-400',
+                        'Semarang': 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/25 dark:text-purple-400',
+                        'Makassar': 'bg-red-500/20 text-red-600 dark:bg-red-500/25 dark:text-red-400',
+                        'Palembang': 'bg-orange-500/20 text-orange-600 dark:bg-orange-500/25 dark:text-orange-400',
+                        'Batam': 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/25 dark:text-indigo-400',
+                        'Pekanbaru': 'bg-teal-500/20 text-teal-600 dark:bg-teal-500/25 dark:text-teal-400',
+                        'Denpasar': 'bg-rose-500/20 text-rose-600 dark:bg-rose-500/25 dark:text-rose-400'
+                      }[landmark.name] || 'bg-blue-500/20 text-blue-600 dark:bg-brand-cyan/25 dark:text-brand-cyan'
                     : 'bg-slate-100 dark:bg-brand-navy-800/80 ' + landmark.color
                 ]"
                 v-html="landmark.svg"
@@ -636,7 +696,22 @@ onUnmounted(() => {
                 </span>
                 <span 
                   class="text-[9px] font-semibold mt-0.5"
-                  :class="selectedCity === landmark.fullName ? 'text-blue-500/80 dark:text-brand-cyan/80' : 'text-slate-400 dark:text-slate-500'"
+                  :class="[
+                    selectedCity === landmark.fullName
+                      ? {
+                          'Jakarta': 'text-blue-500/80 dark:text-blue-400/80',
+                          'Surabaya': 'text-cyan-500/80 dark:text-cyan-400/80',
+                          'Bandung': 'text-emerald-500/80 dark:text-emerald-400/80',
+                          'Medan': 'text-amber-500/80 dark:text-amber-400/80',
+                          'Semarang': 'text-purple-500/80 dark:text-purple-400/80',
+                          'Makassar': 'text-red-500/80 dark:text-red-400/80',
+                          'Palembang': 'text-orange-500/80 dark:text-orange-400/80',
+                          'Batam': 'text-indigo-500/80 dark:text-indigo-400/80',
+                          'Pekanbaru': 'text-teal-500/80 dark:text-teal-400/80',
+                          'Denpasar': 'text-rose-500/80 dark:text-rose-400/80'
+                        }[landmark.name] || 'text-blue-500/80 dark:text-brand-cyan/80'
+                      : 'text-slate-400 dark:text-slate-500'
+                  ]"
                 >
                   {{ selectedCity === landmark.fullName ? 'Aktif' : 'Pilih Kota' }}
                 </span>

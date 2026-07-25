@@ -54,9 +54,29 @@ const nextSlide = () => {
   mobileIndex.value++;
 };
 
-const goToSlide = (i: number) => {
-  slideDir.value = i > mobileIndex.value ? 'left' : 'right';
-  mobileIndex.value = i;
+
+
+// ── Touchscreen Swipe Handling ──────────────────────────────────────────────
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.changedTouches[0].screenX;
+};
+const handleTouchEnd = (e: TouchEvent) => {
+  touchEndX.value = e.changedTouches[0].screenX;
+  handleSwipe();
+};
+const handleSwipe = () => {
+  const threshold = 40;
+  const diff = touchStartX.value - touchEndX.value;
+  if (Math.abs(diff) > threshold) {
+    if (diff > 0) {
+      nextSlide();
+    } else {
+      prevSlide();
+    }
+  }
 };
 
 // Reset index on city change to avoid index out of bounds
@@ -301,7 +321,11 @@ const transitionName = computed(() =>
 
     <!-- ─── MOBILE VIEW: 1 Card Carousel ──────────────────────────────────── -->
     <div class="block md:hidden space-y-2">
-      <div class="relative w-full">
+      <div 
+        class="relative w-full"
+        @touchstart="handleTouchStart"
+        @touchend="handleTouchEnd"
+      >
         <!-- Prev button -->
         <button
           type="button"
@@ -326,7 +350,7 @@ const transitionName = computed(() =>
 
               <div class="p-3.5 px-4">
                 <!-- Name + Location -->
-                <div class="flex items-start gap-2.5 mb-2.5 pr-6 pl-6">
+                <div class="flex items-center gap-2.5 mb-2.5">
                   <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" :class="getColor(activeMobileCourse.colorKey).icon">
                     <component :is="getCategoryIcon(activeMobileCourse.category)" class="w-4 h-4" />
                   </div>
@@ -342,7 +366,7 @@ const transitionName = computed(() =>
                 </div>
 
                 <!-- Chips row -->
-                <div class="flex flex-wrap items-center gap-1.5 mb-2.5 pl-6 pr-6">
+                <div class="flex flex-wrap items-center gap-1.5 mb-2.5">
                   <span
                     class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
                     :class="activeMobileCourse.comfortIndex === 'Nyaman'
@@ -387,19 +411,6 @@ const transitionName = computed(() =>
         </button>
       </div>
 
-      <!-- Slide dots indicators -->
-      <div class="flex items-center justify-center gap-1.5 mt-1">
-        <button
-          v-for="(_, i) in golfCourses"
-          :key="i"
-          type="button"
-          @click="goToSlide(i)"
-          class="rounded-full transition-all duration-300 cursor-pointer"
-          :class="i === mobileIndex
-            ? 'w-4 h-1.5 bg-blue-500 dark:bg-brand-cyan'
-            : 'w-1.5 h-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'"
-        ></button>
-      </div>
     </div>
 
     <!-- ─── DESKTOP VIEW: Multi-Card Flex Row (MD and up) ──────────────────── -->

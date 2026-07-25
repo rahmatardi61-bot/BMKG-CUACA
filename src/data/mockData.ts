@@ -205,6 +205,19 @@ export const weatherDataMap: Record<string, WeatherData> = {
     uvIndex: 7,
     visibility: 10,
     icon: 'Sun'
+  },
+  'Mencari lokasi...': {
+    city: 'Mencari lokasi...',
+    temp: 30,
+    status: 'Cerah Berawan',
+    feelLike: 32,
+    tempMin: 22,
+    tempMax: 32,
+    humidity: 72,
+    windSpeed: 8,
+    uvIndex: 7,
+    visibility: 10,
+    icon: 'SunDim'
   }
 };
 

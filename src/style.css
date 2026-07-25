@@ -176,3 +176,22 @@ body.drawer-open #app {
   pointer-events: none !important;
   user-select: none !important;
 }
+
+/* ── Performance Utilities ──────────────────────────────────────────────────
+
+   .perf-layer: Promote animated/blur elements to their own GPU compositor
+   layer. Use on glow orbs and elements with filter:blur or scale transitions
+   to prevent surrounding content from being repainted during hover animations.
+
+   .sidebar-contained: CSS Containment for the right sidebar column — tells
+   the browser that layout/style changes inside don't affect the rest of the
+   page, avoiding full-page layout recalculations. */
+
+.perf-layer {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.sidebar-contained {
+  contain: layout style;
+}

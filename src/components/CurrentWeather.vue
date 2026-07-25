@@ -30,17 +30,19 @@ import {
 } from 'lucide-vue-next';
 import type { WeatherData } from '../types/weather';
 import { getCityTheme } from '../data/cityThemes';
+import type { AdditionalWeatherInfo } from '../data/weatherHelpers';
 import { 
   getAdditionalWeatherData, 
   getComfortIndex, 
   getNormalizedWeatherType, 
-  getFormattedTimeAndZone 
+  getFormattedTimeAndZone
 } from '../data/weatherHelpers';
 
 const props = defineProps<{
   weatherData: WeatherData;
   cities: string[];
   selectedCity: string;
+  additionalInfo?: AdditionalWeatherInfo;
 }>();
 
 const emit = defineEmits<{
@@ -49,13 +51,29 @@ const emit = defineEmits<{
 }>();
 
 // Real-time ticking clock state
+// ⚡ Perf: interval reduced to 60s — sun/moon positions don't change within a second.
+// The display format is HH:MM so 1-minute precision is fully sufficient.
 const currentTime = ref(new Date());
-let clockIntervalId: any = null;
+let clockIntervalId: ReturnType<typeof setInterval> | null = null;
+
+// Derived minute-level signal — computed properties that depend on time
+// (sunPosition, moonPosition) will only re-run when the minute actually changes.
+const currentMinute = computed(() => {
+  const t = currentTime.value;
+  return t.getHours() * 60 + t.getMinutes();
+});
 
 onMounted(() => {
-  clockIntervalId = setInterval(() => {
+  // Align to the next whole minute so the first tick is on a clean boundary
+  const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000;
+  const alignTimer = setTimeout(() => {
     currentTime.value = new Date();
-  }, 1000);
+    clockIntervalId = setInterval(() => {
+      currentTime.value = new Date();
+    }, 60000);
+  }, msUntilNextMinute);
+  // Store alignTimer so we can clear it on unmount if component unmounts before it fires
+  (clockIntervalId as any) = alignTimer;
 });
 
 onUnmounted(() => {
@@ -124,7 +142,7 @@ const cityTheme = computed(() => {
 
 // Additional weather details for full screen cards
 const additionalWeatherData = computed(() => {
-  return getAdditionalWeatherData(props.selectedCity);
+  return props.additionalInfo || getAdditionalWeatherData(props.selectedCity);
 });
 
 // Dynamic comfort index data based on temperature
@@ -199,7 +217,9 @@ const {
 
 const sunPosition = computed(() => {
   if (!additionalWeatherData.value) return { x: 50, y: 15, isDay: true };
-  
+  // ⚡ Perf: depends on currentMinute (changes every 60s) not currentTime (was every 1s)
+  void currentMinute.value;
+
   const city = props.selectedCity.toLowerCase();
   let offset = 7; // WIB (UTC+7)
   if (city.includes('makassar') || city.includes('denpasar')) {
@@ -245,7 +265,9 @@ const sunPosition = computed(() => {
 
 const moonPosition = computed(() => {
   if (!additionalWeatherData.value) return { x: 50, y: 15, isMoonUp: false };
-  
+  // ⚡ Perf: depends on currentMinute (changes every 60s) not currentTime (was every 1s)
+  void currentMinute.value;
+
   const city = props.selectedCity.toLowerCase();
   let offset = 7; // WIB (UTC+7)
   if (city.includes('makassar') || city.includes('denpasar')) {
@@ -668,7 +690,7 @@ onUnmounted(() => {
             <!-- Lower Panel: Min / Max -->
             <div class="py-2.5 px-3.5 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
               <span class="opacity-75 font-bold">Min / Max</span>
-              <span class="font-black">{{ weatherData.tempMax }}° / {{ weatherData.tempMin }}°</span>
+              <span class="font-black">{{ weatherData.tempMin }}° / {{ weatherData.tempMax }}°</span>
             </div>
           </div>
         </div>

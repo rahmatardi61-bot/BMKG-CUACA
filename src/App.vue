@@ -7,7 +7,6 @@ const MainDashboard = defineAsyncComponent(() => import('./pages/MainDashboard.v
 const Footer = defineAsyncComponent(() => import('./components/Footer.vue'));
 const LoginView = defineAsyncComponent(() => import('./pages/LoginView.vue'));
 const UnderMaintenance = defineAsyncComponent(() => import('./pages/UnderMaintenance.vue'));
-// const NewsSection = defineAsyncComponent(() => import('./components/NewsSection.vue'));
 
 // Import Mock Data
 import { 
@@ -30,13 +29,13 @@ const isNightTime = () => {
 const darkMode = ref(isNightTime()); // Defaulting to light during day, dark during night
 
 // Active selected location state
-const selectedCity = ref('Tamanan, Kec. Bantul, Banguntapan, Daerah Istimewa Yogyakarta');
+const selectedCity = ref('Mencari lokasi...');
 
 // Active selected tab state
 const activeTab = ref('Beranda');
 
 // Reactive list of cities for navigation tabs
-const cities = ref([...citiesList]);
+const cities = ref(['Mencari lokasi...', ...citiesList.slice(1)]);
 
 // Computed current weather metrics based on selected city
 const activeWeatherData = computed(() => {
@@ -374,14 +373,6 @@ onMounted(() => {
         class="flex-grow"
       />
 
-      <!-- News Section for Mobile (above footer) - Hidden -->
-      <!--
-      <div v-if="activeTab === 'Beranda'" class="lg:hidden border-t border-slate-200/30 dark:border-brand-navy-800/30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <NewsSection :articles="newsArticles" />
-        </div>
-      </div>
-      -->
 
       <!-- Footer -->
       <Footer />

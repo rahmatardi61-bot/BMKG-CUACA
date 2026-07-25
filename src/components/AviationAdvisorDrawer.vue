@@ -3,8 +3,6 @@ import { ref, watch, onUnmounted } from 'vue';
 import {
   X,
   AlertTriangle,
-  UserCog,
-  Users2,
   CheckCircle2,
   Info,
   Sparkles,
@@ -57,9 +55,8 @@ watch(
         localSectors.value = JSON.parse(JSON.stringify(byName));
       }
 
-      const targetId = props.initialSectorId || 'commercial';
-      const found = localSectors.value.find(s => s.id === targetId) || localSectors.value[0];
-      if (found) activeAdvisorSector.value = found;
+      // Default to first available sector or specified initial sector
+      activeAdvisorSector.value = (props.initialSectorId ? localSectors.value.find(s => s.id === props.initialSectorId) : null) || localSectors.value[0] || null;
       activeSectorTab.value = 'status';
     } else {
       document.body.classList.remove('drawer-open');
@@ -92,98 +89,7 @@ const getSectorLabel = (id: string) => {
   }
 };
 
-const getCategoryBadgeClass = (cat: string) => {
-  switch (cat) {
-    case 'VFR':  return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30';
-    case 'MVFR': return 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30';
-    case 'IFR':  return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30';
-    case 'LIFR': return 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30';
-    default:     return 'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/20';
-  }
-};
 
-const getStatusBadgeClass = (status: string) => {
-  switch (status) {
-    case 'aman':    return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-    case 'waspada': return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
-    case 'siaga':   return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
-    case 'bahaya':  return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
-    default:        return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
-  }
-};
-
-// ── Rekomendasi Generator ─────────────────────────────────────────────────────
-interface Recommendation { icon: string; text: string; }
-
-const getPilotRecommendations = (category: string): Recommendation[] => {
-  const base: Recommendation[] = [
-    { icon: '📡', text: 'Dapatkan briefing cuaca terbaru dari BMKG MWO sebelum berangkat.' },
-    { icon: '📋', text: 'Isi rencana terbang (flight plan) dengan data cuaca aktual yang diperoleh dari ATIS/VOLMET.' },
-  ];
-  if (category === 'VFR') return [
-    ...base,
-    { icon: '✅', text: 'Kondisi VFR aktif — visual approach diizinkan. Pantau ATIS 30 menit sebelum landing.' },
-    { icon: '👁️', text: 'Pertahankan visual clearance dari awan dan hindari masuk IMC secara tidak sengaja.' },
-    { icon: '🛬', text: 'Pilih runway dengan headwind optimal berdasarkan data angin METAR terkini.' },
-  ];
-  if (category === 'MVFR') return [
-    ...base,
-    { icon: '⚠️', text: 'Kondisi MVFR — siapkan ILS approach briefing meskipun kondisi masih marginal visual.' },
-    { icon: '🛫', text: 'Tetapkan alternate airport dengan bahan bakar cukup sebelum departure.' },
-    { icon: '📻', text: 'Monitor ATIS setiap 30 menit and minta update kondisi dari ATC saat descent.' },
-    { icon: '🎯', text: 'Stabilized approach wajib dipenuhi — go-around jika tidak stabil di 500 ft AGL.' },
-  ];
-  if (category === 'IFR') return [
-    ...base,
-    { icon: '🚨', text: 'Kondisi IFR aktif — instrument approach wajib. Verifikasi ketersediaan ILS dan minima approach.' },
-    { icon: '⛽', text: 'Hitung extra fuel untuk holding dan diversion ke alternate yang sudah dikonfirmasi kondisinya.' },
-    { icon: '🎖️', text: 'Pastikan crew sudah qualified minimum CAT-I approach (DH 200 ft, RVR 550 m).' },
-    { icon: '📡', text: 'Laporkan kondisi aktual saat landing sebagai PIREP untuk penerbangan berikutnya.' },
-    { icon: '🔄', text: 'Siapkan missed approach procedure secara mental sebelum descend ke DH.' },
-  ];
-  if (category === 'LIFR') return [
-    ...base,
-    { icon: '🛑', text: 'LIFR KRITIS — pertimbangkan delay atau cancellation. Risiko go-around sangat tinggi.' },
-    { icon: '⛽', text: 'Fuel planning wajib memperhitungkan hold 45 menit + full diversion.' },
-    { icon: '📟', text: 'Minta laporan PIREP terbaru dari ATC sebelum memutuskan untuk approach.' },
-    { icon: '🎖️', text: 'Hanya crew dengan kualifikasi CAT-II/III yang diizinkan melakukan approach pada kondisi ini.' },
-    { icon: '📋', text: 'Dokumentasikan keputusan operasional dan laporkan ke dispatcher/ops control.' },
-  ];
-  return base;
-};
-
-const getPassengerRecommendations = (category: string): Recommendation[] => {
-  if (category === 'VFR') return [
-    { icon: '🌤️', text: 'Cuaca sangat baik hari ini. Penerbangan diperkirakan tepat waktu dan nyaman.' },
-    { icon: '💺', text: 'Tetap kenakan sabuk pengaman meski lampu seat belt padam — antisipasi turbulensi mendadak.' },
-    { icon: '📱', text: 'Simpan ponsel dalam mode pesawat selama penerbangan sesuai aturan maskapai.' },
-    { icon: '🧃', text: 'Hidrasi cukup selama penerbangan — udara kabin cukup kering di ketinggian jelajah.' },
-  ];
-  if (category === 'MVFR') return [
-    { icon: '⛅', text: 'Kondisi cuaca marginal — kemungkinan keterlambatan kecil. Pantau informasi penerbangan di aplikasi maskapai.' },
-    { icon: '💺', text: 'Patuhi instruksi awak kabin dan tetap duduk dengan sabuk pengaman saat lampu menyala.' },
-    { icon: '🤢', text: 'Siapkan kantong muntah jika rentan mabuk perjalanan — kemungkinan turbulensi ringan saat descent.' },
-    { icon: '📡', text: 'Minta informasi terbaru dari pramugari jika penerbangan terasa tertunda lebih dari 15 menit.' },
-  ];
-  if (category === 'IFR') return [
-    { icon: '⚠️', text: 'Kondisi cuaca buruk aktif di bandara tujuan. Kemungkinan keterlambatan signifikan — siapkan alternatif.' },
-    { icon: '📲', text: 'Pantau status penerbangan di aplikasi maskapai atau website resmi bandara secara aktif.' },
-    { icon: '🚌', text: 'Siapkan rencana alternatif transportasi darat jika penerbangan dibatalkan atau dialihkan.' },
-    { icon: '💺', text: 'Selama penerbangan, tetap sabuk pengaman terpasang sepanjang waktu demi keselamatan.' },
-    { icon: '😮‍💨', text: 'Tetap tenang jika terjadi perubahan rute mendadak — pilot dan ATC sudah memiliki prosedur standar.' },
-  ];
-  if (category === 'LIFR') return [
-    { icon: '🛑', text: 'KONDISI KRITIS: Kemungkinan pembatalan atau pengalihan penerbangan sangat tinggi hari ini.' },
-    { icon: '📲', text: 'Periksa status penerbangan Anda SEBELUM berangkat ke bandara untuk menghindari perjalanan sia-sia.' },
-    { icon: '📞', text: 'Hubungi call center maskapai untuk informasi reschedule atau refund jika penerbangan dibatalkan.' },
-    { icon: '🧳', text: 'Siapkan pakaian ekstra dan perlengkapan darurat jika harus menginap di kota tujuan atau transit.' },
-    { icon: '🚨', text: 'Jika sudah di dalam pesawat, patuhi semua instruksi awak kabin tanpa pengecualian.' },
-  ];
-  return [
-    { icon: '💺', text: 'Selalu kenakan sabuk pengaman selama penerbangan.' },
-    { icon: '📱', text: 'Aktifkan mode pesawat saat boarding.' },
-  ];
-};
 
 const getPulseClass = (status: string) => {
   switch (status) {
@@ -212,7 +118,7 @@ const getPulseClass = (status: string) => {
       <Transition name="drawer-slide" appear>
         <div
           v-if="isOpen"
-          class="relative h-full w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 p-5 md:p-6 flex flex-col justify-between overflow-hidden"
+          class="relative h-full w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 pt-5 px-5 pb-0 md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden"
         >
           <!-- Ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
@@ -227,13 +133,31 @@ const getPulseClass = (status: string) => {
 
           <!-- Header -->
           <div class="mb-4 pr-8 text-left">
-            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <span class="w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
-              Advisor Keselamatan Penerbangan
-            </h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-0.5">
-              Data cuaca bandara, SIGMET, dan panduan operasi penerbangan berbasis BMKG.
-            </p>
+            <!-- Title & Icon Row -->
+            <div class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/30">
+              <template v-if="activeAdvisorSector">
+                <div class="p-2.5 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-500/10 dark:from-indigo-400/20 dark:to-blue-400/10 flex items-center justify-center border border-indigo-500/25 dark:border-indigo-400/25 shrink-0 shadow-sm">
+                  <component :is="getSectorIcon(activeAdvisorSector.id)" class="w-5 h-5" :class="activeAdvisorSector.textColor" />
+                </div>
+                <div class="text-left min-w-0 flex-grow">
+                  <span class="text-[8.5px] font-black uppercase tracking-[0.18em] text-indigo-500 dark:text-indigo-400 block">{{ activeAdvisorSector.name }}</span>
+                  <h3 class="text-[13px] font-black text-slate-800 dark:text-white leading-snug mt-0.5 tracking-tight">
+                    {{ activeAdvisorSector.title }}
+                  </h3>
+                </div>
+              </template>
+              <template v-else-if="localSectors.length > 0">
+                <div class="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 dark:from-amber-400/20 dark:to-orange-400/10 flex items-center justify-center border border-amber-500/25 dark:border-amber-400/25 shrink-0 shadow-sm">
+                  <Sparkles class="w-5 h-5 text-amber-500" />
+                </div>
+                <div class="text-left min-w-0 flex-grow">
+                  <span class="text-[8.5px] font-black uppercase tracking-[0.18em] text-amber-500 dark:text-amber-400 block">Panduan Pra-Terbang</span>
+                  <h3 class="text-[13px] font-black text-slate-800 dark:text-white leading-snug mt-0.5 tracking-tight">
+                    Checklist Sebelum Terbang — {{ localSectors[0].icao }}
+                  </h3>
+                </div>
+              </template>
+            </div>
 
             <!-- Nearest Airport Banner -->
             <div
@@ -249,15 +173,15 @@ const getPulseClass = (status: string) => {
             </div>
 
             <!-- Sector Tab Switcher -->
-            <div class="flex overflow-x-auto no-scrollbar gap-1 mt-4 pb-0.5">
+            <div class="flex overflow-x-auto no-scrollbar gap-1.5 mt-4 pb-0.5">
               <button
                 v-for="sect in localSectors"
                 :key="sect.id"
-                @click="activeAdvisorSector = sect; activeSectorTab = 'status'"
-                class="shrink-0 py-1.5 px-2.5 text-[9px] font-black uppercase tracking-wider rounded-full transition-all duration-200 cursor-pointer text-center whitespace-nowrap"
+                @click="activeAdvisorSector = sect"
+                class="shrink-0 py-1.5 px-3 text-[9px] font-black uppercase tracking-wider rounded-full transition-all duration-200 cursor-pointer text-center whitespace-nowrap border"
                 :class="activeAdvisorSector?.id === sect.id
-                  ? 'bg-slate-100 dark:bg-brand-navy-900/60 text-indigo-600 dark:text-indigo-400 font-black'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'"
+                  ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-indigo-500/0 shadow-sm shadow-indigo-500/30'
+                  : 'text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-brand-navy-800 hover:text-slate-700 dark:hover:text-white hover:border-slate-300 dark:hover:border-brand-navy-700 bg-transparent'"
               >
                 {{ getSectorLabel(sect.id) }}
               </button>
@@ -266,210 +190,197 @@ const getPulseClass = (status: string) => {
 
           <!-- Scrollable Content -->
           <div
-            v-if="activeAdvisorSector"
-            class="flex-grow overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-3 text-left"
+            class="flex-grow overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-3 pb-12 text-left"
             style="will-change: scroll-position; -webkit-overflow-scrolling: touch;"
           >
-            <div class="space-y-4">
-              <!-- Title & Icon Row -->
-              <div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-brand-navy-900/20">
-                <div class="p-2 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 flex items-center justify-center border border-indigo-500/20 dark:border-indigo-400/30 shrink-0">
-                  <component :is="getSectorIcon(activeAdvisorSector.id)" class="w-4 h-4" :class="activeAdvisorSector.textColor" />
-                </div>
-                <div class="text-left min-w-0">
-                  <span class="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-500">{{ activeAdvisorSector.name }}</span>
-                  <h3 class="text-xs font-bold text-slate-800 dark:text-white leading-tight tracking-tight mt-0.5 truncate">
-                    {{ activeAdvisorSector.title }}
-                  </h3>
+
+
+            <!-- TAMPILAN: Sektor Spesifik (Komersial, Pirep, dll) -->
+            <div v-if="activeAdvisorSector" class="space-y-4">
+
+              <!-- ── RISK BANNER ── -->
+              <div
+                class="relative rounded-2xl overflow-hidden border p-4"
+                :class="activeAdvisorSector!.riskLevel === 'Rendah'
+                  ? 'bg-gradient-to-br from-emerald-50 to-teal-50/30 border-emerald-200/60 dark:from-emerald-950/30 dark:to-teal-950/20 dark:border-emerald-800/30'
+                  : activeAdvisorSector!.riskLevel === 'Sedang'
+                  ? 'bg-gradient-to-br from-amber-50 to-yellow-50/30 border-amber-200/60 dark:from-amber-950/30 dark:to-yellow-950/20 dark:border-amber-800/30'
+                  : activeAdvisorSector!.riskLevel === 'Tinggi'
+                  ? 'bg-gradient-to-br from-orange-50 to-red-50/30 border-orange-200/60 dark:from-orange-950/30 dark:to-red-950/20 dark:border-orange-800/30'
+                  : 'bg-gradient-to-br from-red-50 to-rose-50/30 border-red-200/60 dark:from-red-950/30 dark:to-rose-950/20 dark:border-red-800/30'"
+              >
+                <!-- Ambient glow -->
+                <div class="absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl opacity-30 pointer-events-none"
+                  :class="activeAdvisorSector!.riskLevel === 'Rendah' ? 'bg-emerald-400' : activeAdvisorSector!.riskLevel === 'Sedang' ? 'bg-amber-400' : 'bg-red-400'"
+                />
+                <div class="flex items-center justify-between gap-3 relative z-10">
+                  <!-- Left: category + description -->
+                  <div class="min-w-0">
+                    <span
+                      class="text-[8.5px] font-black uppercase tracking-[0.18em] block mb-0.5"
+                      :class="activeAdvisorSector!.category === 'VFR' ? 'text-emerald-600 dark:text-emerald-400' : activeAdvisorSector!.category === 'MVFR' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'"
+                    >{{ activeAdvisorSector!.category }} — {{ activeAdvisorSector!.name }}</span>
+                    <p class="text-[10.5px] text-slate-600 dark:text-slate-300 font-semibold leading-snug">
+                      {{ activeAdvisorSector!.description }}
+                    </p>
+                  </div>
+                  <!-- Right: risk score circle -->
+                  <div class="shrink-0 flex flex-col items-center gap-0.5">
+                    <div
+                      class="w-11 h-11 rounded-full border-2 flex items-center justify-center font-black text-[13px]"
+                      :class="activeAdvisorSector!.riskLevel === 'Rendah'
+                        ? 'border-emerald-400 text-emerald-700 bg-emerald-100/60 dark:text-emerald-400 dark:bg-emerald-900/40'
+                        : activeAdvisorSector!.riskLevel === 'Sedang'
+                        ? 'border-amber-400 text-amber-700 bg-amber-100/60 dark:text-amber-400 dark:bg-amber-900/40'
+                        : 'border-red-400 text-red-700 bg-red-100/60 dark:text-red-400 dark:bg-red-900/40'"
+                    >{{ activeAdvisorSector!.riskScore }}</div>
+                    <span
+                      class="text-[7.5px] font-black uppercase tracking-wider"
+                      :class="activeAdvisorSector!.riskLevel === 'Rendah' ? 'text-emerald-600 dark:text-emerald-400' : activeAdvisorSector!.riskLevel === 'Sedang' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'"
+                    >{{ activeAdvisorSector!.riskLevel }}</span>
+                  </div>
                 </div>
               </div>
 
-              <!-- Description -->
-              <p class="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-normal">
-                {{ activeAdvisorSector.description }}
-              </p>
-
-              <!-- Parameters Grid -->
-              <div class="grid grid-cols-[110px_1fr] gap-y-3.5 text-[11px] border-t border-b border-slate-100 dark:border-brand-navy-900/20 py-4 my-2">
-                <!-- Category row -->
-                <div class="text-slate-500 dark:text-slate-450 font-semibold self-center">Kategori Cuaca</div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span
-                    class="px-2 py-0.5 rounded text-[9px] font-bold uppercase border"
-                    :class="getCategoryBadgeClass(activeAdvisorSector.category)"
-                  >
-                    {{ activeAdvisorSector.category }}
-                  </span>
-                  <span class="text-[9px] font-mono font-bold text-slate-500 dark:text-slate-400">
-                    {{ activeAdvisorSector.icao }}
-                  </span>
-                </div>
-
-                <!-- Risk Level row -->
-                <div class="text-slate-500 dark:text-slate-450 font-semibold self-center">Tingkat Risiko</div>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="px-2 py-0.5 rounded text-[9px] font-bold uppercase border self-start"
-                    :class="getStatusBadgeClass(activeAdvisorSector.riskLevel === 'Rendah' ? 'aman' : activeAdvisorSector.riskLevel === 'Sedang' ? 'waspada' : activeAdvisorSector.riskLevel === 'Tinggi' ? 'siaga' : 'bahaya')"
-                  >
-                    {{ activeAdvisorSector.riskLevel }}
-                  </span>
-                  <span class="text-slate-500 dark:text-slate-400 font-semibold text-[10px]">
-                    Skor: {{ activeAdvisorSector.riskScore }}/100
-                  </span>
-                </div>
-
-                <!-- Dynamic Parameters -->
-                <template v-for="param in activeAdvisorSector.parameters" :key="param.label">
-                  <div class="text-slate-500 dark:text-slate-450 font-semibold self-center">{{ param.label }}</div>
-                  <div class="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300 min-w-0">
-                    <span class="truncate">{{ param.value }}</span>
+              <!-- ── PARAMETER CARDS ── -->
+              <div class="grid grid-cols-2 gap-2">
+                <div
+                  v-for="param in activeAdvisorSector!.parameters"
+                  :key="param.label"
+                  class="p-2.5 rounded-xl border bg-white/60 dark:bg-brand-navy-900/30 border-slate-200/60 dark:border-brand-navy-800 flex flex-col gap-1"
+                >
+                  <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 leading-none">{{ param.label }}</span>
+                  <span class="text-[11px] font-black text-slate-800 dark:text-white leading-tight">{{ param.value }}</span>
+                  <div class="flex items-center gap-1.5">
                     <span
                       class="rounded-full relative shrink-0"
-                      :title="param.status"
                       :class="getPulseClass(param.status)"
-                      style="width:6px;height:6px;min-width:6px;min-height:6px;"
+                      style="width:5px;height:5px;min-width:5px;min-height:5px;"
                     >
                       <span class="animate-ping absolute inset-0 rounded-full opacity-75" :class="getPulseClass(param.status)" />
                     </span>
-                  </div>
-                </template>
-              </div>
-            </div>
-
-            <!-- Sub-tabs -->
-            <div class="space-y-4">
-              <div class="flex gap-5 border-b border-slate-150 dark:border-brand-navy-900/20 pb-2 overflow-x-auto no-scrollbar">
-                <button
-                  v-for="tab in ['status', 'sop', 'emergency', 'rekomendasi']"
-                  :key="tab"
-                  @click="activeSectorTab = tab as any"
-                  class="shrink-0 pb-2 text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer relative text-left whitespace-nowrap"
-                  :class="activeSectorTab === tab
-                    ? 'text-indigo-600 dark:text-indigo-400 font-black border-b-2 border-indigo-600 dark:border-indigo-400 -mb-[10px]'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'"
-                >
-                  {{ tab === 'status' ? 'Status' : tab === 'sop' ? 'SOP' : tab === 'emergency' ? 'Mitigasi' : 'Rekomendasi' }}
-                </button>
-              </div>
-
-              <!-- Tab: Status -->
-              <div v-if="activeSectorTab === 'status'" class="space-y-2.5 min-h-[110px] pt-1 animate-fade-in text-left">
-                <div
-                  v-for="(adv, index) in activeAdvisorSector.advisories"
-                  :key="index"
-                  class="flex gap-2 text-[10.5px] font-semibold leading-relaxed text-slate-600 dark:text-slate-350"
-                >
-                  <AlertTriangle v-if="adv.status === 'danger'"   class="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
-                  <AlertTriangle v-else-if="adv.status === 'warning'" class="w-3.5 h-3.5 text-yellow-500 shrink-0 mt-0.5" />
-                  <CheckCircle2 v-else-if="adv.status === 'safe'"  class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                  <Info          v-else                             class="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
-                  <p class="flex-grow">{{ adv.text }}</p>
-                </div>
-              </div>
-
-              <!-- Tab: SOP Checklist -->
-              <div v-if="activeSectorTab === 'sop'" class="space-y-2.5 min-h-[110px] pt-1 animate-fade-in text-left">
-                <div
-                  v-for="(step, index) in activeAdvisorSector.sopSteps"
-                  :key="index"
-                  class="flex items-start gap-2.5 cursor-pointer group/step"
-                  @click="step.done = !step.done"
-                >
-                  <div
-                    class="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-all duration-200 mt-0.5"
-                    :class="step.done
-                      ? 'bg-indigo-600 border-indigo-600 dark:bg-indigo-400 dark:border-indigo-400 text-white shadow-sm'
-                      : 'border-slate-300 dark:border-brand-navy-700 bg-transparent'"
-                  >
-                    <svg v-if="step.done" class="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span
-                    class="text-[10.5px] font-semibold select-none leading-normal"
-                    :class="step.done ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-700 dark:text-slate-350'"
-                  >
-                    {{ step.text }}
-                  </span>
-                </div>
-                <div class="pt-2 text-[8px] font-black text-slate-450 dark:text-brand-navy-600 uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles class="w-3.5 h-3.5 text-yellow-500" />
-                  Tip: Ketuk butir SOP di atas untuk menandai selesai.
-                </div>
-              </div>
-
-              <!-- Tab: Emergency Contacts -->
-              <div v-if="activeSectorTab === 'emergency'" class="space-y-2.5 min-h-[110px] pt-1 animate-fade-in text-left">
-                <div
-                  v-for="contact in activeAdvisorSector.emergencyContacts"
-                  :key="contact.label"
-                  class="p-2.5 rounded-xl border flex flex-wrap items-center justify-between gap-2 bg-white border-slate-200/60 dark:bg-brand-navy-900/30 dark:border-brand-navy-800"
-                >
-                  <div class="text-left">
-                    <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Unit Hubungan</p>
-                    <p class="text-[10.5px] font-black text-slate-800 dark:text-white mt-1">{{ contact.label }}</p>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-mono font-black text-slate-800 dark:text-white bg-slate-50 dark:bg-brand-navy-900/60 px-2 py-0.5 rounded border border-slate-200/40 dark:border-brand-navy-800/80">
-                      {{ contact.number }}
-                    </span>
-                    <a
-                      :href="'tel:' + contact.number.replace(/[^0-9]/g, '')"
-                      class="p-1 rounded-lg bg-indigo-600 text-white hover:scale-105 active:scale-95 transition-all outline-none"
-                      title="Panggil"
-                    >
-                      <ArrowUpRight class="w-3.5 h-3.5" />
-                    </a>
+                    <span
+                      class="text-[7.5px] font-black uppercase tracking-wider"
+                      :class="param.status === 'aman' ? 'text-emerald-600 dark:text-emerald-400' : param.status === 'waspada' ? 'text-amber-600 dark:text-amber-400' : param.status === 'siaga' ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'"
+                    >{{ param.status }}</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Tab: Rekomendasi Pilot & Penumpang -->
-              <div v-if="activeSectorTab === 'rekomendasi'" class="space-y-4 min-h-[110px] pt-1 animate-fade-in text-left">
-                <!-- Pilot -->
+              <!-- ── STATUS CUACA ── -->
+              <div>
+                <div class="flex items-center gap-2.5 mb-2.5">
+                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/15 to-blue-500/5 border border-indigo-500/20 dark:from-indigo-400/15 dark:to-blue-400/5 dark:border-indigo-400/20">
+                    <Info class="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                    <span class="text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Status Cuaca</span>
+                  </div>
+                  <div class="flex-grow h-px bg-gradient-to-r from-indigo-200/60 to-transparent dark:from-indigo-800/40" />
+                </div>
                 <div class="space-y-2">
-                  <div class="flex items-center gap-2 pb-1.5 border-b border-indigo-500/15 dark:border-indigo-400/10">
-                    <UserCog class="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                    <span class="text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Rekomendasi Pilot</span>
-                  </div>
                   <div
-                    v-for="(rec, i) in getPilotRecommendations(activeAdvisorSector.category)"
-                    :key="'pilot-' + i"
-                    class="flex items-start gap-2 text-[10.5px] font-semibold leading-relaxed text-slate-600 dark:text-slate-350"
+                    v-for="(adv, index) in activeAdvisorSector!.advisories"
+                    :key="index"
+                    class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-2.5 rounded-xl border-l-2 bg-white/40 dark:bg-brand-navy-900/20"
+                    :class="adv.status === 'danger'
+                      ? 'border-l-red-500 text-red-700 dark:text-red-300'
+                      : adv.status === 'warning'
+                      ? 'border-l-amber-500 text-amber-700 dark:text-amber-300'
+                      : adv.status === 'safe'
+                      ? 'border-l-emerald-500 text-emerald-700 dark:text-emerald-300'
+                      : 'border-l-indigo-500 text-slate-600 dark:text-slate-300'"
                   >
-                    <span class="shrink-0 text-[12px] leading-none mt-0.5">{{ rec.icon }}</span>
-                    <p class="flex-grow">{{ rec.text }}</p>
-                  </div>
-                </div>
-
-                <!-- Penumpang -->
-                <div class="space-y-2 mt-4">
-                  <div class="flex items-center gap-2 pb-1.5 border-b border-violet-500/15 dark:border-violet-400/10">
-                    <Users2 class="w-3.5 h-3.5 text-violet-500 shrink-0" />
-                    <span class="text-[9px] font-black uppercase tracking-widest text-violet-600 dark:text-violet-400">Rekomendasi Penumpang</span>
-                  </div>
-                  <div
-                    v-for="(rec, i) in getPassengerRecommendations(activeAdvisorSector.category)"
-                    :key="'pax-' + i"
-                    class="flex items-start gap-2 text-[10.5px] font-semibold leading-relaxed text-slate-600 dark:text-slate-350"
-                  >
-                    <span class="shrink-0 text-[12px] leading-none mt-0.5">{{ rec.icon }}</span>
-                    <p class="flex-grow">{{ rec.text }}</p>
+                    <AlertTriangle v-if="adv.status === 'danger'"    class="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                    <AlertTriangle v-else-if="adv.status === 'warning'" class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 v-else-if="adv.status === 'safe'"  class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <Info         v-else                              class="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
+                    <p class="flex-grow">{{ adv.text }}</p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Close Button -->
-            <div class="pt-4 mt-6 border-t border-slate-150 dark:border-brand-navy-900/20">
-              <button
-                type="button"
-                @click="emit('close')"
-                class="w-full py-2.5 rounded-xl border border-slate-200/80 dark:border-brand-navy-800 bg-white hover:bg-slate-50/80 dark:bg-transparent dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer shadow-xs"
-              >
-                Tutup Advisor
-              </button>
+              <!-- Divider -->
+              <div class="h-px bg-gradient-to-r from-transparent via-slate-200/60 to-transparent dark:via-brand-navy-800/60" />
+
+              <!-- ── SOP CHECKLIST ── -->
+              <div>
+                <div class="flex items-center gap-2.5 mb-2.5">
+                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/15 to-teal-500/5 border border-emerald-500/20 dark:from-emerald-400/15 dark:to-teal-400/5 dark:border-emerald-400/20">
+                    <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                    <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">SOP Checklist</span>
+                  </div>
+                  <div class="flex-grow h-px bg-gradient-to-r from-emerald-200/60 to-transparent dark:from-emerald-800/40" />
+                </div>
+                <div class="space-y-1.5">
+                  <div
+                    v-for="(step, index) in activeAdvisorSector!.sopSteps"
+                    :key="index"
+                    class="flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-all duration-200 group/step border border-transparent"
+                    :class="step.done
+                      ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200/40 dark:border-emerald-800/30'
+                      : 'hover:bg-slate-50 dark:hover:bg-brand-navy-900/30 hover:border-slate-200/40'"
+                    @click="step.done = !step.done"
+                  >
+                    <!-- Step number / check -->
+                    <div
+                      class="w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 font-black text-[9px]"
+                      :class="step.done
+                        ? 'bg-emerald-500 dark:bg-emerald-400 text-white shadow-sm'
+                        : 'bg-slate-100 dark:bg-brand-navy-800 text-slate-400 dark:text-slate-500 group-hover/step:bg-emerald-100 dark:group-hover/step:bg-emerald-900/30 group-hover/step:text-emerald-600'"
+                    >
+                      <svg v-if="step.done" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span v-else>{{ String(index + 1).padStart(2, '0') }}</span>
+                    </div>
+                    <span
+                      class="text-[10.5px] font-semibold select-none leading-normal flex-grow"
+                      :class="step.done ? 'text-slate-400 line-through dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'"
+                    >{{ step.text }}</span>
+                  </div>
+                  <div class="pt-0.5 text-[8px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest flex items-center gap-1.5 px-2.5">
+                    <Sparkles class="w-3 h-3 text-yellow-500" />
+                    Ketuk item untuk menandai selesai
+                  </div>
+                </div>
+              </div>
+
+              <!-- Divider -->
+              <div class="h-px bg-gradient-to-r from-transparent via-slate-200/60 to-transparent dark:via-brand-navy-800/60" />
+
+              <!-- ── KONTAK MITIGASI ── -->
+              <div>
+                <div class="flex items-center gap-2.5 mb-2.5">
+                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-red-500/15 to-orange-500/5 border border-red-500/20 dark:from-red-400/15 dark:to-orange-400/5 dark:border-red-400/20">
+                    <AlertTriangle class="w-3.5 h-3.5 text-red-500 dark:text-red-400 shrink-0" />
+                    <span class="text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Kontak Mitigasi</span>
+                  </div>
+                  <div class="flex-grow h-px bg-gradient-to-r from-red-200/60 to-transparent dark:from-red-800/40" />
+                </div>
+                <div class="space-y-2">
+                  <div
+                    v-for="contact in activeAdvisorSector!.emergencyContacts"
+                    :key="contact.label"
+                    class="flex items-center justify-between gap-3 p-3 rounded-xl border bg-white/60 border-slate-200/60 dark:bg-brand-navy-900/30 dark:border-brand-navy-800 hover:border-red-200/60 dark:hover:border-red-800/30 transition-colors"
+                  >
+                    <div class="min-w-0">
+                      <p class="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Unit Hubungan</p>
+                      <p class="text-[10.5px] font-black text-slate-800 dark:text-white mt-1 truncate">{{ contact.label }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <span class="text-[9px] font-mono font-black text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-brand-navy-900/60 px-2 py-1 rounded-lg border border-slate-200/60 dark:border-brand-navy-700">
+                        {{ contact.number }}
+                      </span>
+                      <a
+                        :href="'tel:' + contact.number.replace(/[^0-9]/g, '')"
+                        class="p-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white hover:scale-105 active:scale-95 transition-all shadow-sm shadow-red-500/30 outline-none"
+                        title="Panggil"
+                      >
+                        <ArrowUpRight class="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

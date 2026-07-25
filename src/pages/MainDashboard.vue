@@ -32,6 +32,7 @@ const TransportWeather = defineAsyncComponent(() => import('../components/Transp
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
 const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
 const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
+const LandBasedActivities = defineAsyncComponent(() => import('../components/LandBasedActivities.vue'));
 
 import type { 
   WeatherData, 
@@ -331,6 +332,11 @@ const openAviationAdvisor = (sectorId?: string) => {
     activeAviationSector.value = sectorId as any;
   }
   isAviationDrawerOpen.value = true;
+};
+
+const isLandDrawerOpen = ref(false);
+const openLandAdvisor = () => {
+  isLandDrawerOpen.value = true;
 };
 
 const handleSearchOtherLocation = () => {
@@ -793,6 +799,7 @@ onUnmounted(() => {
           :current-city-short-name="currentCityShortName"
           @open-maritime-advisor="openMaritimeAdvisor"
           @open-aviation-advisor="openAviationAdvisor"
+          @open-land-advisor="openLandAdvisor"
         />
 
 
@@ -817,6 +824,11 @@ onUnmounted(() => {
     :user-lat="props.userLat ?? null"
     :user-lng="props.userLng ?? null"
     @close="isAviationDrawerOpen = false"
+  />
+  <LandBasedActivities
+    :is-open="isLandDrawerOpen"
+    :selected-city="selectedCity"
+    @close="isLandDrawerOpen = false"
   />
 </template>
 

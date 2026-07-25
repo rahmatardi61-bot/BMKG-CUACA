@@ -106,7 +106,7 @@ const getPulseClass = (status: string) => {
       <Transition name="drawer-slide" appear>
         <div 
           v-if="isOpen"
-          class="relative h-full w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 p-5 md:p-6 flex flex-col justify-between overflow-hidden"
+          class="relative h-full w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 pt-5 px-5 pb-0 md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden"
         >
           <!-- Clean subtle top corner ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-brand-cyan/10 blur-3xl pointer-events-none"></div>
@@ -121,13 +121,18 @@ const getPulseClass = (status: string) => {
           
           <!-- Header Section -->
           <div class="mb-4 pr-8 text-left">
-            <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <span class="w-1 h-5 bg-blue-600 dark:bg-brand-cyan rounded-full"></span>
-              Advisor Keselamatan Maritim
-            </h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-0.5">
-              Rekomendasi keselamatan sektoral berbasis telemetri real-time.
-            </p>
+            <!-- Title & Icon Row -->
+            <div v-if="activeAdvisorSector" class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/20">
+              <div class="p-2.5 rounded-xl bg-blue-500/10 dark:bg-brand-cyan/15 flex items-center justify-center border border-blue-500/20 dark:border-brand-cyan/35 shrink-0">
+                <component :is="getSectorIcon(activeAdvisorSector.id)" class="w-5 h-5" :class="activeAdvisorSector.textColor" />
+              </div>
+              <div class="text-left flex-grow min-w-0">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-500 block">{{ activeAdvisorSector.name }}</span>
+                <h3 class="text-sm font-black text-slate-800 dark:text-white leading-snug mt-0.5 tracking-tight">
+                  {{ activeAdvisorSector.title }}
+                </h3>
+              </div>
+            </div>
             
             <!-- Tab Navigation / Sector Switcher -->
             <div class="flex overflow-x-auto no-scrollbar gap-1 mt-4 pb-0.5">
@@ -146,22 +151,10 @@ const getPulseClass = (status: string) => {
           </div>
 
           <!-- Scrollable Content Area -->
-          <div v-if="activeAdvisorSector" class="flex-grow overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-3 text-left" style="will-change: scroll-position; -webkit-overflow-scrolling: touch;">
+          <div v-if="activeAdvisorSector" class="flex-grow overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-3 pb-12 text-left" style="will-change: scroll-position; -webkit-overflow-scrolling: touch;">
             
             <!-- Sector Details Clean Layout -->
             <div class="space-y-4">
-              <!-- Title & Icon Row -->
-              <div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-brand-navy-900/20">
-                <div class="p-2 rounded-xl bg-blue-500/10 dark:bg-brand-cyan/15 flex items-center justify-center border border-blue-500/20 dark:border-brand-cyan/35 shrink-0">
-                  <component :is="getSectorIcon(activeAdvisorSector.id)" class="w-4 h-4" :class="activeAdvisorSector.textColor" />
-                </div>
-                <div class="text-left">
-                  <span class="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-550">{{ activeAdvisorSector.name }}</span>
-                  <h3 class="text-xs font-bold text-slate-800 dark:text-white leading-tight tracking-tight mt-0.5">
-                    {{ activeAdvisorSector.title }}
-                  </h3>
-                </div>
-              </div>
 
               <!-- Description -->
               <p class="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-normal">
@@ -292,17 +285,6 @@ const getPulseClass = (status: string) => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Close Button inside Scrollable Area -->
-            <div class="pt-4 mt-6 border-t border-slate-150 dark:border-brand-navy-900/20">
-              <button 
-                type="button" 
-                @click="emit('close')"
-                class="w-full py-2.5 rounded-xl border border-slate-200/80 dark:border-brand-navy-800 bg-white hover:bg-slate-50/80 dark:bg-transparent dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer shadow-xs"
-              >
-                Tutup Advisor
-              </button>
             </div>
           </div>
         </div>

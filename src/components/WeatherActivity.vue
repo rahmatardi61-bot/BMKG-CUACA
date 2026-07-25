@@ -28,6 +28,7 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'open-maritime-advisor', sectorId?: string): void;
   (e: 'open-aviation-advisor', sectorId?: string): void;
+  (e: 'open-land-advisor'): void;
 }>();
 
 function lockHeight(el: Element) {
@@ -56,7 +57,10 @@ function unlockHeight(el: Element) {
     >
       <div :key="selectedCity" class="flex flex-col gap-4">
         <!-- Card 1: Darat -->
-        <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50">
+        <div 
+          @click="emit('open-land-advisor')"
+          class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
+        >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/12 dark:bg-orange-500/18 blur-2xl group-hover:bg-orange-500/30 dark:group-hover:bg-orange-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
@@ -149,9 +153,9 @@ function unlockHeight(el: Element) {
                 <span>UV {{ weatherData.uvIndex }}</span>
               </div>
             </div>
-            <span class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 cursor-not-allowed transition-colors font-black" title="Layanan belum tersedia">
+            <span @click.stop="emit('open-land-advisor')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-orange-600 dark:text-orange-400 hover:text-orange-750 dark:hover:text-orange-300 hover:underline transition-colors font-black cursor-pointer">
               Selengkapnya
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
                 <polyline points="7 7 17 7 17 17"></polyline>
               </svg>
@@ -160,7 +164,10 @@ function unlockHeight(el: Element) {
         </div>
 
         <!-- Card 2: Pesisir & Laut -->
-        <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50">
+        <div 
+          @click="emit('open-maritime-advisor', 'shipping')"
+          class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
+        >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/12 dark:bg-cyan-500/18 blur-2xl group-hover:bg-cyan-500/30 dark:group-hover:bg-cyan-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
@@ -250,7 +257,7 @@ function unlockHeight(el: Element) {
                 <span>{{ additionalInfo.windDir }}</span>
               </div>
             </div>
-            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-cyan-600 dark:text-brand-cyan hover:text-cyan-750 dark:hover:text-cyan-300 hover:underline transition-colors font-black">
+            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-cyan-600 dark:text-brand-cyan hover:text-cyan-750 dark:hover:text-cyan-300 hover:underline transition-colors font-black cursor-pointer">
               Selengkapnya
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
@@ -261,7 +268,10 @@ function unlockHeight(el: Element) {
         </div>
 
         <!-- Card 3: Penerbangan -->
-        <div class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50">
+        <div 
+          @click="emit('open-aviation-advisor', 'commercial')"
+          class="group relative bg-white/95 dark:bg-brand-navy-900/90 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-all duration-500 backdrop-blur-xl flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
+        >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/12 dark:bg-indigo-500/18 blur-2xl group-hover:bg-indigo-500/30 dark:group-hover:bg-indigo-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 

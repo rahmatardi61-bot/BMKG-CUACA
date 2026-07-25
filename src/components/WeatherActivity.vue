@@ -25,7 +25,11 @@ defineProps<{
   currentCityShortName: string;
 }>();
 
-// ── Height lock: prevents container collapse when leaving el goes position:absolute ──
+const emit = defineEmits<{
+  (e: 'open-maritime-advisor', sectorId?: string): void;
+  (e: 'open-aviation-advisor', sectorId?: string): void;
+}>();
+
 function lockHeight(el: Element) {
   const wrapper = (el as HTMLElement).parentElement;
   if (wrapper) wrapper.style.height = (el as HTMLElement).offsetHeight + 'px';
@@ -34,30 +38,6 @@ function unlockHeight(el: Element) {
   const wrapper = (el as HTMLElement).parentElement;
   if (wrapper) wrapper.style.height = '';
 }
-
-const redirectToMaritime = () => {
-  const { protocol, hostname, port, origin } = window.location;
-  
-  // 1. Check if it's local development
-  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-  
-  if (isLocal) {
-    let targetUrl = 'http://localhost:5174';
-    if (port === '5173') {
-      targetUrl = origin.replace(':5173', ':5174');
-    } else if (port) {
-      const nextPort = parseInt(port) + 1;
-      targetUrl = `${protocol}//${hostname}:${nextPort}`;
-    }
-    window.open(targetUrl, '_blank');
-    return;
-  }
-  
-  // 2. Production/Staging domain replacement logic
-  const productionUrl = 'https://bmkg-maritim.vercel.app';
-
-  window.open(productionUrl, '_blank');
-};
 </script>
 
 <template>
@@ -270,7 +250,7 @@ const redirectToMaritime = () => {
                 <span>{{ additionalInfo.windDir }}</span>
               </div>
             </div>
-            <span @click.stop="redirectToMaritime" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-cyan-600 dark:text-brand-cyan hover:text-cyan-750 dark:hover:text-cyan-300 hover:underline transition-colors font-black">
+            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-cyan-600 dark:text-brand-cyan hover:text-cyan-750 dark:hover:text-cyan-300 hover:underline transition-colors font-black">
               Selengkapnya
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
@@ -380,9 +360,12 @@ const redirectToMaritime = () => {
                 <span>{{ weatherData.humidity }}%</span>
               </div>
             </div>
-            <span class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 cursor-not-allowed transition-colors font-black" title="Layanan belum tersedia">
+            <span
+              @click.stop="emit('open-aviation-advisor', 'commercial')"
+              class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors font-black cursor-pointer"
+            >
               Selengkapnya
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
                 <polyline points="7 7 17 7 17 17"></polyline>
               </svg>

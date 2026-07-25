@@ -30,6 +30,8 @@ const AroundActivityPanel = defineAsyncComponent({
 // ── Lighter components — lazy loaded without skeleton (loads fast enough) ─────
 const TransportWeather = defineAsyncComponent(() => import('../components/TransportWeather.vue'));
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
+const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
+const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
 
 import type { 
   WeatherData, 
@@ -59,6 +61,8 @@ const props = defineProps<{
   selectedCity: string;
   isLocating: boolean;
   isGeolocated?: boolean;
+  userLat?: number | null;
+  userLng?: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -307,6 +311,27 @@ const otherCities = computed(() => {
     );
   });
 });
+
+// ── Advisor Drawer State & Logic ──
+const isMaritimeDrawerOpen = ref(false);
+const activeMaritimeSector = ref<'shipping' | 'fishery' | 'oilgas' | 'tourism' | 'public'>('shipping');
+
+const openMaritimeAdvisor = (sectorId?: string) => {
+  if (sectorId && ['shipping', 'fishery', 'oilgas', 'tourism', 'public'].includes(sectorId)) {
+    activeMaritimeSector.value = sectorId as any;
+  }
+  isMaritimeDrawerOpen.value = true;
+};
+
+const isAviationDrawerOpen = ref(false);
+const activeAviationSector = ref<'commercial' | 'cargo' | 'sigmet' | 'pirep'>('commercial');
+
+const openAviationAdvisor = (sectorId?: string) => {
+  if (sectorId && ['commercial', 'cargo', 'sigmet', 'pirep'].includes(sectorId)) {
+    activeAviationSector.value = sectorId as any;
+  }
+  isAviationDrawerOpen.value = true;
+};
 
 const handleSearchOtherLocation = () => {
   showDropdown.value = false;
@@ -766,6 +791,8 @@ onUnmounted(() => {
           :slide-direction="slideDirection"
           :current-city-landmark-svg="currentCityLandmarkSvg"
           :current-city-short-name="currentCityShortName"
+          @open-maritime-advisor="openMaritimeAdvisor"
+          @open-aviation-advisor="openAviationAdvisor"
         />
 
 
@@ -775,6 +802,22 @@ onUnmounted(() => {
 
     </div>
   </main>
+
+  <!-- Stands as standalone modal/drawer teleporter -->
+  <MaritimeAdvisorDrawer
+    :is-open="isMaritimeDrawerOpen"
+    :initial-sector-id="activeMaritimeSector"
+    :selected-city="selectedCity"
+    @close="isMaritimeDrawerOpen = false"
+  />
+  <AviationAdvisorDrawer
+    :is-open="isAviationDrawerOpen"
+    :initial-sector-id="activeAviationSector"
+    :selected-city="selectedCity"
+    :user-lat="props.userLat ?? null"
+    :user-lng="props.userLng ?? null"
+    @close="isAviationDrawerOpen = false"
+  />
 </template>
 
 <style scoped>

@@ -103,6 +103,8 @@ const applyTheme = () => {
 // Geolocation state
 const isLocating = ref(false);
 const isGeolocated = ref(false);
+const userLat = ref<number | null>(null);
+const userLng = ref<number | null>(null);
 
 const toastMessage = ref<{ text: string; type: 'warning' | 'info' } | null>(null);
 
@@ -128,11 +130,13 @@ const detectRealtimeLocation = () => {
   }
 
   isLocating.value = true;
-  
+
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
+      userLat.value = lat;
+      userLng.value = lon;
       
       try {
         const response = await fetch(
@@ -148,16 +152,36 @@ const detectRealtimeLocation = () => {
         
         if (data && data.address) {
           const addr = data.address;
-          const village = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || 'Lokasi Terdeteksi';
-          const district = addr.city_district || addr.county || '';
-          const city = addr.city || addr.regency || addr.town || '';
-          const state = addr.state || '';
+          // Nominatim field mapping untuk Indonesia:
+          // village/suburb/neighbourhood = Kelurahan/Desa
+          // city_district/town = Kecamatan (Kecamatan biasanya masuk 'town' jika berada di dalam kabupaten/county)
+          // county/city/regency = Kabupaten/Kota
+          // state = Provinsi
+          const village = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || '';
           
+          let kecamatan = '';
+          let kabupaten = '';
+          
+          const candidateKecamatan = addr.city_district || addr.subdistrict || addr.quarter || '';
+          const candidateKabupaten = addr.county || addr.city || addr.regency || '';
+          
+          if (candidateKabupaten) {
+            kabupaten = candidateKabupaten;
+            // Jika ada kabupaten, field 'town' kemungkinan besar adalah kecamatan (seperti Kasihan di Kabupaten Bantul)
+            kecamatan = candidateKecamatan || addr.town || '';
+          } else {
+            // Jika tidak ada kabupaten/kota lain, maka 'town' dianggap sebagai kabupaten/kota utama
+            kabupaten = addr.town || '';
+            kecamatan = candidateKecamatan;
+          }
+          
+          const state = addr.state || '';
+
           let formattedAddress = '';
-          if (village) formattedAddress += village;
-          if (district) formattedAddress += `, Kec. ${district.replace(/Kecamatan/g, '').trim()}`;
-          if (city) formattedAddress += `, ${city.trim()}`;
-          if (state) formattedAddress += `, ${state.trim()}`;
+          if (village)   formattedAddress += village;
+          if (kecamatan) formattedAddress += `, Kec. ${kecamatan.replace(/Kecamatan\s*/gi, '').trim()}`;
+          if (kabupaten) formattedAddress += `, ${kabupaten.replace(/Kabupaten\s*/gi, 'Kab. ').trim()}`;
+          if (state)     formattedAddress += `, ${state.trim()}`;
           
           if (formattedAddress) {
             generateMockWeatherForCity(formattedAddress);
@@ -370,6 +394,8 @@ onMounted(() => {
         :selected-city="selectedCity"
         :is-locating="isLocating"
         :is-geolocated="isGeolocated"
+        :user-lat="userLat"
+        :user-lng="userLng"
         @select-city="selectCity"
         @delete-city="deleteCity"
         @detect-location="detectRealtimeLocation"

@@ -213,3 +213,11 @@ body.drawer-open #app {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 16px);
 }
+
+/* Global iOS Auto-Zoom Fix on mobile input focus */
+@media screen and (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+

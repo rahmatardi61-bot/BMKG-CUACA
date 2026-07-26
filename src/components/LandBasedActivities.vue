@@ -848,7 +848,8 @@ onUnmounted(() => {
                   placeholder="Cari di peta" 
                   v-model="searchQuery"
                   @focus="startSearch"
-                  class="w-full bg-transparent border-none outline-none text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400"
+                  class="w-full bg-transparent border-none outline-none font-semibold text-slate-800 dark:text-white placeholder-slate-400"
+                  style="font-size: 16px !important; line-height: 1;"
                 />
                 <Mic class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-2 cursor-pointer hover:text-blue-500 transition-colors" />
                 <button 

@@ -15,13 +15,8 @@ import {
   Navigation,
   X,
   MessageSquare,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2,
-  Globe,
   MapPin,
   Home,
-  ThumbsUp,
   Sunrise,
   Sunset,
   Moon,
@@ -195,6 +190,7 @@ const getSnowStyle = (index: number) => {
 
 import { toRef } from 'vue';
 import { useWeatherReport } from '../composables/useWeatherReport';
+import WeatherReportDrawer from './WeatherReportDrawer.vue';
 
 const {
   isReportModalOpen,
@@ -640,10 +636,11 @@ onUnmounted(() => {
               {{ weatherData.city.split(',')[0] }}
             </h2>
             <p class="text-[11px] font-bold opacity-80 mt-1.5 uppercase tracking-wider flex items-center gap-1 flex-wrap">
-              <span>{{ weatherData.city.split(',')[0] }}</span>
               <template v-if="weatherData.city.split(',').length > 1 && weatherData.city.split(',')[1].trim()">
-                <span class="opacity-50">•</span>
                 <span>{{ weatherData.city.split(',').slice(1).map(x => x.trim()).join(', ') }}</span>
+              </template>
+              <template v-else>
+                <span>{{ weatherData.city.split(',')[0] }}</span>
               </template>
             </p>
           </div>
@@ -1386,275 +1383,31 @@ onUnmounted(() => {
 
     </div>
 
-    <!-- Futuristic Glassmorphic Lapor Cuaca Right-Side Panel -->
-    <Teleport to="body">
-      <div v-if="isReportModalOpen" class="fixed inset-0 z-[9999] overflow-hidden">
-        <!-- Backdrop Overlay -->
-        <Transition name="fade" appear>
-          <div 
-            v-if="isReportModalOpen"
-            class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm cursor-default"
-            @click="closeReportModal"
-          ></div>
-        </Transition>
+    <!-- Lapor Cuaca Drawer (extracted component) -->
+    <WeatherReportDrawer
+      :isOpen="isReportModalOpen"
+      :selectedCity="props.selectedCity"
+      :weatherTemp="weatherData.temp"
+      :weatherIcon="weatherStyling.icon"
+      :reportSubmitting="reportSubmitting"
+      :reportSuccess="reportSuccess"
+      :reportActiveTab="reportActiveTab"
+      :reportForm="reportForm"
+      :reportHistory="reportHistory"
+      :overallConditions="overallConditions"
+      :tempFeelings="tempFeelings"
+      :otherConditionsList="otherConditionsList"
+      :getConditionIconBg="getConditionIconBg"
+      :getConditionIconColor="getConditionIconColor"
+      @close="closeReportModal"
+      @update:reportActiveTab="reportActiveTab = $event"
+      @update:reportForm="reportForm = $event"
+      @toggleOtherCondition="toggleOtherCondition"
+      @submit="submitReport"
+    />
+</div>
 
-        <!-- Slide-out Drawer Panel -->
-        <Transition name="slide-right" appear>
-          <div 
-            v-if="isReportModalOpen"
-            class="absolute top-0 right-0 bottom-0 w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 p-5 md:p-6 flex flex-col justify-between overflow-hidden"
-          >
-            <!-- Clean subtle top corner ambient glow -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-brand-cyan/10 blur-3xl pointer-events-none"></div>
-            
-            <!-- Close button -->
-            <button 
-              @click="closeReportModal"
-              class="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer"
-            >
-              <X class="w-4 h-4" />
-            </button>
-            
-            <!-- Header Section -->
-            <div class="mb-4 pr-8 text-left">
-              <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                <span class="w-1 h-5 bg-blue-600 dark:bg-brand-cyan rounded-full"></span>
-                Laporkan Cuaca
-              </h2>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-0.5">
-                Pengamatan Anda membantu meningkatkan akurasi prakiraan.
-              </p>
-              
-              <!-- Tab Navigation (Capsule Switcher) -->
-              <div class="flex gap-3.5 mt-4 items-center justify-start">
-                <button 
-                  @click="reportActiveTab = 'feedback'"
-                  class="py-1.5 px-3.5 text-[9px] font-black uppercase tracking-wider rounded-full transition-all duration-200 cursor-pointer text-center whitespace-nowrap"
-                  :class="reportActiveTab === 'feedback'
-                    ? 'bg-slate-100 dark:bg-brand-navy-900/60 text-blue-650 dark:text-brand-cyan font-black'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-850 dark:hover:text-white'"
-                >
-                  Lapor Masukan
-                </button>
-                <button 
-                  @click="reportActiveTab = 'history'"
-                  class="py-1.5 px-3.5 text-[9px] font-black uppercase tracking-wider rounded-full transition-all duration-200 cursor-pointer text-center whitespace-nowrap"
-                  :class="reportActiveTab === 'history'
-                    ? 'bg-slate-100 dark:bg-brand-navy-900/60 text-blue-650 dark:text-brand-cyan font-black'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-850 dark:hover:text-white'"
-                >
-                  Riwayat Laporan
-                </button>
-              </div>
-            </div>
-
-            <!-- Success Screen -->
-            <div v-if="reportSuccess" class="flex-1 py-12 flex flex-col items-center justify-center text-center space-y-5 my-auto animate-fade-in">
-              <div class="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center text-green-500 dark:text-green-400 animate-bounce">
-                <CheckCircle2 class="w-10 h-10 animate-pulse" />
-              </div>
-              <h3 class="text-xl font-bold text-slate-800 dark:text-white">Laporan Terkirim!</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-                Terima kasih atas kontribusi Anda. Laporan cuaca Anda di <strong class="text-blue-600 dark:text-brand-cyan">{{ selectedCity }}</strong> telah berhasil diverifikasi dan masuk ke sistem BMKG Crowd-Sourced Weather.
-              </p>
-            </div>
-
-            <!-- Scrollable Content Area -->
-            <div v-else class="flex-1 overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-2" style="will-change: scroll-position; -webkit-overflow-scrolling: touch;">
-              <!-- FEEDBACK TAB -->
-              <div v-if="reportActiveTab === 'feedback'" class="space-y-5">
-                
-                <!-- Location Section -->
-                <div class="space-y-2">
-                  <div class="flex justify-between items-center">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Lokasi</label>
-                    <button type="button" class="text-[10px] font-bold text-blue-600 dark:text-brand-cyan hover:text-blue-700 dark:hover:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors duration-200">
-                      <Globe class="w-3.5 h-3.5" />
-                      Temukan lokasi Anda di peta
-                    </button>
-                  </div>
-                  <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 dark:bg-brand-navy-900/20 border border-slate-200/15 dark:border-white/5 shadow-xs">
-                    <div class="flex items-center gap-2.5 min-w-0 text-left">
-                      <div class="w-7 h-7 rounded-lg bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center shrink-0">
-                        <MapPin class="w-4 h-4 text-rose-500" />
-                      </div>
-                      <span class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {{ selectedCity }}, Indonesia
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0 bg-white dark:bg-brand-navy-900/50 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-brand-navy-800/40 shadow-2xs">
-                      <component :is="weatherStyling.icon" class="w-3.5 h-3.5 text-blue-600 dark:text-brand-cyan" />
-                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                        {{ weatherData.temp }}°C
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Overall Condition Section -->
-                <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block text-left">Kondisi umum</label>
-                  <div class="grid grid-cols-3 gap-2">
-                    <button 
-                      v-for="cond in overallConditions"
-                      :key="cond.name"
-                      type="button"
-                      @click="reportForm.condition = cond.label"
-                      class="flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border text-xs font-semibold transition-all duration-300 active:scale-95 hover:scale-[1.02] cursor-pointer min-h-[72px] shadow-2xs"
-                      :class="reportForm.condition === cond.label
-                        ? 'bg-blue-500/10 border-blue-500/80 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/75 dark:text-brand-cyan font-bold shadow-sm shadow-blue-550/5 dark:shadow-brand-cyan/10'
-                        : 'bg-slate-50/40 border-slate-200/15 hover:bg-slate-100/50 dark:bg-brand-navy-900/15 dark:border-white/5 dark:hover:border-brand-navy-800 text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                    >
-                      <div 
-                        class="w-8 h-8 rounded-[8px] flex items-center justify-center transition-colors duration-200"
-                        :class="[
-                          reportForm.condition === cond.label
-                            ? 'bg-blue-500/20 dark:bg-brand-cyan/25'
-                            : getConditionIconBg(cond.label)
-                        ]"
-                      >
-                        <component 
-                          :is="cond.icon" 
-                          class="w-4 h-4 transition-colors duration-200"
-                          :class="[
-                            reportForm.condition === cond.label
-                              ? 'text-blue-600 dark:text-brand-cyan'
-                              : getConditionIconColor(cond.label)
-                          ]"
-                        />
-                      </div>
-                      <span class="text-[10px] text-center leading-tight mt-0.5 font-bold">{{ cond.label }}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Temperature Section -->
-                <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block text-left">Suhu</label>
-                  <div class="grid grid-cols-5 gap-1.5">
-                    <button 
-                      v-for="feel in tempFeelings"
-                      :key="feel.name"
-                      type="button"
-                      @click="reportForm.tempFeeling = feel.label"
-                      class="flex flex-col items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all duration-300 active:scale-95 hover:scale-[1.02] cursor-pointer min-h-[72px] shadow-2xs"
-                      :class="reportForm.tempFeeling === feel.label
-                        ? 'bg-blue-500/10 border-blue-500/80 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/75 dark:text-brand-cyan font-bold shadow-sm shadow-blue-550/5 dark:shadow-brand-cyan/10'
-                        : 'bg-slate-50/40 border-slate-200/15 hover:bg-slate-100/50 dark:bg-brand-navy-900/15 dark:border-white/5 dark:hover:border-brand-navy-800 text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                    >
-                      <div class="text-center space-y-0.5">
-                        <span class="text-[8px] opacity-70 font-bold block leading-none">{{ feel.range }}</span>
-                        <span class="text-[9px] font-extrabold block leading-tight mt-0.5">{{ feel.label }}</span>
-                      </div>
-                      <ThumbsUp class="w-3 h-3 mt-1" :class="reportForm.tempFeeling === feel.label ? 'fill-current text-blue-600 dark:text-brand-cyan opacity-100' : 'opacity-30'" />
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Other Conditions Section -->
-                <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block text-left">Kondisi lainnya</label>
-                  <div class="grid grid-cols-5 gap-1.5">
-                    <button 
-                      v-for="oth in otherConditionsList"
-                      :key="oth.name"
-                      type="button"
-                      @click="toggleOtherCondition(oth.label)"
-                      class="flex flex-col items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all duration-300 active:scale-95 hover:scale-[1.02] cursor-pointer min-h-[72px] shadow-2xs"
-                      :class="reportForm.otherConditions.includes(oth.label)
-                        ? 'bg-blue-500/10 border-blue-500/80 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/75 dark:text-brand-cyan font-bold shadow-sm shadow-blue-550/5 dark:shadow-brand-cyan/10'
-                        : 'bg-slate-50/40 border-slate-200/15 hover:bg-slate-100/50 dark:bg-brand-navy-900/15 dark:border-white/5 dark:hover:border-brand-navy-800 text-slate-650 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                    >
-                      <component :is="oth.icon" class="w-4 h-4 text-slate-500 dark:text-slate-400 transition-colors" :class="reportForm.otherConditions.includes(oth.label) ? 'text-blue-600 dark:text-brand-cyan' : ''" />
-                      <span class="text-[9px] text-center font-extrabold leading-tight mt-0.5">{{ oth.label }}</span>
-                      <ThumbsUp class="w-3 h-3 mt-1" :class="reportForm.otherConditions.includes(oth.label) ? 'fill-current text-blue-600 dark:text-brand-cyan opacity-100' : 'opacity-30'" />
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Comment Section -->
-                <div class="space-y-2 text-left">
-                  <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Apa lagi yang perlu kami ketahui?</label>
-                  <textarea 
-                    rows="3"
-                    v-model="reportForm.comment"
-                    placeholder="Tambahkan komentar, detail, atau hal lainnya..."
-                    class="w-full bg-slate-50/30 border border-slate-200/80 dark:bg-brand-navy-900/20 dark:border-brand-navy-850/40 rounded-xl p-3 text-base md:text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-brand-cyan focus:ring-2 focus:ring-blue-500/10 dark:focus:ring-brand-cyan/20 transition-all shadow-sm"
-                  ></textarea>
-                </div>
-
-                <!-- Warning Info Box -->
-                <div class="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 dark:border-amber-500/15 text-xs text-amber-700 dark:text-amber-300 leading-normal">
-                  <AlertTriangle class="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
-                  <span class="text-[10.5px] text-left font-semibold leading-relaxed">Pastikan laporan Anda sesuai dengan kondisi cuaca sebenarnya di lokasi Anda saat ini. Laporan palsu dapat ditindaklanjuti.</span>
-                </div>
-
-                <!-- Actions Area (Relocated inside scrollable area) -->
-                <div v-if="!reportSuccess" class="pt-4 mt-6 border-t border-slate-150 dark:border-brand-navy-900/20 flex gap-3 bg-transparent">
-                  <button 
-                    type="button" 
-                    @click="closeReportModal"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-200/80 dark:border-brand-navy-800 bg-white hover:bg-slate-50/80 dark:bg-transparent dark:hover:bg-white/5 text-slate-655 dark:text-slate-300 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer shadow-2xs"
-                  >
-                    Batal
-                  </button>
-                  <button 
-                    type="button"
-                    @click="submitReport"
-                    :disabled="reportSubmitting || !reportForm.condition"
-                    class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 dark:from-brand-cyan dark:to-cyan-400 dark:hover:from-brand-cyan/90 dark:hover:to-cyan-400/90 text-white dark:text-brand-navy-950 text-xs font-bold transition-all duration-300 active:scale-95 disabled:from-slate-200 disabled:to-slate-200 disabled:dark:from-brand-navy-800/80 disabled:dark:to-brand-navy-800/80 disabled:text-slate-400 disabled:dark:text-slate-600 disabled:shadow-none disabled:active:scale-100 disabled:cursor-not-allowed cursor-pointer shadow-md shadow-blue-500/10 dark:shadow-brand-cyan/15 flex items-center justify-center gap-1.5"
-                  >
-                    <Loader2 v-if="reportSubmitting" class="w-3.5 h-3.5 animate-spin" />
-                    <span>{{ reportSubmitting ? 'Mengirimkan...' : 'Kirim Laporan' }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- HISTORY TAB -->
-              <div v-else class="space-y-4">
-                <div 
-                  v-for="hist in reportHistory" 
-                  :key="hist.id" 
-                  class="p-4 rounded-xl border border-slate-200 dark:border-brand-navy-800 bg-white dark:bg-brand-navy-900/20 shadow-sm flex flex-col gap-2.5 text-left"
-                >
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ hist.city.split(',')[0] }}</span>
-                      <span class="text-[9px] text-slate-400 dark:text-slate-500 font-medium block">{{ hist.city.split(',').slice(1).map(x => x.trim()).join(', ') }}</span>
-                      <span class="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">{{ hist.time }}</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-blue-600 dark:text-brand-cyan bg-blue-500/10 dark:bg-brand-cyan/10 px-2.5 py-0.5 rounded-full border border-blue-500/10 dark:border-brand-cyan/20">
-                      {{ hist.condition }}
-                    </span>
-                  </div>
-                  <div class="text-[11px] text-slate-650 dark:text-slate-350 space-y-1.5">
-                    <p><strong class="text-slate-400 dark:text-slate-500 font-bold uppercase text-[9px] tracking-wide">Sensasi suhu:</strong> {{ hist.tempFeeling }}</p>
-                    <p v-if="hist.otherConditions.length > 0"><strong class="text-slate-400 dark:text-slate-500 font-bold uppercase text-[9px] tracking-wide">Kondisi lainnya:</strong> {{ hist.otherConditions.join(', ') }}</p>
-                    <p v-if="hist.comment" class="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-brand-navy-900/40 italic text-slate-500 dark:text-slate-400 border-l-2 border-slate-200 dark:border-brand-navy-800">
-                      "{{ hist.comment }}"
-                    </p>
-                  </div>
-                </div>
-
-                <!-- History close actions (Relocated inside scrollable area) -->
-                <div class="pt-4 mt-6 border-t border-slate-150 dark:border-brand-navy-900/20">
-                  <button 
-                    type="button" 
-                    @click="closeReportModal"
-                    class="w-full py-2.5 rounded-xl border border-slate-200/80 dark:border-brand-navy-800 bg-white hover:bg-slate-50/80 dark:bg-transparent dark:hover:bg-white/5 text-slate-650 dark:text-slate-300 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer shadow-2xs"
-                  >
-                    Tutup Riwayat
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Transition>
-      </div>
-    </Teleport>
-  </div>
 </template>
-
 <style scoped>
 /* Weather animations styling */
 .sunny-aura {
@@ -1976,43 +1729,10 @@ onUnmounted(() => {
   100% { stroke-dashoffset: -260; }
 }
 
-/* ── Weather Metric Card Glassmorphism Overlay ────────────────────────────────
-   Creates a frosted gradient layer between the SVG illustration (z-0) and
-   the text content (z-10), giving a premium "glass over artwork" effect. */
+/* ── Weather Metric Card ──────────────────────────────────────────────────────
+   Overlay glassmorphism dihapus agar ilustrasi background tampil bersih di
+   kedua tema (light & dark). */
 .weather-metric-card {
   isolation: isolate;
-}
-.weather-metric-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  border-radius: inherit;
-  /* Light mode: white frost from top, fading to transparent at bottom */
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(255, 255, 255, 0.72) 40%,
-    rgba(255, 255, 255, 0.30) 70%,
-    rgba(255, 255, 255, 0.00) 100%
-  );
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  transition: opacity 0.4s ease;
-}
-/* Dark mode: navy frost overlay */
-:global(.dark) .weather-metric-card::after {
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 17, 32, 0.90) 0%,
-    rgba(8, 17, 32, 0.70) 40%,
-    rgba(8, 17, 32, 0.28) 70%,
-    rgba(8, 17, 32, 0.00) 100%
-  );
-}
-/* On hover: lighten the overlay slightly to reveal more illustration */
-.weather-metric-card:hover::after {
-  opacity: 0.75;
 }
 </style>

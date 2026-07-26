@@ -118,20 +118,15 @@ const getPulseClass = (status: string) => {
       <Transition name="drawer-slide" appear>
         <div
           v-if="isOpen"
-          class="relative w-full h-[95dvh] md:h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-t md:border-t-0 border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 pt-5 px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-t-3xl md:rounded-none"
+          class="relative w-full h-[100dvh] md:h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+20px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-none"
         >
-          <!-- Drag handle pill — mobile only -->
-          <div class="flex justify-center pt-2 pb-1 shrink-0 md:hidden">
-            <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-          </div>
-
           <!-- Ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
           <!-- Close button -->
           <button
             @click="emit('close')"
-            class="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer z-10"
+            class="absolute top-[calc(env(safe-area-inset-top,16px)+4px)] right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer z-10 md:top-4"
           >
             <X class="w-4 h-4" />
           </button>

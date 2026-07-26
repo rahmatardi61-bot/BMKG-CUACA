@@ -49,7 +49,7 @@ const destinationLocation = ref<LocationData | null>(null);
 const activeTravelMode = ref('car');
 
 // Bottom sheet drag state
-const sheetExpanded = ref(true);
+const sheetExpanded = ref(false);
 let dragStartY = 0;
 let dragStartTime = 0;
 let isDraggingSheet = false;
@@ -738,7 +738,7 @@ watch(
       document.body.classList.add('drawer-open');
       
       currentStep.value = 'overview';
-      sheetExpanded.value = true;
+      sheetExpanded.value = false;
       startLocation.value = locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0];
       startCityId.value = startLocation.value.id;
       startQuery.value = startLocation.value.name;
@@ -796,39 +796,29 @@ onUnmounted(() => {
           <div ref="mapEl" id="land-map" class="w-full h-full"></div>
         </div>
 
-        <!-- Floating Close X Button on Map (desktop only, mobile uses back/close inside the fullscreen drawer) -->
+        <!-- Floating Close X Button on Map -->
         <button 
           v-if="currentStep !== 'search'"
           type="button"
           @click="emit('close')"
-          class="hidden md:flex absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
+          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
           title="Tutup Rute"
         >
           <X class="w-5 h-5" />
         </button>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
-             2. BOTTOM SHEET: Fullscreen responsive drawer content for all steps
+             2. BOTTOM SHEET: Drawer content for all steps
              ───────────────────────────────────────────────────────────────────────── -->
         <Transition name="drawer-slide" appear>
           <div 
             v-if="isOpen"
-            class="
-              fixed inset-0 z-45 w-full h-[100dvh]
-              md:relative md:inset-auto md:z-45 md:w-[420px] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]
-              mx-0 mb-0 md:mx-6 md:my-6
-              bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl
-              border-none md:border md:border-slate-200/60 md:dark:border-slate-800/40
-              shadow-2xl rounded-none md:rounded-3xl
-              flex flex-col overflow-hidden text-left select-none
-              pt-[calc(env(safe-area-inset-top,0px)+8px)] md:pt-0
-              transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
-            "
-            :class="sheetExpanded ? 'max-h-full md:max-h-[calc(100vh-48px)]' : 'max-h-full md:max-h-[calc(100vh-48px)]'"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
+            :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
           >
-            <!-- Drag Handle / Bar at the top of the sheet (desktop only, hidden on mobile since it is fullscreen) -->
+            <!-- Drag Handle / Bar at the top of the sheet -->
             <div 
-              class="hidden md:flex py-3 items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+              class="py-3 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
               @pointerdown.prevent="onSheetDragStart"
               @click="toggleSheetExpanded"
               title="Seret untuk minimize/expand"

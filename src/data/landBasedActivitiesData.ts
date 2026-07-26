@@ -14,6 +14,9 @@ export interface LocationData {
 
 export const locationsList: LocationData[] = [
   // --- DI YOGYAKARTA & JAWA TENGAH ---
+  { id: 'bangunjiwo', name: 'Bangunjiwo, Kasihan', type: 'Desa', region: 'Bantul, DI Yogyakarta', lat: -7.8385, lng: 110.3275, temp: 32, weather: 'Hujan Ringan', uv: 5, condition: 'hujan', tips: 'Tidak ada curah hujan setidaknya selama 1 jam. Tidak direkomendasikan untuk aktivitas luar ruangan.' },
+  { id: 'bentarsari', name: 'Bentarsari, Salem', type: 'Desa', region: 'Kabupaten Brebes Jawa Tengah', lat: -7.1643, lng: 108.7909, temp: 32, weather: 'Hujan Ringan', uv: 5, condition: 'hujan', tips: 'Badai Petir diprakirakan akan terjadi pada saat Anda tiba.' },
+  { id: 'purworejo', name: 'Purworejo', type: 'Kabupaten', region: 'Jawa Tengah', lat: -7.7123, lng: 110.0090, temp: 36, weather: 'Cerah', uv: 8, condition: 'cerah', tips: 'Sangat Tinggi tidak disarankan untuk aktivitas luar' },
   { id: 'yogyakarta', name: 'Kota Yogyakarta', type: 'Kota', region: 'DI Yogyakarta', lat: -7.7956, lng: 110.3695, temp: 30, weather: 'Berawan', uv: 4, condition: 'berawan', tips: 'Kondisi aspal lembap. Waspadai genangan air di bahu jalan.' },
   { id: 'sleman', name: 'Sleman', type: 'Kabupaten', region: 'DI Yogyakarta', lat: -7.7123, lng: 110.3980, temp: 29, weather: 'Cerah Berawan', uv: 5, condition: 'cerah', tips: 'Lalu lintas lancar. Suhu berkendara stabil.' },
   { id: 'bantul', name: 'Bantul', type: 'Kabupaten', region: 'DI Yogyakarta', lat: -7.8876, lng: 110.3273, temp: 31, weather: 'Berawan', uv: 4, condition: 'berawan', tips: 'Kelembapan tinggi, laju kendaraan normal.' },
@@ -28,11 +31,11 @@ export const locationsList: LocationData[] = [
   { id: 'solo', name: 'Kota Surakarta (Solo)', type: 'Kota', region: 'Jawa Tengah', lat: -7.5754, lng: 110.8243, temp: 31, weather: 'Cerah Berawan', uv: 5, condition: 'cerah', tips: 'Kondisi jalanan kering, perjalanan aman.' },
   { id: 'semarang', name: 'Kota Semarang', type: 'Kota', region: 'Jawa Tengah', lat: -6.9667, lng: 110.4167, temp: 32, weather: 'Cerah', uv: 6, condition: 'cerah', tips: 'Jalan arteri pesisir kering. Waspadai cuaca panas.' },
   { id: 'purwokerto', name: 'Purwokerto', type: 'Kecamatan', region: 'Banyumas, Jawa Tengah', lat: -7.4244, lng: 109.2300, temp: 26, weather: 'Hujan Sedang', uv: 3, condition: 'hujan', tips: 'Hujan membatasi jarak pandang. Kurangi kecepatan.' },
-
+  
   // --- DKI JAKARTA & JAWA BARAT ---
   { id: 'jakarta', name: 'Jakarta Pusat', type: 'Kota', region: 'DKI Jakarta', lat: -6.2088, lng: 106.8456, temp: 33, weather: 'Cerah Berawan', uv: 5, condition: 'cerah', tips: 'Lalu lintas ibukota kondusif. Cuaca aman.' },
   { id: 'bogor', name: 'Kota Bogor', type: 'Kota', region: 'Jawa Barat', lat: -6.5971, lng: 106.7986, temp: 26, weather: 'Hujan Sedang', uv: 2, condition: 'hujan', tips: 'Khas kota hujan, aspal basah. Hati-hati slip ban.' },
-  { id: 'cisarua', name: 'Cisarua', type: 'Kecamatan', region: 'Bogor, Jawa Barat', lat: -6.6908, lng: 106.9450, temp: 22, weather: 'Hujan Ringan', uv: 2, condition: 'hujan', tips: 'Jalur Puncak berkabut tebal dan licin. Jaga jarak aman.' },
+  { id: 'cisarua', name: 'Cisarua', type: 'Kecamatan', region: 'Bogor, Jawa Barat', lat: -6.6908, lng: 106.9450, temp: 22, weather: 'Hujan Ringan', uv: 2, condition: 'hujan', tips: 'Jalur Puncak berkabut tebal and licin. Jaga jarak aman.' },
   { id: 'bandung', name: 'Kota Bandung', type: 'Kota', region: 'Jawa Barat', lat: -6.9175, lng: 107.6191, temp: 25, weather: 'Berawan Tebal', uv: 3, condition: 'berawan', tips: 'Mendung merata di area cekungan Bandung.' },
   { id: 'lembang', name: 'Lembang', type: 'Kecamatan', region: 'Bandung Barat, Jabar', lat: -6.8200, lng: 107.6200, temp: 20, weather: 'Hujan Ringan', uv: 2, condition: 'hujan', tips: 'Jalanan sempit berbukit rawan licin saat basah.' },
   { id: 'kawahputih', name: 'Kawah Putih', type: 'Tempat Wisata', region: 'Bandung, Jawa Barat', lat: -7.1662, lng: 107.4021, temp: 18, weather: 'Berawan', uv: 4, condition: 'berawan', tips: 'Jalur Ciwidey sejuk berawan. Siapkan pakaian hangat.' },
@@ -79,6 +82,18 @@ export const locationsList: LocationData[] = [
 
 export const routesCoordinates: Record<string, [number, number][]> = {
   // Predefined key coords fallback if OSRM is offline or separating islands
+  'bangunjiwo-bentarsari': [
+    [-7.8385, 110.3275],
+    [-7.7800, 110.1500],
+    [-7.7123, 110.0090], // Purworejo
+    [-7.7500, 109.8000],
+    [-7.6500, 109.6500], // Kebumen
+    [-7.5000, 109.4500],
+    [-7.4244, 109.2300], // Purwokerto
+    [-7.2500, 109.0500],
+    [-7.2200, 108.9500], // Bumiayu
+    [-7.1643, 108.7909]  // Bentarsari
+  ],
   'jakarta-bandung': [
     [-6.2088, 106.8456], [-6.2201, 106.9200], [-6.2383, 106.9756], [-6.2650, 107.0800],
     [-6.2900, 107.1500], [-6.3227, 107.2905], [-6.3800, 107.3900], [-6.5562, 107.4431],

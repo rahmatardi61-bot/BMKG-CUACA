@@ -699,7 +699,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Full Width: Index Kenyamanan Card -->
-    <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-6 shadow-sm backdrop-blur-md">
+    <div class="bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-6 shadow-sm backdrop-blur-xl">
       <!-- Title Header Area -->
       <div class="mb-4">
         <div class="flex items-center gap-2">
@@ -777,7 +777,7 @@ onUnmounted(() => {
       <!-- Slide transition wrapper: overflow-hidden clips the outgoing/incoming cards -->
 
       <!-- Card 1: Suhu -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🌡️ Temperature Illustration: Village + sun/clouds + thermometer -->
         <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
@@ -832,13 +832,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Suhu</span>
           <div class="p-1.5 rounded-lg bg-orange-500/10 text-orange-500 dark:bg-orange-500/15 dark:text-orange-400 shrink-0">
             <Thermometer class="w-4 h-4" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ weatherData.temp }}<span class="text-xs font-semibold">°C</span>
           </p>
@@ -847,7 +847,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 2: Angin -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 💨 Wind Illustration: Turbines + hills + wind lines -->
         <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
@@ -887,13 +887,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Angin</span>
           <div class="p-1.5 rounded-lg bg-teal-500/10 text-teal-500 dark:bg-teal-500/15 dark:text-teal-400 shrink-0">
             <Wind class="w-4 h-4" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ weatherData.windSpeed }}<span class="text-xs font-semibold">km/jam</span>
           </p>
@@ -902,7 +902,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 3: Arah Angin -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🧭 Compass Illustration: Compass rose + countryside -->
         <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
@@ -953,13 +953,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Arah Angin</span>
           <div class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-brand-cyan/15 dark:text-brand-cyan shrink-0">
             <Navigation class="w-4 h-4 transition-transform duration-700" :style="{ transform: `rotate(${additionalWeatherData.windAngle}deg)` }" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ additionalWeatherData.windDir }}
           </p>
@@ -968,7 +968,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 4: Kelembapan -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 💧 Humidity Illustration: Rainforest + water drops -->
         <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
@@ -1002,13 +1002,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Kelembapan</span>
           <div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-500 dark:bg-brand-cyan/15 dark:text-brand-cyan shrink-0">
             <Droplets class="w-4 h-4" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ weatherData.humidity }}<span class="text-xs font-semibold">%</span>
           </p>
@@ -1017,7 +1017,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 5: Indeks UV -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- ☀️ UV Illustration: Beach + palm + umbrella + intense sun -->
         <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
@@ -1060,13 +1060,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Indeks UV</span>
           <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400 shrink-0">
             <Sun class="w-4 h-4" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ weatherData.uvIndex }}
           </p>
@@ -1082,7 +1082,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 6: Visibilitas -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 👁️ Visibility Illustration: Mountain road -->
         <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
@@ -1115,13 +1115,13 @@ onUnmounted(() => {
           </svg>
         </div>
 
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Visibilitas</span>
           <div class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/15 dark:text-indigo-400 shrink-0">
             <Eye class="w-4 h-4" />
           </div>
         </div>
-        <div class="mt-3 relative z-10">
+        <div class="mt-3 relative z-20">
           <p class="text-2xl font-black text-slate-800 dark:text-white leading-tight">
             {{ weatherData.visibility }}<span class="text-xs font-semibold">km</span>
           </p>
@@ -1130,7 +1130,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 7: Fase Bulan -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🌙 Moon Illustration: Starry night + mountains + crescent moon -->
         <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
@@ -1201,7 +1201,7 @@ onUnmounted(() => {
 
 
         <!-- Top Title Row -->
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight block">Fase Bulan</span>
             <div class="flex items-baseline gap-1.5 mt-1">
@@ -1218,7 +1218,7 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div class="mt-3 flex items-center justify-between w-full gap-2 sm:gap-4 relative z-10">
+        <div class="mt-3 flex items-center justify-between w-full gap-2 sm:gap-4 relative z-20">
           <!-- Moonrise info -->
           <div class="space-y-1 text-left shrink-0">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Terbit</span>
@@ -1270,7 +1270,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Card 8: Matahari -->
-      <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-md relative overflow-hidden group">
+      <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-xl relative overflow-hidden group">
         <!-- ☀️ Weather Illustration: Vibrant Golden Sunset / Ocean Bay / Bridge Artwork -->
         <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 opacity-80 group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
           <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
@@ -1324,14 +1324,14 @@ onUnmounted(() => {
         </div>
 
         <!-- Top Title Row matching other cards -->
-        <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-start justify-between gap-3 relative z-20">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 min-w-0 break-words leading-tight">Matahari</span>
           <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400 shrink-0">
             <Sunrise class="w-4 h-4" />
           </div>
         </div>
 
-        <div class="mt-3 flex items-center justify-between w-full gap-2 sm:gap-4 relative z-10">
+        <div class="mt-3 flex items-center justify-between w-full gap-2 sm:gap-4 relative z-20">
           <!-- Sunrise info -->
           <div class="space-y-1 text-left shrink-0">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">Terbit</span>
@@ -1974,5 +1974,45 @@ onUnmounted(() => {
 @keyframes wind-flow {
   0%   { stroke-dashoffset: 0;   }
   100% { stroke-dashoffset: -260; }
+}
+
+/* ── Weather Metric Card Glassmorphism Overlay ────────────────────────────────
+   Creates a frosted gradient layer between the SVG illustration (z-0) and
+   the text content (z-10), giving a premium "glass over artwork" effect. */
+.weather-metric-card {
+  isolation: isolate;
+}
+.weather-metric-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: inherit;
+  /* Light mode: white frost from top, fading to transparent at bottom */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.72) 40%,
+    rgba(255, 255, 255, 0.30) 70%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: opacity 0.4s ease;
+}
+/* Dark mode: navy frost overlay */
+:global(.dark) .weather-metric-card::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 17, 32, 0.90) 0%,
+    rgba(8, 17, 32, 0.70) 40%,
+    rgba(8, 17, 32, 0.28) 70%,
+    rgba(8, 17, 32, 0.00) 100%
+  );
+}
+/* On hover: lighten the overlay slightly to reveal more illustration */
+.weather-metric-card:hover::after {
+  opacity: 0.75;
 }
 </style>

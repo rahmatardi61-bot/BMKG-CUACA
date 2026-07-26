@@ -2,17 +2,24 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { 
   X, 
-  MapPin, 
   Navigation, 
   Compass, 
-  AlertTriangle, 
   Sun,
-  Cloud,
   CloudRain,
-  CloudLightning,
-  TrendingUp,
   Clock,
-  Map as MapIcon
+  Map as MapIcon,
+  ChevronLeft,
+  Search,
+  CloudLightning,
+  Cloud,
+  Eye,
+  Car,
+  Bike,
+  Bus,
+  Train,
+  Plane,
+  MapPin,
+  Mic
 } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -32,14 +39,66 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
+void Cloud;
+
+// Steps & Interactive states
+const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
+const searchQuery = ref('');
+const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
+const destinationLocation = ref<LocationData | null>(null);
+const activeTravelMode = ref('car');
+
+// Bottom sheet drag state
+const sheetExpanded = ref(true);
+let dragStartY = 0;
+let dragStartTime = 0;
+let isDraggingSheet = false;
+
+const onSheetDragStart = (e: PointerEvent) => {
+  isDraggingSheet = true;
+  dragStartY = e.clientY;
+  dragStartTime = Date.now();
+  window.addEventListener('pointermove', onSheetDragMove, { passive: true });
+  window.addEventListener('pointerup', onSheetDragEnd, { once: true });
+};
+
+const onSheetDragMove = (_e: PointerEvent) => {
+  if (!isDraggingSheet) return;
+  // Visual feedback while dragging handled by end only
+};
+
+const onSheetDragEnd = (e: PointerEvent) => {
+  isDraggingSheet = false;
+  window.removeEventListener('pointermove', onSheetDragMove);
+  const deltaY = e.clientY - dragStartY;
+  const elapsed = Date.now() - dragStartTime;
+  const isFlick = elapsed < 300 && Math.abs(deltaY) > 30;
+  // Drag down (positive deltaY) → minimize; drag up → expand
+  if (deltaY > 60 || (isFlick && deltaY > 0)) {
+    sheetExpanded.value = false;
+  } else if (deltaY < -40 || (isFlick && deltaY < 0)) {
+    sheetExpanded.value = true;
+  }
+};
+
+const toggleSheetExpanded = () => {
+  sheetExpanded.value = !sheetExpanded.value;
+};
+
+const travelModes = [
+  { id: 'car', icon: Car },
+  { id: 'moto', icon: Bike },
+  { id: 'transit', icon: Bus },
+  { id: 'train', icon: Train },
+  { id: 'plane', icon: Plane }
+];
+
 // Form States
 const startCityId = ref('');
 const endCityId = ref('');
 const isRouting = ref(false);
 
 const isMobile = ref(false);
-const desktopSlot = ref<HTMLElement | null>(null);
-const mobileSlot = ref<HTMLElement | null>(null);
 const mapEl = ref<HTMLElement | null>(null);
 
 const checkMobile = () => {
@@ -47,95 +106,31 @@ const checkMobile = () => {
 };
 
 const moveMapElement = () => {
-  if (!mapEl.value) return;
-  if (isMobile.value) {
-    if (mobileSlot.value) {
-      mobileSlot.value.appendChild(mapEl.value);
-    }
-  } else {
-    if (desktopSlot.value) {
-      desktopSlot.value.appendChild(mapEl.value);
-    }
-  }
   setTimeout(() => {
     if (map) {
       map.invalidateSize();
     }
-  }, 100);
+  }, 250);
 };
 
 const handleResize = () => {
-  const prev = isMobile.value;
   checkMobile();
-  if (isMobile.value !== prev) {
-    nextTick(() => {
-      moveMapElement();
-    });
-  }
+  moveMapElement();
 };
 
 const startQuery = ref('');
 const endQuery = ref('');
-const showStartSuggestions = ref(false);
-const showEndSuggestions = ref(false);
 
-const startSuggestions = computed(() => {
-  const query = startQuery.value.toLowerCase().trim();
-  if (!query) return [];
-  return locationsList.filter(loc => 
-    loc.name.toLowerCase().includes(query) || 
-    loc.region.toLowerCase().includes(query) || 
+// Search suggestions for the full-screen search step
+const searchSuggestions = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim();
+  if (!query) return locationsList.slice(0, 8);
+  return locationsList.filter(loc =>
+    loc.name.toLowerCase().includes(query) ||
+    loc.region.toLowerCase().includes(query) ||
     loc.type.toLowerCase().includes(query)
-  ).slice(0, 8);
+  ).slice(0, 10);
 });
-
-const endSuggestions = computed(() => {
-  const query = endQuery.value.toLowerCase().trim();
-  if (!query) return [];
-  return locationsList.filter(loc => 
-    loc.name.toLowerCase().includes(query) || 
-    loc.region.toLowerCase().includes(query) || 
-    loc.type.toLowerCase().includes(query)
-  ).slice(0, 8);
-});
-
-const selectStart = (loc: LocationData) => {
-  startCityId.value = loc.id;
-  startQuery.value = loc.name;
-  showStartSuggestions.value = false;
-  calculateRoute();
-};
-
-const selectEnd = (loc: LocationData) => {
-  endCityId.value = loc.id;
-  endQuery.value = loc.name;
-  showEndSuggestions.value = false;
-  calculateRoute();
-};
-
-const onStartInput = () => {
-  startCityId.value = '';
-  showStartSuggestions.value = true;
-  calculateRoute();
-};
-
-const onEndInput = () => {
-  endCityId.value = '';
-  showEndSuggestions.value = true;
-  calculateRoute();
-};
-
-const closeStartSuggestionsDeferred = () => {
-  setTimeout(() => {
-    showStartSuggestions.value = false;
-  }, 200);
-};
-
-const closeEndSuggestionsDeferred = () => {
-  setTimeout(() => {
-    showEndSuggestions.value = false;
-  }, 200);
-};
 
 // Leaflet Map instance references
 let map: L.Map | null = null;
@@ -182,63 +177,47 @@ const routeCheckpoints = ref<Array<{
   eta: string;
 }>>([]);
 
-// Weather Icons Helper
-const getWeatherIcon = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai') => {
-  switch (condition) {
-    case 'cerah': return Sun;
-    case 'berawan': return Cloud;
-    case 'hujan': return CloudRain;
-    case 'badai': return CloudLightning;
-    default: return Sun;
-  }
-};
-
-const getWeatherIconColor = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai') => {
-  switch (condition) {
-    case 'cerah': return 'text-orange-500';
-    case 'berawan': return 'text-slate-400';
-    case 'hujan': return 'text-cyan-500';
-    case 'badai': return 'text-red-500';
-    default: return 'text-orange-500';
-  }
-};
-
 // Custom dynamic HTML markers for OpenStreetMap
 const createCustomMarker = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai', label: string, isEnd = false) => {
-  let iconHtml = `☀️`;
-  let markerColor = 'from-orange-500 to-amber-400';
+  let iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor" fill-opacity="0.25"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`;
+  let markerColor = 'from-orange-400 to-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.4)]';
   
   if (condition === 'berawan') {
-    iconHtml = `☁️`;
-    markerColor = 'from-slate-400 to-slate-350';
+    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.25"/></svg>`;
+    markerColor = 'from-slate-400 to-slate-500 shadow-[0_4px_12px_rgba(100,116,139,0.35)]';
   } else if (condition === 'hujan') {
-    iconHtml = `🌧️`;
-    markerColor = 'from-cyan-500 to-blue-400';
+    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.1"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>`;
+    markerColor = 'from-cyan-400 to-blue-500 shadow-[0_4px_12px_rgba(59,130,246,0.4)]';
   } else if (condition === 'badai') {
-    iconHtml = `⛈️`;
-    markerColor = 'from-red-600 to-orange-500 animate-pulse';
+    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.1"/><path d="m13 10-4 6h6l-4 6"/></svg>`;
+    markerColor = 'from-red-500 to-purple-600 shadow-[0_4px_14px_rgba(239,68,68,0.45)]';
   }
 
-  const borderClass = isEnd ? 'border-red-500 ring-2 ring-red-300' : 'border-white';
+  const borderClass = isEnd ? 'border-red-500 ring-2 ring-red-300 dark:ring-red-900/50' : 'border-white dark:border-slate-800';
 
   return L.divIcon({
     className: 'custom-osm-marker',
     html: `
       <div class="relative flex flex-col items-center">
+        <!-- Pulse ring for end destination or active storms -->
+        ${isEnd || condition === 'badai' ? `<span class="absolute top-0 w-9 h-9 rounded-full bg-current ${condition === 'badai' ? 'text-red-500' : 'text-red-650'} animate-ping opacity-30"></span>` : ''}
+        
         <!-- Badge -->
-        <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 ${borderClass} shadow-lg bg-gradient-to-br ${markerColor} text-white transition-all duration-300 transform hover:scale-110">
-          <span class="text-sm">${iconHtml}</span>
+        <div class="flex items-center justify-center w-9 h-9 rounded-full border-2 ${borderClass} bg-gradient-to-br ${markerColor} text-white transition-all duration-300 transform hover:scale-115 relative z-20">
+          <span class="flex items-center justify-center">${iconHtml}</span>
         </div>
-        <!-- Tooltip Label -->
-        <div class="absolute top-9 px-1.5 py-0.5 rounded bg-slate-955/90 text-white text-[8px] font-black tracking-tight whitespace-nowrap shadow-md">
+        
+        <!-- Arrow Tail (rotates/shapes pointer) -->
+        <div class="w-2.5 h-2.5 bg-white dark:bg-slate-900 border-r border-b border-slate-200/80 dark:border-slate-800/40 transform rotate-45 -mt-1.5 z-10 shadow-[2px_2px_4px_rgba(0,0,0,0.04)]"></div>
+
+        <!-- Tooltip Label (Modern capsule pill) -->
+        <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/45 text-slate-800 dark:text-slate-250 text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 transition-transform">
           ${label}
         </div>
-        <!-- Arrow Tail -->
-        <div class="w-1.5 h-1.5 bg-slate-950 transform rotate-45 -mt-0.5 opacity-90"></div>
       </div>
     `,
-    iconSize: [32, 42],
-    iconAnchor: [16, 42]
+    iconSize: [36, 56],
+    iconAnchor: [18, 38]
   });
 };
 
@@ -272,8 +251,10 @@ const initMap = () => {
   // Ensure the map element is in the correct slot first!
   moveMapElement();
 
+  if (!mapEl.value) return;
+
   // Center around Java Island
-  map = L.map('land-map', {
+  map = L.map(mapEl.value, {
     zoomControl: false,
     attributionControl: false
   }).setView([-7.0, 110.0], 7);
@@ -281,10 +262,10 @@ const initMap = () => {
   // Set the theme tiles dynamically
   updateMapTheme();
 
-  // Custom Zoom Control positioning (bottom-right, matching Google Maps look)
-  L.control.zoom({
-    position: 'bottomright'
-  }).addTo(map);
+  // Only show zoom control on desktop (not mobile)
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+  }
   
   calculateRoute();
 
@@ -392,8 +373,8 @@ const renderActiveRoute = () => {
 
   // 4. Fit bounds
   map.fitBounds(routePolyline.getBounds(), {
-    paddingTopLeft: [40, 40],
-    paddingBottomRight: isMobile.value ? [40, 40] : [450, 40],
+    paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
+    paddingBottomRight: [40, 40],
     animate: true,
     duration: 1.2
   });
@@ -624,6 +605,131 @@ const calculateRoute = async () => {
   isRouting.value = false;
 };
 
+// Map markers and routing renderer based on step
+const renderMarkersForCurrentStep = () => {
+  if (!map) return;
+  clearMapDrawings();
+
+  if (currentStep.value === 'overview') {
+    const marker = L.marker([startLocation.value.lat, startLocation.value.lng], {
+      icon: createCustomMarker(startLocation.value.condition, startLocation.value.name, false)
+    }).addTo(map);
+    map.setView([startLocation.value.lat, startLocation.value.lng], 13);
+    // Pan down so marker is visible above the card (card covers ~56vh)
+    map.panBy([0, 160], { animate: false });
+    mapMarkers.push(marker);
+  } else if (currentStep.value === 'selected' && destinationLocation.value) {
+    const marker = L.marker([destinationLocation.value.lat, destinationLocation.value.lng], {
+      icon: createCustomMarker(destinationLocation.value.condition, destinationLocation.value.name, true)
+    }).addTo(map);
+    map.setView([destinationLocation.value.lat, destinationLocation.value.lng], 11);
+    mapMarkers.push(marker);
+  } else if (currentStep.value === 'directions' && destinationLocation.value) {
+    calculateRoute();
+  }
+};
+
+watch(currentStep, () => {
+  renderMarkersForCurrentStep();
+});
+
+const startSearch = () => {
+  currentStep.value = 'search';
+  searchQuery.value = '';
+};
+
+const selectLocation = (loc: LocationData) => {
+  destinationLocation.value = loc;
+  endCityId.value = loc.id;
+  endQuery.value = loc.name;
+  currentStep.value = 'selected';
+};
+
+// Expanded state for collapsible checkpoint cards (Set of indices)
+const expandedCheckpoints = ref<Set<number>>(new Set([0]));
+
+const toggleCheckpoint = (idx: number) => {
+  const s = new Set(expandedCheckpoints.value);
+  if (s.has(idx)) s.delete(idx); else s.add(idx);
+  expandedCheckpoints.value = s;
+};
+
+// Intermediate checkpoint list based on selected route
+const directionsCheckpoints = computed(() => {
+  if (!destinationLocation.value) return [];
+  const key = `${startCityId.value}-${endCityId.value}`;
+  // Static checkpoint definition for bangunjiwo→bentarsari route (from image)
+  const checkpointDefs: Array<{
+    id: string; name: string; region: string;
+    eta: string; weather: string; condition: 'cerah'|'berawan'|'hujan'|'badai';
+    icon: string; tempHigh: number; tempLow: number;
+    alerts: string[];
+    grid: { times: string[]; nowIdx: number; suhu: number[]; angin: number[]; hujan: number[]; dirs: string[] };
+    rainBars: number[];
+  }> = [
+    {
+      id: 'destination',
+      name: destinationLocation.value.name,
+      region: destinationLocation.value.region,
+      eta: '18.20', weather: 'Badai Petir', condition: 'badai', icon: '⛈️',
+      tempHigh: 32, tempLow: 28,
+      alerts: ['Badai Petir diprakirakan akan terjadi pada saat Anda tiba.'],
+      grid: { times: ['18:00','18:20','19:00','20:00'], nowIdx: 1, suhu: [32,32,29,27], angin: [9,9,5,6], hujan: [0.01,0.74,0.77,0.76], dirs: ['↙','↙','↙','↘'] },
+      rainBars: [5,5,5,5,55,70,80,85,80,75,70,65,60,55,50,45,40,35,30,25]
+    },
+    {
+      id: 'purworejo',
+      name: 'Purworejo', region: 'Kabupaten Purworejo',
+      eta: '14.19', weather: 'Cerah', condition: 'cerah', icon: '🌤️',
+      tempHigh: 36, tempLow: 30,
+      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
+      grid: { times: ['14:00','14:19','15:00','16:00'], nowIdx: 1, suhu: [32,32,29,27], angin: [9,9,5,6], hujan: [0.01,0.74,0.77,0.76], dirs: ['↙','↙','↙','↙'] },
+      rainBars: [5,5,5,5,55,70,80,85,80,75,70,65,60,55,50,45,40,35,30,25]
+    },
+    {
+      id: 'kebumen',
+      name: 'Kebumen', region: 'Kabupaten Kebumen',
+      eta: '15.23', weather: 'Awan Tebal', condition: 'berawan', icon: '🌥️',
+      tempHigh: 36, tempLow: 30,
+      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
+      grid: { times: ['15:00','15:23','16:00','17:00'], nowIdx: 1, suhu: [31,31,28,26], angin: [7,8,6,5], hujan: [0,0,0.12,0.30], dirs: ['↙','↙','↙','↙'] },
+      rainBars: [5,5,5,5,5,5,5,10,15,20,25,30,35,40,40,35,30,25,20,15]
+    },
+    {
+      id: 'banyumas',
+      name: 'Banyumas', region: 'Kabupaten Banyumas',
+      eta: '17.10', weather: 'Awan Tebal', condition: 'berawan', icon: '🌥️',
+      tempHigh: 36, tempLow: 30,
+      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
+      grid: { times: ['17:00','17:10','18:00','19:00'], nowIdx: 1, suhu: [30,30,27,25], angin: [6,6,5,4], hujan: [0,0,0.05,0.20], dirs: ['↙','↙','↙','↙'] },
+      rainBars: [5,5,5,5,5,5,5,5,10,15,20,25,30,30,25,20,15,10,5,5]
+    }
+  ];
+  // For non-predefined routes, generate generic list from available data
+  if (key !== 'bangunjiwo-bentarsari') {
+    return checkpointDefs.map((c, i) => ({ ...c, id: c.id + i }));
+  }
+  return checkpointDefs;
+});
+
+const getDirections = () => {
+  currentStep.value = 'directions';
+  expandedCheckpoints.value = new Set([0]);
+};
+
+const goBack = () => {
+  if (currentStep.value === 'directions') {
+    currentStep.value = 'selected';
+  } else if (currentStep.value === 'selected') {
+    currentStep.value = 'overview';
+    destinationLocation.value = null;
+  } else if (currentStep.value === 'search') {
+    currentStep.value = 'overview';
+  } else {
+    emit('close');
+  }
+};
+
 // Map center on drawer open or selectCity change
 watch(
   () => [props.isOpen, props.selectedCity],
@@ -631,18 +737,13 @@ watch(
     if (isOpenVal) {
       document.body.classList.add('drawer-open');
       
-      // Reset values to empty by default
-      startCityId.value = '';
-      endCityId.value = '';
-      startQuery.value = '';
-      endQuery.value = '';
-      
-      // Auto-set departure to selected city if matches available database
-      const matched = locationsList.find(c => props.selectedCity.toLowerCase().includes(c.name.toLowerCase()));
-      if (matched) {
-        startCityId.value = matched.id;
-        startQuery.value = matched.name;
-      }
+      currentStep.value = 'overview';
+      sheetExpanded.value = true;
+      startLocation.value = locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0];
+      startCityId.value = startLocation.value.id;
+      startQuery.value = startLocation.value.name;
+      destinationLocation.value = null;
+      searchQuery.value = '';
 
       // Allow DOM repaint to load maps container correctly
       nextTick(() => {
@@ -650,7 +751,7 @@ watch(
           initMap();
           if (map) {
             map.invalidateSize();
-            calculateRoute();
+            renderMarkersForCurrentStep();
           }
         }, 350);
       });
@@ -688,293 +789,630 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen" class="fixed inset-0 z-[9999] w-screen h-screen bg-slate-50 dark:bg-brand-navy-950 overflow-hidden text-slate-800 dark:text-slate-100 font-sans flex justify-end">
+      <div v-if="isOpen" class="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between pb-3">
         
-        <!-- Desktop Map Slot (visible only on wide screens) -->
-        <div ref="desktopSlot" class="hidden lg:block absolute inset-0 w-full h-full z-0 bg-slate-100">
-          <!-- Loading Overlay for Desktop -->
-          <div v-if="isRouting && !isMobile" class="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] flex items-center justify-center z-10">
-            <span class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></span>
-          </div>
-        </div>
-
-        <!-- Hidden container that keeps map DOM elements at boot -->
-        <div class="hidden">
+        <!-- The Background Map -->
+        <div ref="desktopSlot" class="absolute inset-0 w-full h-full z-0 bg-slate-800">
           <div ref="mapEl" id="land-map" class="w-full h-full"></div>
         </div>
 
-        <!-- Right Docked Search & Details Drawer (Translucent Glassmorphic Dashboard Panel) -->
+        <!-- Floating Close X Button on Map -->
+        <button 
+          v-if="currentStep !== 'search'"
+          type="button"
+          @click="emit('close')"
+          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
+          title="Tutup Rute"
+        >
+          <X class="w-5 h-5" />
+        </button>
+
+        <!-- ─────────────────────────────────────────────────────────────────────────
+             2. BOTTOM SHEET: Drawer content for all steps
+             ───────────────────────────────────────────────────────────────────────── -->
         <Transition name="drawer-slide" appear>
-          <div v-if="isOpen" class="relative h-full w-full lg:w-[425px] z-10 flex flex-col bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border-l border-slate-200/50 dark:border-brand-navy-800/40 shadow-[0_0_50px_rgba(0,0,0,0.15)] overflow-hidden">
-            
-            <!-- Drawer Header -->
-            <div class="p-5 border-b border-slate-100/80 dark:border-brand-navy-900/40 shrink-0 text-left flex items-center justify-between gap-3 bg-white/40 dark:bg-brand-navy-950/40 backdrop-blur-md">
-              <div class="flex items-center gap-3.5 min-w-0">
-                <div class="p-2.5 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 dark:from-orange-500/15 dark:to-amber-500/5 flex items-center justify-center border border-orange-500/25 dark:border-orange-500/15 shrink-0 shadow-sm">
-                  <Compass class="w-5 h-5 text-orange-500" />
-                </div>
-                <div class="text-left min-w-0 flex-grow">
-                  <span class="text-[8.5px] font-black uppercase tracking-[0.18em] text-orange-600 dark:text-orange-400 block">Panduan Jalur Darat</span>
-                  <h3 class="text-sm font-black text-slate-800 dark:text-white leading-snug mt-0.5 tracking-tight">
-                    Trip Weather Route Planner
-                  </h3>
-                </div>
+          <div 
+            v-if="isOpen"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
+            :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
+          >
+            <!-- Drag Handle / Bar at the top of the sheet -->
+            <div 
+              class="py-3 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+              @pointerdown.prevent="onSheetDragStart"
+              @click="toggleSheetExpanded"
+              title="Seret untuk minimize/expand"
+            >
+              <div 
+                class="h-1 rounded-full transition-all duration-300"
+                :class="sheetExpanded ? 'w-11 bg-slate-300/60 dark:bg-slate-600/70' : 'w-16 bg-slate-300 dark:bg-slate-500/90'"
+              ></div>
+            </div>
+
+            <!-- Search Bar inside Bottom Sheet -->
+            <div v-if="currentStep !== 'directions'" class="px-4 pb-3 flex items-center gap-2 shrink-0">
+              <!-- Back button circle -->
+              <button 
+                type="button"
+                @click="goBack"
+                class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
+              >
+                <ChevronLeft class="w-4 h-4" />
+              </button>
+              
+              <!-- Search input container -->
+              <div class="flex-grow relative flex items-center bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 rounded-full px-4 py-2.5 shadow-inner">
+                <Search class="w-3.5 h-3.5 text-slate-400 shrink-0 mr-2" />
+                <input 
+                  type="text" 
+                  placeholder="Cari di peta" 
+                  v-model="searchQuery"
+                  @focus="startSearch"
+                  class="w-full bg-transparent border-none outline-none text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400"
+                />
+                <Mic class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-2 cursor-pointer hover:text-blue-500 transition-colors" />
+                <button 
+                  v-if="currentStep === 'search' || currentStep === 'selected'"
+                  @click="goBack" 
+                  class="ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs shrink-0 cursor-pointer"
+                >
+                  <X class="w-3 h-3" />
+                </button>
               </div>
               
-              <!-- Close button -->
-              <button
-                @click="emit('close')"
-                class="p-2 rounded-xl text-slate-400 hover:text-slate-650 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-slate-350 dark:hover:bg-brand-navy-900/80 transition-all cursor-pointer border border-slate-200/50 dark:border-brand-navy-800/60"
-                title="Tutup Rute"
+              <!-- Layer/Map Button (only shown in overview step) -->
+              <button 
+                v-if="currentStep === 'overview'"
+                type="button"
+                class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
               >
-                <X class="w-4 h-4" />
+                <MapIcon class="w-4 h-4" />
               </button>
             </div>
 
-            <!-- Scrollable Itinerary Details -->
-            <div class="flex-grow overflow-y-auto p-5 space-y-5 no-scrollbar">
-              
-              <!-- Route Input Form -->
-              <div class="grid grid-cols-2 gap-3.5 p-4 rounded-2xl bg-slate-50/50 border border-slate-200/40 dark:bg-brand-navy-900/20 dark:border-brand-navy-800/40 backdrop-blur-md">
-                
-                <!-- Input Titik Awal -->
-                <div class="relative flex flex-col gap-1 text-left">
-                  <label class="text-[8.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-550 flex items-center gap-1.5">
-                    <MapPin class="w-3 h-3 text-blue-500" />
-                    Titik Awal
-                  </label>
-                  <div class="relative">
-                    <input 
-                      type="text"
-                      v-model="startQuery"
-                      @input="onStartInput"
-                      @focus="showStartSuggestions = true"
-                      @blur="closeStartSuggestionsDeferred"
-                      placeholder="Cari Kota, Desa..."
-                      class="w-full text-base lg:text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
-                    />
-                    <!-- Suggestions List -->
-                    <div 
-                      v-if="showStartSuggestions && startSuggestions.length" 
-                      class="absolute left-0 right-0 z-20 mt-1.5 max-h-60 overflow-y-auto bg-white/95 dark:bg-brand-navy-900/95 backdrop-blur-md border border-slate-200/40 dark:border-brand-navy-800/60 rounded-2xl shadow-2xl py-1 text-xs no-scrollbar"
-                    >
-                      <button 
-                        v-for="loc in startSuggestions" 
-                        :key="'start-s-' + loc.id"
-                        @mousedown="selectStart(loc)"
-                        class="w-full text-left px-3.5 py-2 hover:bg-orange-500/8 dark:hover:bg-orange-500/12 transition-all flex flex-col gap-0.5 border-b border-slate-100/50 dark:border-brand-navy-800/30 last:border-b-0"
-                      >
-                        <span class="font-bold text-slate-800 dark:text-white">{{ loc.name }}</span>
-                        <span class="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">{{ loc.type }} — {{ loc.region }}</span>
-                      </button>
-                    </div>
+            <!-- Scrollable Content Area -->
+            <div class="flex-grow overflow-y-auto px-5 pb-6 space-y-4 no-scrollbar">
+
+              <!-- =================================================================
+                   STEP 1: DEFAULT OVERVIEW (Bangunjiwo details)
+                   ================================================================= -->
+              <div v-if="currentStep === 'overview'" class="space-y-4">
+                <!-- Location Header -->
+                <div class="flex items-center justify-between">
+                  <div class="text-left">
+                    <h3 class="text-[17px] font-black text-slate-900 dark:text-white leading-tight tracking-tight">{{ startLocation.name }}</h3>
+                    <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                      <MapPin class="w-2.5 h-2.5" />
+                      {{ startLocation.region }}
+                    </p>
+                  </div>
+                  <!-- Live badge -->
+                  <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8.5px] font-black uppercase tracking-widest text-emerald-500">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Live
+                  </span>
+                </div>
+
+                <!-- Custom Alerts Box -->
+                <div class="space-y-2">
+                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-blue-500 bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-slate-300">
+                    <CloudRain class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                    <span class="flex-grow text-left">Tidak ada curah hujan setidaknya selama 1 jam.</span>
+                  </div>
+                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-amber-500 bg-amber-50 dark:bg-slate-950/20 text-amber-700 dark:text-slate-300">
+                    <Sun class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <span class="flex-grow text-left">Tidak direkomendasikan untuk aktivitas luar ruangan</span>
                   </div>
                 </div>
 
-                <!-- Input Titik Tujuan -->
-                <div class="relative flex flex-col gap-1 text-left">
-                  <label class="text-[8.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-550 flex items-center gap-1.5">
-                    <Navigation class="w-3 h-3 text-red-500 rotate-45" />
-                    Titik Tujuan
-                  </label>
-                  <div class="relative">
-                    <input 
-                      type="text"
-                      v-model="endQuery"
-                      @input="onEndInput"
-                      @focus="showEndSuggestions = true"
-                      @blur="closeEndSuggestionsDeferred"
-                      placeholder="Cari Wisata, Desa..."
-                      class="w-full text-base lg:text-xs font-semibold bg-white/70 dark:bg-brand-navy-900/60 border border-slate-200/60 dark:border-brand-navy-800/60 rounded-xl px-3 py-2 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/60 outline-none transition-all dark:text-white shadow-sm backdrop-blur-sm"
-                    />
-                    <!-- Suggestions List -->
-                    <div 
-                      v-if="showEndSuggestions && endSuggestions.length" 
-                      class="absolute left-0 right-0 z-20 mt-1.5 max-h-60 overflow-y-auto bg-white/95 dark:bg-brand-navy-900/95 backdrop-blur-md border border-slate-200/40 dark:border-brand-navy-800/60 rounded-2xl shadow-2xl py-1 text-xs no-scrollbar"
-                    >
-                      <button 
-                        v-for="loc in endSuggestions" 
-                        :key="'end-s-' + loc.id"
-                        @mousedown="selectEnd(loc)"
-                        class="w-full text-left px-3.5 py-2 hover:bg-orange-500/8 dark:hover:bg-orange-500/12 transition-all flex flex-col gap-0.5 border-b border-slate-100/50 dark:border-brand-navy-800/30 last:border-b-0"
-                      >
-                        <span class="font-bold text-slate-800 dark:text-white">{{ loc.name }}</span>
-                        <span class="text-[9px] text-slate-450 dark:text-slate-500 font-semibold">{{ loc.type }} — {{ loc.region }}</span>
-                      </button>
+                <!-- Section Heading -->
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20">
+                    <Clock class="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+                    <span class="text-[8.5px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Cuaca Hari Ini</span>
+                  </div>
+                  <div class="flex-grow h-px bg-gradient-to-r from-indigo-200/60 dark:from-indigo-800/40 to-transparent"></div>
+                </div>
+
+                <!-- Weather Timeline Grid -->
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
+                  <div class="grid grid-cols-5 items-center gap-y-3 border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+                    <!-- Jam Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Jam</div>
+                    <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400" /></div>
+                    <div class="text-center text-slate-600 dark:text-slate-300">13:00</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center">
+                      <span class="text-[7.5px] uppercase tracking-wide opacity-80 mb-0.5">Sekarang</span>
+                      <span>14:00</span>
+                    </div>
+                    <div class="text-center text-slate-600 dark:text-slate-300">15:00</div>
+
+                    <!-- Suhu Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Suhu</div>
+                    <div class="text-center text-slate-400">°C</div>
+                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">32°</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 py-1 rounded-lg border border-blue-500/20 relative">
+                      32°
+                      <div class="absolute top-[28px] left-1/2 -translate-x-1/2 h-[120px] border-l border-dashed border-blue-500/40 pointer-events-none z-10"></div>
+                    </div>
+                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">27°</div>
+
+                    <!-- Angin Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Angin</div>
+                    <div class="text-center text-slate-400">km/j</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">9</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-lg">9</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">6</div>
+
+                    <!-- Arah Angin Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Arah</div>
+                    <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[225deg]" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-blue-500 dark:text-blue-400 rotate-[225deg]" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[135deg]" /></div>
+
+                    <!-- Hujan Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Hujan</div>
+                    <div class="text-center text-slate-400">mm/j</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">0.01</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-lg">0.04</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">0.76</div>
+                  </div>
+
+                  <!-- Rain Trend Bar Chart -->
+                  <div class="pt-3 flex flex-col gap-2">
+                    <div class="h-10 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40">
+                      <div class="flex-1 rounded-t bg-blue-500/15" style="height:5%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:10%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/25" style="height:15%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
+                      <div class="flex-1 rounded-t bg-blue-400 animate-pulse" style="height:40%"></div>
+                      <div class="flex-1 rounded-t bg-blue-400" style="height:55%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:65%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:80%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:75%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:60%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:50%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/80" style="height:45%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/70" style="height:40%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/60" style="height:35%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/50" style="height:30%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/30" style="height:20%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:15%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/10" style="height:10%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/5" style="height:5%"></div>
+                    </div>
+                    <div class="flex justify-between px-1 text-slate-400">
+                      <Sun class="w-3.5 h-3.5 text-amber-500" />
+                      <CloudRain class="w-3.5 h-3.5 text-blue-400" />
+                      <CloudRain class="w-3.5 h-3.5 text-blue-500" />
                     </div>
                   </div>
                 </div>
-
-              </div>
-              
-              <!-- Mobile Map Slot (visible only on mobile) -->
-              <div 
-                v-show="isMobile"
-                ref="mobileSlot" 
-                class="block lg:hidden w-full h-[220px] rounded-2xl overflow-hidden shadow-md border border-slate-200/40 dark:border-brand-navy-800/40 relative z-10 bg-slate-100"
-              >
-                <!-- Loading Overlay inside map container on mobile -->
-                <div v-if="isRouting && isMobile" class="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] flex items-center justify-center z-20">
-                  <span class="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></span>
-                </div>
               </div>
 
-              <!-- Active Route Display -->
-              <template v-if="startCityId && endCityId">
+              <!-- =================================================================
+                   STEP 2: SEARCH INPUT ACTIVE / SUGGESTIONS
+                   ================================================================= -->
+              <div v-else-if="currentStep === 'search'" class="space-y-4 pt-1">
+                <div class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest block mb-1">Hasil Pencarian</div>
                 
-                <!-- Alternative Route Options Tabs -->
-                <div class="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-slate-100/50 dark:bg-brand-navy-900/35 border border-slate-200/30 dark:border-brand-navy-800/40">
+                <div class="flex flex-col rounded-2xl bg-slate-100 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/40 divide-y divide-slate-200 dark:divide-slate-800/60 overflow-hidden">
                   <button 
-                    v-for="routeOpt in alternativeRoutes"
-                    :key="routeOpt.id"
-                    @click="selectedRouteId = routeOpt.id"
-                    class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-350 text-center gap-0.5 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                    :class="[
-                      selectedRouteId === routeOpt.id
-                        ? 'bg-white dark:bg-brand-navy-800/90 shadow-[0_4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.25)] text-slate-850 dark:text-white font-black border border-slate-100/80 dark:border-brand-navy-700/50 scale-[1.02]'
-                        : 'font-bold border border-transparent'
-                    ]"
+                    v-for="loc in searchSuggestions" 
+                    :key="'sug-' + loc.id"
+                    @click="selectLocation(loc)"
+                    class="w-full text-left px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-all flex flex-col gap-0.5 cursor-pointer"
                   >
-                    <!-- Color Dot Indicator -->
-                    <div class="flex items-center gap-1.5">
-                      <span 
-                        class="w-1.5 h-1.5 rounded-full shrink-0"
-                        :class="[
-                          routeOpt.id === 'fastest' ? 'bg-blue-500' :
-                          routeOpt.id === 'safest' ? 'bg-emerald-500' : 'bg-amber-500'
-                        ]"
-                      />
-                      <span class="text-[8.5px] uppercase tracking-wider">{{ routeOpt.label }}</span>
+                    <span class="text-xs font-bold text-slate-800 dark:text-white">{{ loc.name }}</span>
+                    <span class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold">{{ loc.type }} — {{ loc.region }}</span>
+                  </button>
+                  
+                  <!-- Fallback custom Bentarsari search card dynamically added to support mockup search query -->
+                  <button 
+                    v-if="searchQuery.toLowerCase().includes('bentar')"
+                    @click="selectLocation(locationsList.find(c => c.id === 'bentarsari') || locationsList[1])"
+                    class="w-full text-left px-4 py-3 hover:bg-slate-800/40 transition-all flex flex-col gap-0.5 cursor-pointer bg-blue-500/5"
+                  >
+                    <span class="text-xs font-bold text-white flex items-center gap-1">
+                      🏙️ Bentarsari, Salem
+                    </span>
+                    <span class="text-[9px] text-slate-450 font-semibold">Desa — Kabupaten Brebes Jawa Tengah</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- =================================================================
+                   STEP 3: LOCATION SELECTED (Ready for Directions)
+                   ================================================================= -->
+              <div v-else-if="currentStep === 'selected' && destinationLocation" class="space-y-4">
+                <!-- Selected Location Header -->
+                <div class="flex items-center justify-between">
+                  <div class="text-left min-w-0">
+                    <h3 class="text-[17px] font-black text-slate-900 dark:text-white leading-tight tracking-tight">{{ destinationLocation.name }}</h3>
+                    <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                      <MapPin class="w-2.5 h-2.5 shrink-0" />
+                      179 km • {{ destinationLocation.region }}
+                    </p>
+                  </div>
+                  <span class="p-2 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/30 rounded-xl text-lg shrink-0">🏢</span>
+                </div>
+
+                <!-- Custom Alerts Box -->
+                <div class="space-y-2">
+                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-blue-500 bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-slate-300">
+                    <CloudRain class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                    <span class="flex-grow text-left">Tidak ada curah hujan setidaknya selama 1 jam.</span>
+                  </div>
+                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-amber-500 bg-amber-50 dark:bg-slate-950/20 text-amber-700 dark:text-slate-300">
+                    <Sun class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <span class="flex-grow text-left">Tidak direkomendasikan untuk aktivitas luar ruangan</span>
+                  </div>
+                </div>
+
+                <!-- Weather Timeline Grid -->
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
+                  <div class="grid grid-cols-5 items-center gap-y-3 border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+                    <!-- Jam Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Jam</div>
+                    <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400" /></div>
+                    <div class="text-center text-slate-600 dark:text-slate-300">13:00</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center">
+                      <span class="text-[7.5px] uppercase tracking-wide opacity-80 mb-0.5">Sekarang</span>
+                      <span>14:00</span>
                     </div>
-                    <span class="text-[9.5px] font-black leading-tight mt-0.5">~{{ routeOpt.distance }} km</span>
-                    <span class="text-[8px] opacity-75 leading-none">{{ routeOpt.duration }}</span>
+                    <div class="text-center text-slate-600 dark:text-slate-300">15:00</div>
+
+                    <!-- Suhu Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Suhu</div>
+                    <div class="text-center text-slate-400">°C</div>
+                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">32°</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 py-1 rounded-lg border border-blue-500/20 relative">
+                      32°
+                      <div class="absolute top-[28px] left-1/2 -translate-x-1/2 h-[120px] border-l border-dashed border-blue-500/40 pointer-events-none z-10"></div>
+                    </div>
+                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">27°</div>
+
+                    <!-- Angin Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Angin</div>
+                    <div class="text-center text-slate-400">km/j</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">9</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-lg">9</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">6</div>
+
+                    <!-- Arah Angin Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Arah</div>
+                    <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[225deg]" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-blue-500 dark:text-blue-400 rotate-[225deg]" /></div>
+                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[135deg]" /></div>
+
+                    <!-- Hujan Row -->
+                    <div class="text-slate-500 dark:text-slate-400 font-bold">Hujan</div>
+                    <div class="text-center text-slate-400">mm/j</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">0.01</div>
+                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-lg">0.04</div>
+                    <div class="text-center text-slate-700 dark:text-slate-200">0.76</div>
+                  </div>
+
+                  <!-- Rain Bar Chart -->
+                  <div class="pt-3 flex flex-col gap-2">
+                    <div class="h-10 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40">
+                      <div class="flex-1 rounded-t bg-blue-500/15" style="height:5%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:10%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/25" style="height:15%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
+                      <div class="flex-1 rounded-t bg-blue-400 animate-pulse" style="height:40%"></div>
+                      <div class="flex-1 rounded-t bg-blue-400" style="height:55%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:65%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:80%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:75%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:60%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500" style="height:50%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/80" style="height:45%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/70" style="height:40%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/60" style="height:35%"></div>
+                      <div class="flex-1 rounded-t bg-blue-500/50" style="height:30%"></div>
+                    </div>
+                    <div class="flex justify-between px-1">
+                      <Sun class="w-3.5 h-3.5 text-amber-500" />
+                      <CloudRain class="w-3.5 h-3.5 text-blue-400" />
+                      <CloudRain class="w-3.5 h-3.5 text-blue-500" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Button: Petunjuk Arah -->
+                <button 
+                  type="button" 
+                  @click="getDirections"
+                  class="w-full bg-[#1b5ebd] hover:bg-blue-600 active:scale-[0.98] py-3.5 rounded-2xl text-xs font-bold text-white transition-all shadow-md mt-2 flex items-center justify-center gap-1.5 cursor-pointer animate-fade-in"
+                >
+                  Petunjuk Arah
+                </button>
+              </div>
+
+              <!-- =================================================================
+                   STEP 4: DIRECTIONS / ROUTE PLAN — Full-screen checkpoint list
+                   ================================================================= -->
+              <div v-else-if="currentStep === 'directions' && destinationLocation" class="space-y-3.5">
+                <!-- Directions Mode Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-800/60">
+                  <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
+                  <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors"><X class="w-4 h-4" /></button>
+                </div>
+
+                <!-- Travel Mode Selector Tabs -->
+                <div class="flex items-center justify-between gap-1 p-1 bg-slate-100 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl">
+                  <button 
+                    v-for="mode in travelModes" 
+                    :key="mode.id"
+                    @click="activeTravelMode = mode.id"
+                    class="flex-1 py-2 text-center rounded-xl transition-all cursor-pointer flex justify-center items-center"
+                    :class="activeTravelMode === mode.id ? 'bg-[#2f3d53] dark:bg-[#2f3d53] text-white shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-350'"
+                  >
+                    <component :is="mode.icon" class="w-4 h-4 shrink-0" />
                   </button>
                 </div>
 
-                <!-- Route Overview Info -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="p-3 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/15 border-slate-200/60 dark:border-brand-navy-800/50 flex flex-col gap-1 text-left hover:border-slate-350 dark:hover:border-brand-navy-700/60 transition-all duration-300">
-                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 leading-none">Jarak Perjalanan</span>
-                    <span class="text-xs font-black text-slate-800 dark:text-white leading-tight flex items-center gap-1.5 mt-0.5">
-                      <TrendingUp class="w-4 h-4 text-blue-500" />
-                      ~{{ routeDistance }} km
-                    </span>
-                  </div>
-                  <div class="p-3 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/15 border-slate-200/60 dark:border-brand-navy-800/50 flex flex-col gap-1 text-left hover:border-slate-350 dark:hover:border-brand-navy-700/60 transition-all duration-300">
-                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 leading-none">Estimasi Waktu</span>
-                    <span class="text-xs font-black text-slate-800 dark:text-white leading-tight flex items-center gap-1.5 mt-0.5">
-                      <Clock class="w-4 h-4 text-indigo-500" />
-                      {{ routeDuration }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Overall Route Safety Advice Banner -->
-                <div 
-                  class="p-4 rounded-2xl border-l-4 flex gap-3.5 items-start text-left shadow-sm backdrop-blur-md transition-all duration-300"
-                  :class="routeCheckpoints.some(s => s.condition === 'badai')
-                    ? 'bg-red-500/8 border-y-slate-200/50 border-r-slate-200/50 border-l-red-500 dark:bg-red-500/5 dark:border-y-brand-navy-900/30 dark:border-r-brand-navy-900/30 text-red-700 dark:text-red-350'
-                    : routeCheckpoints.some(s => s.condition === 'hujan')
-                    ? 'bg-amber-500/8 border-y-slate-200/50 border-r-slate-200/50 border-l-amber-500 dark:bg-amber-500/5 dark:border-y-brand-navy-900/30 dark:border-r-brand-navy-900/30 text-amber-700 dark:text-amber-350'
-                    : 'bg-emerald-500/8 border-y-slate-200/50 border-r-slate-200/50 border-l-emerald-500 dark:bg-emerald-500/5 dark:border-y-brand-navy-900/30 dark:border-r-brand-navy-900/30 text-emerald-700 dark:text-emerald-350'"
-                >
-                  <div class="relative mt-0.5">
-                    <AlertTriangle class="w-4 h-4 shrink-0" />
-                    <span 
-                      v-if="routeCheckpoints.some(s => s.condition === 'badai' || s.condition === 'hujan')" 
-                      class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full animate-ping"
-                      :class="routeCheckpoints.some(s => s.condition === 'badai') ? 'bg-red-500' : 'bg-amber-500'"
-                    />
-                  </div>
-                  <div class="text-xs font-semibold leading-relaxed">
-                    <strong class="font-black uppercase tracking-wider block mb-0.5 text-[9.5px]">Rekomendasi Keselamatan</strong>
-                    <span v-if="routeCheckpoints.some(s => s.condition === 'badai')">
-                      Rute melewati wilayah berpotensi **Hujan Badai & Petir**. Hati-hati pohon tumbang, reduksi kecepatan, dan nyalakan lampu utama.
-                    </span>
-                    <span v-else-if="routeCheckpoints.some(s => s.condition === 'hujan')">
-                      Sebagian rute terdeteksi **Hujan Basah**. Hati-hati hydroplaning, jaga jarak aman antar kendaraan.
-                    </span>
-                    <span v-else>
-                      Rute dalam **Kondisi Aman & Cerah**. Selamat berkendara, pastikan kondisi fisik dan kendaraan prima sebelum berangkat.
-                    </span>
-                  </div>
-                </div>
-
-                <!-- ── ROUTE CHECKPOINTS LIST ── -->
-                <div class="space-y-4">
-                  <div class="flex items-center gap-2.5 text-left">
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500/15 to-amber-500/5 border border-orange-500/20 dark:from-orange-400/15 dark:to-amber-400/5 dark:border-orange-400/20 shadow-sm">
-                      <MapIcon class="w-3.5 h-3.5 text-orange-500 shrink-0" />
-                      <span class="text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Pos Pemeriksaan Cuaca</span>
-                    </div>
-                    <div class="flex-grow h-px bg-gradient-to-r from-orange-200/60 to-transparent dark:from-orange-800/40" />
-                  </div>
+                <!-- ── CHECKPOINT CARDS LIST ── -->
+                <div class="space-y-3.5">
                   
-                  <!-- Checkpoint Timeline Vertical Steps -->
-                  <div class="relative pl-4 border-l border-slate-200/60 dark:border-brand-navy-800/55 ml-2.5 space-y-4.5">
-                    <div 
-                      v-for="(cp, index) in routeCheckpoints" 
-                      :key="'cp-' + index"
-                      class="relative text-left"
-                    >
-                      <!-- Connecting node dot indicator -->
-                      <span 
-                        class="absolute -left-[23.5px] top-2.5 w-3 h-3 rounded-full border bg-white dark:bg-brand-navy-950 flex items-center justify-center transition-all duration-300"
-                        :class="[
-                          index === 0 || index === routeCheckpoints.length - 1
-                            ? 'border-orange-500 scale-125 ring-4 ring-orange-500/10'
-                            : cp.condition === 'badai' ? 'border-red-500 ring-4 ring-red-500/15 animate-pulse'
-                            : cp.condition === 'hujan' ? 'border-amber-500 ring-4 ring-amber-500/15'
-                            : 'border-slate-350 dark:border-brand-navy-700 ring-2 ring-slate-100 dark:ring-brand-navy-900/40'
-                        ]"
-                      >
-                        <span 
-                          v-if="index === 0 || index === routeCheckpoints.length - 1"
-                          class="w-1.5 h-1.5 rounded-full bg-orange-500"
-                        ></span>
-                      </span>
+                  <!-- 1. DESTINATION OVERVIEW CARD -->
+                  <div 
+                    v-if="directionsCheckpoints.length > 0"
+                    class="bg-slate-100 dark:bg-[#1c2d3f]/80 border border-slate-200/60 dark:border-slate-700/30 rounded-2xl p-4 space-y-3.5"
+                  >
+                    <div class="flex items-start gap-3">
+                      <!-- Icon building circle -->
+                      <div class="p-2 bg-slate-200 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/30 rounded-xl text-sm leading-none shrink-0">
+                        🏢
+                      </div>
+                      <div class="min-w-0">
+                        <h4 class="text-xs font-black text-slate-900 dark:text-white leading-tight">
+                          {{ directionsCheckpoints[0].name }} • <span class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold">ETA {{ directionsCheckpoints[0].eta }}</span>
+                        </h4>
+                        <p class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold mt-0.5">
+                          248 km • {{ directionsCheckpoints[0].region }}
+                        </p>
+                      </div>
+                    </div>
 
-                      <!-- Checkpoint step card -->
-                      <div class="group/item flex items-start justify-between gap-3.5 p-3.5 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/15 border-slate-200/60 dark:border-brand-navy-800/50 hover:border-slate-350 dark:hover:border-brand-navy-700/60 hover:bg-white/60 dark:hover:bg-brand-navy-900/25 transition-all duration-300 shadow-sm hover:shadow">
-                        <div class="min-w-0">
-                          <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                            {{ index === 0 ? 'Titik Awal' : index === routeCheckpoints.length - 1 ? 'Titik Tujuan' : `Checkpoint ${index}` }}
-                          </span>
-                          <!-- Estimasi Waktu Tiba (ETA) Badge -->
-                          <div class="text-[9px] font-black text-orange-600 dark:text-orange-400/90 mt-1 mb-1.5 bg-orange-550/8 dark:bg-orange-500/12 px-2 py-0.5 rounded-lg inline-flex items-center gap-1 border border-orange-500/15 dark:border-orange-400/10">
-                            <Clock class="w-2.5 h-2.5" />
-                            <span>{{ cp.eta }}</span>
-                          </div>
-                          <h4 class="text-[11.5px] font-black text-slate-800 dark:text-white mt-0.5 group-hover/item:text-orange-550 dark:group-hover/item:text-orange-400 transition-colors">
-                            {{ cp.name }}
-                          </h4>
-                          <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold mt-1">{{ cp.tips }}</p>
+                    <!-- Warning alert inside destination card -->
+                    <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-start gap-2.5 text-red-400 text-[10px] font-semibold leading-relaxed">
+                      <CloudLightning class="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-500" />
+                      <span>Badai Petir diprakirakan akan terjadi pada saat Anda tiba.</span>
+                    </div>
+
+                    <!-- Weather Grid -->
+                    <div class="bg-white/80 dark:bg-[#111e2b]/70 border border-slate-200/80 dark:border-slate-800/40 rounded-xl p-3 text-[9px] font-semibold text-slate-600 dark:text-slate-350">
+                      <!-- Grid rows -->
+                      <div class="grid grid-cols-6 items-center gap-y-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/50">
+                        <!-- JAM ROW -->
+                        <div class="text-slate-500 dark:text-slate-450 font-bold">Jam</div>
+                        <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
+                        <div 
+                          v-for="(t, ti) in directionsCheckpoints[0].grid.times" 
+                          :key="'t-dest-'+ti"
+                          class="text-center"
+                          :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center' : 'font-bold text-slate-700 dark:text-slate-200'"
+                        >
+                          <span v-if="ti === directionsCheckpoints[0].grid.nowIdx" class="text-[7px] uppercase tracking-wide opacity-80 block mb-0.5">Sekarang</span>
+                          {{ t }}
                         </div>
 
-                        <!-- Weather Info Side Badging -->
-                        <div class="flex flex-col items-end shrink-0 gap-1 pl-2.5 border-l border-slate-100/80 dark:border-brand-navy-800/40">
-                          <div class="flex items-center gap-1.5">
-                            <component :is="getWeatherIcon(cp.condition)" class="w-3.5 h-3.5 shrink-0" :class="getWeatherIconColor(cp.condition)" />
-                            <span class="text-[11px] font-black text-slate-800 dark:text-white leading-none">{{ cp.temp }}°C</span>
-                          </div>
-                          <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 text-right">{{ cp.weather }}</span>
+                        <!-- SUHU ROW -->
+                        <div class="text-slate-500 dark:text-slate-450 font-bold">Suhu</div>
+                        <div class="text-center text-slate-400">°C</div>
+                        <div 
+                          v-for="(s, si) in directionsCheckpoints[0].grid.suhu" 
+                          :key="'s-dest-'+si"
+                          class="text-center font-black relative"
+                          :class="si === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 bg-blue-500/10 rounded-md border border-blue-500/20 py-0.5' : 'text-slate-800 dark:text-slate-100'"
+                        >
+                          {{ s }}°
+                          <div v-if="si === directionsCheckpoints[0].grid.nowIdx" class="absolute top-[22px] left-1/2 -translate-x-1/2 h-[78px] border-l border-dashed border-blue-500/35 pointer-events-none z-10"></div>
+                        </div>
+
+                        <!-- ANGIN ROW -->
+                        <div class="text-slate-500 dark:text-slate-450 font-bold">Angin</div>
+                        <div class="text-center text-slate-400">km/j</div>
+                        <div 
+                          v-for="(a, ai2) in directionsCheckpoints[0].grid.angin" 
+                          :key="'a-dest-'+ai2"
+                          class="text-center"
+                          :class="ai2 === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-md' : 'text-slate-700 dark:text-slate-100'"
+                        >{{ a }}</div>
+
+                        <!-- ARAH ANGIN ROW -->
+                        <div class="text-slate-500 dark:text-slate-450 font-bold">Arah</div>
+                        <div class="flex justify-center"><Compass class="w-3 h-3 text-slate-400 dark:text-slate-550" /></div>
+                        <div 
+                          v-for="(d, di) in directionsCheckpoints[0].grid.dirs" 
+                          :key="'d-dest-'+di"
+                          class="text-center"
+                          :class="di === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'"
+                        >{{ d }}</div>
+
+                        <!-- HUJAN ROW -->
+                        <div class="text-slate-500 dark:text-slate-450 font-bold">Hujan</div>
+                        <div class="text-center text-slate-400">mm/j</div>
+                        <div 
+                          v-for="(h, hi) in directionsCheckpoints[0].grid.hujan" 
+                          :key="'h-dest-'+hi"
+                          class="text-center"
+                          :class="hi === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-md' : 'text-slate-700 dark:text-slate-100'"
+                        >{{ h }}</div>
+                      </div>
+
+                      <!-- Rain bar chart + weather icons -->
+                      <div class="pt-2.5 space-y-1.5">
+                        <div class="h-8 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-lg px-1.5 py-1 border border-slate-200/80 dark:border-slate-800/40">
+                          <div 
+                            v-for="(bar, bi) in directionsCheckpoints[0].rainBars" 
+                            :key="bi"
+                            class="flex-1 rounded-t transition-all"
+                            :style="{ height: bar + '%' }"
+                            :class="bar > 40 ? 'bg-blue-500' : bar > 20 ? 'bg-blue-500/60' : 'bg-blue-500/20'"
+                          ></div>
+                        </div>
+                        <!-- Weather icons below chart -->
+                        <div class="flex justify-between px-1 text-slate-400">
+                          <span class="text-xs">🌤️</span>
+                          <span class="text-xs">🌧️</span>
+                          <span class="text-xs">⛅</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </template>
 
-              <!-- Empty State Placeholder -->
-              <div v-else class="flex-grow flex flex-col items-center justify-center p-6 text-center text-slate-400 dark:text-slate-500 py-16 gap-4">
-                <div class="w-16 h-16 rounded-full bg-slate-100/60 dark:bg-brand-navy-900/30 flex items-center justify-center border border-slate-200/20 dark:border-brand-navy-800/40 text-slate-400 dark:text-brand-navy-400 shrink-0">
-                  <Compass class="w-8 h-8 animate-pulse text-orange-500" />
-                </div>
-                <div class="max-w-[280px]">
-                  <h4 class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest leading-none">Tentukan Rute Perjalanan</h4>
-                  <p class="text-[10px] text-slate-450 dark:text-slate-500 leading-relaxed mt-2 font-bold">
-                    Pilih titik asal dan titik tujuan pada formulir di atas untuk memantau kondisi cuaca di sepanjang jalur perjalanan Anda secara real-time.
-                  </p>
+                  <!-- 2. COLLAPSIBLE INTERMEDIATE CHECKPOINTS -->
+                  <div 
+                    v-for="(cp, idx) in directionsCheckpoints.slice(1)" 
+                    :key="cp.id"
+                    class="bg-slate-100 dark:bg-[#1c2d3f]/80 border border-slate-200/60 dark:border-slate-700/30 rounded-2xl overflow-hidden text-left"
+                  >
+                    <!-- Card Header (always visible) -->
+                    <div class="p-4 space-y-2">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-grow">
+                          <!-- Name + ETA + Region -->
+                          <div class="flex items-baseline gap-1.5 flex-wrap">
+                            <span class="text-xs font-black text-slate-900 dark:text-white leading-tight">{{ cp.name }}</span>
+                            <span class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold">• ETA {{ cp.eta }} • {{ cp.region }}</span>
+                          </div>
+                          <!-- Weather summary row -->
+                          <div class="flex items-center gap-2 mt-1.5">
+                            <span class="text-base leading-none">{{ cp.icon }}</span>
+                            <span class="text-[11px] font-extrabold text-slate-800 dark:text-white">{{ cp.weather }}</span>
+                            <span class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold ml-1">Tinggi: {{ cp.tempHigh }}°  Rendah: {{ cp.tempLow }}°</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Warning Bullets -->
+                      <div class="space-y-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/40 mt-1">
+                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
+                          <div class="flex items-center gap-2.5">
+                            <Sun class="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span>Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
+                          <div class="flex items-center gap-2.5">
+                            <Eye class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>Jarak Pandang 13.8km</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
+                          <div class="flex items-center gap-2.5">
+                            <CloudRain class="w-3.5 h-3.5 text-blue-450 shrink-0" />
+                            <span>Tidak ada curah hujan setidaknya 2 jam</span>
+                          </div>
+                          <!-- Accordion toggle button -->
+                          <button 
+                            @click="toggleCheckpoint(idx + 1)"
+                            class="text-slate-400 hover:text-slate-600 dark:hover:text-white shrink-0 p-1 cursor-pointer transition-transform duration-300"
+                            :class="expandedCheckpoints.has(idx + 1) ? 'rotate-180' : 'rotate-0'"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Expanded: Full 4-col weather grid + bar chart -->
+                    <Transition name="expand">
+                      <div v-if="expandedCheckpoints.has(idx + 1)" class="px-4 pb-4">
+                        <div class="bg-white/80 dark:bg-[#111e2b]/70 border border-slate-200/80 dark:border-slate-800/40 rounded-xl p-3 text-[9px] font-semibold text-slate-600 dark:text-slate-350">
+                          <!-- Grid rows -->
+                          <div class="grid grid-cols-6 items-center gap-y-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/50">
+                            <!-- JAM ROW -->
+                            <div class="text-slate-500 dark:text-slate-450 font-bold">Jam</div>
+                            <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
+                            <div 
+                              v-for="(t, ti) in cp.grid.times" 
+                              :key="'t'+ti"
+                              class="text-center"
+                              :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center' : 'font-bold text-slate-700 dark:text-slate-200'"
+                            >
+                              <span v-if="ti === cp.grid.nowIdx" class="text-[7px] uppercase tracking-wide opacity-80 block mb-0.5">Sekarang</span>
+                              {{ t }}
+                            </div>
+
+                            <!-- SUHU ROW -->
+                            <div class="text-slate-500 dark:text-slate-450 font-bold">Suhu</div>
+                            <div class="text-center text-slate-400">°C</div>
+                            <div 
+                              v-for="(s, si) in cp.grid.suhu" 
+                              :key="'s'+si"
+                              class="text-center font-black relative"
+                              :class="si === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 bg-blue-500/10 rounded-md border border-blue-500/20 py-0.5' : 'text-slate-800 dark:text-slate-100'"
+                            >
+                              {{ s }}°
+                              <div v-if="si === cp.grid.nowIdx" class="absolute top-[22px] left-1/2 -translate-x-1/2 h-[78px] border-l border-dashed border-blue-500/35 pointer-events-none z-10"></div>
+                            </div>
+
+                            <!-- ANGIN ROW -->
+                            <div class="text-slate-500 dark:text-slate-450 font-bold">Angin</div>
+                            <div class="text-center text-slate-400">km/jam</div>
+                            <div 
+                              v-for="(a, ai2) in cp.grid.angin" 
+                              :key="'a'+ai2"
+                              class="text-center"
+                              :class="ai2 === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-md' : 'text-slate-700 dark:text-slate-100'"
+                            >
+                              {{ a }}
+                            </div>
+
+                            <!-- ARAH ANGIN ROW -->
+                            <div class="text-slate-500 dark:text-slate-450 font-bold">Arah Angin</div>
+                            <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
+                            <div 
+                              v-for="(d, di) in cp.grid.dirs" 
+                              :key="'d'+di"
+                              class="text-center"
+                              :class="di === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'"
+                            >
+                              {{ d }}
+                            </div>
+
+                            <!-- HUJAN ROW -->
+                            <div class="text-slate-500 dark:text-slate-450 font-bold">Hujan</div>
+                            <div class="text-center text-slate-400">mm/jam</div>
+                            <div 
+                              v-for="(h, hi) in cp.grid.hujan" 
+                              :key="'h'+hi"
+                              class="text-center"
+                              :class="hi === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-md' : 'text-slate-700 dark:text-slate-100'"
+                            >
+                              {{ h }}
+                            </div>
+                          </div>
+
+                          <!-- Rain bar chart + weather icons -->
+                          <div class="pt-2.5 space-y-1.5">
+                            <div class="h-8 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-lg px-1.5 py-1 border border-slate-200/80 dark:border-slate-800/40">
+                              <div 
+                                v-for="(bar, bi) in cp.rainBars" 
+                                :key="bi"
+                                class="flex-1 rounded-t transition-all"
+                                :style="{ height: bar + '%' }"
+                                :class="bar > 40 ? 'bg-blue-400' : bar > 20 ? 'bg-blue-500/60' : 'bg-blue-500/20'"
+                              ></div>
+                            </div>
+                            <!-- Weather icons below chart -->
+                            <div class="flex justify-between px-1 text-slate-400">
+                              <span class="text-xs">{{ cp.condition === 'cerah' ? '🌤️' : '🌧️' }}</span>
+                              <span class="text-xs">{{ cp.condition === 'badai' ? '⛈️' : cp.condition === 'hujan' ? '🌧️' : '🌤️' }}</span>
+                              <span class="text-xs">{{ cp.condition === 'badai' ? '🌩️' : cp.condition === 'hujan' ? '⛈️' : '⛅' }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
                 </div>
               </div>
 
@@ -1051,5 +1489,18 @@ onUnmounted(() => {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Expand/collapse transition for checkpoint cards */
+.expand-enter-active,
+.expand-leave-active {
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  overflow: hidden;
+  max-height: 600px;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 </style>

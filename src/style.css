@@ -13,6 +13,13 @@ body {
   overflow-x: clip;
 }
 
+/* Hide Leaflet zoom control on mobile */
+@media (max-width: 767px) {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+}
+
 #app {
   overflow: visible;
   max-width: 100%;
@@ -198,4 +205,11 @@ body.drawer-open #app {
 
 .sidebar-contained {
   contain: layout style;
+}
+
+/* ── iOS Safe Area Utility ──────────────────────────────────────────────────
+   .pb-safe: adds padding-bottom = env(safe-area-inset-bottom) for notch/home
+   bar devices (iPhone X+). Used on mobile bottom sheet drawers. */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
 }

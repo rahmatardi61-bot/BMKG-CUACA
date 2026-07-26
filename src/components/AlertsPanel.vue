@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { AlertTriangle, AlertCircle, Info, Calendar, MapPin, X, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import type { WarningAlert } from '../types/weather';
 
@@ -54,6 +54,17 @@ const openDesktopIndex = ref<number | null>(null);
 const toggleDesktopCard = (index: number) => {
   openDesktopIndex.value = openDesktopIndex.value === index ? null : index;
 };
+
+// Reset carousel/floating card indices when alerts array changes to prevent out-of-bounds rendering
+watch(
+  () => props.alerts,
+  () => {
+    currentIndex.value = 0;
+    openDesktopIndex.value = null;
+    showMobileDetail.value = false;
+  },
+  { deep: true }
+);
 
 // ── Click Outside to Close Both Panels ──────────────────────────────────────
 const wrapperRef = ref<HTMLElement | null>(null);

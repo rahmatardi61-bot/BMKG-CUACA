@@ -386,7 +386,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       
       <!-- 3 Analysis Cards (Activity Advisories) - Full Width (Col Span 3) -->

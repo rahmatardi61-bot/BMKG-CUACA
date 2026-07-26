@@ -88,7 +88,7 @@ onUnmounted(() => {
     border border-white/60 dark:border-white/[0.08]
     shadow-[0_12px_40px_rgba(0,0,0,0.03),0_1px_3px_rgba(0,0,0,0.01),0_1px_1px_rgba(255,255,255,0.85)_inset]
     dark:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,0.08)_inset]
-    rounded-full h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative">
+    rounded-full h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative mb-6 md:mb-8">
       
       <!-- Left: Logo & Title -->
       <div 

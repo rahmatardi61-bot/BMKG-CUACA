@@ -104,7 +104,7 @@ const getPulseClass = (status: string) => {
 
 <template>
   <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-hidden flex justify-end">
+    <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-hidden flex flex-col justify-end md:flex-row md:justify-end">
       <!-- Backdrop -->
       <Transition name="drawer-fade" appear>
         <div
@@ -118,8 +118,13 @@ const getPulseClass = (status: string) => {
       <Transition name="drawer-slide" appear>
         <div
           v-if="isOpen"
-          class="relative h-full w-full max-w-lg bg-white/95 dark:bg-brand-navy-950/95 border-l border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 pt-5 px-5 pb-0 md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden"
+          class="relative w-full h-[95dvh] md:h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-t md:border-t-0 border-slate-200/30 dark:border-brand-navy-900/20 shadow-2xl text-slate-800 dark:text-slate-100 pt-5 px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-t-3xl md:rounded-none"
         >
+          <!-- Drag handle pill — mobile only -->
+          <div class="flex justify-center pt-2 pb-1 shrink-0 md:hidden">
+            <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+          </div>
+
           <!-- Ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
@@ -401,11 +406,20 @@ const getPulseClass = (status: string) => {
 
 .drawer-slide-enter-active,
 .drawer-slide-leave-active {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
 }
 .drawer-slide-enter-from,
 .drawer-slide-leave-to {
-  transform: translateX(100%);
+  /* Mobile: slide up from bottom */
+  transform: translateY(100%);
   opacity: 0.9;
+}
+@media (min-width: 768px) {
+  .drawer-slide-enter-from,
+  .drawer-slide-leave-to {
+    /* Desktop: slide in from right */
+    transform: translateX(100%);
+    opacity: 0.9;
+  }
 }
 </style>

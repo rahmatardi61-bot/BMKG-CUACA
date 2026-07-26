@@ -789,36 +789,46 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen" class="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between pb-3">
+      <div v-if="isOpen" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between">
         
         <!-- The Background Map -->
         <div ref="desktopSlot" class="absolute inset-0 w-full h-full z-0 bg-slate-800">
           <div ref="mapEl" id="land-map" class="w-full h-full"></div>
         </div>
 
-        <!-- Floating Close X Button on Map -->
+        <!-- Floating Close X Button on Map (desktop only, mobile uses back/close inside the fullscreen drawer) -->
         <button 
           v-if="currentStep !== 'search'"
           type="button"
           @click="emit('close')"
-          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
+          class="hidden md:flex absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
           title="Tutup Rute"
         >
           <X class="w-5 h-5" />
         </button>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
-             2. BOTTOM SHEET: Drawer content for all steps
+             2. BOTTOM SHEET: Fullscreen responsive drawer content for all steps
              ───────────────────────────────────────────────────────────────────────── -->
         <Transition name="drawer-slide" appear>
           <div 
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
-            :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
+            class="
+              fixed inset-0 z-45 w-full h-[100dvh]
+              md:relative md:inset-auto md:z-45 md:w-[420px] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]
+              mx-0 mb-0 md:mx-6 md:my-6
+              bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl
+              border-none md:border md:border-slate-200/60 md:dark:border-slate-800/40
+              shadow-2xl rounded-none md:rounded-3xl
+              flex flex-col overflow-hidden text-left select-none
+              pt-[calc(env(safe-area-inset-top,0px)+8px)] md:pt-0
+              transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+            "
+            :class="sheetExpanded ? 'max-h-full md:max-h-[calc(100vh-48px)]' : 'max-h-full md:max-h-[calc(100vh-48px)]'"
           >
-            <!-- Drag Handle / Bar at the top of the sheet -->
+            <!-- Drag Handle / Bar at the top of the sheet (desktop only, hidden on mobile since it is fullscreen) -->
             <div 
-              class="py-3 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+              class="hidden md:flex py-3 items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
               @pointerdown.prevent="onSheetDragStart"
               @click="toggleSheetExpanded"
               title="Seret untuk minimize/expand"
@@ -1139,7 +1149,16 @@ onUnmounted(() => {
               <div v-else-if="currentStep === 'directions' && destinationLocation" class="space-y-3.5">
                 <!-- Directions Mode Header -->
                 <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-800/60">
-                  <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
+                  <div class="flex items-center gap-2">
+                    <button 
+                      type="button"
+                      @click="goBack"
+                      class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                    >
+                      <ChevronLeft class="w-4 h-4" />
+                    </button>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
+                  </div>
                   <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors"><X class="w-4 h-4" /></button>
                 </div>
 
@@ -1471,15 +1490,21 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* Drawer slide from right transition */
+/* Drawer slide transition (Mobile: slide up from bottom | Desktop: slide in from right) */
 .drawer-slide-enter-active,
 .drawer-slide-leave-active {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
 .drawer-slide-enter-from,
 .drawer-slide-leave-to {
-  transform: translateX(100%);
+  transform: translateY(100%);
   opacity: 0.95;
+}
+@media (min-width: 768px) {
+  .drawer-slide-enter-from,
+  .drawer-slide-leave-to {
+    transform: translateX(100%);
+  }
 }
 
 /* Custom scrollbar hiding */

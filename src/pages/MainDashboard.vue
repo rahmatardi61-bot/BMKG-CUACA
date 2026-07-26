@@ -596,7 +596,7 @@ onUnmounted(() => {
               <div class="flex items-center justify-center gap-2 shrink-0 sm:ml-auto">
                 <!-- Google Play Button -->
                 <a 
-                  href="https://play.google.com/store/apps/details?id=id.go.bmkg.infobmkg" 
+                  href="https://play.google.com/store/apps/details?id=com.Info_BMKG" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="h-9 px-3.5 rounded-xl border flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-800/80 hover:bg-slate-950 dark:bg-slate-900/60 dark:border-white/10 dark:hover:bg-slate-900 dark:hover:border-white/20 text-white shadow-sm"

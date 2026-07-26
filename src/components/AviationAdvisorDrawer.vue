@@ -118,7 +118,7 @@ const getPulseClass = (status: string) => {
       <Transition name="drawer-slide" appear>
         <div
           v-if="isOpen"
-          class="relative w-full h-[100dvh] md:h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+20px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-none"
+          class="relative w-full h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+20px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-none"
         >
           <!-- Ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />

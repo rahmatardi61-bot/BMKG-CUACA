@@ -19,7 +19,10 @@ import {
   Train,
   Plane,
   MapPin,
-  Mic
+  Mic,
+  History,
+  Trash2,
+  Locate
 } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -29,6 +32,7 @@ import {
   routesCoordinates,
   routesCheckpoints
 } from '../data/landBasedActivitiesData';
+import { hourlyForecastsMap } from '../data/mockData';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -41,12 +45,192 @@ const emit = defineEmits<{
 
 void Cloud;
 
+// ── "Cuaca Hari Ini" reactive state ────────────────────────────────────────
+const weatherNow = ref(new Date());
+
+// Compute current hour string 'HH:00'
+const currentHourStr = computed(() => {
+  const h = String(weatherNow.value.getHours()).padStart(2, '0');
+  return `${h}:00`;
+});
+
+// ISO date of today 'YYYY-MM-DD'
+const todayIso = computed(() => weatherNow.value.toISOString().slice(0, 10));
+
+// Forecasts for the active city (fallback DKI Jakarta)
+const cityForecasts = computed(() => {
+  return hourlyForecastsMap[props.selectedCity] || hourlyForecastsMap['DKI Jakarta'] || [];
+});
+
+// Grouped by date: [{ date, slots }]
+const dayGroups = computed(() => {
+  const map = new Map<string, typeof cityForecasts.value>();
+  for (const f of cityForecasts.value) {
+    if (!map.has(f.date)) map.set(f.date, []);
+    map.get(f.date)!.push(f);
+  }
+  return Array.from(map.entries()).map(([date, slots]) => ({ date, slots }));
+});
+
+// Selected date (defaults to today)
+const selectedWeatherDate = ref('');
+
+// Slots for selected date (24 hourly entries)
+const selectedDaySlots = computed(() => {
+  const targetDate = selectedWeatherDate.value || todayIso.value;
+  return cityForecasts.value.filter(f => f.date === targetDate);
+});
+
+// Centered view: prev, current, next slots around the current hour
+const visibleHourSlots = computed(() => {
+  const slots = selectedDaySlots.value;
+  if (!slots.length) return [];
+  return slots;
+});
+
+// Index of the current/closest active hour within selected day
+const activeHourIndex = computed(() => {
+  const slots = visibleHourSlots.value;
+  if (!slots.length) return 0;
+  const isToday = selectedWeatherDate.value === todayIso.value || selectedWeatherDate.value === '';
+  if (!isToday) return 0;
+  const idx = slots.findIndex(s => s.time === currentHourStr.value);
+  return idx >= 0 ? idx : 0;
+});
+
+// Wind direction angle helper (pseudo from time)
+const getWindAngle = (timeStr: string) => {
+  const [h] = timeStr.split(':').map(Number);
+  return Math.round(45 + Math.sin(h * 0.5) * 60);
+};
+
+// Precipitation rate mm/h from probability %
+const toRainRate = (pct: number) => parseFloat(((pct / 100) * 12).toFixed(2));
+
+// Max precip % for bar chart scale
+const maxPrecipForDay = computed(() => {
+  const slots = selectedDaySlots.value;
+  return Math.max(...slots.map(s => s.precipitation ?? 0), 1);
+});
+
+// Scroll container ref for weather table
+const weatherScrollRef = ref<HTMLElement | null>(null);
+
+const scrollWeatherToNow = async () => {
+  await nextTick();
+  if (!weatherScrollRef.value) return;
+  const idx = activeHourIndex.value;
+  // each column is 64px wide
+  const colW = 64;
+  weatherScrollRef.value.scrollLeft = Math.max(0, (idx - 1) * colW);
+};
+
+onMounted(() => {
+  selectedWeatherDate.value = todayIso.value;
+  scrollWeatherToNow();
+});
+
+// Clock interval to keep currentHourStr live
+let _weatherClockInterval: ReturnType<typeof setInterval> | null = null;
+
 // Steps & Interactive states
 const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
 const searchQuery = ref('');
 const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
 const destinationLocation = ref<LocationData | null>(null);
 const activeTravelMode = ref('car');
+const isLocating = ref(false);
+
+// Haversine distance in km between two lat/lng pairs
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+// Update startLocation to user's real GPS coords (via Reverse Geocoding)
+const updateStartLocationFromCoords = async (lat: number, lng: number) => {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data.address) {
+      const addr = data.address;
+      const name = addr.village || addr.suburb || addr.neighbourhood || addr.city_district || addr.road || addr.municipality || 'Lokasi Saya';
+      const region = [addr.city || addr.regency || addr.county || '', addr.state || ''].filter(Boolean).join(', ');
+      
+      startLocation.value = {
+        id: 'real-gps-start',
+        name: name,
+        type: 'Desa',
+        region: region || 'Indonesia',
+        lat: lat,
+        lng: lng,
+        temp: 30,
+        weather: 'Cerah Berawan',
+        uv: 5,
+        condition: 'cerah',
+        tips: 'Berkendara dengan aman.'
+      };
+      
+      startCityId.value = 'real-gps-start';
+      startQuery.value = name;
+      
+      if (map && currentStep.value === 'overview') renderMarkersForCurrentStep(false);
+      return;
+    }
+  } catch (e) {
+    console.warn('Reverse geocoding failed, falling back to nearest preset location', e);
+  }
+
+  // Fallback: nearest mock location
+  let nearest = locationsList[0];
+  let minDist = Infinity;
+  for (const loc of locationsList) {
+    const d = haversineDistance(lat, lng, loc.lat, loc.lng);
+    if (d < minDist) { minDist = d; nearest = loc; }
+  }
+  startLocation.value = { ...nearest };
+  startCityId.value = nearest.id;
+  startQuery.value = nearest.name;
+  if (map && currentStep.value === 'overview') renderMarkersForCurrentStep(false);
+};
+
+// Request real-time GPS location from browser
+const tryGetUserLocation = () => {
+  if (!navigator.geolocation) return;
+  isLocating.value = true;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      isLocating.value = false;
+      updateStartLocationFromCoords(pos.coords.latitude, pos.coords.longitude);
+    },
+    () => { isLocating.value = false; }, // fallback: keep default
+    { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
+  );
+};
+
+// Center map view back to user's starting location with a single-pass offset animation
+const centerMapToStartLocation = () => {
+  // Query fresh GPS coordinates in the background
+  tryGetUserLocation();
+
+  if (!map || !startLocation.value) return;
+
+  const zoom = 13;
+  const point = map.project([startLocation.value.lat, startLocation.value.lng], zoom);
+  const dx = isMobile.value ? 0 : -210;
+  const dy = isMobile.value ? 160 : 0;
+  const offsetPoint = L.point(point.x + dx, point.y + dy);
+  const targetLatLng = map.unproject(offsetPoint, zoom);
+
+  map.setView(targetLatLng, zoom, { animate: true });
+};
+
+watch([selectedWeatherDate, cityForecasts, () => props.isOpen, currentStep], scrollWeatherToNow);
 
 // Bottom sheet drag state
 const sheetExpanded = ref(false);
@@ -106,11 +290,13 @@ const checkMobile = () => {
 };
 
 const moveMapElement = () => {
+  // Double invalidate — pertama saat transisi setengah jalan, kedua saat selesai
   setTimeout(() => {
-    if (map) {
-      map.invalidateSize();
-    }
-  }, 250);
+    if (map) map.invalidateSize();
+  }, 300);
+  setTimeout(() => {
+    if (map) map.invalidateSize();
+  }, 650);
 };
 
 const handleResize = () => {
@@ -121,15 +307,77 @@ const handleResize = () => {
 const startQuery = ref('');
 const endQuery = ref('');
 
+const nominatimResults = ref<any[]>([]);
+const isSearching = ref(false);
+let searchDebounce: any = null;
+
+// Search History list (defaults to first 8 items)
+const searchHistory = ref<LocationData[]>(locationsList.slice(0, 8));
+
+const clearSearchHistory = () => {
+  searchHistory.value = [];
+};
+
 // Search suggestions for the full-screen search step
 const searchSuggestions = computed(() => {
   const query = searchQuery.value.toLowerCase().trim();
-  if (!query) return locationsList.slice(0, 8);
+  if (!query) return searchHistory.value;
+
+  if (searchQuery.value.trim() && nominatimResults.value.length > 0) {
+    return nominatimResults.value;
+  }
   return locationsList.filter(loc =>
     loc.name.toLowerCase().includes(query) ||
     loc.region.toLowerCase().includes(query) ||
     loc.type.toLowerCase().includes(query)
   ).slice(0, 10);
+});
+
+watch(searchQuery, (newVal) => {
+  if (!newVal.trim()) {
+    nominatimResults.value = [];
+    return;
+  }
+  if (searchDebounce) clearTimeout(searchDebounce);
+  isSearching.value = true;
+  searchDebounce = setTimeout(async () => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(newVal)}&format=json&countrycodes=id&limit=8&addressdetails=1`;
+      const res = await fetch(url);
+      const data = await res.json();
+      nominatimResults.value = data.map((item: any, idx: number) => {
+        const address = item.address || {};
+        const district = address.district || address.city_district || address.municipality || '';
+        const city = address.city || address.regency || address.county || '';
+        const state = address.state || '';
+        
+        let typeStr: 'Desa' | 'Kecamatan' | 'Kabupaten' | 'Kota' | 'Tempat Wisata' = 'Desa';
+        if (item.type === 'city' || item.type === 'administrative') typeStr = 'Kota';
+        else if (item.type === 'attraction' || item.type === 'tourism') typeStr = 'Tempat Wisata';
+        
+        let displayName = item.name || item.display_name.split(',')[0];
+        let regionName = [district, city, state].filter(Boolean).join(', ');
+        
+        return {
+          id: `nom-${item.place_id}-${idx}`,
+          name: displayName,
+          type: typeStr,
+          region: regionName || 'Indonesia',
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          temp: 28 + Math.round(Math.random() * 6),
+          weather: 'Berawan',
+          uv: 4,
+          condition: 'berawan',
+          tips: 'Kondisi aspal normal.'
+        };
+      });
+    } catch (e) {
+      console.warn('Nominatim search failed:', e);
+    } finally {
+      isSearching.value = false;
+    }
+  }, 400);
 });
 
 // Leaflet Map instance references
@@ -149,6 +397,7 @@ interface AlternativeRoute {
   duration: string;
   coords: [number, number][];
   checkpoints: Array<{
+    id?: string;
     name: string;
     lat: number;
     lng: number;
@@ -167,6 +416,7 @@ const selectedRouteId = ref<'fastest' | 'safest' | 'least_rain'>('fastest');
 const routeDistance = ref(0);
 const routeDuration = ref('');
 const routeCheckpoints = ref<Array<{
+  id?: string;
   name: string;
   lat: number;
   lng: number;
@@ -177,21 +427,67 @@ const routeCheckpoints = ref<Array<{
   eta: string;
 }>>([]);
 
+// Proper weather SVG icons per condition (20×20 viewBox, self-contained)
+const WEATHER_ICONS: Record<string, string> = {
+  // ☀️ Cerah — sun with bold rays
+  cerah: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="10" r="4" fill="white" fill-opacity="0.95"/>
+    <!-- 8 rays -->
+    <line x1="10" y1="1.5" x2="10" y2="3.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="16.5" x2="10" y2="18.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="1.5" y1="10" x2="3.5" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16.5" y1="10" x2="18.5" y2="10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="14.36" y1="14.36" x2="15.78" y2="15.78" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15.78" y1="4.22" x2="14.36" y2="5.64" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="5.64" y1="14.36" x2="4.22" y2="15.78" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  // 🌤️ Berawan — clean double-cloud (partly cloudy)
+  berawan: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Sun dot top-right -->
+    <circle cx="14.5" cy="5.5" r="2.5" fill="white" fill-opacity="0.85"/>
+    <line x1="14.5" y1="1.5" x2="14.5" y2="2.8" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="18" y1="5.5" x2="19" y2="5.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="16.7" y1="3.3" x2="17.5" y2="2.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+    <line x1="16.7" y1="7.7" x2="17.5" y2="8.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+    <!-- Main cloud -->
+    <path d="M14.5 16H5A3 3 0 0 1 2 13a3 3 0 0 1 3-3q.3 0 .6.06A3.5 3.5 0 0 1 12.5 11 3 3 0 0 1 14.5 16Z" fill="white" fill-opacity="0.95"/>
+  </svg>`,
+
+  // 🌧️ Hujan — dark cloud with distinct rain drops
+  hujan: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Cloud body -->
+    <path d="M15.5 12.5H5.5A3.5 3.5 0 0 1 2 9c0-1.93 1.57-3.5 3.5-3.5c.28 0 .55.04.8.1A4 4 0 0 1 14 7a3.5 3.5 0 0 1 1.5 6.5Z" fill="white" fill-opacity="0.95"/>
+    <!-- Rain drops (3 lines) -->
+    <line x1="7" y1="14.5" x2="6" y2="17.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="10" y1="15" x2="9" y2="18.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="13" y1="14.5" x2="12" y2="17.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  // ⛈️ Badai — storm cloud with lightning bolt + rain
+  badai: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Dark storm cloud -->
+    <path d="M15.5 11H5.5A3.5 3.5 0 0 1 2 7.5C2 5.57 3.57 4 5.5 4c.28 0 .55.04.8.1A4 4 0 0 1 14 5.5a3.5 3.5 0 0 1 1.5 5.5Z" fill="white" fill-opacity="0.95"/>
+    <!-- Lightning bolt -->
+    <path d="M11 11.5 L8.5 15.5 L10.5 15.5 L8 19.5 L13.5 13.5 L11 13.5 Z" fill="white" fill-opacity="0.95" stroke="white" stroke-width="0.3" stroke-linejoin="round"/>
+    <!-- Rain drops (sides) -->
+    <line x1="5.5" y1="13" x2="4.5" y2="15.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="16" y1="13" x2="15" y2="15.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>`,
+};
+
 // Custom dynamic HTML markers for OpenStreetMap
 const createCustomMarker = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai', label: string, isEnd = false) => {
-  let iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor" fill-opacity="0.25"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`;
-  let markerColor = 'from-orange-400 to-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.4)]';
-  
-  if (condition === 'berawan') {
-    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.25"/></svg>`;
-    markerColor = 'from-slate-400 to-slate-500 shadow-[0_4px_12px_rgba(100,116,139,0.35)]';
-  } else if (condition === 'hujan') {
-    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.1"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>`;
-    markerColor = 'from-cyan-400 to-blue-500 shadow-[0_4px_12px_rgba(59,130,246,0.4)]';
-  } else if (condition === 'badai') {
-    iconHtml = `<svg class="w-5 h-5 text-white drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19A3.5 3.5 0 0 0 21 15.5c0-2.79-2.54-4.5-5-4.5-.42 0-.83.07-1.23.2A6 6 0 0 0 3 11.5A5.5 5.5 0 0 0 8.5 17h9Z" fill="currentColor" fill-opacity="0.1"/><path d="m13 10-4 6h6l-4 6"/></svg>`;
-    markerColor = 'from-red-500 to-purple-600 shadow-[0_4px_14px_rgba(239,68,68,0.45)]';
-  }
+  const iconHtml = WEATHER_ICONS[condition] ?? WEATHER_ICONS.cerah;
+
+  const markerColorMap: Record<string, string> = {
+    cerah:   'from-amber-400 to-orange-500 shadow-[0_4px_14px_rgba(251,146,60,0.55)]',
+    berawan: 'from-slate-400 to-slate-500 shadow-[0_4px_12px_rgba(100,116,139,0.40)]',
+    hujan:   'from-sky-400 to-blue-600 shadow-[0_4px_14px_rgba(59,130,246,0.50)]',
+    badai:   'from-violet-600 to-red-600 shadow-[0_4px_16px_rgba(124,58,237,0.55)]',
+  };
+  const markerColor = markerColorMap[condition] ?? markerColorMap.cerah;
 
   const borderClass = isEnd ? 'border-red-500 ring-2 ring-red-300 dark:ring-red-900/50' : 'border-white dark:border-slate-800';
 
@@ -242,16 +538,8 @@ const updateMapTheme = () => {
 
 // Initialize Leaflet Map
 const initMap = () => {
-  if (map) {
-    moveMapElement();
-    updateMapTheme();
-    return;
-  }
-
-  // Ensure the map element is in the correct slot first!
-  moveMapElement();
-
   if (!mapEl.value) return;
+  if (map) return; // already initialized
 
   // Center around Java Island
   map = L.map(mapEl.value, {
@@ -262,11 +550,22 @@ const initMap = () => {
   // Set the theme tiles dynamically
   updateMapTheme();
 
-  // Only show zoom control on desktop (not mobile)
+  // Only show zoom control on desktop
   if (window.matchMedia('(min-width: 768px)').matches) {
     L.control.zoom({ position: 'bottomright' }).addTo(map);
   }
-  
+
+  // whenReady: only invalidate size — marker placement is handled separately
+  // to avoid being overridden by tile layer initialization
+  map.whenReady(() => {
+    map?.invalidateSize();
+  });
+
+  // Place marker after map + tiles are mounted (delay covers tile layer init)
+  setTimeout(() => {
+    renderMarkersForCurrentStep();
+  }, 300);
+
   calculateRoute();
 
   // Initialize theme MutationObserver to watch html class changes
@@ -281,19 +580,6 @@ const initMap = () => {
   }
 };
 
-// Get predefined intermediate checkpoints based on route to avoid geographic naming anomalies
-const getRouteCheckpoints = (startId: string, endId: string): string[] => {
-  const routeKey = [startId, endId].sort().join('-');
-  const checkpointNames = routesCheckpoints[routeKey];
-  
-  if (checkpointNames) {
-    const isReversed = startId > endId;
-    return isReversed ? [...checkpointNames].reverse() : [...checkpointNames];
-  }
-
-  // Fallback for general highways
-  return ['Rest Area KM 86', 'Rest Area KM 207', 'Rest Area KM 379'];
-};
 
 // Clear map drawings helper
 const clearMapDrawings = () => {
@@ -380,6 +666,43 @@ const renderActiveRoute = () => {
   });
 };
 
+const fetchOverpassCheckpoints = async (coords: [number, number][]) => {
+  if (coords.length < 5) return [];
+  const sampled: [number, number][] = [];
+  const count = 4;
+  const step = Math.floor(coords.length / (count + 1));
+  for (let i = 1; i <= count; i++) {
+    sampled.push(coords[i * step]);
+  }
+  
+  const arounds = sampled.map(p => `node(around:5000, ${p[0]}, ${p[1]})["amenity"~"rest_area|fuel"];\n  node(around:5000, ${p[0]}, ${p[1]})["barrier"="toll_booth"];`).join('\n  ');
+  const query = `[out:json][timeout:8];
+(
+  ${arounds}
+);
+out body 6;`;
+
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: query
+    });
+    const data = await res.json();
+    return (data.elements || []).map((el: any) => {
+      const name = el.tags.name || (el.tags.amenity === 'fuel' ? 'SPBU Pertamina' : el.tags.barrier === 'toll_booth' ? 'Gerbang Tol' : 'Rest Area');
+      return {
+        name: name,
+        lat: el.lat,
+        lng: el.lon,
+        type: el.tags.amenity === 'fuel' ? 'fuel' : el.tags.barrier === 'toll_booth' ? 'toll' : 'rest_area'
+      };
+    });
+  } catch (e) {
+    console.warn('Overpass API failed:', e);
+    return [];
+  }
+};
+
 // Calculate coordinates along the route and simulate driving conditions
 const calculateRoute = async () => {
   if (!map) return;
@@ -387,31 +710,55 @@ const calculateRoute = async () => {
   const taskId = ++currentRouteTaskId;
   isRouting.value = true;
 
-  // Clear existing layers immediately
   clearMapDrawings();
   routeDistance.value = 0;
   routeDuration.value = '';
   routeCheckpoints.value = [];
   alternativeRoutes.value = [];
 
-  if (!startCityId.value || !endCityId.value) {
+  if (!startLocation.value || !destinationLocation.value) {
     isRouting.value = false;
     return;
   }
 
-  const startCity = locationsList.find(c => c.id === startCityId.value) || locationsList[0];
-  const endCity = locationsList.find(c => c.id === endCityId.value) || locationsList[5];
+  const startCity = startLocation.value;
+  const endCity = destinationLocation.value;
 
-  // Resolve coordinate sequence
-  const routeKey = [startCityId.value, endCityId.value].sort().join('-');
+  // Render start and destination markers immediately to keep pins visible during loading
+  const startMarker = L.marker([startCity.lat, startCity.lng], {
+    icon: createCustomMarker(startCity.condition, startCity.name, false)
+  }).addTo(map);
+  mapMarkers.push(startMarker);
+
+  const destMarker = L.marker([endCity.lat, endCity.lng], {
+    icon: createCustomMarker(endCity.condition, endCity.name, true)
+  }).addTo(map);
+  mapMarkers.push(destMarker);
+
+  // Fit bounds to keep both start and destination in view during loading
+  const group = L.featureGroup([startMarker, destMarker]);
+  map.fitBounds(group.getBounds(), {
+    paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
+    paddingBottomRight: [40, 40],
+    maxZoom: 12,
+    animate: true
+  });
+
+  const getSimulatedDuration = (dist: number) => {
+    const totalHours = dist / 60;
+    const hours = Math.floor(totalHours);
+    const minutes = Math.round((totalHours - hours) * 60);
+    return hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
+  };
+
   let primaryCoords: [number, number][] = [];
   let roadDist = 0;
   let durationText = '';
   let primaryDurationSeconds = 0;
+  let osrmSteps: any[] = [];
 
   try {
-    // Try to fetch actual road routing from OSRM API (OpenStreetMap Routing Engine)
-    const url = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&alternatives=true`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
     const res = await fetch(url);
     const data = await res.json();
     
@@ -419,91 +766,113 @@ const calculateRoute = async () => {
       const route = data.routes[0];
       primaryCoords = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
       roadDist = Math.round(route.distance / 1000);
-      
       primaryDurationSeconds = route.duration;
+      
       const hours = Math.floor(primaryDurationSeconds / 3600);
       const minutes = Math.round((primaryDurationSeconds % 3600) / 60);
       durationText = hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
+      
+      osrmSteps = route.legs?.[0]?.steps || [];
     } else {
       throw new Error('No route found from OSRM');
     }
   } catch (error) {
     console.warn('OSRM routing failed, falling back to mock routing database:', error);
-    
-    // Fallback 1: Predefined mock coordinates database
+    const routeKey = [startCity.id, endCity.id].sort().join('-');
     if (routesCoordinates[routeKey]) {
-      const rawCoords = routesCoordinates[routeKey];
-      const firstPoint = rawCoords[0];
-      const distToStart = Math.pow(firstPoint[0] - startCity.lat, 2) + Math.pow(firstPoint[1] - startCity.lng, 2);
-      const distToEnd = Math.pow(firstPoint[0] - endCity.lat, 2) + Math.pow(firstPoint[1] - endCity.lng, 2);
-      primaryCoords = distToStart > distToEnd ? [...rawCoords].reverse() : [...rawCoords];
+      primaryCoords = routesCoordinates[routeKey];
     } else {
-      // Fallback 2: Dynamic curved interpolation
       const stepsCount = 20;
       for (let i = 0; i <= stepsCount; i++) {
         const ratio = i / stepsCount;
         let lat = startCity.lat + (endCity.lat - startCity.lat) * ratio;
         let lng = startCity.lng + (endCity.lng - startCity.lng) * ratio;
-        if (i > 0 && i < stepsCount) {
-          const perpLat = -(endCity.lng - startCity.lng);
-          const perpLng = endCity.lat - startCity.lat;
-          const length = Math.sqrt(perpLat * perpLat + perpLng * perpLng);
-          const offsetFactor = Math.sin(ratio * Math.PI) * 0.12;
-          lat += (perpLat / length) * offsetFactor;
-          lng += (perpLng / length) * offsetFactor;
-        }
         primaryCoords.push([lat, lng]);
       }
     }
-
-    // Calculate simulated road distance based on resolved path length
     let totalDist = 0;
     for (let i = 0; i < primaryCoords.length - 1; i++) {
       totalDist += map.distance(primaryCoords[i], primaryCoords[i + 1]);
     }
     roadDist = Math.round(totalDist / 1000);
-    
-    const totalHours = roadDist / 60;
-    primaryDurationSeconds = totalHours * 3600;
-    const hours = Math.floor(totalHours);
-    const minutes = Math.round((totalHours - hours) * 60);
-    durationText = hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
+    primaryDurationSeconds = (roadDist / 60) * 3600;
+    durationText = getSimulatedDuration(roadDist);
   }
 
   if (taskId !== currentRouteTaskId) return;
 
-  // Generate alternative geometries (offset deviations)
+  let overpassPOIs: any[] = [];
+  try {
+    overpassPOIs = await fetchOverpassCheckpoints(primaryCoords);
+  } catch (e) {
+    console.warn('Overpass failed', e);
+  }
+
   const safestCoords = primaryCoords.map((coord, idx) => {
     if (idx === 0 || idx === primaryCoords.length - 1) return coord;
     const ratio = idx / primaryCoords.length;
-    const offset = Math.sin(ratio * Math.PI) * 0.04; // curved offset
+    const offset = Math.sin(ratio * Math.PI) * 0.04;
     return [coord[0] + offset, coord[1] - offset] as [number, number];
   });
 
   const leastRainCoords = primaryCoords.map((coord, idx) => {
     if (idx === 0 || idx === primaryCoords.length - 1) return coord;
     const ratio = idx / primaryCoords.length;
-    const offset = Math.sin(ratio * Math.PI) * 0.025; // alternate curve offset
+    const offset = Math.sin(ratio * Math.PI) * 0.025;
     return [coord[0] - offset, coord[1] + offset] as [number, number];
   });
 
-  // Calculate checkpoints for each route option
-  const intermediateNames = getRouteCheckpoints(startCityId.value, endCityId.value);
-  const numSteps = intermediateNames.length + 1;
+  const dist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+  };
 
-  const generateCheckpointsForOption = (coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
+  const generateCheckpointsForOption = (_coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
     const list: AlternativeRoute['checkpoints'] = [];
     const startTime = new Date();
 
-    for (let i = 0; i <= numSteps; i++) {
-      const ratio = i / numSteps;
-      const coordIdx = Math.round(ratio * (coords.length - 1));
-      const coord = coords[coordIdx];
-      const lat = coord[0];
-      const lng = coord[1];
+    let waypoints = osrmSteps
+      .filter((step: any) => step.name && step.name.trim() !== '' && step.distance > 2000)
+      .map((step: any) => ({
+        name: step.name.startsWith('Jalan') || step.name.startsWith('Jl') ? step.name : `Jl. ${step.name}`,
+        lat: step.maneuver.location[1],
+        lng: step.maneuver.location[0],
+        type: 'waypoint'
+      }));
 
-      // Calculate ETA clock time and cumulative travel time
-      const segmentSecs = Math.round((totalSecs * i) / numSteps);
+    let merged = [...waypoints, ...overpassPOIs];
+
+    merged.sort((a, b) => {
+      return dist(a.lat, a.lng, startCity.lat, startCity.lng) - dist(b.lat, b.lng, startCity.lat, startCity.lng);
+    });
+
+    const filtered: any[] = [];
+    for (const item of merged) {
+      if (dist(item.lat, item.lng, startCity.lat, startCity.lng) < 0.08) continue;
+      if (dist(item.lat, item.lng, endCity.lat, endCity.lng) < 0.08) continue;
+      
+      const tooClose = filtered.some(f => dist(f.lat, f.lng, item.lat, item.lng) < 0.1);
+      if (!tooClose) {
+        filtered.push(item);
+      }
+    }
+
+    const finalIntermediates = filtered.slice(0, 4);
+
+    const allCheckpoints = [
+      { name: startCity.name, lat: startCity.lat, lng: startCity.lng, type: 'depart' },
+      ...finalIntermediates,
+      { name: endCity.name, lat: endCity.lat, lng: endCity.lng, type: 'arrive' }
+    ];
+
+    const totalDistToLast = dist(endCity.lat, endCity.lng, startCity.lat, startCity.lng) || 1;
+
+    allCheckpoints.forEach((cp, index) => {
+      const isStart = index === 0;
+      const isEnd = index === allCheckpoints.length - 1;
+
+      const checkpointDist = dist(cp.lat, cp.lng, startCity.lat, startCity.lng);
+      const ratio = checkpointDist / totalDistToLast;
+      const segmentSecs = Math.round(totalSecs * ratio);
       const segmentTime = new Date(startTime.getTime() + segmentSecs * 1000);
       const hh = String(segmentTime.getHours()).padStart(2, '0');
       const mm = String(segmentTime.getMinutes()).padStart(2, '0');
@@ -512,66 +881,41 @@ const calculateRoute = async () => {
       const elapsedHours = Math.floor(segmentSecs / 3600);
       const elapsedMins = Math.round((segmentSecs % 3600) / 60);
       const elapsedStr = elapsedHours > 0 ? `+${elapsedHours}j ${elapsedMins}m` : `+${elapsedMins}m`;
-      
-      const etaText = i === 0 ? `Berangkat: ${timeStr}` : `Tiba: ${timeStr} (${elapsedStr})`;
+      const etaText = isStart ? `Berangkat: ${timeStr}` : `Tiba: ${timeStr} (${elapsedStr})`;
 
-      if (i === 0) {
-        list.push({
-          name: startCity.name, lat, lng,
-          temp: startCity.temp, weather: startCity.weather, condition: startCity.condition,
-          tips: `Titik Keberangkatan: ${startCity.tips}`,
-          eta: etaText
-        });
-      } else if (i === numSteps) {
-        list.push({
-          name: endCity.name, lat, lng,
-          temp: endCity.temp, weather: endCity.weather, condition: endCity.condition,
-          tips: `Titik Tujuan: ${endCity.tips}`,
-          eta: etaText
-        });
+      const nameHash = cp.name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+      let condition: LocationData['condition'] = 'cerah';
+
+      if (weatherMode === 'dry') {
+        condition = nameHash % 2 === 0 ? 'cerah' : 'berawan';
+      } else if (weatherMode === 'safe') {
+        const available: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan'];
+        condition = available[nameHash % 3];
       } else {
-        const checkpointName = intermediateNames[i - 1];
-        const nameHash = checkpointName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        let dynamicCondition: LocationData['condition'] = 'cerah';
-
-        if (weatherMode === 'dry') {
-          // Strictly sunny or cloudy (0 rain/storms)
-          dynamicCondition = nameHash % 2 === 0 ? 'cerah' : 'berawan';
-        } else if (weatherMode === 'safe') {
-          // Milder weather (cerah, berawan, max hujan ringan, NO STORMS/badai)
-          const available: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan'];
-          dynamicCondition = available[nameHash % 3];
-        } else {
-          // Standard weather simulation
-          const conditions: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan', 'badai'];
-          const startIdx = conditions.indexOf(startCity.condition);
-          const endIdx = conditions.indexOf(endCity.condition);
-          const interpolatedIdx = Math.round(startIdx + (endIdx - startIdx) * ratio);
-          const conditionIdx = Math.max(0, Math.min(3, Math.round(interpolatedIdx + (nameHash % 2 - 0.5))));
-          dynamicCondition = conditions[conditionIdx];
-        }
-
-        const weatherText = dynamicCondition === 'cerah' ? 'Cerah Berawan' : dynamicCondition === 'berawan' ? 'Berawan Tebal' : dynamicCondition === 'hujan' ? 'Hujan Sedang' : 'Hujan Petir';
-        const tempDiff = endCity.temp - startCity.temp;
-        const interpolatedTemp = Math.round(startCity.temp + tempDiff * ratio);
-        const temperature = interpolatedTemp + (nameHash % 3 - 1);
-        const tipsText = dynamicCondition === 'cerah' ? 'Kondisi jalan kondusif.' : dynamicCondition === 'berawan' ? 'Mendung, pandangan stabil.' : dynamicCondition === 'hujan' ? 'Jalan basah. Reduksi kecepatan berkendara.' : 'Angin kencang & jalan licin. Hati-hati hydroplaning!';
-
-        list.push({
-          name: checkpointName, lat, lng, temp: temperature, weather: weatherText, condition: dynamicCondition, tips: tipsText,
-          eta: etaText
-        });
+        const conditions: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan', 'badai'];
+        condition = conditions[nameHash % 4];
       }
-    }
+
+      const weatherText = condition === 'cerah' ? 'Cerah Berawan' : condition === 'berawan' ? 'Berawan Tebal' : condition === 'hujan' ? 'Hujan Sedang' : 'Hujan Petir';
+      const temperature = 27 + (nameHash % 6);
+      const tipsText = condition === 'cerah' ? 'Kondisi jalan kondusif.' : condition === 'berawan' ? 'Mendung, pandangan stabil.' : condition === 'hujan' ? 'Jalan basah. Reduksi kecepatan berkendara.' : 'Angin kencang & jalan licin. Hati-hati hydroplaning!';
+
+      list.push({
+        id: `cp-${index}-${cp.name.replace(/\s+/g, '-').toLowerCase()}`,
+        name: cp.name,
+        lat: cp.lat,
+        lng: cp.lng,
+        temp: temperature,
+        weather: weatherText,
+        condition: condition,
+        tips: isStart ? `Titik Keberangkatan: ${startCity.tips || 'Perjalanan dimulai.'}` : isEnd ? `Titik Tujuan: ${endCity.tips || 'Tiba di tujuan.'}` : tipsText,
+        eta: etaText
+      });
+    });
+
     return list;
   };
 
-  const getSimulatedDuration = (dist: number) => {
-    const totalHours = dist / 60;
-    const hours = Math.floor(totalHours);
-    const minutes = Math.round((totalHours - hours) * 60);
-    return hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
-  };
 
   alternativeRoutes.value = [
     {
@@ -606,30 +950,60 @@ const calculateRoute = async () => {
 };
 
 // Map markers and routing renderer based on step
-const renderMarkersForCurrentStep = () => {
+const renderMarkersForCurrentStep = (shouldCenter = true) => {
   if (!map) return;
+  // Keep existing markers visible during search — no clearing
+  if (currentStep.value === 'search') return;
   clearMapDrawings();
 
   if (currentStep.value === 'overview') {
     const marker = L.marker([startLocation.value.lat, startLocation.value.lng], {
       icon: createCustomMarker(startLocation.value.condition, startLocation.value.name, false)
     }).addTo(map);
-    map.setView([startLocation.value.lat, startLocation.value.lng], 13);
-    // Pan down so marker is visible above the card (card covers ~56vh)
-    map.panBy([0, 160], { animate: false });
+    
+    if (shouldCenter) {
+      map.setView([startLocation.value.lat, startLocation.value.lng], 13, { animate: false });
+      setTimeout(() => {
+        if (!map) return;
+        if (isMobile.value) {
+          map.panBy([0, 160], { animate: false });
+        } else {
+          map.panBy([-210, 0], { animate: false });
+        }
+      }, 50);
+    }
     mapMarkers.push(marker);
   } else if (currentStep.value === 'selected' && destinationLocation.value) {
-    const marker = L.marker([destinationLocation.value.lat, destinationLocation.value.lng], {
+    // 1. Render start location marker (Lokasi Saya / Asal)
+    const startMarker = L.marker([startLocation.value.lat, startLocation.value.lng], {
+      icon: createCustomMarker(startLocation.value.condition, startLocation.value.name, false)
+    }).addTo(map);
+    mapMarkers.push(startMarker);
+
+    // 2. Render destination marker (Tujuan)
+    const destMarker = L.marker([destinationLocation.value.lat, destinationLocation.value.lng], {
       icon: createCustomMarker(destinationLocation.value.condition, destinationLocation.value.name, true)
     }).addTo(map);
-    map.setView([destinationLocation.value.lat, destinationLocation.value.lng], 11);
-    mapMarkers.push(marker);
+    mapMarkers.push(destMarker);
+
+    // 3. Center view strictly on the destination marker with offset pan
+    if (shouldCenter) {
+      map.setView([destinationLocation.value.lat, destinationLocation.value.lng], 11, { animate: false });
+      setTimeout(() => {
+        if (!map) return;
+        if (isMobile.value) {
+          map.panBy([0, 160], { animate: false });
+        } else {
+          map.panBy([-210, 0], { animate: false });
+        }
+      }, 50);
+    }
   } else if (currentStep.value === 'directions' && destinationLocation.value) {
     calculateRoute();
   }
 };
 
-watch(currentStep, () => {
+watch([currentStep, destinationLocation], () => {
   renderMarkersForCurrentStep();
 });
 
@@ -643,6 +1017,16 @@ const selectLocation = (loc: LocationData) => {
   endCityId.value = loc.id;
   endQuery.value = loc.name;
   currentStep.value = 'selected';
+
+  // Add to search history if not already present, otherwise move to top
+  const existsIdx = searchHistory.value.findIndex(item => item.id === loc.id);
+  if (existsIdx !== -1) {
+    searchHistory.value.splice(existsIdx, 1);
+  }
+  searchHistory.value.unshift(loc);
+  if (searchHistory.value.length > 8) {
+    searchHistory.value.pop();
+  }
 };
 
 // Expanded state for collapsible checkpoint cards (Set of indices)
@@ -655,61 +1039,91 @@ const toggleCheckpoint = (idx: number) => {
 };
 
 // Intermediate checkpoint list based on selected route
-const directionsCheckpoints = computed(() => {
-  if (!destinationLocation.value) return [];
-  const key = `${startCityId.value}-${endCityId.value}`;
-  // Static checkpoint definition for bangunjiwo→bentarsari route (from image)
-  const checkpointDefs: Array<{
-    id: string; name: string; region: string;
-    eta: string; weather: string; condition: 'cerah'|'berawan'|'hujan'|'badai';
-    icon: string; tempHigh: number; tempLow: number;
-    alerts: string[];
-    grid: { times: string[]; nowIdx: number; suhu: number[]; angin: number[]; hujan: number[]; dirs: string[] };
-    rainBars: number[];
-  }> = [
-    {
-      id: 'destination',
-      name: destinationLocation.value.name,
-      region: destinationLocation.value.region,
-      eta: '18.20', weather: 'Badai Petir', condition: 'badai', icon: '⛈️',
-      tempHigh: 32, tempLow: 28,
-      alerts: ['Badai Petir diprakirakan akan terjadi pada saat Anda tiba.'],
-      grid: { times: ['18:00','18:20','19:00','20:00'], nowIdx: 1, suhu: [32,32,29,27], angin: [9,9,5,6], hujan: [0.01,0.74,0.77,0.76], dirs: ['↙','↙','↙','↘'] },
-      rainBars: [5,5,5,5,55,70,80,85,80,75,70,65,60,55,50,45,40,35,30,25]
-    },
-    {
-      id: 'purworejo',
-      name: 'Purworejo', region: 'Kabupaten Purworejo',
-      eta: '14.19', weather: 'Cerah', condition: 'cerah', icon: '🌤️',
-      tempHigh: 36, tempLow: 30,
-      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
-      grid: { times: ['14:00','14:19','15:00','16:00'], nowIdx: 1, suhu: [32,32,29,27], angin: [9,9,5,6], hujan: [0.01,0.74,0.77,0.76], dirs: ['↙','↙','↙','↙'] },
-      rainBars: [5,5,5,5,55,70,80,85,80,75,70,65,60,55,50,45,40,35,30,25]
-    },
-    {
-      id: 'kebumen',
-      name: 'Kebumen', region: 'Kabupaten Kebumen',
-      eta: '15.23', weather: 'Awan Tebal', condition: 'berawan', icon: '🌥️',
-      tempHigh: 36, tempLow: 30,
-      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
-      grid: { times: ['15:00','15:23','16:00','17:00'], nowIdx: 1, suhu: [31,31,28,26], angin: [7,8,6,5], hujan: [0,0,0.12,0.30], dirs: ['↙','↙','↙','↙'] },
-      rainBars: [5,5,5,5,5,5,5,10,15,20,25,30,35,40,40,35,30,25,20,15]
-    },
-    {
-      id: 'banyumas',
-      name: 'Banyumas', region: 'Kabupaten Banyumas',
-      eta: '17.10', weather: 'Awan Tebal', condition: 'berawan', icon: '🌥️',
-      tempHigh: 36, tempLow: 30,
-      alerts: ['Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.', 'Jarak Pandang 13.8km', 'Tidak ada curah hujan setidaknya 2 jam'],
-      grid: { times: ['17:00','17:10','18:00','19:00'], nowIdx: 1, suhu: [30,30,27,25], angin: [6,6,5,4], hujan: [0,0,0.05,0.20], dirs: ['↙','↙','↙','↙'] },
-      rainBars: [5,5,5,5,5,5,5,5,10,15,20,25,30,30,25,20,15,10,5,5]
-    }
-  ];
-  // For non-predefined routes, generate generic list from available data
-  if (key !== 'bangunjiwo-bentarsari') {
-    return checkpointDefs.map((c, i) => ({ ...c, id: c.id + i }));
+const getDetailedCheckpoint = (cp: any, index: number, isDestination: boolean) => {
+  const iconMap: Record<string, string> = {
+    cerah: '🌤️',
+    berawan: '🌥️',
+    hujan: '🌧️',
+    badai: '⛈️'
+  };
+  
+  let etaHour = 14;
+  const etaMatch = cp.eta.match(/(\d{2}):(\d{2})/);
+  if (etaMatch) {
+    etaHour = parseInt(etaMatch[1]);
   }
-  return checkpointDefs;
+  
+  const times = [
+    `${String((etaHour - 1 + 24) % 24).padStart(2, '0')}:00`,
+    etaMatch ? etaMatch[0] : `${String(etaHour).padStart(2, '0')}:00`,
+    `${String((etaHour + 1) % 24).padStart(2, '0')}:00`,
+    `${String((etaHour + 2) % 24).padStart(2, '0')}:00`
+  ];
+
+  let suhu = [30, 30, 28, 27];
+  let angin = [8, 8, 6, 5];
+  let hujan = [0, 0, 0, 0];
+  let rainBars = Array.from({ length: 20 }, () => Math.round(5 + Math.random() * 15));
+  
+  if (cp.condition === 'hujan') {
+    suhu = [28, 28, 26, 25];
+    hujan = [0.1, 0.4, 0.8, 1.2];
+    rainBars = Array.from({ length: 20 }, () => Math.round(30 + Math.random() * 50));
+  } else if (cp.condition === 'badai') {
+    suhu = [27, 26, 25, 24];
+    hujan = [0.5, 1.8, 2.5, 1.5];
+    rainBars = Array.from({ length: 20 }, () => Math.round(50 + Math.random() * 45));
+  } else if (cp.condition === 'berawan') {
+    suhu = [29, 29, 28, 27];
+    hujan = [0, 0.05, 0.1, 0.1];
+    rainBars = Array.from({ length: 20 }, () => Math.round(10 + Math.random() * 20));
+  }
+
+  const alertMap: Record<string, string[]> = {
+    cerah: ['Suhu cukup panas.', 'Pandangan sangat jelas (15km).', 'Tidak ada potensi hujan.'],
+    berawan: ['Mendung tipis, pandangan stabil.', 'Tidak ada potensi hujan lebat.'],
+    hujan: ['Jalanan basah dan licin.', 'Kurangi kecepatan berkendara.', 'Potensi genangan air.'],
+    badai: ['Badai petir aktif!', 'Hati-hati angin kencang.', 'Disarankan berteduh jika perlu.']
+  };
+
+  return {
+    id: cp.id || `cp-${index}-${cp.name.replace(/\s+/g, '-').toLowerCase()}`,
+    name: cp.name,
+    region: isDestination ? (destinationLocation.value?.region || '') : 'Rute Perjalanan',
+    eta: etaMatch ? etaMatch[0] : '12:00',
+    weather: cp.weather,
+    condition: cp.condition as 'cerah' | 'berawan' | 'hujan' | 'badai',
+    icon: iconMap[cp.condition] || '🌤️',
+    tempHigh: cp.temp + 2,
+    tempLow: cp.temp - 2,
+    alerts: alertMap[cp.condition] || ['Kondisi normal.'],
+    grid: {
+      times: times,
+      nowIdx: 1,
+      suhu: suhu,
+      angin: angin,
+      hujan: hujan,
+      dirs: ['↙', '↙', '↙', '↙']
+    },
+    rainBars: rainBars
+  };
+};
+
+const selectedRoute = computed(() => {
+  return alternativeRoutes.value.find(r => r.id === selectedRouteId.value) || alternativeRoutes.value[0];
+});
+
+const directionsCheckpoints = computed(() => {
+  const route = selectedRoute.value;
+  if (!route || !route.checkpoints || route.checkpoints.length === 0) return [];
+  
+  const destCp = route.checkpoints[route.checkpoints.length - 1];
+  const intermediates = route.checkpoints.slice(1, route.checkpoints.length - 1);
+  
+  const mappedDest = getDetailedCheckpoint(destCp, route.checkpoints.length - 1, true);
+  const mappedIntermediates = intermediates.map((cp, idx) => getDetailedCheckpoint(cp, idx + 1, false));
+  
+  return [mappedDest, ...mappedIntermediates];
 });
 
 const getDirections = () => {
@@ -730,33 +1144,50 @@ const goBack = () => {
   }
 };
 
-// Map center on drawer open or selectCity change
+// Map init on drawer open or selectedCity change
 watch(
   () => [props.isOpen, props.selectedCity],
   ([isOpenVal]) => {
     if (isOpenVal) {
       document.body.classList.add('drawer-open');
-      
-      currentStep.value = 'overview';
-      sheetExpanded.value = false;
-      startLocation.value = locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0];
+
+      // Match dashboard selectedCity first (case-insensitive)
+      const queryCity = props.selectedCity || '';
+      const matchedLoc = locationsList.find(c => 
+        c.id.toLowerCase() === queryCity.toLowerCase() ||
+        c.name.toLowerCase().includes(queryCity.toLowerCase())
+      ) || locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0];
+
+      startLocation.value = { ...matchedLoc };
       startCityId.value = startLocation.value.id;
       startQuery.value = startLocation.value.name;
       destinationLocation.value = null;
       searchQuery.value = '';
 
-      // Allow DOM repaint to load maps container correctly
+      // Immediately query browser GPS geolocation
+      tryGetUserLocation();
+
+      // Init map after Vue has flushed DOM (nextTick) then wait for
+      // the drawer CSS transition to finish (≈500ms) before mounting Leaflet.
+      // Multiple progressive invalidateSize calls ensure tiles render even if
+      // the container is still settling (animated resize / mobile reflow).
       nextTick(() => {
-        setTimeout(() => {
-          initMap();
-          if (map) {
-            map.invalidateSize();
-            renderMarkersForCurrentStep();
-          }
-        }, 350);
+        // Fast initial mount right after DOM paint
+        setTimeout(() => { initMap(); }, 150);
+
+        // Progressive invalidations to recover from any pending reflows
+        [350, 600, 900, 1400].forEach(delay => {
+          setTimeout(() => { if (map) map.invalidateSize(); }, delay);
+        });
       });
     } else {
       document.body.classList.remove('drawer-open');
+      if (map) {
+        clearMapDrawings();
+        map.remove();
+        map = null;
+        tileLayer = null;
+      }
     }
   },
   { immediate: true }
@@ -770,11 +1201,16 @@ watch(selectedRouteId, () => {
 onMounted(() => {
   window.addEventListener('resize', handleResize);
   checkMobile();
+  // Keep weatherNow live so currentHourStr refreshes each minute
+  _weatherClockInterval = setInterval(() => { weatherNow.value = new Date(); }, 60000);
+  // Try to detect user's real location
+  tryGetUserLocation();
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   document.body.classList.remove('drawer-open');
+  if (_weatherClockInterval) clearInterval(_weatherClockInterval);
   if (themeObserver) {
     themeObserver.disconnect();
     themeObserver = null;
@@ -841,33 +1277,43 @@ onUnmounted(() => {
               </button>
               
               <!-- Search input container -->
-              <div class="flex-grow relative flex items-center bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 rounded-full px-4 py-2.5 shadow-inner">
-                <Search class="w-3.5 h-3.5 text-slate-400 shrink-0 mr-2" />
+              <div class="flex-grow relative flex items-center bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-sm">
+                <Search class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                 <input 
                   type="text" 
                   placeholder="Cari di peta" 
                   v-model="searchQuery"
                   @focus="startSearch"
-                  class="w-full bg-transparent border-none outline-none font-semibold text-slate-800 dark:text-white placeholder-slate-400"
-                  style="font-size: 16px !important; line-height: 1;"
+                  class="w-full bg-transparent border-none outline-none text-sm placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-1 py-1"
+                  style="font-size: 14px !important; line-height: 1.2;"
                 />
-                <Mic class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-2 cursor-pointer hover:text-blue-500 transition-colors" />
+                <!-- Clear / X button -->
                 <button 
                   v-if="currentStep === 'search' || currentStep === 'selected'"
                   @click="goBack" 
-                  class="ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs shrink-0 cursor-pointer"
+                  class="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/50 transition-all shrink-0 cursor-pointer"
                 >
                   <X class="w-3 h-3" />
                 </button>
+                <!-- Mic icon (overview only) -->
+                <button
+                  v-else
+                  class="p-1.5 rounded-full text-slate-400 hover:text-blue-500 dark:hover:text-brand-cyan hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all shrink-0 cursor-pointer"
+                >
+                  <Mic class="w-3.5 h-3.5" />
+                </button>
+
               </div>
               
               <!-- Layer/Map Button (only shown in overview step) -->
               <button 
                 v-if="currentStep === 'overview'"
                 type="button"
-                class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                @click="centerMapToStartLocation"
+                class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-blue-500 dark:text-brand-cyan flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                title="Pusatkan ke lokasi saya"
               >
-                <MapIcon class="w-4 h-4" />
+                <Locate class="w-4 h-4" :class="{'animate-spin text-blue-500 dark:text-brand-cyan': isLocating}" />
               </button>
             </div>
 
@@ -887,8 +1333,18 @@ onUnmounted(() => {
                       {{ startLocation.region }}
                     </p>
                   </div>
-                  <!-- Live badge -->
-                  <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8.5px] font-black uppercase tracking-widest text-emerald-500">
+                  <!-- Live badge — loading state while GPS is active -->
+                  <span
+                    v-if="isLocating"
+                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8.5px] font-black uppercase tracking-widest text-blue-400"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+                    GPS...
+                  </span>
+                  <span
+                    v-else
+                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8.5px] font-black uppercase tracking-widest text-emerald-500"
+                  >
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     Live
                   </span>
@@ -915,74 +1371,122 @@ onUnmounted(() => {
                   <div class="flex-grow h-px bg-gradient-to-r from-indigo-200/60 dark:from-indigo-800/40 to-transparent"></div>
                 </div>
 
-                <!-- Weather Timeline Grid -->
-                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                  <div class="grid grid-cols-5 items-center gap-y-3 border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
-                    <!-- Jam Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Jam</div>
-                    <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400" /></div>
-                    <div class="text-center text-slate-600 dark:text-slate-300">13:00</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center">
-                      <span class="text-[7.5px] uppercase tracking-wide opacity-80 mb-0.5">Sekarang</span>
-                      <span>14:00</span>
-                    </div>
-                    <div class="text-center text-slate-600 dark:text-slate-300">15:00</div>
-
-                    <!-- Suhu Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Suhu</div>
-                    <div class="text-center text-slate-400">°C</div>
-                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">32°</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 py-1 rounded-lg border border-blue-500/20 relative">
-                      32°
-                      <div class="absolute top-[28px] left-1/2 -translate-x-1/2 h-[120px] border-l border-dashed border-blue-500/40 pointer-events-none z-10"></div>
-                    </div>
-                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">27°</div>
-
-                    <!-- Angin Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Angin</div>
-                    <div class="text-center text-slate-400">km/j</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">9</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-lg">9</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">6</div>
-
-                    <!-- Arah Angin Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Arah</div>
-                    <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[225deg]" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-blue-500 dark:text-blue-400 rotate-[225deg]" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[135deg]" /></div>
-
-                    <!-- Hujan Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Hujan</div>
-                    <div class="text-center text-slate-400">mm/j</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">0.01</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-lg">0.04</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">0.76</div>
+                <!-- Weather Timeline Grid — Reactive 10-day + Scrollable Hourly -->
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl overflow-hidden">
+                  <!-- Day Selector Strip -->
+                  <div class="flex gap-1.5 overflow-x-auto no-scrollbar px-3 pt-3 pb-2">
+                    <button
+                      v-for="group in dayGroups"
+                      :key="group.date"
+                      @click="selectedWeatherDate = group.date"
+                      class="flex-shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-center cursor-pointer transition-all duration-200 border select-none"
+                      :class="selectedWeatherDate === group.date
+                        ? 'bg-blue-500/15 dark:bg-blue-500/20 border-blue-400/50 dark:border-blue-400/30 shadow-sm'
+                        : 'bg-white/60 dark:bg-brand-navy-800/30 border-slate-100/60 dark:border-slate-700/20 hover:bg-blue-50/40 dark:hover:bg-slate-700/30'"
+                    >
+                      <span
+                        class="text-[8.5px] font-black uppercase tracking-wider leading-none"
+                        :class="selectedWeatherDate === group.date ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'"
+                      >{{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}</span>
+                      <span
+                        class="text-sm font-black mt-0.5 leading-none"
+                        :class="selectedWeatherDate === group.date ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'"
+                      >{{ new Date(group.date).getDate() }}</span>
+                      <!-- mini precip bar sparkline -->
+                      <div class="flex gap-px items-end mt-1" style="height:10px;">
+                        <div
+                          v-for="(s, si) in group.slots.filter((_, i) => i % 6 === 0)"
+                          :key="si"
+                          class="w-1 rounded-sm transition-all"
+                          :class="selectedWeatherDate === group.date ? 'bg-blue-400/70 dark:bg-blue-400/60' : 'bg-slate-300/60 dark:bg-slate-600/50'"
+                          :style="{ height: Math.max(2, ((s.precipitation ?? 0) / 100) * 10) + 'px' }"
+                        />
+                      </div>
+                    </button>
                   </div>
 
-                  <!-- Rain Trend Bar Chart -->
-                  <div class="pt-3 flex flex-col gap-2">
-                    <div class="h-10 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40">
-                      <div class="flex-1 rounded-t bg-blue-500/15" style="height:5%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:10%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/25" style="height:15%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
-                      <div class="flex-1 rounded-t bg-blue-400 animate-pulse" style="height:40%"></div>
-                      <div class="flex-1 rounded-t bg-blue-400" style="height:55%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:65%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:80%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:75%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:60%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:50%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/80" style="height:45%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/70" style="height:40%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/60" style="height:35%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/50" style="height:30%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/30" style="height:20%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:15%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/10" style="height:10%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/5" style="height:5%"></div>
+                  <!-- Scrollable Hourly Table -->
+                  <div class="relative">
+                    <!-- Frozen label column -->
+                    <div class="flex">
+                      <!-- Labels (fixed left) -->
+                      <div class="flex-shrink-0 w-14 text-[9px] font-bold text-slate-500 dark:text-slate-400 flex flex-col border-r border-slate-200/50 dark:border-slate-700/30 bg-slate-50 dark:bg-[#1e293b]/75">
+                        <div class="h-7 flex items-center pl-2">Jam</div>
+                        <div class="h-6 flex items-center pl-2">Suhu</div>
+                        <div class="h-5 flex items-center pl-2">Angin</div>
+                        <div class="h-5 flex items-center pl-2">Arah</div>
+                        <div class="h-5 flex items-center pl-2">Hujan</div>
+                      </div>
+                      <div
+                        ref="weatherScrollRef"
+                        class="flex-grow overflow-x-auto no-scrollbar"
+                        style="will-change: transform; transform: translate3d(0,0,0);"
+                      >
+                        <div class="flex" :style="{ width: (visibleHourSlots.length * 64) + 'px' }">
+                          <div
+                            v-for="(slot, idx) in visibleHourSlots"
+                            :key="slot.time"
+                            class="flex-shrink-0 flex flex-col items-center"
+                            :style="{ width: '64px' }"
+                            :class="idx === activeHourIndex ? 'bg-blue-500/10 dark:bg-blue-500/15' : ''"
+                          >
+                            <!-- Time -->
+                            <div class="h-7 flex flex-col items-center justify-center">
+                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 uppercase tracking-wide">Skrng</span>
+                              <span
+                                class="text-[10px] font-bold leading-none"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'"
+                              >{{ slot.time }}</span>
+                            </div>
+                            <!-- Suhu -->
+                            <div class="h-6 flex items-center justify-center">
+                              <span
+                                class="font-black text-[11px]"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-800 dark:text-slate-100'"
+                              >{{ slot.temp }}°</span>
+                            </div>
+                            <!-- Angin -->
+                            <div class="h-5 flex items-center justify-center">
+                              <span
+                                class="text-[10px] font-semibold"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'"
+                              >{{ slot.windSpeed ?? '—' }}</span>
+                            </div>
+                            <!-- Arah Angin -->
+                            <div class="h-5 flex items-center justify-center">
+                              <Navigation
+                                class="w-2.5 h-2.5 transition-transform"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'"
+                                :style="{ transform: `rotate(${getWindAngle(slot.time)}deg)` }"
+                              />
+                            </div>
+                            <!-- Hujan (mm/j) -->
+                            <div class="h-5 flex items-center justify-center">
+                              <span
+                                class="text-[9px] font-bold"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'"
+                              >{{ toRainRate(slot.precipitation ?? 0) }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Precipitation Bar Chart (real data) -->
+                  <div class="px-3 pt-2 pb-3 flex flex-col gap-1.5">
+                    <div class="h-10 flex items-end gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40 overflow-hidden">
+                      <div
+                        v-for="(slot, idx) in visibleHourSlots"
+                        :key="'bar-' + idx"
+                        class="flex-1 rounded-t transition-all duration-300"
+                        :class="[
+                          idx === activeHourIndex ? 'bg-blue-400 animate-pulse' :
+                          (slot.precipitation ?? 0) > 50 ? 'bg-blue-500' :
+                          (slot.precipitation ?? 0) > 20 ? 'bg-blue-400/80' : 'bg-blue-300/60 dark:bg-blue-500/40'
+                        ]"
+                        :style="{ height: Math.max(4, ((slot.precipitation ?? 0) / maxPrecipForDay) * 100) + '%' }"
+                      />
                     </div>
                     <div class="flex justify-between px-1 text-slate-400">
                       <Sun class="w-3.5 h-3.5 text-amber-500" />
@@ -996,32 +1500,61 @@ onUnmounted(() => {
               <!-- =================================================================
                    STEP 2: SEARCH INPUT ACTIVE / SUGGESTIONS
                    ================================================================= -->
-              <div v-else-if="currentStep === 'search'" class="space-y-4 pt-1">
-                <div class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest block mb-1">Hasil Pencarian</div>
-                
-                <div class="flex flex-col rounded-2xl bg-slate-100 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/40 divide-y divide-slate-200 dark:divide-slate-800/60 overflow-hidden">
-                  <button 
-                    v-for="loc in searchSuggestions" 
+              <div v-else-if="currentStep === 'search'" class="space-y-3 pt-1">
+
+                <!-- Header row -->
+                <div class="flex items-center justify-between px-0.5">
+                  <div class="flex items-center gap-2">
+                    <History class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      {{ searchQuery.trim() ? 'Hasil Pencarian' : 'Riwayat Pencarian' }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div v-if="isSearching" class="flex items-center gap-1.5 text-[9px] font-bold text-blue-500 dark:text-brand-cyan animate-pulse">
+                      <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
+                      Mencari...
+                    </div>
+                    <button
+                      v-if="!searchQuery.trim() && searchHistory.length > 0"
+                      @click="clearSearchHistory"
+                      class="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer py-1 px-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10"
+                      title="Hapus riwayat"
+                    >
+                      <Trash2 class="w-3 h-3" />
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+
+                <!-- List -->
+                <div v-if="searchSuggestions.length > 0" class="flex flex-col gap-1">
+                  <button
+                    v-for="loc in searchSuggestions"
                     :key="'sug-' + loc.id"
                     @click="selectLocation(loc)"
-                    class="w-full text-left px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-all flex flex-col gap-0.5 cursor-pointer"
+                    class="w-full text-left px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/30 hover:bg-white dark:hover:bg-slate-700/50 hover:border-blue-200 dark:hover:border-blue-500/30 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer group"
                   >
-                    <span class="text-xs font-bold text-slate-800 dark:text-white">{{ loc.name }}</span>
-                    <span class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold">{{ loc.type }} — {{ loc.region }}</span>
-                  </button>
-                  
-                  <!-- Fallback custom Bentarsari search card dynamically added to support mockup search query -->
-                  <button 
-                    v-if="searchQuery.toLowerCase().includes('bentar')"
-                    @click="selectLocation(locationsList.find(c => c.id === 'bentarsari') || locationsList[1])"
-                    class="w-full text-left px-4 py-3 hover:bg-slate-800/40 transition-all flex flex-col gap-0.5 cursor-pointer bg-blue-500/5"
-                  >
-                    <span class="text-xs font-bold text-white flex items-center gap-1">
-                      🏙️ Bentarsari, Salem
+                    <!-- Icon bubble -->
+                    <span class="w-8 h-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600/40 flex items-center justify-center text-[11px] group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:border-blue-200 dark:group-hover:border-blue-500/30 transition-all">
+                      {{ loc.condition === 'cerah' ? '☀️' : loc.condition === 'berawan' ? '☁️' : loc.condition === 'hujan' ? '🌧️' : '⛈️' }}
                     </span>
-                    <span class="text-[9px] text-slate-450 font-semibold">Desa — Kabupaten Brebes Jawa Tengah</span>
+                    <!-- Text -->
+                    <div class="flex-grow min-w-0">
+                      <div class="text-xs font-bold text-slate-800 dark:text-white leading-tight truncate">{{ loc.name }}</div>
+                      <div class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 truncate">{{ loc.type }} — {{ loc.region }}</div>
+                    </div>
+                    <!-- Temp badge -->
+                    <span class="shrink-0 text-[10px] font-black text-slate-500 dark:text-slate-400">{{ loc.temp }}°</span>
                   </button>
                 </div>
+
+                <!-- Empty state -->
+                <div v-else class="flex flex-col items-center justify-center py-10 gap-3 text-slate-400 dark:text-slate-600">
+                  <History class="w-8 h-8 opacity-40" />
+                  <p class="text-xs font-semibold">Belum ada riwayat pencarian</p>
+                </div>
+
               </div>
 
               <!-- =================================================================
@@ -1052,71 +1585,104 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <!-- Weather Timeline Grid -->
-                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl p-4 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
-                  <div class="grid grid-cols-5 items-center gap-y-3 border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
-                    <!-- Jam Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Jam</div>
-                    <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400" /></div>
-                    <div class="text-center text-slate-600 dark:text-slate-300">13:00</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center">
-                      <span class="text-[7.5px] uppercase tracking-wide opacity-80 mb-0.5">Sekarang</span>
-                      <span>14:00</span>
-                    </div>
-                    <div class="text-center text-slate-600 dark:text-slate-300">15:00</div>
-
-                    <!-- Suhu Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Suhu</div>
-                    <div class="text-center text-slate-400">°C</div>
-                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">32°</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 py-1 rounded-lg border border-blue-500/20 relative">
-                      32°
-                      <div class="absolute top-[28px] left-1/2 -translate-x-1/2 h-[120px] border-l border-dashed border-blue-500/40 pointer-events-none z-10"></div>
-                    </div>
-                    <div class="text-center text-slate-800 dark:text-slate-100 font-black">27°</div>
-
-                    <!-- Angin Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Angin</div>
-                    <div class="text-center text-slate-400">km/j</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">9</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-lg">9</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">6</div>
-
-                    <!-- Arah Angin Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Arah</div>
-                    <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[225deg]" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-blue-500 dark:text-blue-400 rotate-[225deg]" /></div>
-                    <div class="flex justify-center"><Navigation class="w-3 h-3 text-slate-400 rotate-[135deg]" /></div>
-
-                    <!-- Hujan Row -->
-                    <div class="text-slate-500 dark:text-slate-400 font-bold">Hujan</div>
-                    <div class="text-center text-slate-400">mm/j</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">0.01</div>
-                    <div class="text-center text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-lg">0.04</div>
-                    <div class="text-center text-slate-700 dark:text-slate-200">0.76</div>
+                <!-- Weather Timeline Grid — Reactive 10-day + Scrollable Hourly -->
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl overflow-hidden">
+                  <!-- Day Selector Strip -->
+                  <div class="flex gap-1.5 overflow-x-auto no-scrollbar px-3 pt-3 pb-2">
+                    <button
+                      v-for="group in dayGroups"
+                      :key="'sel-' + group.date"
+                      @click="selectedWeatherDate = group.date"
+                      class="flex-shrink-0 flex flex-col items-center px-2.5 py-1.5 rounded-xl text-center cursor-pointer transition-all duration-200 border select-none"
+                      :class="selectedWeatherDate === group.date
+                        ? 'bg-blue-500/15 dark:bg-blue-500/20 border-blue-400/50 dark:border-blue-400/30 shadow-sm'
+                        : 'bg-white/60 dark:bg-brand-navy-800/30 border-slate-100/60 dark:border-slate-700/20 hover:bg-blue-50/40 dark:hover:bg-slate-700/30'"
+                    >
+                      <span
+                        class="text-[8.5px] font-black uppercase tracking-wider leading-none"
+                        :class="selectedWeatherDate === group.date ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'"
+                      >{{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}</span>
+                      <span
+                        class="text-sm font-black mt-0.5 leading-none"
+                        :class="selectedWeatherDate === group.date ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'"
+                      >{{ new Date(group.date).getDate() }}</span>
+                      <div class="flex gap-px items-end mt-1" style="height:10px;">
+                        <div
+                          v-for="(s, si) in group.slots.filter((_, i) => i % 6 === 0)"
+                          :key="'sp2-' + si"
+                          class="w-1 rounded-sm transition-all"
+                          :class="selectedWeatherDate === group.date ? 'bg-blue-400/70 dark:bg-blue-400/60' : 'bg-slate-300/60 dark:bg-slate-600/50'"
+                          :style="{ height: Math.max(2, ((s.precipitation ?? 0) / 100) * 10) + 'px' }"
+                        />
+                      </div>
+                    </button>
                   </div>
 
-                  <!-- Rain Bar Chart -->
-                  <div class="pt-3 flex flex-col gap-2">
-                    <div class="h-10 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40">
-                      <div class="flex-1 rounded-t bg-blue-500/15" style="height:5%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/20" style="height:10%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/25" style="height:15%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/40" style="height:25%"></div>
-                      <div class="flex-1 rounded-t bg-blue-400 animate-pulse" style="height:40%"></div>
-                      <div class="flex-1 rounded-t bg-blue-400" style="height:55%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:65%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:80%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:75%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:60%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500" style="height:50%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/80" style="height:45%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/70" style="height:40%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/60" style="height:35%"></div>
-                      <div class="flex-1 rounded-t bg-blue-500/50" style="height:30%"></div>
+                  <!-- Scrollable Hourly Table -->
+                  <div class="relative">
+                    <div class="flex">
+                      <div class="flex-shrink-0 w-14 text-[9px] font-bold text-slate-500 dark:text-slate-400 flex flex-col border-r border-slate-200/50 dark:border-slate-700/30 bg-slate-50 dark:bg-[#1e293b]/75">
+                        <div class="h-7 flex items-center pl-2">Jam</div>
+                        <div class="h-6 flex items-center pl-2">Suhu</div>
+                        <div class="h-5 flex items-center pl-2">Angin</div>
+                        <div class="h-5 flex items-center pl-2">Arah</div>
+                        <div class="h-5 flex items-center pl-2">Hujan</div>
+                      </div>
+                      <div
+                        ref="weatherScrollRef"
+                        class="flex-grow overflow-x-auto no-scrollbar"
+                        style="will-change: transform; transform: translate3d(0,0,0);"
+                      >
+                        <div class="flex" :style="{ width: (visibleHourSlots.length * 64) + 'px' }">
+                          <div
+                            v-for="(slot, idx) in visibleHourSlots"
+                            :key="'d-' + slot.time"
+                            class="flex-shrink-0 flex flex-col items-center"
+                            :style="{ width: '64px' }"
+                            :class="idx === activeHourIndex ? 'bg-blue-500/10 dark:bg-blue-500/15' : ''"
+                          >
+                            <div class="h-7 flex flex-col items-center justify-center">
+                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 uppercase tracking-wide">Skrng</span>
+                              <span class="text-[10px] font-bold leading-none" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'">{{ slot.time }}</span>
+                            </div>
+                            <div class="h-6 flex items-center justify-center">
+                              <span class="font-black text-[11px]" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-800 dark:text-slate-100'">{{ slot.temp }}°</span>
+                            </div>
+                            <div class="h-5 flex items-center justify-center">
+                              <span class="text-[10px] font-semibold" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'">{{ slot.windSpeed ?? '—' }}</span>
+                            </div>
+                            <div class="h-5 flex items-center justify-center">
+                              <Navigation
+                                class="w-2.5 h-2.5 transition-transform"
+                                :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'"
+                                :style="{ transform: `rotate(${getWindAngle(slot.time)}deg)` }"
+                              />
+                            </div>
+                            <div class="h-5 flex items-center justify-center">
+                              <span class="text-[9px] font-bold" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'">{{ toRainRate(slot.precipitation ?? 0) }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="flex justify-between px-1">
+                  </div>
+
+                  <!-- Precipitation Bar Chart -->
+                  <div class="px-3 pt-2 pb-3 flex flex-col gap-1.5">
+                    <div class="h-10 flex items-end gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40 overflow-hidden">
+                      <div
+                        v-for="(slot, idx) in visibleHourSlots"
+                        :key="'b2-' + idx"
+                        class="flex-1 rounded-t transition-all duration-300"
+                        :class="[
+                          idx === activeHourIndex ? 'bg-blue-400 animate-pulse' :
+                          (slot.precipitation ?? 0) > 50 ? 'bg-blue-500' :
+                          (slot.precipitation ?? 0) > 20 ? 'bg-blue-400/80' : 'bg-blue-300/60 dark:bg-blue-500/40'
+                        ]"
+                        :style="{ height: Math.max(4, ((slot.precipitation ?? 0) / maxPrecipForDay) * 100) + '%' }"
+                      />
+                    </div>
+                    <div class="flex justify-between px-1 text-slate-400">
                       <Sun class="w-3.5 h-3.5 text-amber-500" />
                       <CloudRain class="w-3.5 h-3.5 text-blue-400" />
                       <CloudRain class="w-3.5 h-3.5 text-blue-500" />
@@ -1144,13 +1710,19 @@ onUnmounted(() => {
                     <button 
                       type="button"
                       @click="goBack"
-                      class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                      class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
                     >
                       <ChevronLeft class="w-4 h-4" />
                     </button>
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
+                    <div class="flex flex-col text-left">
+                      <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
+                      <p class="text-[9px] font-bold mt-1.5 flex items-center gap-1.5 leading-none max-w-[270px]" :title="`${startLocation.name} ke ${destinationLocation.name}`">
+                        <span class="truncate bg-slate-100/80 dark:bg-slate-800/70 px-1.5 py-0.5 rounded-md text-slate-500 dark:text-slate-350 border border-slate-200/50 dark:border-slate-700/30">{{ startLocation.name }}</span>
+                        <span class="text-slate-300 dark:text-slate-650 shrink-0 font-normal">→</span>
+                        <span class="truncate bg-blue-50/60 dark:bg-blue-950/40 px-1.5 py-0.5 rounded-md text-blue-600 dark:text-brand-cyan border border-blue-100/40 dark:border-brand-cyan/20">{{ destinationLocation.name }}</span>
+                      </p>
+                    </div>
                   </div>
-                  <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors"><X class="w-4 h-4" /></button>
                 </div>
 
                 <!-- Travel Mode Selector Tabs -->
@@ -1167,7 +1739,55 @@ onUnmounted(() => {
                 </div>
 
                 <!-- ── CHECKPOINT CARDS LIST ── -->
-                <div class="space-y-3.5">
+                <div v-if="isRouting" class="space-y-4 pt-1 animate-pulse">
+                  <!-- Header skeleton -->
+                  <div class="flex items-center justify-between px-1">
+                    <div class="h-3 w-1/3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                    <div class="h-3 w-1/4 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                  </div>
+
+                  <!-- Destination Overview Card Skeleton -->
+                  <div class="bg-slate-100/70 dark:bg-[#1c2d3f]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-xl bg-slate-250 dark:bg-slate-700/80 shrink-0"></div>
+                      <div class="flex-grow space-y-2">
+                        <div class="h-3.5 w-2/3 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
+                        <div class="h-2.5 w-1/2 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
+                      </div>
+                    </div>
+                    <!-- Mock alert block -->
+                    <div class="h-10 bg-slate-200/40 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300/40 dark:border-slate-700/30 flex items-center px-3.5 gap-2">
+                      <div class="w-3.5 h-3.5 rounded-full bg-slate-250 dark:bg-slate-700/80"></div>
+                      <div class="h-2 w-3/4 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
+                    </div>
+                    <!-- Detailed stats shimmer -->
+                    <div class="bg-white/50 dark:bg-[#111e2b]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-xl p-3 space-y-3">
+                      <div class="grid grid-cols-4 gap-2">
+                        <div v-for="j in 4" :key="j" class="h-3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                      </div>
+                      <div class="h-8 bg-slate-250 dark:bg-slate-700/60 rounded-lg"></div>
+                    </div>
+                  </div>
+
+                  <!-- Intermediate Cards Skeletons -->
+                  <div v-for="i in 3" :key="'skel-'+i" class="bg-slate-100/50 dark:bg-[#1c2d3f]/30 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <div class="flex-grow space-y-2">
+                        <div class="h-3 w-1/3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                        <div class="h-2 w-1/2 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                      </div>
+                      <div class="w-4 h-4 bg-slate-250 dark:bg-slate-700/60 rounded-full shrink-0"></div>
+                    </div>
+                    <div class="h-px bg-slate-200/60 dark:bg-slate-800/40"></div>
+                    <div class="flex justify-between items-center">
+                      <div class="h-2.5 w-3/5 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                      <div class="h-2 w-1/6 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actual Checkpoint Cards List -->
+                <div v-else class="space-y-3.5">
                   
                   <!-- 1. DESTINATION OVERVIEW CARD -->
                   <div 

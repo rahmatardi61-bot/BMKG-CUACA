@@ -1,24 +1,27 @@
 import type { WeatherData, HourlyForecast, TransportStatus, WarningAlert, NewsArticle, CityAnalysis } from '../types/weather';
 
-// ── Helper: build a 7-day hourly array from a single-day base ───────────────
+// ── Helper: build a 10-day hourly array from a single-day base ──────────────
 // startDate: today's Date object (local)
 // base24: the 24-hour slice for "today"
 // Each subsequent day gets slight temperature & precipitation variation
 function build7DayForecast(base24: Omit<HourlyForecast, 'date'>[], startDate: Date): HourlyForecast[] {
   const result: HourlyForecast[] = [];
 
-  // Daily variation deltas: [tempOffset, precipMultiplier]
+  // Daily variation deltas: [tempOffset, precipMultiplier] — 10 days
   const dayVariants: [number, number][] = [
-    [0, 1.00],   // Day 0 = today (base)
+    [ 0, 1.00],  // Day 0 = today (base)
     [-1, 1.10],  // Day 1
-    [1, 0.90],   // Day 2
-    [2, 0.80],   // Day 3
+    [ 1, 0.90],  // Day 2
+    [ 2, 0.80],  // Day 3
     [-2, 1.20],  // Day 4
-    [1, 1.05],   // Day 5
-    [0, 0.95],   // Day 6
+    [ 1, 1.05],  // Day 5
+    [ 0, 0.95],  // Day 6
+    [-1, 1.15],  // Day 7
+    [ 2, 0.85],  // Day 8
+    [ 1, 1.00],  // Day 9
   ];
 
-  for (let d = 0; d < 7; d++) {
+  for (let d = 0; d < 10; d++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + d);
     const isoDate = date.toISOString().slice(0, 10); // YYYY-MM-DD

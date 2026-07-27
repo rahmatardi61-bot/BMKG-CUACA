@@ -280,7 +280,7 @@ const startCityId = ref('');
 const endCityId = ref('');
 const isRouting = ref(false);
 
-const isMobile = ref(false);
+const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 const mapEl = ref<HTMLElement | null>(null);
 
 const checkMobile = () => {
@@ -1170,11 +1170,17 @@ watch(
       // Multiple progressive invalidateSize calls ensure tiles render even if
       // the container is still settling (animated resize / mobile reflow).
       nextTick(() => {
-        // Fast initial mount right after DOM paint
-        setTimeout(() => { initMap(); }, 150);
+        // Mobile needs longer delay: CSS transition is ≈400ms
+        const initDelay = isMobile.value ? 350 : 150;
+        setTimeout(() => { initMap(); }, initDelay);
+
+        // Safety retry: if initMap failed (container not ready), try once more
+        setTimeout(() => {
+          if (!map && mapEl.value) { initMap(); }
+        }, 800);
 
         // Progressive invalidations to recover from any pending reflows
-        [350, 600, 900, 1400].forEach(delay => {
+        [400, 700, 1100, 1600, 2500].forEach(delay => {
           setTimeout(() => { if (map) map.invalidateSize(); }, delay);
         });
       });
@@ -1282,8 +1288,12 @@ onUnmounted(() => {
                   placeholder="Cari di peta" 
                   v-model="searchQuery"
                   @focus="startSearch"
-                  class="w-full bg-transparent border-none outline-none text-sm placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-1 py-1"
-                  style="font-size: 14px !important; line-height: 1.2;"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  class="w-full bg-transparent border-none outline-none placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-1 py-1"
+                  style="font-size: 16px; line-height: 1.2; transform: scale(1);"
                 />
                 <!-- Clear / X button -->
                 <button 

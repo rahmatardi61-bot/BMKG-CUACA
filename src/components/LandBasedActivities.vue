@@ -7,7 +7,6 @@ import {
   Sun,
   CloudRain,
   Clock,
-  Map as MapIcon,
   ChevronLeft,
   Search,
   CloudLightning,
@@ -30,7 +29,6 @@ import {
   type LocationData, 
   locationsList, 
   routesCoordinates,
-  routesCheckpoints
 } from '../data/landBasedActivitiesData';
 import { hourlyForecastsMap } from '../data/mockData';
 

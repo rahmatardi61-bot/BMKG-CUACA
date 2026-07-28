@@ -3,7 +3,6 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { 
   X, 
   Navigation, 
-  Compass, 
   Sun,
   CloudRain,
   Clock,
@@ -11,7 +10,6 @@ import {
   Search,
   CloudLightning,
   Cloud,
-  Eye,
   Car,
   Bike,
   Bus,
@@ -22,7 +20,11 @@ import {
   History,
   Trash2,
   Locate,
-  Anchor
+  Anchor,
+  CornerUpRight,
+  Info,
+  Moon,
+  SunDim
 } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -56,10 +58,85 @@ const currentHourStr = computed(() => {
 // ISO date of today 'YYYY-MM-DD'
 const todayIso = computed(() => weatherNow.value.toISOString().slice(0, 10));
 
-// Forecasts for the active city (fallback DKI Jakarta)
-const cityForecasts = computed(() => {
-  return hourlyForecastsMap[props.selectedCity] || hourlyForecastsMap['DKI Jakarta'] || [];
+// ── Generate realistic hourly data from a LocationData condition ─────────────
+// Active location for weather table (destination when selected, else start)
+const activeWeatherLocation = computed(() => {
+  if (currentStep.value === 'selected' && destinationLocation.value) return destinationLocation.value;
+  return startLocation.value;
 });
+
+// Forecasts: map location region to closest main city from mockData, then adjust weather parameters to match location condition
+const cityForecasts = computed(() => {
+  const loc = activeWeatherLocation.value;
+  if (!loc) {
+    return hourlyForecastsMap[props.selectedCity] || hourlyForecastsMap['DKI Jakarta'] || [];
+  }
+
+  // 1. Map to closest regional city in hourlyForecastsMap
+  const region = loc.region.toLowerCase();
+  let key = 'DKI Jakarta';
+  if (region.includes('yogyakarta') || region.includes('bantul') || region.includes('sleman') || region.includes('diy') || region.includes('magelang') || region.includes('purworejo') || region.includes('jawa tengah') || region.includes('brebes')) {
+    key = 'Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta';
+  } else if (region.includes('jawa barat') || region.includes('bandung') || region.includes('bogor') || region.includes('sukabumi') || region.includes('cirebon')) {
+    key = 'Bandung';
+  } else if (region.includes('jawa timur') || region.includes('surabaya') || region.includes('malang') || region.includes('batu') || region.includes('bromo') || region.includes('banyuwangi')) {
+    key = 'Surabaya';
+  } else if (region.includes('bali') || region.includes('denpasar') || region.includes('kuta') || region.includes('ubud')) {
+    key = 'Denpasar';
+  } else if (region.includes('jakarta') || region.includes('dki')) {
+    key = 'DKI Jakarta';
+  }
+
+  const baseForecasts = hourlyForecastsMap[key] || hourlyForecastsMap['DKI Jakarta'] || [];
+  const cond = loc.condition || 'cerah';
+
+  // 2. Adjust base forecasts to match loc.temp and condition
+  return baseForecasts.map(slot => {
+    let icon = slot.icon;
+    let precipitation = slot.precipitation ?? 0;
+    let status = slot.status;
+    
+    const [hStr] = slot.time.split(':');
+    const h = parseInt(hStr) || 0;
+
+    if (cond === 'cerah') {
+      if (icon === 'CloudRain' || icon === 'CloudLightning') {
+        icon = (h < 6 || h > 18) ? 'Moon' : 'Sun';
+      }
+      precipitation = Math.min(precipitation, 15);
+      status = 'Cerah';
+    } else if (cond === 'berawan') {
+      if (icon === 'Sun' || icon === 'Moon') {
+        icon = (h < 6 || h > 18) ? 'Cloud' : 'SunDim';
+      } else if (icon === 'CloudRain' || icon === 'CloudLightning') {
+        icon = 'Cloud';
+      }
+      precipitation = Math.max(15, Math.min(precipitation, 40));
+      status = 'Berawan';
+    } else if (cond === 'hujan') {
+      icon = 'CloudRain';
+      precipitation = Math.max(55, Math.min(precipitation + 45, 90));
+      status = 'Hujan Ringan';
+    } else if (cond === 'badai') {
+      icon = 'CloudLightning';
+      precipitation = Math.max(80, Math.min(precipitation + 65, 100));
+      status = 'Hujan Petir';
+    }
+
+    // Offset temperature based on location's base temp (Yogya/Jakarta base ref is ~31)
+    const tempOffset = loc.temp - 31;
+    const finalTemp = Math.round(slot.temp + tempOffset);
+
+    return {
+      ...slot,
+      icon,
+      precipitation,
+      status,
+      temp: finalTemp
+    };
+  });
+});
+
 
 // Grouped by date: [{ date, slots }]
 const dayGroups = computed(() => {
@@ -90,11 +167,11 @@ const visibleHourSlots = computed(() => {
 // Index of the current/closest active hour within selected day
 const activeHourIndex = computed(() => {
   const slots = visibleHourSlots.value;
-  if (!slots.length) return 0;
+  if (!slots.length) return -1;
   const isToday = selectedWeatherDate.value === todayIso.value || selectedWeatherDate.value === '';
-  if (!isToday) return 0;
+  if (!isToday) return -1;
   const idx = slots.findIndex(s => s.time === currentHourStr.value);
-  return idx >= 0 ? idx : 0;
+  return idx >= 0 ? idx : -1;
 });
 
 // Wind direction angle helper (pseudo from time)
@@ -135,6 +212,7 @@ let _weatherClockInterval: ReturnType<typeof setInterval> | null = null;
 // Steps & Interactive states
 const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
 const searchQuery = ref('');
+const searchInput = ref<HTMLInputElement | null>(null);
 const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
 const destinationLocation = ref<LocationData | null>(null);
 const activeTravelMode = ref('car');
@@ -724,10 +802,10 @@ const createCustomMarker = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai', 
         </div>
         
         <!-- Arrow Tail (rotates/shapes pointer) -->
-        <div class="w-2.5 h-2.5 bg-white/75 dark:bg-slate-900/75 border-r border-b border-slate-200/80 dark:border-slate-800/40 transform rotate-45 -mt-1.5 z-10 shadow-[2px_2px_4px_rgba(0,0,0,0.04)] backdrop-blur-md"></div>
+        <div class="w-2.5 h-2.5 bg-white/90 dark:bg-slate-950/90 border-r border-b border-slate-200 dark:border-slate-800 transform rotate-45 -mt-1.5 z-10 shadow-[2px_2px_4px_rgba(0,0,0,0.04)] backdrop-blur-md"></div>
 
         <!-- Tooltip Label (Modern capsule pill) -->
-        <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/75 dark:bg-slate-900/75 border border-white/30 dark:border-white/10 text-slate-800 dark:text-slate-250 text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 transition-transform backdrop-blur-md">
+        <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/90 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-white text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 transition-transform backdrop-blur-md">
           ${label}
         </div>
       </div>
@@ -991,11 +1069,79 @@ const calculateRoute = async () => {
     return hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
   };
 
+  const dist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+  };
+
+  const getNearestLocationCondition = (lat: number, lng: number): LocationData['condition'] => {
+    let best: LocationData | null = null;
+    let bestD = Infinity;
+    for (const loc of locationsList) {
+      const d = dist(lat, lng, loc.lat, loc.lng);
+      if (d < bestD) { bestD = d; best = loc; }
+    }
+    return best?.condition || 'cerah';
+  };
+
+  const findBestDetourCity = (primaryCoordsList: [number, number][], excludedIds: string[] = []) => {
+    const dDirect = dist(startCity.lat, startCity.lng, endCity.lat, endCity.lng) || 1;
+    let bestLoc: LocationData | null = null;
+    let bestScore = -Infinity;
+
+    for (const loc of locationsList) {
+      if (loc.id === startCity.id || loc.id === endCity.id || excludedIds.includes(loc.id)) continue;
+      
+      // We only want clear or cloudy cities for detour
+      if (loc.condition !== 'cerah' && loc.condition !== 'berawan') continue;
+
+      const d1 = dist(startCity.lat, startCity.lng, loc.lat, loc.lng);
+      const d2 = dist(loc.lat, loc.lng, endCity.lat, endCity.lng);
+      const detourRatio = (d1 + d2) / dDirect;
+
+      // Must be a reasonable detour (not too far away, but not straight line)
+      if (detourRatio < 1.01 || detourRatio > 1.35) continue;
+
+      // Must not be right on the primary route
+      let minRouteDist = Infinity;
+      for (const pt of primaryCoordsList) {
+        const d = dist(loc.lat, loc.lng, pt[0], pt[1]);
+        if (d < minRouteDist) minRouteDist = d;
+      }
+
+      if (minRouteDist < 0.1) continue; // Must be at least ~11km away from primary route
+
+      // Score based on weather (prefer 'cerah') and lower detour ratio
+      let score = 0;
+      if (loc.condition === 'cerah') score += 100;
+      else if (loc.condition === 'berawan') score += 50;
+
+      // Prefer midpoints
+      score -= Math.abs(detourRatio - 1.15) * 60;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestLoc = loc;
+      }
+    }
+    return bestLoc;
+  };
+
   let primaryCoords: [number, number][] = [];
   let roadDist = 0;
   let durationText = '';
   let primaryDurationSeconds = 0;
   let osrmSteps: any[] = [];
+
+  // Store real alternative route data from OSRM
+  let secondaryCoords: [number, number][] = [];
+  let secondarySteps: any[] = [];
+  let secondaryDist = 0;
+  let secondaryDurationSecs = 0;
+
+  let tertiaryCoords: [number, number][] = [];
+  let tertiarySteps: any[] = [];
+  let tertiaryDist = 0;
+  let tertiaryDurationSecs = 0;
 
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&alternatives=true&steps=true`;
@@ -1003,16 +1149,91 @@ const calculateRoute = async () => {
     const data = await res.json();
     
     if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
-      primaryCoords = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
-      roadDist = Math.round(route.distance / 1000);
-      primaryDurationSeconds = route.duration;
-      
+      // --- Route 0: Primary (fastest/shortest) ---
+      const route0 = data.routes[0];
+      primaryCoords = route0.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+      roadDist = Math.round(route0.distance / 1000);
+      primaryDurationSeconds = route0.duration;
       const hours = Math.floor(primaryDurationSeconds / 3600);
       const minutes = Math.round((primaryDurationSeconds % 3600) / 60);
       durationText = hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
-      
-      osrmSteps = route.legs?.[0]?.steps || [];
+      osrmSteps = route0.legs?.[0]?.steps || [];
+
+      // --- Dynamic Weather Detouring ---
+      let hasBadWeather = false;
+      const checkCount = 8;
+      for (let i = 1; i <= checkCount; i++) {
+        const ratio = i / (checkCount + 1);
+        const idx = Math.round(ratio * (primaryCoords.length - 1));
+        if (primaryCoords[idx]) {
+          const cond = getNearestLocationCondition(primaryCoords[idx][0], primaryCoords[idx][1]);
+          if (cond === 'hujan' || cond === 'badai') {
+            hasBadWeather = true;
+            break;
+          }
+        }
+      }
+
+      let detour1 = hasBadWeather ? findBestDetourCity(primaryCoords, []) : null;
+      let detour2 = hasBadWeather && detour1 ? findBestDetourCity(primaryCoords, [detour1.id]) : null;
+
+      // --- Route 1 (Cuaca Aman): Detour via detour1, fallback to standard alternative ---
+      if (detour1) {
+        try {
+          const detourUrl = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${detour1.lng},${detour1.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&steps=true`;
+          const detourRes = await fetch(detourUrl);
+          const detourData = await detourRes.json();
+          if (detourData.code === 'Ok' && detourData.routes && detourData.routes.length > 0) {
+            const route1 = detourData.routes[0];
+            secondaryCoords = route1.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+            secondaryDist = Math.round(route1.distance / 1000);
+            secondaryDurationSecs = route1.duration;
+            secondarySteps = [];
+            for (const leg of route1.legs || []) {
+              secondarySteps.push(...(leg.steps || []));
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch detour1 route', e);
+        }
+      }
+
+      if (secondaryCoords.length === 0 && data.routes.length > 1) {
+        const route1 = data.routes[1];
+        secondaryCoords = route1.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        secondaryDist = Math.round(route1.distance / 1000);
+        secondaryDurationSecs = route1.duration;
+        secondarySteps = route1.legs?.[0]?.steps || [];
+      }
+
+      // --- Route 2 (Minim Hujan): Detour via detour2, fallback to standard alternative ---
+      if (detour2) {
+        try {
+          const detourUrl = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${detour2.lng},${detour2.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&steps=true`;
+          const detourRes = await fetch(detourUrl);
+          const detourData = await detourRes.json();
+          if (detourData.code === 'Ok' && detourData.routes && detourData.routes.length > 0) {
+            const route2 = detourData.routes[0];
+            tertiaryCoords = route2.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+            tertiaryDist = Math.round(route2.distance / 1000);
+            tertiaryDurationSecs = route2.duration;
+            tertiarySteps = [];
+            for (const leg of route2.legs || []) {
+              tertiarySteps.push(...(leg.steps || []));
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch detour2 route', e);
+        }
+      }
+
+      if (tertiaryCoords.length === 0 && data.routes.length > 2) {
+        const route2 = data.routes[2];
+        tertiaryCoords = route2.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        tertiaryDist = Math.round(route2.distance / 1000);
+        tertiaryDurationSecs = route2.duration;
+        tertiarySteps = route2.legs?.[0]?.steps || [];
+      }
     } else {
       throw new Error('No route found from OSRM');
     }
@@ -1035,9 +1256,43 @@ const calculateRoute = async () => {
       totalDist += map.distance(primaryCoords[i], primaryCoords[i + 1]);
     }
     roadDist = Math.round(totalDist / 1000);
-    primaryDurationSeconds = (roadDist / 60) * 3600;
-    durationText = getSimulatedDuration(roadDist);
+    // Apply weather-based speed factor: hujan/badai = slower ETA
+    const destCond = endCity.condition || 'cerah';
+    const weatherSpeedFactor = destCond === 'badai' ? 0.60 : destCond === 'hujan' ? 0.80 : destCond === 'berawan' ? 0.95 : 1.0;
+    primaryDurationSeconds = (roadDist / (60 * weatherSpeedFactor)) * 3600;
+    durationText = getSimulatedDuration(roadDist / weatherSpeedFactor);
   }
+
+  // Fallback: generate geometric offsets if OSRM returned fewer than 3 routes
+  const safestCoords: [number, number][] = secondaryCoords.length > 0 ? secondaryCoords : primaryCoords.map((coord, idx) => {
+    if (idx === 0 || idx === primaryCoords.length - 1) return coord;
+    const ratio = idx / primaryCoords.length;
+    const offset = Math.sin(ratio * Math.PI) * 0.04;
+    return [coord[0] + offset, coord[1] - offset] as [number, number];
+  });
+
+  const leastRainCoords: [number, number][] = tertiaryCoords.length > 0 ? tertiaryCoords : primaryCoords.map((coord, idx) => {
+    if (idx === 0 || idx === primaryCoords.length - 1) return coord;
+    const ratio = idx / primaryCoords.length;
+    const offset = Math.sin(ratio * Math.PI) * 0.025;
+    return [coord[0] - offset, coord[1] + offset] as [number, number];
+  });
+
+  // Duration for alternatives: use real OSRM value or estimate
+  const safestDurationSecs = secondaryDurationSecs > 0 ? secondaryDurationSecs : primaryDurationSeconds * 1.05;
+  const safestDist = secondaryDist > 0 ? secondaryDist : Math.round(roadDist * 1.05);
+  const leastRainDurationSecs = tertiaryDurationSecs > 0 ? tertiaryDurationSecs : primaryDurationSeconds * 1.08;
+  const leastRainDist = tertiaryDist > 0 ? tertiaryDist : Math.round(roadDist * 1.08);
+
+  // Override osrmSteps for each route option via closure-captured variable trick
+  // We pass steps via a helper wrapper
+  const makeForOption = (coords: [number, number][], steps: any[], mode: 'standard' | 'safe' | 'dry', secs: number) => {
+    const prevSteps = osrmSteps;
+    osrmSteps = steps.length > 0 ? steps : prevSteps;
+    const result = generateCheckpointsForOption(coords, mode, secs);
+    osrmSteps = prevSteps;
+    return result;
+  };
 
   if (taskId !== currentRouteTaskId) return;
 
@@ -1048,55 +1303,67 @@ const calculateRoute = async () => {
     console.warn('Overpass failed', e);
   }
 
-  const safestCoords = primaryCoords.map((coord, idx) => {
-    if (idx === 0 || idx === primaryCoords.length - 1) return coord;
-    const ratio = idx / primaryCoords.length;
-    const offset = Math.sin(ratio * Math.PI) * 0.04;
-    return [coord[0] + offset, coord[1] - offset] as [number, number];
-  });
+  // Build cumulative OSRM step distance lookup for accurate road-based ratio
+  // Keys: step maneuver coord string => cumulative distance from start (meters)
+  const osrmStepCumDist: Map<string, number> = new Map();
+  if (osrmSteps.length > 0) {
+    let cumDist = 0;
+    for (const step of osrmSteps) {
+      const key = `${step.maneuver.location[1].toFixed(5)},${step.maneuver.location[0].toFixed(5)}`;
+      osrmStepCumDist.set(key, cumDist);
+      cumDist += (step.distance || 0);
+    }
+  }
+  const osrmTotalRoadDist = osrmSteps.reduce((sum: number, s: any) => sum + (s.distance || 0), 0) || 1;
 
-  const leastRainCoords = primaryCoords.map((coord, idx) => {
-    if (idx === 0 || idx === primaryCoords.length - 1) return coord;
-    const ratio = idx / primaryCoords.length;
-    const offset = Math.sin(ratio * Math.PI) * 0.025;
-    return [coord[0] - offset, coord[1] + offset] as [number, number];
-  });
-
-  const dist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
-  };
-
-  const generateCheckpointsForOption = (_coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
+  const generateCheckpointsForOption = (coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
     const list: AlternativeRoute['checkpoints'] = [];
     const startTime = new Date();
 
-    let waypoints = osrmSteps
-      .filter((step: any) => step.name && step.name.trim() !== '' && step.distance > 2000)
-      .map((step: any) => ({
-        name: step.name.startsWith('Jalan') || step.name.startsWith('Jl') ? step.name : `Jl. ${step.name}`,
-        lat: step.maneuver.location[1],
-        lng: step.maneuver.location[0],
-        type: 'waypoint'
-      }));
+    // --- Sample N evenly-spaced points along the actual route polyline ---
+    const NUM_INTERMEDIATES = 8;
+    const sampledIntermediates: any[] = [];
 
-    let merged = [...waypoints, ...overpassPOIs];
+    if (coords.length >= 3) {
+      for (let i = 1; i <= NUM_INTERMEDIATES; i++) {
+        const ratio = i / (NUM_INTERMEDIATES + 1);
+        const idx = Math.round(ratio * (coords.length - 1));
+        const [lat, lng] = coords[idx];
 
-    merged.sort((a, b) => {
-      return dist(a.lat, a.lng, startCity.lat, startCity.lng) - dist(b.lat, b.lng, startCity.lat, startCity.lng);
-    });
+        // Match to nearest locationsList city for a real name
+        let bestLoc: any = null;
+        let bestD = Infinity;
+        for (const loc of locationsList) {
+          const d = dist(lat, lng, loc.lat, loc.lng);
+          if (d < bestD) { bestD = d; bestLoc = loc; }
+        }
 
-    const filtered: any[] = [];
-    for (const item of merged) {
-      if (dist(item.lat, item.lng, startCity.lat, startCity.lng) < 0.08) continue;
-      if (dist(item.lat, item.lng, endCity.lat, endCity.lng) < 0.08) continue;
-      
-      const tooClose = filtered.some(f => dist(f.lat, f.lng, item.lat, item.lng) < 0.1);
-      if (!tooClose) {
-        filtered.push(item);
+        // Only use if not too close to start/end or a previous sample
+        if (dist(lat, lng, startCity.lat, startCity.lng) < 0.08) continue;
+        if (dist(lat, lng, endCity.lat, endCity.lng) < 0.08) continue;
+        const tooClose = sampledIntermediates.some(s => dist(s.lat, s.lng, lat, lng) < 0.05);
+        if (tooClose) continue;
+
+        sampledIntermediates.push({
+          name: bestLoc ? bestLoc.name : `Titik ${i}`,
+          lat,
+          lng,
+          type: 'waypoint',
+          _locCondition: bestLoc ? bestLoc.condition : null,
+          _coordRatio: i / (NUM_INTERMEDIATES + 1)
+        });
       }
     }
 
-    const finalIntermediates = filtered.slice(0, 4);
+    // Fallback: also include any overpass POIs not already covered
+    for (const poi of overpassPOIs) {
+      if (dist(poi.lat, poi.lng, startCity.lat, startCity.lng) < 0.08) continue;
+      if (dist(poi.lat, poi.lng, endCity.lat, endCity.lng) < 0.08) continue;
+      const tooClose = sampledIntermediates.some(s => dist(s.lat, s.lng, poi.lat, poi.lng) < 0.05);
+      if (!tooClose) sampledIntermediates.push(poi);
+    }
+
+    const finalIntermediates = sampledIntermediates.slice(0, NUM_INTERMEDIATES);
 
     const allCheckpoints = [
       { name: startCity.name, lat: startCity.lat, lng: startCity.lng, type: 'depart' },
@@ -1110,8 +1377,28 @@ const calculateRoute = async () => {
       const isStart = index === 0;
       const isEnd = index === allCheckpoints.length - 1;
 
-      const checkpointDist = dist(cp.lat, cp.lng, startCity.lat, startCity.lng);
-      const ratio = checkpointDist / totalDistToLast;
+
+      // Ratio from route position: prefer stored _coordRatio (polyline-sampled), then OSRM cumulative, then straight line
+      let ratio: number;
+      if (isEnd) {
+        ratio = 1;
+      } else if (isStart) {
+        ratio = 0;
+      } else if ((cp as any)._coordRatio !== undefined) {
+        ratio = (cp as any)._coordRatio;
+      } else if (osrmStepCumDist.size > 0) {
+        let nearestStepDist = Infinity;
+        let nearestCum = 0;
+        osrmStepCumDist.forEach((cum, key) => {
+          const [sLat, sLng] = key.split(',').map(Number);
+          const d = dist(cp.lat, cp.lng, sLat, sLng);
+          if (d < nearestStepDist) { nearestStepDist = d; nearestCum = cum; }
+        });
+        ratio = nearestCum / osrmTotalRoadDist;
+      } else {
+        ratio = dist(cp.lat, cp.lng, startCity.lat, startCity.lng) / totalDistToLast;
+      }
+
       const segmentSecs = Math.round(totalSecs * ratio);
       const segmentTime = new Date(startTime.getTime() + segmentSecs * 1000);
       const hh = String(segmentTime.getHours()).padStart(2, '0');
@@ -1123,17 +1410,24 @@ const calculateRoute = async () => {
       const elapsedStr = elapsedHours > 0 ? `+${elapsedHours}j ${elapsedMins}m` : `+${elapsedMins}m`;
       const etaText = isStart ? `Berangkat: ${timeStr}` : `Tiba: ${timeStr} (${elapsedStr})`;
 
+      // --- FIX 3: Condition from nearest real location, not nameHash ---
       const nameHash = cp.name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-      let condition: LocationData['condition'] = 'cerah';
+      let condition: LocationData['condition'];
 
-      if (weatherMode === 'dry') {
-        condition = nameHash % 2 === 0 ? 'cerah' : 'berawan';
-      } else if (weatherMode === 'safe') {
-        const available: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan'];
-        condition = available[nameHash % 3];
+      if (isStart) {
+        condition = startCity.condition || 'cerah';
+      } else if (isEnd) {
+        condition = endCity.condition || 'cerah';
       } else {
-        const conditions: Array<LocationData['condition']> = ['cerah', 'berawan', 'hujan', 'badai'];
-        condition = conditions[nameHash % 4];
+        // Use nearest location from locationsList as proxy for intermediate point
+        const nearestCond = getNearestLocationCondition(cp.lat, cp.lng);
+        if (weatherMode === 'dry') {
+          condition = (nearestCond === 'hujan' || nearestCond === 'badai') ? 'berawan' : nearestCond;
+        } else if (weatherMode === 'safe') {
+          condition = nearestCond === 'badai' ? 'hujan' : nearestCond;
+        } else {
+          condition = nearestCond;
+        }
       }
 
       const weatherText = condition === 'cerah' ? 'Cerah Berawan' : condition === 'berawan' ? 'Berawan Tebal' : condition === 'hujan' ? 'Hujan Sedang' : 'Hujan Petir';
@@ -1164,23 +1458,23 @@ const calculateRoute = async () => {
       distance: roadDist,
       duration: durationText || getSimulatedDuration(roadDist),
       coords: primaryCoords,
-      checkpoints: generateCheckpointsForOption(primaryCoords, 'standard', primaryDurationSeconds)
+      checkpoints: makeForOption(primaryCoords, osrmSteps, 'standard', primaryDurationSeconds)
     },
     {
       id: 'safest',
-      label: 'Cuaca Aman',
-      distance: Math.round(roadDist * 1.05),
-      duration: getSimulatedDuration(Math.round(roadDist * 1.05)),
+      label: secondaryCoords.length > 0 ? 'Alt. Rute 2' : 'Cuaca Aman',
+      distance: safestDist,
+      duration: getSimulatedDuration(safestDist),
       coords: safestCoords,
-      checkpoints: generateCheckpointsForOption(safestCoords, 'safe', primaryDurationSeconds * 1.05)
+      checkpoints: makeForOption(safestCoords, secondarySteps, 'safe', safestDurationSecs)
     },
     {
       id: 'least_rain',
-      label: 'Minim Hujan',
-      distance: Math.round(roadDist * 1.08),
-      duration: getSimulatedDuration(Math.round(roadDist * 1.08)),
+      label: tertiaryCoords.length > 0 ? 'Alt. Rute 3' : 'Minim Hujan',
+      distance: leastRainDist,
+      duration: getSimulatedDuration(leastRainDist),
       coords: leastRainCoords,
-      checkpoints: generateCheckpointsForOption(leastRainCoords, 'dry', primaryDurationSeconds * 1.08)
+      checkpoints: makeForOption(leastRainCoords, tertiarySteps, 'dry', leastRainDurationSecs)
     }
   ];
 
@@ -1256,6 +1550,7 @@ const selectLocation = (loc: LocationData) => {
   destinationLocation.value = loc;
   endCityId.value = loc.id;
   endQuery.value = loc.name;
+  searchQuery.value = loc.name;
   currentStep.value = 'selected';
 
   // Add to search history if not already present, otherwise move to top
@@ -1271,13 +1566,6 @@ const selectLocation = (loc: LocationData) => {
 
 // Expanded state for collapsible checkpoint cards (Set of indices)
 const expandedCheckpoints = ref<Set<number>>(new Set([0]));
-
-const toggleCheckpoint = (idx: number) => {
-  const s = new Set(expandedCheckpoints.value);
-  if (s.has(idx)) s.delete(idx); else s.add(idx);
-  expandedCheckpoints.value = s;
-};
-
 // Intermediate checkpoint list based on selected route
 const getDetailedCheckpoint = (cp: any, index: number, isDestination: boolean) => {
   const iconMap: Record<string, string> = {
@@ -1289,33 +1577,71 @@ const getDetailedCheckpoint = (cp: any, index: number, isDestination: boolean) =
   
   let etaHour = 14;
   const etaMatch = cp.eta.match(/(\d{2}):(\d{2})/);
+  const elapsedMatch = cp.eta.match(/\(([^)]+)\)/);
+  const elapsedStr = elapsedMatch ? elapsedMatch[1] : '';
   if (etaMatch) {
     etaHour = parseInt(etaMatch[1]);
   }
   
-  const times = [
-    `${String((etaHour - 1 + 24) % 24).padStart(2, '0')}:00`,
-    etaMatch ? etaMatch[0] : `${String(etaHour).padStart(2, '0')}:00`,
-    `${String((etaHour + 1) % 24).padStart(2, '0')}:00`,
-    `${String((etaHour + 2) % 24).padStart(2, '0')}:00`
-  ];
+  const times: string[] = [];
+  const suhu: number[] = [];
+  const angin: number[] = [];
+  const hujan: number[] = [];
+  const dirs: string[] = [];
+  const cuaca: string[] = [];
 
-  let suhu = [30, 30, 28, 27];
-  let angin = [8, 8, 6, 5];
-  let hujan = [0, 0, 0, 0];
+  for (let h = 0; h < 24; h++) {
+    times.push(`${String(h).padStart(2, '0')}:00`);
+
+    // Generate based on condition
+    let baseTemp = 28;
+    let baseWind = 6;
+    let baseRain = 0;
+    let baseCuaca = 'Sun';
+
+    // diurnal temp variation (cooler at night, warmer in afternoon)
+    const tempOffset = h >= 10 && h <= 15 ? 4 : h >= 22 || h <= 5 ? -3 : 0;
+
+    if (cp.condition === 'hujan') {
+      baseTemp = 25 + tempOffset;
+      baseWind = 8 + (h % 3);
+      baseRain = Number((0.2 + (h % 5) * 0.3).toFixed(1));
+      baseCuaca = h >= 18 || h < 6 ? 'Moon' : (h % 2 === 0 ? 'CloudRain' : 'Cloud');
+    } else if (cp.condition === 'badai') {
+      baseTemp = 24 + tempOffset;
+      baseWind = 12 + (h % 5);
+      baseRain = Number((0.5 + (h % 4) * 0.7).toFixed(1));
+      baseCuaca = h % 3 === 0 ? 'CloudLightning' : 'CloudRain';
+    } else if (cp.condition === 'berawan') {
+      baseTemp = 27 + tempOffset;
+      baseWind = 7 + (h % 2);
+      baseRain = h % 6 === 0 ? 0.1 : 0;
+      baseCuaca = h >= 18 || h < 6 ? 'Moon' : 'Cloud';
+    } else { // cerah
+      baseTemp = 29 + tempOffset;
+      baseWind = 5 + (h % 2);
+      baseRain = 0;
+      baseCuaca = h >= 18 || h < 6 ? 'Moon' : (h >= 10 && h <= 15 ? 'Sun' : 'SunDim');
+    }
+
+    suhu.push(baseTemp);
+    angin.push(baseWind);
+    hujan.push(baseRain);
+    dirs.push('↙');
+    cuaca.push(baseCuaca);
+  }
+
+  // Inject exact ETA time representation at the target slot
+  if (etaHour >= 0 && etaHour < 24) {
+    times[etaHour] = etaMatch ? etaMatch[0] : `${String(etaHour).padStart(2, '0')}:00`;
+  }
+
   let rainBars = Array.from({ length: 20 }, () => Math.round(5 + Math.random() * 15));
-  
   if (cp.condition === 'hujan') {
-    suhu = [28, 28, 26, 25];
-    hujan = [0.1, 0.4, 0.8, 1.2];
     rainBars = Array.from({ length: 20 }, () => Math.round(30 + Math.random() * 50));
   } else if (cp.condition === 'badai') {
-    suhu = [27, 26, 25, 24];
-    hujan = [0.5, 1.8, 2.5, 1.5];
     rainBars = Array.from({ length: 20 }, () => Math.round(50 + Math.random() * 45));
   } else if (cp.condition === 'berawan') {
-    suhu = [29, 29, 28, 27];
-    hujan = [0, 0.05, 0.1, 0.1];
     rainBars = Array.from({ length: 20 }, () => Math.round(10 + Math.random() * 20));
   }
 
@@ -1331,6 +1657,7 @@ const getDetailedCheckpoint = (cp: any, index: number, isDestination: boolean) =
     name: cp.name,
     region: isDestination ? (destinationLocation.value?.region || '') : 'Rute Perjalanan',
     eta: etaMatch ? etaMatch[0] : '12:00',
+    elapsed: elapsedStr,
     weather: cp.weather,
     condition: cp.condition as 'cerah' | 'berawan' | 'hujan' | 'badai',
     icon: iconMap[cp.condition] || '🌤️',
@@ -1339,11 +1666,12 @@ const getDetailedCheckpoint = (cp: any, index: number, isDestination: boolean) =
     alerts: alertMap[cp.condition] || ['Kondisi normal.'],
     grid: {
       times: times,
-      nowIdx: 1,
+      nowIdx: etaHour,
       suhu: suhu,
       angin: angin,
       hujan: hujan,
-      dirs: ['↙', '↙', '↙', '↙']
+      dirs: dirs,
+      cuaca: cuaca
     },
     rainBars: rainBars
   };
@@ -1366,6 +1694,39 @@ const directionsCheckpoints = computed(() => {
   return [mappedDest, ...mappedIntermediates];
 });
 
+const toggleCheckpoint = (idx: number) => {
+  const s = new Set(expandedCheckpoints.value);
+  const isExpanding = !s.has(idx);
+  if (s.has(idx)) s.delete(idx); else s.add(idx);
+  expandedCheckpoints.value = s;
+
+  if (isExpanding) {
+    nextTick(() => {
+      const el = document.getElementById(`cp-scroll-${idx}`);
+      if (el) {
+        const cp = directionsCheckpoints.value[idx];
+        const nowIdx = cp?.grid?.nowIdx ?? 14;
+        const colW = 56;
+        el.scrollLeft = Math.max(0, (nowIdx - 2.5) * colW);
+      }
+    });
+  }
+};
+
+watch(directionsCheckpoints, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    nextTick(() => {
+      const el = document.getElementById('cp-scroll-0');
+      if (el) {
+        const cp = newVal[0];
+        const nowIdx = cp?.grid?.nowIdx ?? 14;
+        const colW = 56;
+        el.scrollLeft = Math.max(0, (nowIdx - 2.5) * colW);
+      }
+    });
+  }
+}, { immediate: true });
+
 const getDirections = () => {
   currentStep.value = 'directions';
   expandedCheckpoints.value = new Set([0]);
@@ -1377,10 +1738,25 @@ const goBack = () => {
   } else if (currentStep.value === 'selected') {
     currentStep.value = 'overview';
     destinationLocation.value = null;
+    searchQuery.value = '';
   } else if (currentStep.value === 'search') {
     currentStep.value = 'overview';
+    searchQuery.value = '';
   } else {
     emit('close');
+  }
+};
+
+const clearSearch = () => {
+  if ((currentStep.value === 'search' || currentStep.value === 'selected') && searchQuery.value) {
+    searchQuery.value = '';
+    destinationLocation.value = null;
+    currentStep.value = 'search';
+    nextTick(() => {
+      searchInput.value?.focus();
+    });
+  } else {
+    goBack();
   }
 };
 
@@ -1495,7 +1871,7 @@ onUnmounted(() => {
         <Transition name="drawer-slide" appear>
           <div 
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white/95 dark:bg-[#182232]/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
             :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
           >
             <!-- Drag Handle / Bar at the top of the sheet -->
@@ -1544,6 +1920,7 @@ onUnmounted(() => {
               <div class="flex-grow relative flex items-center bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-4 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-md">
                 <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
                 <input 
+                  ref="searchInput"
                   type="text" 
                   placeholder="Cari lokasi tujuan" 
                   v-model="searchQuery"
@@ -1556,13 +1933,13 @@ onUnmounted(() => {
                 />
                 <!-- Clear / X button -->
                 <button 
-                  v-if="currentStep === 'search' || currentStep === 'selected'"
-                  @click="goBack" 
+                  v-if="searchQuery"
+                  @click="clearSearch" 
                   class="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/50 transition-all shrink-0 cursor-pointer"
                 >
                   <X class="w-3 h-3" />
                 </button>
-                <!-- Mic icon (overview only) -->
+                <!-- Mic icon -->
                 <button
                   v-else
                   class="p-1.5 rounded-full text-slate-400 hover:text-blue-500 dark:hover:text-brand-cyan hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all shrink-0 cursor-pointer"
@@ -1571,17 +1948,52 @@ onUnmounted(() => {
                 </button>
 
               </div>
+
+              <!-- Direction Button with Custom Premium Tooltip -->
+              <div v-if="currentStep === 'selected'" class="relative group shrink-0">
+                <button
+                  type="button"
+                  @click="getDirections"
+                  class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all duration-300 cursor-pointer animate-fade-in group-hover:shadow-[0_0_8px_rgba(27,94,189,0.2)] dark:group-hover:shadow-[0_0_8px_rgba(34,211,238,0.25)]"
+                >
+                  <div class="w-4.5 h-4.5 bg-[#1b5ebd] dark:bg-brand-cyan rotate-45 flex items-center justify-center rounded-[2.5px] shadow-[0_1px_2px_rgba(0,0,0,0.15)] group-hover:scale-110 group-hover:rotate-[50deg] transition-all duration-300">
+                    <div class="-rotate-45 flex items-center justify-center">
+                      <CornerUpRight class="w-2.5 h-2.5 text-white dark:text-slate-950 stroke-[3.5px]" />
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Premium Tooltip -->
+                <div class="absolute right-0 top-full mt-2.5 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-out whitespace-nowrap">
+                  <!-- Tooltip Card -->
+                  <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center gap-1.5 backdrop-blur-sm">
+                    <!-- Little arrow pointer pointing up -->
+                    <div class="absolute -top-1 right-3.5 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                    <Navigation class="w-3 h-3 text-brand-cyan animate-pulse shrink-0" />
+                    <span>Petunjuk Rute Perjalanan</span>
+                  </div>
+                </div>
+              </div>
               
               <!-- Layer/Map Button (only shown in overview step) -->
-              <button 
-                v-if="currentStep === 'overview'"
-                type="button"
-                @click="centerMapToStartLocation"
-                class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-blue-500 dark:text-brand-cyan flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
-                title="Pusatkan ke lokasi saya"
-              >
-                <Locate class="w-4 h-4" :class="{'animate-spin text-blue-500 dark:text-brand-cyan': isLocating}" />
-              </button>
+              <div v-if="currentStep === 'overview'" class="relative group shrink-0">
+                <button 
+                  type="button"
+                  @click="centerMapToStartLocation"
+                  class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800/80 text-blue-500 dark:text-brand-cyan flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                >
+                  <Locate class="w-4 h-4" :class="{'animate-spin text-blue-500 dark:text-brand-cyan': isLocating}" />
+                </button>
+
+                <!-- Premium Tooltip -->
+                <div class="absolute right-0 top-full mt-2.5 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-out whitespace-nowrap">
+                  <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center gap-1.5 backdrop-blur-sm">
+                    <div class="absolute -top-1 right-3.5 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                    <Locate class="w-3 h-3 text-brand-cyan animate-pulse shrink-0" />
+                    <span>Pusatkan ke lokasi saya</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Transport Hub Quick Filter (overview only) -->
@@ -1607,7 +2019,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Scrollable Content Area -->
-            <div class="flex-grow overflow-y-auto px-5 pb-6 space-y-4 no-scrollbar">
+            <div class="flex-grow overflow-y-auto px-5 pb-6 space-y-4 no-scrollbar" style="will-change: transform; contain: layout style; -webkit-overflow-scrolling: touch;">
 
               <!-- =================================================================
                    STEP 1: DEFAULT OVERVIEW (Bangunjiwo details)
@@ -1705,6 +2117,7 @@ onUnmounted(() => {
                         <div class="h-5 flex items-center pl-2">Angin</div>
                         <div class="h-5 flex items-center pl-2">Arah</div>
                         <div class="h-5 flex items-center pl-2">Hujan</div>
+                        <div class="h-6 flex items-center pl-2">Cuaca</div>
                       </div>
                       <div
                         ref="weatherScrollRef"
@@ -1756,6 +2169,16 @@ onUnmounted(() => {
                                 :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'"
                               >{{ toRainRate(slot.precipitation ?? 0) }}</span>
                             </div>
+                            <!-- Cuaca (dynamic icon) -->
+                            <div class="h-6 flex items-center justify-center">
+                              <Sun v-if="slot.icon === 'Sun'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-amber-400' : 'text-amber-400/70'" />
+                              <SunDim v-else-if="slot.icon === 'SunDim'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-amber-300' : 'text-amber-300/70'" />
+                              <Cloud v-else-if="slot.icon === 'Cloud'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-slate-400' : 'text-slate-400/70'" />
+                              <CloudRain v-else-if="slot.icon === 'CloudRain'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-blue-400' : 'text-blue-400/70'" />
+                              <CloudLightning v-else-if="slot.icon === 'CloudLightning'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-violet-400' : 'text-violet-400/70'" />
+                              <Moon v-else-if="slot.icon === 'Moon'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-indigo-300' : 'text-indigo-300/70'" />
+                              <Cloud v-else class="w-3.5 h-3.5 text-slate-400/60" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1764,23 +2187,84 @@ onUnmounted(() => {
 
                   <!-- Precipitation Bar Chart (real data) -->
                   <div class="px-3 pt-2 pb-3 flex flex-col gap-1.5">
-                    <div class="h-10 flex items-end gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40 overflow-hidden">
+                    <div class="h-10 flex items-end gap-px bg-slate-100 dark:bg-slate-950/30 rounded-xl px-2 py-1.5 border border-slate-200/60 dark:border-slate-800/40 relative">
                       <div
                         v-for="(slot, idx) in visibleHourSlots"
                         :key="'bar-' + idx"
-                        class="flex-1 rounded-t transition-all duration-300"
+                        class="flex-1 rounded-t transition-all duration-300 relative group cursor-pointer"
                         :class="[
                           idx === activeHourIndex ? 'bg-blue-400 animate-pulse' :
                           (slot.precipitation ?? 0) > 50 ? 'bg-blue-500' :
                           (slot.precipitation ?? 0) > 20 ? 'bg-blue-400/80' : 'bg-blue-300/60 dark:bg-blue-500/40'
                         ]"
                         :style="{ height: Math.max(4, ((slot.precipitation ?? 0) / maxPrecipForDay) * 100) + '%' }"
-                      />
+                      >
+                        <!-- Individual Premium Tooltip -->
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-out">
+                          <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white rounded-lg px-2 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-sm text-center flex flex-col gap-0.5 text-[8px] font-black whitespace-nowrap">
+                            <span class="text-slate-400 text-[7px] leading-none">{{ slot.time }}</span>
+                            <span class="text-brand-cyan text-[8.5px] leading-tight">{{ toRainRate(slot.precipitation ?? 0) }}</span>
+                            <!-- Arrow pointer pointing down -->
+                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="flex justify-between px-1 text-slate-400">
-                      <Sun class="w-3.5 h-3.5 text-amber-500" />
-                      <CloudRain class="w-3.5 h-3.5 text-blue-400" />
-                      <CloudRain class="w-3.5 h-3.5 text-blue-500" />
+                    <div class="flex justify-end items-center px-1 text-slate-400">
+
+                      <!-- Premium Tooltip for Precipitation Explanation -->
+                      <div class="relative group">
+                        <button 
+                          type="button"
+                          class="flex items-center justify-center p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                        >
+                          <Info class="w-3.5 h-3.5" />
+                        </button>
+
+                        <!-- Tooltip Card -->
+                        <div class="absolute right-0 bottom-full mb-2.5 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 ease-out w-64">
+                          <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white rounded-xl p-3.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.4)] backdrop-blur-md text-left flex flex-col gap-2">
+                            <!-- Arrow pointing down to trigger icon -->
+                            <div class="absolute -bottom-1.5 right-2 w-3 h-3 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+
+                            <!-- Header -->
+                            <div class="flex items-center gap-1.5 pb-1.5 border-b border-slate-800">
+                              <span class="text-xs font-black text-brand-cyan tracking-wide">Grafik Curah Hujan</span>
+                              <span class="text-[8px] bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded font-black uppercase">Info</span>
+                            </div>
+
+                            <!-- Intro -->
+                            <p class="text-[10px] leading-relaxed text-slate-300">
+                              Memvisualisasikan volume presipitasi (<span class="font-bold text-white">mm/jam</span>) sepanjang rute pada hari yang dipilih.
+                            </p>
+
+                            <!-- Legend List -->
+                            <div class="flex flex-col gap-1.5 pt-1">
+                              <!-- Item 1 -->
+                              <div class="flex items-start gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
+                                <div class="text-[9.5px] leading-snug">
+                                  <span class="font-black text-blue-400">Tinggi Batang:</span> Menggambarkan volume curah hujan (makin tinggi, makin lebat).
+                                </div>
+                              </div>
+                              <!-- Item 2 -->
+                              <div class="flex items-start gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1 shrink-0 animate-pulse"></span>
+                                <div class="text-[9.5px] leading-snug">
+                                  <span class="font-black text-blue-400">Batang Berkedip:</span> Menunjukkan jam aktif perjalanan yang sedang Anda sorot.
+                                </div>
+                              </div>
+                              <!-- Item 3 -->
+                              <div class="flex items-start gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shrink-0"></span>
+                                <div class="text-[9.5px] leading-snug">
+                                  <span class="font-black text-amber-400">Ikon Bawah:</span> Menunjukkan pergeseran tren cuaca harian (Cerah ke Hujan).
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1916,6 +2400,7 @@ onUnmounted(() => {
                         <div class="h-5 flex items-center pl-2">Angin</div>
                         <div class="h-5 flex items-center pl-2">Arah</div>
                         <div class="h-5 flex items-center pl-2">Hujan</div>
+                        <div class="h-6 flex items-center pl-2">Cuaca</div>
                       </div>
                       <div
                         ref="weatherScrollRef"
@@ -1950,6 +2435,16 @@ onUnmounted(() => {
                             <div class="h-5 flex items-center justify-center">
                               <span class="text-[9px] font-bold" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'">{{ toRainRate(slot.precipitation ?? 0) }}</span>
                             </div>
+                            <!-- Cuaca (dynamic icon) -->
+                            <div class="h-6 flex items-center justify-center">
+                              <Sun v-if="slot.icon === 'Sun'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-amber-400' : 'text-amber-400/70'" />
+                              <SunDim v-else-if="slot.icon === 'SunDim'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-amber-300' : 'text-amber-300/70'" />
+                              <Cloud v-else-if="slot.icon === 'Cloud'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-slate-400' : 'text-slate-400/70'" />
+                              <CloudRain v-else-if="slot.icon === 'CloudRain'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-blue-400' : 'text-blue-400/70'" />
+                              <CloudLightning v-else-if="slot.icon === 'CloudLightning'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-violet-400' : 'text-violet-400/70'" />
+                              <Moon v-else-if="slot.icon === 'Moon'" class="w-3.5 h-3.5" :class="idx === activeHourIndex ? 'text-indigo-300' : 'text-indigo-300/70'" />
+                              <Cloud v-else class="w-3.5 h-3.5 text-slate-400/60" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1971,90 +2466,123 @@ onUnmounted(() => {
                         :style="{ height: Math.max(4, ((slot.precipitation ?? 0) / maxPrecipForDay) * 100) + '%' }"
                       />
                     </div>
-                    <div class="flex justify-between px-1 text-slate-400">
-                      <Sun class="w-3.5 h-3.5 text-amber-500" />
-                      <CloudRain class="w-3.5 h-3.5 text-blue-400" />
-                      <CloudRain class="w-3.5 h-3.5 text-blue-500" />
-                    </div>
                   </div>
                 </div>
 
-                <!-- Action Button: Petunjuk Arah -->
-                <button 
-                  type="button" 
-                  @click="getDirections"
-                  class="w-full bg-[#1b5ebd] hover:bg-blue-600 active:scale-[0.98] py-3.5 rounded-2xl text-xs font-bold text-white transition-all shadow-md mt-2 flex items-center justify-center gap-1.5 cursor-pointer animate-fade-in"
-                >
-                  Petunjuk Arah
-                </button>
               </div>
 
               <!-- =================================================================
                    STEP 4: DIRECTIONS / ROUTE PLAN — Full-screen checkpoint list
                    ================================================================= -->
               <div v-else-if="currentStep === 'directions' && destinationLocation" class="space-y-3.5">
-                <!-- Directions Mode Header -->
-                <div class="flex items-center justify-between pb-3 border-b border-slate-200/60 dark:border-slate-800/60">
-                  <div class="flex items-center gap-2">
-                    <button 
-                      type="button"
-                      @click="goBack"
-                      class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
-                    >
-                      <ChevronLeft class="w-4 h-4" />
-                    </button>
-                    <div class="flex flex-col text-left">
-                      <h3 class="text-sm font-black text-slate-900 dark:text-white leading-none">Petunjuk Arah</h3>
-                      <p class="text-[9px] font-bold mt-1.5 flex items-center gap-1.5 leading-none max-w-[270px]" :title="`${startLocation.name} ke ${destinationLocation.name}`">
-                        <span class="truncate bg-slate-100/80 dark:bg-slate-800/70 px-1.5 py-0.5 rounded-md text-slate-500 dark:text-slate-350 border border-slate-200/50 dark:border-slate-700/30">{{ startLocation.name }}</span>
-                        <span class="text-slate-300 dark:text-slate-650 shrink-0 font-normal">→</span>
-                        <span class="truncate bg-blue-50/60 dark:bg-blue-950/40 px-1.5 py-0.5 rounded-md text-blue-600 dark:text-brand-cyan border border-blue-100/40 dark:border-brand-cyan/20">{{ destinationLocation.name }}</span>
-                      </p>
+                <!-- Directions Mode Header — Premium Card -->
+                <div class="relative rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-700/30 bg-gradient-to-br from-[#1e3a5f] via-[#1a3050] to-[#0f2035]">
+                  <!-- Decorative glow blobs -->
+                  <div class="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-blue-500/20 blur-xl pointer-events-none"></div>
+                  <div class="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-cyan-400/10 blur-lg pointer-events-none"></div>
+
+                  <div class="relative px-4 pt-4 pb-3">
+                    <!-- Top row: back + title + live badge -->
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          @click="goBack"
+                          class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer backdrop-blur-sm"
+                        >
+                          <ChevronLeft class="w-4 h-4" />
+                        </button>
+                        <div>
+                          <h3 class="text-sm font-black text-white leading-none tracking-wide">Rute Perjalanan</h3>
+                          <p class="text-[9px] text-blue-200/70 font-semibold mt-0.5 uppercase tracking-widest">Prakiraan Cuaca Perjalanan</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-2.5 py-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                        <span class="text-[8px] font-black uppercase tracking-widest text-green-300">Live</span>
+                      </div>
+                    </div>
+
+                    <!-- Route chips -->
+                    <div class="flex items-center gap-2 mb-3">
+                      <div class="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-2.5 py-1.5">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-blue-200/60 mb-0.5">Dari</p>
+                        <p class="text-[11px] font-black text-white truncate">{{ startLocation?.name || '—' }}</p>
+                      </div>
+                      <div class="flex flex-col items-center gap-0.5 shrink-0">
+                        <div class="w-5 h-px bg-blue-300/40"></div>
+                        <svg class="w-3 h-3 text-blue-300/70" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                        <div class="w-5 h-px bg-blue-300/40"></div>
+                      </div>
+                      <div class="flex-1 min-w-0 bg-blue-500/20 border border-blue-400/30 rounded-xl px-2.5 py-1.5">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-cyan-300/70 mb-0.5">Tujuan</p>
+                        <p class="text-[11px] font-black text-cyan-200 truncate">{{ destinationLocation?.name || '—' }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Stats bar -->
+                    <div class="flex items-center gap-2 bg-white/[0.08] border border-white/10 rounded-xl px-3 py-2">
+                      <div class="flex-1 text-center">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-blue-200/50 mb-0.5">Jarak</p>
+                        <p class="text-[11px] font-black text-white">{{ routeDistance > 0 ? routeDistance + ' km' : '—' }}</p>
+                      </div>
+                      <div class="w-px h-6 bg-white/10"></div>
+                      <div class="flex-1 text-center">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-blue-200/50 mb-0.5">Estimasi</p>
+                        <p class="text-[11px] font-black text-white">{{ routeDuration || '—' }}</p>
+                      </div>
+                      <div class="w-px h-6 bg-white/10"></div>
+                      <div class="flex-1 text-center">
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-blue-200/50 mb-0.5">Rute Alt.</p>
+                        <p class="text-[11px] font-black text-white">{{ alternativeRoutes.length || '—' }}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Travel Mode Selector Tabs -->
-                <div class="flex items-center justify-between gap-1 p-1 bg-slate-100 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl">
-                  <button 
-                    v-for="mode in travelModes" 
-                    :key="mode.id"
-                    @click="activeTravelMode = mode.id"
-                    class="flex-1 py-2 text-center rounded-xl transition-all cursor-pointer flex justify-center items-center"
-                    :class="activeTravelMode === mode.id ? 'bg-[#2f3d53] dark:bg-[#2f3d53] text-white shadow-sm' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-350'"
-                  >
-                    <component :is="mode.icon" class="w-4 h-4 shrink-0" />
-                  </button>
+                  <!-- Travel Mode Tabs (bottom strip inside card) -->
+                  <div class="flex items-center gap-1 px-3 pb-3">
+                    <button
+                      v-for="mode in travelModes"
+                      :key="mode.id"
+                      @click="activeTravelMode = mode.id"
+                      class="flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer flex justify-center items-center gap-1.5"
+                      :class="activeTravelMode === mode.id
+                        ? 'bg-white/20 text-white border border-white/30 shadow-sm'
+                        : 'text-white/35 hover:text-white/60 border border-transparent'"
+                    >
+                      <component :is="mode.icon" class="w-3.5 h-3.5 shrink-0" />
+                    </button>
+                  </div>
                 </div>
 
                 <!-- ── CHECKPOINT CARDS LIST ── -->
                 <div v-if="isRouting" class="space-y-4 pt-1 animate-pulse">
                   <!-- Header skeleton -->
                   <div class="flex items-center justify-between px-1">
-                    <div class="h-3 w-1/3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
-                    <div class="h-3 w-1/4 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                    <div class="h-3 w-1/3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                    <div class="h-3 w-1/4 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
                   </div>
 
                   <!-- Destination Overview Card Skeleton -->
                   <div class="bg-slate-100/70 dark:bg-[#1c2d3f]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-4">
                     <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-xl bg-slate-250 dark:bg-slate-700/80 shrink-0"></div>
+                      <div class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700/80 shrink-0"></div>
                       <div class="flex-grow space-y-2">
-                        <div class="h-3.5 w-2/3 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
-                        <div class="h-2.5 w-1/2 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
+                        <div class="h-3.5 w-2/3 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
+                        <div class="h-2.5 w-1/2 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
                       </div>
                     </div>
                     <!-- Mock alert block -->
                     <div class="h-10 bg-slate-200/40 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300/40 dark:border-slate-700/30 flex items-center px-3.5 gap-2">
-                      <div class="w-3.5 h-3.5 rounded-full bg-slate-250 dark:bg-slate-700/80"></div>
-                      <div class="h-2 w-3/4 bg-slate-250 dark:bg-slate-700/80 rounded-full"></div>
+                      <div class="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700/80"></div>
+                      <div class="h-2 w-3/4 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
                     </div>
                     <!-- Detailed stats shimmer -->
                     <div class="bg-white/50 dark:bg-[#111e2b]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-xl p-3 space-y-3">
                       <div class="grid grid-cols-4 gap-2">
-                        <div v-for="j in 4" :key="j" class="h-3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                        <div v-for="j in 4" :key="j" class="h-3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
                       </div>
-                      <div class="h-8 bg-slate-250 dark:bg-slate-700/60 rounded-lg"></div>
+                      <div class="h-8 bg-slate-200 dark:bg-slate-700/60 rounded-lg"></div>
                     </div>
                   </div>
 
@@ -2062,270 +2590,273 @@ onUnmounted(() => {
                   <div v-for="i in 3" :key="'skel-'+i" class="bg-slate-100/50 dark:bg-[#1c2d3f]/30 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                       <div class="flex-grow space-y-2">
-                        <div class="h-3 w-1/3 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
-                        <div class="h-2 w-1/2 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                        <div class="h-3 w-1/3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                        <div class="h-2 w-1/2 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
                       </div>
-                      <div class="w-4 h-4 bg-slate-250 dark:bg-slate-700/60 rounded-full shrink-0"></div>
+                      <div class="w-4 h-4 bg-slate-200 dark:bg-slate-700/60 rounded-full shrink-0"></div>
                     </div>
                     <div class="h-px bg-slate-200/60 dark:bg-slate-800/40"></div>
                     <div class="flex justify-between items-center">
-                      <div class="h-2.5 w-3/5 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
-                      <div class="h-2 w-1/6 bg-slate-250 dark:bg-slate-700/60 rounded-full"></div>
+                      <div class="h-2.5 w-3/5 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                      <div class="h-2 w-1/6 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Actual Checkpoint Cards List -->
-                <div v-else class="space-y-3.5">
+                <div v-else class="space-y-3">
                   
                   <!-- 1. DESTINATION OVERVIEW CARD -->
-                  <div 
+                  <div
                     v-if="directionsCheckpoints.length > 0"
-                    class="bg-slate-100 dark:bg-[#1c2d3f]/80 border border-slate-200/60 dark:border-slate-700/30 rounded-2xl p-4 space-y-3.5"
+                    class="rounded-2xl overflow-hidden border"
+                    :class="directionsCheckpoints[0].condition === 'badai'
+                      ? 'border-red-400/30 dark:border-red-500/20'
+                      : directionsCheckpoints[0].condition === 'hujan'
+                        ? 'border-blue-400/30 dark:border-blue-500/20'
+                        : 'border-slate-200/60 dark:border-slate-700/30'"
                   >
-                    <div class="flex items-start gap-3">
-                      <!-- Icon building circle -->
-                      <div class="p-2 bg-slate-200 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/30 rounded-xl text-sm leading-none shrink-0">
-                        🏢
-                      </div>
-                      <div class="min-w-0">
-                        <h4 class="text-xs font-black text-slate-900 dark:text-white leading-tight">
-                          {{ directionsCheckpoints[0].name }} • <span class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold">ETA {{ directionsCheckpoints[0].eta }}</span>
-                        </h4>
-                        <p class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold mt-0.5">
-                          248 km • {{ directionsCheckpoints[0].region }}
-                        </p>
+                    <!-- Gradient Header Banner -->
+                    <div
+                      class="px-4 pt-4 pb-3 flex items-start gap-3"
+                      :class="directionsCheckpoints[0].condition === 'badai'
+                        ? 'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/40 dark:to-orange-950/30'
+                        : directionsCheckpoints[0].condition === 'hujan'
+                          ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/30'
+                          : directionsCheckpoints[0].condition === 'berawan'
+                            ? 'bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/60 dark:to-slate-800/40'
+                            : 'bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20'"
+                    >
+                      <div
+                        class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-lg border"
+                        :class="directionsCheckpoints[0].condition === 'badai'
+                          ? 'bg-red-100 dark:bg-red-900/30 border-red-200/60 dark:border-red-700/30'
+                          : directionsCheckpoints[0].condition === 'hujan'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-200/60 dark:border-blue-700/30'
+                            : 'bg-white/80 dark:bg-slate-800/60 border-slate-200/60 dark:border-slate-700/30'"
+                      >{{ directionsCheckpoints[0].icon }}</div>
+                      <div class="min-w-0 flex-grow">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <h4 class="text-sm font-black text-slate-900 dark:text-white leading-tight">{{ directionsCheckpoints[0].name }}</h4>
+                          <span
+                            class="text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide"
+                            :class="directionsCheckpoints[0].condition === 'badai' ? 'bg-red-500/15 text-red-500 dark:text-red-400' : directionsCheckpoints[0].condition === 'hujan' ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400' : directionsCheckpoints[0].condition === 'berawan' ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'"
+                          >{{ directionsCheckpoints[0].weather }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                          <span class="text-[10px] font-bold" :class="directionsCheckpoints[0].condition === 'badai' ? 'text-red-500 dark:text-red-400' : directionsCheckpoints[0].condition === 'hujan' ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'">
+                            Tiba ~{{ directionsCheckpoints[0].eta }}
+                            <span v-if="directionsCheckpoints[0].elapsed" class="font-semibold opacity-70">({{ directionsCheckpoints[0].elapsed }})</span>
+                          </span>
+                          <span class="text-[9px] text-slate-400">•</span>
+                          <span class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold flex items-center gap-1"><MapPin class="w-2.5 h-2.5" />{{ routeDistance }} km • {{ directionsCheckpoints[0].region }}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Warning alert inside destination card -->
-                    <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-start gap-2.5 text-red-400 text-[10px] font-semibold leading-relaxed">
-                      <CloudLightning class="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-500" />
-                      <span>Badai Petir diprakirakan akan terjadi pada saat Anda tiba.</span>
+                    <!-- Condition-aware Alert -->
+                    <div
+                      class="mx-3 mb-3 rounded-xl p-3 flex items-start gap-2.5 text-[10px] font-semibold leading-relaxed border"
+                      :class="directionsCheckpoints[0].condition === 'badai' ? 'bg-red-500/8 border-red-400/25 text-red-600 dark:text-red-400' : directionsCheckpoints[0].condition === 'hujan' ? 'bg-blue-500/8 border-blue-400/25 text-blue-600 dark:text-blue-400' : directionsCheckpoints[0].condition === 'berawan' ? 'bg-slate-500/8 border-slate-300/40 text-slate-600 dark:text-slate-400' : 'bg-amber-500/8 border-amber-400/25 text-amber-700 dark:text-amber-400'"
+                    >
+                      <CloudLightning v-if="directionsCheckpoints[0].condition === 'badai'" class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <CloudRain v-else-if="directionsCheckpoints[0].condition === 'hujan'" class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <Cloud v-else-if="directionsCheckpoints[0].condition === 'berawan'" class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <Sun v-else class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span>{{ directionsCheckpoints[0].alerts[0] || 'Kondisi cuaca normal saat tiba.' }}</span>
                     </div>
 
                     <!-- Weather Grid -->
-                    <div class="bg-white/80 dark:bg-[#111e2b]/70 border border-slate-200/80 dark:border-slate-800/40 rounded-xl p-3 text-[9px] font-semibold text-slate-600 dark:text-slate-350">
-                      <!-- Grid rows -->
-                      <div class="grid grid-cols-6 items-center gap-y-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/50">
-                        <!-- JAM ROW -->
-                        <div class="text-slate-500 dark:text-slate-450 font-bold">Jam</div>
-                        <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
-                        <div 
-                          v-for="(t, ti) in directionsCheckpoints[0].grid.times" 
-                          :key="'t-dest-'+ti"
-                          class="text-center"
-                          :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center' : 'font-bold text-slate-700 dark:text-slate-200'"
-                        >
-                          <span v-if="ti === directionsCheckpoints[0].grid.nowIdx" class="text-[7px] uppercase tracking-wide opacity-80 block mb-0.5">Sekarang</span>
-                          {{ t }}
+                    <div class="mx-3 mb-3 bg-white/90 dark:bg-[#111e2b]/80 border border-slate-200/60 dark:border-slate-800/40 rounded-xl overflow-hidden text-[9px] font-semibold text-slate-600 dark:text-slate-350">
+                      <div class="flex">
+                        <!-- Left Labels (Fixed) -->
+                        <div class="flex-shrink-0 w-14 border-r border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col justify-between text-left text-slate-400 font-bold select-none py-1.5">
+                          <div class="h-7 flex items-center pl-2">Jam</div>
+                          <div class="h-6 flex items-center pl-2">Suhu</div>
+                          <div class="h-5 flex items-center pl-2">Angin</div>
+                          <div class="h-5 flex items-center pl-2">Arah</div>
+                          <div class="h-5 flex items-center pl-2">Hujan</div>
+                          <div class="h-6 flex items-center pl-2">Cuaca</div>
                         </div>
-
-                        <!-- SUHU ROW -->
-                        <div class="text-slate-500 dark:text-slate-450 font-bold">Suhu</div>
-                        <div class="text-center text-slate-400">°C</div>
-                        <div 
-                          v-for="(s, si) in directionsCheckpoints[0].grid.suhu" 
-                          :key="'s-dest-'+si"
-                          class="text-center font-black relative"
-                          :class="si === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 bg-blue-500/10 rounded-md border border-blue-500/20 py-0.5' : 'text-slate-800 dark:text-slate-100'"
-                        >
-                          {{ s }}°
-                          <div v-if="si === directionsCheckpoints[0].grid.nowIdx" class="absolute top-[22px] left-1/2 -translate-x-1/2 h-[78px] border-l border-dashed border-blue-500/35 pointer-events-none z-10"></div>
+                        <!-- Right Columns (Scrollable) -->
+                        <div id="cp-scroll-0" class="flex-grow overflow-x-auto no-scrollbar scroll-smooth" style="will-change: transform; transform: translate3d(0,0,0);">
+                          <div class="flex" style="width: 1344px;">
+                            <div
+                              v-for="(t, ti) in directionsCheckpoints[0].grid.times"
+                              :key="'t-dest-'+ti"
+                              class="flex-shrink-0 w-14 flex flex-col items-center justify-between py-1.5"
+                              :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'bg-blue-500/10 dark:bg-blue-500/15' : ''"
+                            >
+                              <!-- Jam -->
+                              <div class="h-7 flex flex-col items-center justify-center leading-none text-center">
+                                <span v-if="ti === directionsCheckpoints[0].grid.nowIdx" class="text-[7px] font-black uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-0.5">ETA</span>
+                                <span class="font-extrabold" :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'">{{ t }}</span>
+                              </div>
+                              <!-- Suhu -->
+                              <div class="h-6 flex items-center justify-center font-black text-[11px] relative" :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-800 dark:text-slate-100'">
+                                {{ directionsCheckpoints[0].grid.suhu[ti] }}°
+                                <div v-if="ti === directionsCheckpoints[0].grid.nowIdx" class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[68px] border-l border-dashed border-blue-400/25 pointer-events-none z-10"></div>
+                              </div>
+                              <!-- Angin -->
+                              <div class="h-5 flex items-center justify-center text-[10px] font-semibold" :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold' : 'text-slate-600 dark:text-slate-300'">
+                                {{ directionsCheckpoints[0].grid.angin[ti] }}
+                              </div>
+                              <!-- Arah -->
+                              <div class="h-5 flex items-center justify-center">
+                                <Navigation class="w-2.5 h-2.5" :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500' : 'text-slate-450'" />
+                              </div>
+                              <!-- Hujan -->
+                              <div class="h-5 flex items-center justify-center text-[10px] font-semibold" :class="ti === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black' : 'text-slate-600 dark:text-slate-300'">
+                                {{ directionsCheckpoints[0].grid.hujan[ti] }}
+                              </div>
+                              <!-- Cuaca -->
+                              <div class="h-6 flex items-center justify-center">
+                                <Sun v-if="directionsCheckpoints[0].grid.cuaca[ti] === 'Sun'" class="w-3.5 h-3.5 text-amber-400" />
+                                <SunDim v-else-if="directionsCheckpoints[0].grid.cuaca[ti] === 'SunDim'" class="w-3.5 h-3.5 text-amber-300" />
+                                <Cloud v-else-if="directionsCheckpoints[0].grid.cuaca[ti] === 'Cloud'" class="w-3.5 h-3.5 text-slate-400" />
+                                <CloudRain v-else-if="directionsCheckpoints[0].grid.cuaca[ti] === 'CloudRain'" class="w-3.5 h-3.5 text-blue-400" />
+                                <CloudLightning v-else-if="directionsCheckpoints[0].grid.cuaca[ti] === 'CloudLightning'" class="w-3.5 h-3.5 text-violet-400" />
+                                <Moon v-else-if="directionsCheckpoints[0].grid.cuaca[ti] === 'Moon'" class="w-3.5 h-3.5 text-indigo-300" />
+                                <Cloud v-else class="w-3.5 h-3.5 text-slate-400" />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-
-                        <!-- ANGIN ROW -->
-                        <div class="text-slate-500 dark:text-slate-450 font-bold">Angin</div>
-                        <div class="text-center text-slate-400">km/j</div>
-                        <div 
-                          v-for="(a, ai2) in directionsCheckpoints[0].grid.angin" 
-                          :key="'a-dest-'+ai2"
-                          class="text-center"
-                          :class="ai2 === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-md' : 'text-slate-700 dark:text-slate-100'"
-                        >{{ a }}</div>
-
-                        <!-- ARAH ANGIN ROW -->
-                        <div class="text-slate-500 dark:text-slate-450 font-bold">Arah</div>
-                        <div class="flex justify-center"><Compass class="w-3 h-3 text-slate-400 dark:text-slate-550" /></div>
-                        <div 
-                          v-for="(d, di) in directionsCheckpoints[0].grid.dirs" 
-                          :key="'d-dest-'+di"
-                          class="text-center"
-                          :class="di === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'"
-                        >{{ d }}</div>
-
-                        <!-- HUJAN ROW -->
-                        <div class="text-slate-500 dark:text-slate-450 font-bold">Hujan</div>
-                        <div class="text-center text-slate-400">mm/j</div>
-                        <div 
-                          v-for="(h, hi) in directionsCheckpoints[0].grid.hujan" 
-                          :key="'h-dest-'+hi"
-                          class="text-center"
-                          :class="hi === directionsCheckpoints[0].grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-md' : 'text-slate-700 dark:text-slate-100'"
-                        >{{ h }}</div>
                       </div>
-
-                      <!-- Rain bar chart + weather icons -->
-                      <div class="pt-2.5 space-y-1.5">
-                        <div class="h-8 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-lg px-1.5 py-1 border border-slate-200/80 dark:border-slate-800/40">
-                          <div 
-                            v-for="(bar, bi) in directionsCheckpoints[0].rainBars" 
-                            :key="bi"
-                            class="flex-1 rounded-t transition-all"
-                            :style="{ height: bar + '%' }"
-                            :class="bar > 40 ? 'bg-blue-500' : bar > 20 ? 'bg-blue-500/60' : 'bg-blue-500/20'"
-                          ></div>
+                      <!-- Rain Sparkline -->
+                      <div class="px-3 py-2.5 border-t border-slate-100 dark:border-slate-800/60">
+                        <div class="flex items-center gap-1.5 mb-1.5">
+                          <CloudRain class="w-2.5 h-2.5 text-blue-400" />
+                          <span class="text-[8px] font-black uppercase tracking-wide text-slate-400">Curah Hujan 24 jam</span>
                         </div>
-                        <!-- Weather icons below chart -->
-                        <div class="flex justify-between px-1 text-slate-400">
-                          <span class="text-xs">🌤️</span>
-                          <span class="text-xs">🌧️</span>
-                          <span class="text-xs">⛅</span>
+                        <div class="h-8 flex items-end gap-px rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950/30 px-1 py-1">
+                          <div v-for="(bar, bi) in directionsCheckpoints[0].rainBars" :key="bi" class="flex-1 rounded-t-sm" :style="{ height: bar + '%' }" :class="bar > 40 ? 'bg-blue-500' : bar > 20 ? 'bg-blue-400/60' : 'bg-blue-400/20'"></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
+                  <!-- ROUTE CHECKPOINT DIVIDER -->
+                  <div v-if="directionsCheckpoints.length > 1" class="flex items-center gap-2 px-1">
+                    <div class="h-px flex-grow bg-slate-200/80 dark:bg-slate-800/50"></div>
+                    <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-550 flex items-center gap-1.5">
+                      <MapPin class="w-2.5 h-2.5" />Checkpoint Rute
+                    </span>
+                    <div class="h-px flex-grow bg-slate-200/80 dark:bg-slate-800/50"></div>
+                  </div>
+
                   <!-- 2. COLLAPSIBLE INTERMEDIATE CHECKPOINTS -->
-                  <div 
-                    v-for="(cp, idx) in directionsCheckpoints.slice(1)" 
+                  <div
+                    v-for="(cp, idx) in directionsCheckpoints.slice(1)"
                     :key="cp.id"
-                    class="bg-slate-100 dark:bg-[#1c2d3f]/80 border border-slate-200/60 dark:border-slate-700/30 rounded-2xl overflow-hidden text-left"
+                    class="rounded-2xl overflow-hidden border text-left transition-all duration-200"
+                    :class="cp.condition === 'badai'
+                      ? 'border-red-300/30 dark:border-red-500/15 bg-red-50/30 dark:bg-red-950/10'
+                      : cp.condition === 'hujan'
+                        ? 'border-blue-300/30 dark:border-blue-500/15 bg-blue-50/20 dark:bg-blue-950/10'
+                        : 'border-slate-200/60 dark:border-slate-700/30 bg-slate-50 dark:bg-[#1c2d3f]/70'"
                   >
-                    <!-- Card Header (always visible) -->
-                    <div class="p-4 space-y-2">
+                    <!-- Card Header -->
+                    <div class="p-3.5 space-y-2">
                       <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0 flex-grow">
-                          <!-- Name + ETA + Region -->
-                          <div class="flex items-baseline gap-1.5 flex-wrap">
-                            <span class="text-xs font-black text-slate-900 dark:text-white leading-tight">{{ cp.name }}</span>
-                            <span class="text-[9px] text-slate-500 dark:text-slate-450 font-semibold">• ETA {{ cp.eta }} • {{ cp.region }}</span>
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="w-2 h-2 rounded-full shrink-0" :class="cp.condition === 'badai' ? 'bg-red-500' : cp.condition === 'hujan' ? 'bg-blue-500' : cp.condition === 'berawan' ? 'bg-slate-400' : 'bg-amber-400'"></span>
+                            <span class="text-[11px] font-black text-slate-900 dark:text-white leading-tight">{{ cp.name }}</span>
+                            <span class="text-[8px] font-black px-1.5 py-0.5 rounded-full" :class="cp.condition === 'badai' ? 'bg-red-500/12 text-red-500 dark:text-red-400' : cp.condition === 'hujan' ? 'bg-blue-500/12 text-blue-600 dark:text-blue-400' : cp.condition === 'berawan' ? 'bg-slate-500/10 text-slate-600 dark:text-slate-400' : 'bg-amber-500/12 text-amber-600 dark:text-amber-400'">{{ cp.weather }}</span>
                           </div>
-                          <!-- Weather summary row -->
+                          <div class="flex items-center gap-1.5 mt-1">
+                            <span class="text-[9px] font-semibold text-slate-500 dark:text-slate-400">Tiba ~{{ cp.eta }}<span v-if="cp.elapsed" class="opacity-70"> ({{ cp.elapsed }})</span></span>
+                            <span class="text-[9px] text-slate-400">•</span>
+                            <span class="text-[9px] text-slate-400 dark:text-slate-550 font-medium">{{ cp.region }}</span>
+                          </div>
                           <div class="flex items-center gap-2 mt-1.5">
-                            <span class="text-base leading-none">{{ cp.icon }}</span>
-                            <span class="text-[11px] font-extrabold text-slate-800 dark:text-white">{{ cp.weather }}</span>
-                            <span class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold ml-1">Tinggi: {{ cp.tempHigh }}°  Rendah: {{ cp.tempLow }}°</span>
+                            <span class="text-sm leading-none">{{ cp.icon }}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{{ cp.tempHigh }}° / {{ cp.tempLow }}°</span>
                           </div>
                         </div>
+                        <button
+                          @click="toggleCheckpoint(idx + 1)"
+                          class="shrink-0 w-7 h-7 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 border"
+                          :class="expandedCheckpoints.has(idx + 1) ? 'bg-blue-500/10 border-blue-400/30 text-blue-500 rotate-180' : 'bg-slate-100 dark:bg-slate-800/60 border-slate-200/60 dark:border-slate-700/30 text-slate-400 hover:text-slate-600 dark:hover:text-white'"
+                        >
+                          <svg class="w-3 h-3 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
                       </div>
-
-                      <!-- Warning Bullets -->
-                      <div class="space-y-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/40 mt-1">
-                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
-                          <div class="flex items-center gap-2.5">
-                            <Sun class="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span>Sangat Tinggi tidak disarankan untuk aktivitas luar ruangan.</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
-                          <div class="flex items-center gap-2.5">
-                            <Eye class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>Jarak Pandang 13.8km</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-350 leading-normal">
-                          <div class="flex items-center gap-2.5">
-                            <CloudRain class="w-3.5 h-3.5 text-blue-450 shrink-0" />
-                            <span>Tidak ada curah hujan setidaknya 2 jam</span>
-                          </div>
-                          <!-- Accordion toggle button -->
-                          <button 
-                            @click="toggleCheckpoint(idx + 1)"
-                            class="text-slate-400 hover:text-slate-600 dark:hover:text-white shrink-0 p-1 cursor-pointer transition-transform duration-300"
-                            :class="expandedCheckpoints.has(idx + 1) ? 'rotate-180' : 'rotate-0'"
-                          >
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                          </button>
+                      <!-- Smart Alert Bullets from real data -->
+                      <div class="space-y-1.5 pt-1.5 border-t border-slate-200/60 dark:border-slate-800/40">
+                        <div v-for="(alert, ai) in cp.alerts.slice(0, 2)" :key="ai" class="flex items-start gap-2 text-[9.5px] font-semibold leading-snug" :class="cp.condition === 'badai' ? 'text-red-600 dark:text-red-400' : cp.condition === 'hujan' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-350'">
+                          <CloudLightning v-if="cp.condition === 'badai'" class="w-3 h-3 shrink-0 mt-0.5 text-red-500" />
+                          <CloudRain v-else-if="cp.condition === 'hujan'" class="w-3 h-3 shrink-0 mt-0.5 text-blue-400" />
+                          <Sun v-else class="w-3 h-3 shrink-0 mt-0.5 text-amber-400" />
+                          <span>{{ alert }}</span>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Expanded: Full 4-col weather grid + bar chart -->
+                    <!-- Expanded weather grid -->
                     <Transition name="expand">
-                      <div v-if="expandedCheckpoints.has(idx + 1)" class="px-4 pb-4">
-                        <div class="bg-white/80 dark:bg-[#111e2b]/70 border border-slate-200/80 dark:border-slate-800/40 rounded-xl p-3 text-[9px] font-semibold text-slate-600 dark:text-slate-350">
-                          <!-- Grid rows -->
-                          <div class="grid grid-cols-6 items-center gap-y-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/50">
-                            <!-- JAM ROW -->
-                            <div class="text-slate-500 dark:text-slate-450 font-bold">Jam</div>
-                            <div class="flex justify-center"><Clock class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
-                            <div 
-                              v-for="(t, ti) in cp.grid.times" 
-                              :key="'t'+ti"
-                              class="text-center"
-                              :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-extrabold flex flex-col items-center' : 'font-bold text-slate-700 dark:text-slate-200'"
-                            >
-                              <span v-if="ti === cp.grid.nowIdx" class="text-[7px] uppercase tracking-wide opacity-80 block mb-0.5">Sekarang</span>
-                              {{ t }}
+                      <div v-if="expandedCheckpoints.has(idx + 1)" class="px-3.5 pb-3.5">
+                        <div class="bg-white/90 dark:bg-[#111e2b]/80 border border-slate-200/60 dark:border-slate-800/40 rounded-xl overflow-hidden text-[9px] font-semibold text-slate-600 dark:text-slate-350">
+                          <div class="flex">
+                            <!-- Left Labels (Fixed) -->
+                            <div class="flex-shrink-0 w-14 border-r border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col justify-between text-left text-slate-400 font-bold select-none py-1.5">
+                              <div class="h-7 flex items-center pl-2">Jam</div>
+                              <div class="h-6 flex items-center pl-2">Suhu</div>
+                              <div class="h-5 flex items-center pl-2">Angin</div>
+                              <div class="h-5 flex items-center pl-2">Arah</div>
+                              <div class="h-5 flex items-center pl-2">Hujan</div>
+                              <div class="h-6 flex items-center pl-2">Cuaca</div>
                             </div>
-
-                            <!-- SUHU ROW -->
-                            <div class="text-slate-500 dark:text-slate-450 font-bold">Suhu</div>
-                            <div class="text-center text-slate-400">°C</div>
-                            <div 
-                              v-for="(s, si) in cp.grid.suhu" 
-                              :key="'s'+si"
-                              class="text-center font-black relative"
-                              :class="si === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 bg-blue-500/10 rounded-md border border-blue-500/20 py-0.5' : 'text-slate-800 dark:text-slate-100'"
-                            >
-                              {{ s }}°
-                              <div v-if="si === cp.grid.nowIdx" class="absolute top-[22px] left-1/2 -translate-x-1/2 h-[78px] border-l border-dashed border-blue-500/35 pointer-events-none z-10"></div>
-                            </div>
-
-                            <!-- ANGIN ROW -->
-                            <div class="text-slate-500 dark:text-slate-450 font-bold">Angin</div>
-                            <div class="text-center text-slate-400">km/jam</div>
-                            <div 
-                              v-for="(a, ai2) in cp.grid.angin" 
-                              :key="'a'+ai2"
-                              class="text-center"
-                              :class="ai2 === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold bg-blue-500/5 rounded-md' : 'text-slate-700 dark:text-slate-100'"
-                            >
-                              {{ a }}
-                            </div>
-
-                            <!-- ARAH ANGIN ROW -->
-                            <div class="text-slate-500 dark:text-slate-450 font-bold">Arah Angin</div>
-                            <div class="flex justify-center"><Compass class="w-3.5 h-3.5 text-slate-400 dark:text-slate-450" /></div>
-                            <div 
-                              v-for="(d, di) in cp.grid.dirs" 
-                              :key="'d'+di"
-                              class="text-center"
-                              :class="di === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-400'"
-                            >
-                              {{ d }}
-                            </div>
-
-                            <!-- HUJAN ROW -->
-                            <div class="text-slate-500 dark:text-slate-450 font-bold">Hujan</div>
-                            <div class="text-center text-slate-400">mm/jam</div>
-                            <div 
-                              v-for="(h, hi) in cp.grid.hujan" 
-                              :key="'h'+hi"
-                              class="text-center"
-                              :class="hi === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black bg-blue-500/10 rounded-md' : 'text-slate-700 dark:text-slate-100'"
-                            >
-                              {{ h }}
+                            <!-- Right Columns (Scrollable) -->
+                            <div :id="'cp-scroll-' + (idx + 1)" class="flex-grow overflow-x-auto no-scrollbar scroll-smooth" style="will-change: transform; transform: translate3d(0,0,0);">
+                              <div class="flex" style="width: 1344px;">
+                                <div
+                                  v-for="(t, ti) in cp.grid.times"
+                                  :key="'t-cp-'+idx+'-'+ti"
+                                  class="flex-shrink-0 w-14 flex flex-col items-center justify-between py-1.5"
+                                  :class="ti === cp.grid.nowIdx ? 'bg-blue-500/10 dark:bg-blue-500/15' : ''"
+                                >
+                                  <!-- Jam -->
+                                  <div class="h-7 flex flex-col items-center justify-center leading-none text-center">
+                                    <span v-if="ti === cp.grid.nowIdx" class="text-[7px] font-black uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-0.5">ETA</span>
+                                    <span class="font-extrabold" :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'">{{ t }}</span>
+                                  </div>
+                                  <!-- Suhu -->
+                                  <div class="h-6 flex items-center justify-center font-black text-[11px] relative" :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400' : 'text-slate-800 dark:text-slate-100'">
+                                    {{ cp.grid.suhu[ti] }}°
+                                    <div v-if="ti === cp.grid.nowIdx" class="absolute bottom-0 left-1/2 -translate-x-1/2 h-[68px] border-l border-dashed border-blue-400/25 pointer-events-none z-10"></div>
+                                  </div>
+                                  <!-- Angin -->
+                                  <div class="h-5 flex items-center justify-center text-[10px] font-semibold" :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-bold' : 'text-slate-600 dark:text-slate-300'">
+                                    {{ cp.grid.angin[ti] }}
+                                  </div>
+                                  <!-- Arah -->
+                                  <div class="h-5 flex items-center justify-center">
+                                    <Navigation class="w-2.5 h-2.5" :class="ti === cp.grid.nowIdx ? 'text-blue-500' : 'text-slate-450'" />
+                                  </div>
+                                  <!-- Hujan -->
+                                  <div class="h-5 flex items-center justify-center text-[10px] font-semibold" :class="ti === cp.grid.nowIdx ? 'text-blue-500 dark:text-blue-400 font-black' : 'text-slate-600 dark:text-slate-300'">
+                                    {{ cp.grid.hujan[ti] }}
+                                  </div>
+                                  <!-- Cuaca -->
+                                  <div class="h-6 flex items-center justify-center">
+                                    <Sun v-if="cp.grid.cuaca[ti] === 'Sun'" class="w-3.5 h-3.5 text-amber-400" />
+                                    <SunDim v-else-if="cp.grid.cuaca[ti] === 'SunDim'" class="w-3.5 h-3.5 text-amber-300" />
+                                    <Cloud v-else-if="cp.grid.cuaca[ti] === 'Cloud'" class="w-3.5 h-3.5 text-slate-400" />
+                                    <CloudRain v-else-if="cp.grid.cuaca[ti] === 'CloudRain'" class="w-3.5 h-3.5 text-blue-400" />
+                                    <CloudLightning v-else-if="cp.grid.cuaca[ti] === 'CloudLightning'" class="w-3.5 h-3.5 text-violet-400" />
+                                    <Moon v-else-if="cp.grid.cuaca[ti] === 'Moon'" class="w-3.5 h-3.5 text-indigo-300" />
+                                    <Cloud v-else class="w-3.5 h-3.5 text-slate-400" />
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-
-                          <!-- Rain bar chart + weather icons -->
-                          <div class="pt-2.5 space-y-1.5">
-                            <div class="h-8 flex items-end justify-between gap-px bg-slate-100 dark:bg-slate-950/30 rounded-lg px-1.5 py-1 border border-slate-200/80 dark:border-slate-800/40">
-                              <div 
-                                v-for="(bar, bi) in cp.rainBars" 
-                                :key="bi"
-                                class="flex-1 rounded-t transition-all"
-                                :style="{ height: bar + '%' }"
-                                :class="bar > 40 ? 'bg-blue-400' : bar > 20 ? 'bg-blue-500/60' : 'bg-blue-500/20'"
-                              ></div>
-                            </div>
-                            <!-- Weather icons below chart -->
-                            <div class="flex justify-between px-1 text-slate-400">
-                              <span class="text-xs">{{ cp.condition === 'cerah' ? '🌤️' : '🌧️' }}</span>
-                              <span class="text-xs">{{ cp.condition === 'badai' ? '⛈️' : cp.condition === 'hujan' ? '🌧️' : '🌤️' }}</span>
-                              <span class="text-xs">{{ cp.condition === 'badai' ? '🌩️' : cp.condition === 'hujan' ? '⛈️' : '⛅' }}</span>
+                          <!-- Rain Sparkline -->
+                          <div class="px-3 py-2.5 border-t border-slate-100 dark:border-slate-800/60">
+                            <div class="h-7 flex items-end gap-px rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950/30 px-1 py-1">
+                              <div v-for="(bar, bi) in cp.rainBars" :key="bi" class="flex-1 rounded-t-sm" :style="{ height: bar + '%' }" :class="bar > 40 ? 'bg-blue-500' : bar > 20 ? 'bg-blue-400/60' : 'bg-blue-400/20'"></div>
                             </div>
                           </div>
                         </div>
@@ -2334,6 +2865,7 @@ onUnmounted(() => {
                   </div>
                 </div>
               </div>
+
 
             </div>
           </div>

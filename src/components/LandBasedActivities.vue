@@ -278,7 +278,7 @@ const centerMapToStartLocation = () => {
   const zoom = 13;
   const point = map.project([startLocation.value.lat, startLocation.value.lng], zoom);
   const dx = isMobile.value ? 0 : -210;
-  const dy = isMobile.value ? 160 : 0;
+  const dy = isMobile.value ? 180 : 0;
   const offsetPoint = L.point(point.x + dx, point.y + dy);
   const targetLatLng = map.unproject(offsetPoint, zoom);
 
@@ -485,14 +485,19 @@ const showTransportHubs = (type: TransportType) => {
 
   if (bounds.length > 0) {
     map.fitBounds(bounds as L.LatLngBoundsExpression, {
-      paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
-      paddingBottomRight: [40, 60],
+      paddingTopLeft: isMobile.value ? [20, 20] : [480, 40],
+      paddingBottomRight: isMobile.value ? [20, 360] : [40, 60],
       animate: true,
       maxZoom: 12
     });
   } else {
     // No hubs within 70km — zoom to start location so user understands the empty area
     map.setView([startLocation.value.lat, startLocation.value.lng], 10, { animate: true });
+    if (isMobile.value) {
+      setTimeout(() => {
+        map?.panBy([0, 180], { animate: true });
+      }, 300);
+    }
   }
 };
 
@@ -894,8 +899,8 @@ const renderActiveRoute = () => {
 
   // 4. Fit bounds
   map.fitBounds(routePolyline.getBounds(), {
-    paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
-    paddingBottomRight: [40, 40],
+    paddingTopLeft: isMobile.value ? [20, 20] : [480, 40],
+    paddingBottomRight: isMobile.value ? [20, 360] : [40, 40],
     animate: true,
     duration: 1.2
   });
@@ -973,8 +978,8 @@ const calculateRoute = async () => {
   // Fit bounds to keep both start and destination in view during loading
   const group = L.featureGroup([startMarker, destMarker]);
   map.fitBounds(group.getBounds(), {
-    paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
-    paddingBottomRight: [40, 40],
+    paddingTopLeft: isMobile.value ? [20, 20] : [480, 40],
+    paddingBottomRight: isMobile.value ? [20, 360] : [40, 40],
     maxZoom: 12,
     animate: true
   });
@@ -1201,7 +1206,7 @@ const renderMarkersForCurrentStep = (shouldCenter = true) => {
       setTimeout(() => {
         if (!map) return;
         if (isMobile.value) {
-          map.panBy([0, 160], { animate: false });
+          map.panBy([0, 180], { animate: false });
         } else {
           map.panBy([-210, 0], { animate: false });
         }
@@ -1227,7 +1232,7 @@ const renderMarkersForCurrentStep = (shouldCenter = true) => {
       setTimeout(() => {
         if (!map) return;
         if (isMobile.value) {
-          map.panBy([0, 160], { animate: false });
+          map.panBy([0, 180], { animate: false });
         } else {
           map.panBy([-210, 0], { animate: false });
         }

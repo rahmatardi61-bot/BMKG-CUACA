@@ -21,7 +21,8 @@ import {
   Mic,
   History,
   Trash2,
-  Locate
+  Locate,
+  Anchor
 } from 'lucide-vue-next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -138,6 +139,62 @@ const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangun
 const destinationLocation = ref<LocationData | null>(null);
 const activeTravelMode = ref('car');
 const isLocating = ref(false);
+
+const alertDetails = computed(() => {
+  const loc = currentStep.value === 'selected' && destinationLocation.value
+    ? destinationLocation.value
+    : startLocation.value;
+
+  if (!loc) return null;
+
+  const cond = loc.condition || 'cerah';
+  
+  if (cond === 'cerah') {
+    return {
+      icon: Sun,
+      iconColor: 'text-amber-500 dark:text-amber-400',
+      borderColor: 'border-amber-200/60 dark:border-amber-500/20',
+      bgColor: 'bg-gradient-to-br from-amber-50/90 to-amber-100/40 dark:from-slate-900/60 dark:to-slate-900/30',
+      textColor: 'text-amber-900 dark:text-slate-200',
+      boldTextColor: 'text-amber-950 dark:text-amber-300',
+      decorColor: 'bg-amber-400/25 dark:bg-amber-400/10',
+      messageSuffix: 'terpantau sangat baik untuk beraktivitas di luar ruangan. Pastikan tubuh tetap terhidrasi dengan baik.'
+    };
+  } else if (cond === 'berawan') {
+    return {
+      icon: Cloud,
+      iconColor: 'text-sky-500 dark:text-sky-400',
+      borderColor: 'border-sky-200/60 dark:border-sky-500/20',
+      bgColor: 'bg-gradient-to-br from-sky-50/90 to-sky-100/40 dark:from-slate-900/60 dark:to-slate-900/30',
+      textColor: 'text-sky-900 dark:text-slate-200',
+      boldTextColor: 'text-sky-950 dark:text-sky-300',
+      decorColor: 'bg-sky-400/25 dark:bg-sky-400/10',
+      messageSuffix: 'terpantau cukup baik untuk beraktivitas di luar ruangan. Waspadai awan tebal yang berpotensi membawa hujan.'
+    };
+  } else if (cond === 'hujan') {
+    return {
+      icon: CloudRain,
+      iconColor: 'text-blue-500 dark:text-blue-400',
+      borderColor: 'border-blue-200/60 dark:border-blue-500/20',
+      bgColor: 'bg-gradient-to-br from-blue-50/90 to-blue-100/40 dark:from-slate-900/60 dark:to-slate-900/30',
+      textColor: 'text-blue-900 dark:text-slate-200',
+      boldTextColor: 'text-blue-950 dark:text-blue-300',
+      decorColor: 'bg-blue-400/25 dark:bg-blue-400/10',
+      messageSuffix: 'terpantau hujan. Kurang direkomendasikan untuk beraktivitas di luar ruangan tanpa pelindung air.'
+    };
+  } else {
+    return {
+      icon: CloudLightning,
+      iconColor: 'text-red-500 dark:text-red-400',
+      borderColor: 'border-red-200/60 dark:border-red-500/20',
+      bgColor: 'bg-gradient-to-br from-red-50/90 to-red-100/40 dark:from-slate-900/60 dark:to-slate-900/30',
+      textColor: 'text-red-900 dark:text-slate-200',
+      boldTextColor: 'text-red-950 dark:text-red-300',
+      decorColor: 'bg-red-400/25 dark:bg-red-400/10',
+      messageSuffix: 'terpantau buruk/badai petir. Sangat tidak direkomendasikan untuk beraktivitas di luar ruangan demi keselamatan.'
+    };
+  }
+});
 
 // Haversine distance in km between two lat/lng pairs
 const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -279,6 +336,166 @@ const travelModes = [
 const startCityId = ref('');
 const endCityId = ref('');
 const isRouting = ref(false);
+
+// ── Transport Hub Quick-Filter ──────────────────────────────────────────────
+type TransportType = 'terminal' | 'stasiun' | 'bandara' | 'pelabuhan';
+const activeTransportFilter = ref<TransportType | null>(null);
+let transportMarkers: L.Marker[] = [];
+
+interface TransportHub {
+  name: string;
+  lat: number;
+  lng: number;
+  type: TransportType;
+  condition: 'cerah' | 'berawan' | 'hujan' | 'badai';
+  weather: string;
+  temp: number;
+  tips: string;
+}
+
+const transportHubsData: TransportHub[] = [
+  // Terminal Bus
+  { name: 'Terminal Giwangan', lat: -7.8280, lng: 110.3848, type: 'terminal', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Cuaca mendukung keberangkatan.' },
+  { name: 'Terminal Jombor', lat: -7.7446, lng: 110.3582, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Waspadai awan mendung.' },
+  { name: 'Terminal Pulogadung', lat: -6.1853, lng: 106.9019, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 33, tips: 'Cuaca aman, panas terik.' },
+  { name: 'Terminal Tirtonadi Solo', lat: -7.5604, lng: 110.8265, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Kondisi normal.' },
+  { name: 'Terminal Bungurasih', lat: -7.3497, lng: 112.7383, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Jalur masuk terminal lancar.' },
+  // Stasiun Kereta Api
+  { name: 'Stasiun Tugu Yogyakarta', lat: -7.7894, lng: 110.3649, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Cuaca baik untuk perjalanan kereta.' },
+  { name: 'Stasiun Lempuyangan', lat: -7.7919, lng: 110.3756, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Jalur aman.' },
+  { name: 'Stasiun Gambir Jakarta', lat: -6.1763, lng: 106.8307, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 33, tips: 'Panas terik, sediakan air minum.' },
+  { name: 'Stasiun Gubeng Surabaya', lat: -7.2648, lng: 112.7467, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Kondisi cerah, perjalanan nyaman.' },
+  { name: 'Stasiun Bandung', lat: -6.9124, lng: 107.6097, type: 'stasiun', condition: 'berawan', weather: 'Berawan Tebal', temp: 24, tips: 'Suhu sejuk, bawa jaket.' },
+  { name: 'Stasiun Purwokerto', lat: -7.4255, lng: 109.2365, type: 'stasiun', condition: 'hujan', weather: 'Hujan Ringan', temp: 26, tips: 'Bawa payung.' },
+  // Bandara
+  { name: 'Bandara YIA Kulon Progo', lat: -7.9002, lng: 110.0570, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Visibilitas tinggi, penerbangan lancar.' },
+  { name: 'Bandara Soekarno-Hatta', lat: -6.1256, lng: 106.6558, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Cuaca stabil, tidak ada delay cuaca.' },
+  { name: 'Bandara Juanda Surabaya', lat: -7.3798, lng: 112.7869, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Angin tenang, penerbangan normal.' },
+  { name: 'Bandara I Gusti Ngurah Rai', lat: -8.7481, lng: 115.1671, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Cuaca Bali cerah, penerbangan aman.' },
+  { name: 'Bandara Adisutjipto', lat: -7.7880, lng: 110.4318, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Kondisi normal.' },
+  // Pelabuhan — Pantai Selatan DIY & Jateng
+  { name: 'Pelabuhan Sadeng', lat: -8.1637, lng: 110.7742, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Pelabuhan nelayan Gunungkidul. Ombak selatan tenang hari ini.' },
+  { name: 'Pel. Tanjung Adikarta', lat: -7.9134, lng: 110.1058, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan niaga Kulon Progo, angin barat daya 15 km/j.' },
+  { name: 'Pelabuhan Gesing', lat: -7.9720, lng: 110.1780, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Pelabuhan nelayan Gunungkidul barat. Akses jalan baik.' },
+  { name: 'Pelabuhan Cilacap', lat: -7.7276, lng: 108.9939, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan niaga utama Jateng selatan.' },
+  { name: 'Pelabuhan Karangwuni', lat: -7.9014, lng: 110.0810, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Pelabuhan kecil Kulon Progo, layar nelayan aktif.' },
+  // Pelabuhan — Jawa Timur & penyeberangan
+  { name: 'Pelabuhan Tanjung Perak', lat: -7.2013, lng: 112.7317, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Gelombang laut tenang.' },
+  { name: 'Pelabuhan Tanjung Emas', lat: -6.9645, lng: 110.4196, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Pelabuhan utama Semarang, ombak Jawa utara tenang.' },
+  // Pelabuhan — Selat Sunda & penyeberangan
+  { name: 'Pelabuhan Merak', lat: -5.9326, lng: 106.0011, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 31, tips: 'Angin sedang, ferry normal.' },
+  { name: 'Pelabuhan Bakauheni', lat: -5.8775, lng: 105.7381, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 31, tips: 'Gelombang tenang, layanan lancar.' },
+  // Pelabuhan — Bali
+  { name: 'Pelabuhan Ketapang', lat: -8.1529, lng: 114.3840, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Cuaca baik untuk penyeberangan.' },
+  { name: 'Pelabuhan Gilimanuk', lat: -8.1633, lng: 114.4372, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 30, tips: 'Penyeberangan aman.' },
+];
+
+const transportFilterOptions: { id: TransportType; label: string; icon: any; activeColor: string; hoverColor: string; markerColor: string }[] = [
+  { id: 'terminal',  label: 'Terminal',   icon: Bus,    activeColor: 'bg-orange-50 border-orange-300 text-orange-600 dark:bg-orange-500/10 dark:border-orange-500/30 dark:text-orange-400', hoverColor: 'hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 dark:hover:bg-orange-500/10 dark:hover:border-orange-500/30 dark:hover:text-orange-400', markerColor: 'from-orange-400 to-orange-600 shadow-[0_4px_14px_rgba(249,115,22,0.5)]' },
+  { id: 'stasiun',   label: 'Stasiun KA', icon: Train,  activeColor: 'bg-blue-50   border-blue-300   text-blue-600   dark:bg-blue-500/10   dark:border-blue-500/30   dark:text-blue-400',   hoverColor: 'hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 dark:hover:bg-blue-500/10 dark:hover:border-blue-500/30 dark:hover:text-blue-400',   markerColor: 'from-blue-400 to-blue-600 shadow-[0_4px_14px_rgba(59,130,246,0.5)]' },
+  { id: 'bandara',   label: 'Bandara',    icon: Plane,  activeColor: 'bg-indigo-50 border-indigo-300 text-indigo-600 dark:bg-indigo-500/10 dark:border-indigo-500/30 dark:text-indigo-400', hoverColor: 'hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400', markerColor: 'from-indigo-400 to-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,0.5)]' },
+  { id: 'pelabuhan', label: 'Pelabuhan',  icon: Anchor, activeColor: 'bg-sky-50    border-sky-300    text-sky-600    dark:bg-sky-500/10    dark:border-sky-500/30    dark:text-sky-400',    hoverColor: 'hover:bg-sky-50 hover:border-sky-300 hover:text-sky-600 dark:hover:bg-sky-500/10 dark:hover:border-sky-500/30 dark:hover:text-sky-400',    markerColor: 'from-sky-400 to-sky-600 shadow-[0_4px_14px_rgba(14,165,233,0.5)]' },
+];
+
+const clearTransportMarkers = () => {
+  transportMarkers.forEach(m => map?.removeLayer(m));
+  transportMarkers = [];
+};
+
+const showTransportHubs = (type: TransportType) => {
+  if (!map) return;
+
+  // Toggle off if already active
+  if (activeTransportFilter.value === type) {
+    activeTransportFilter.value = null;
+    clearTransportMarkers();
+    // Restore start location marker
+    renderMarkersForCurrentStep(false);
+    return;
+  }
+
+  activeTransportFilter.value = type;
+  clearTransportMarkers();
+  // Also clear and re-render the start marker so it stays visible
+  clearMapDrawings();
+  const startMarker = L.marker([startLocation.value.lat, startLocation.value.lng], {
+    icon: createCustomMarker(startLocation.value.condition, startLocation.value.name, false)
+  }).addTo(map);
+  mapMarkers.push(startMarker);
+
+  const option = transportFilterOptions.find(o => o.id === type)!;
+  const MAX_RADIUS_KM = 70;
+  const hubs = transportHubsData.filter(h => {
+    if (h.type !== type) return false;
+    const dist = haversineDistance(startLocation.value.lat, startLocation.value.lng, h.lat, h.lng);
+    return dist <= MAX_RADIUS_KM;
+  });
+  const bounds: [number, number][] = [];
+
+  hubs.forEach(hub => {
+    const iconHtml = WEATHER_ICONS[hub.condition] ?? WEATHER_ICONS.cerah;
+    const markerIcon = L.divIcon({
+      className: 'custom-osm-marker',
+      html: `
+        <div class="relative flex flex-col items-center">
+          <div class="flex items-center justify-center w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br ${option.markerColor} text-white z-20">
+            <span class="flex items-center justify-center">${iconHtml}</span>
+          </div>
+          <div class="w-2.5 h-2.5 bg-white/75 dark:bg-slate-900/75 border-r border-b border-slate-200/80 dark:border-slate-800/40 transform rotate-45 -mt-1.5 z-10 backdrop-blur-md"></div>
+          <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/75 dark:bg-slate-900/75 border border-white/30 dark:border-white/10 text-slate-800 dark:text-slate-200 text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 backdrop-blur-md">
+            ${hub.name}
+          </div>
+        </div>
+      `,
+      iconSize: [36, 56],
+      iconAnchor: [18, 38]
+    });
+
+    const marker = L.marker([hub.lat, hub.lng], { icon: markerIcon }).addTo(map!);
+    const emojiMap: Record<string, string> = { cerah: '☀️', berawan: '☁️', hujan: '🌧️', badai: '⛈️' };
+    const emoji = emojiMap[hub.condition] || '☀️';
+
+    marker.bindPopup(`
+      <div class="text-left font-sans select-none min-w-[200px] py-0.5">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-500/10 dark:border-white/10 pb-1.5 mb-2">
+          <span class="text-[11px] font-black text-slate-800 dark:text-slate-200 leading-tight tracking-tight">${hub.name}</span>
+        </div>
+        <div class="flex items-center gap-2.5 mb-2">
+          <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-slate-500/10 dark:bg-white/5 text-lg shrink-0">
+            ${emoji}
+          </div>
+          <div>
+            <span class="text-[13px] font-extrabold text-slate-850 dark:text-slate-100 leading-none block">${hub.temp}°C</span>
+            <span class="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 leading-none mt-0.5 block">${hub.weather}</span>
+          </div>
+        </div>
+        <div class="bg-blue-500/5 dark:bg-blue-400/5 border border-blue-500/15 dark:border-blue-400/10 rounded-xl p-2 flex items-start gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-[9px] font-bold text-slate-600 dark:text-slate-350 leading-normal m-0">${hub.tips}</p>
+        </div>
+      </div>
+    `, {
+      maxWidth: 240
+    });
+    transportMarkers.push(marker);
+    bounds.push([hub.lat, hub.lng]);
+  });
+
+  if (bounds.length > 0) {
+    map.fitBounds(bounds as L.LatLngBoundsExpression, {
+      paddingTopLeft: isMobile.value ? [40, 40] : [480, 40],
+      paddingBottomRight: [40, 60],
+      animate: true,
+      maxZoom: 12
+    });
+  } else {
+    // No hubs within 70km — zoom to start location so user understands the empty area
+    map.setView([startLocation.value.lat, startLocation.value.lng], 10, { animate: true });
+  }
+};
+
 
 const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 const mapEl = ref<HTMLElement | null>(null);
@@ -502,10 +719,10 @@ const createCustomMarker = (condition: 'cerah' | 'berawan' | 'hujan' | 'badai', 
         </div>
         
         <!-- Arrow Tail (rotates/shapes pointer) -->
-        <div class="w-2.5 h-2.5 bg-white dark:bg-slate-900 border-r border-b border-slate-200/80 dark:border-slate-800/40 transform rotate-45 -mt-1.5 z-10 shadow-[2px_2px_4px_rgba(0,0,0,0.04)]"></div>
+        <div class="w-2.5 h-2.5 bg-white/75 dark:bg-slate-900/75 border-r border-b border-slate-200/80 dark:border-slate-800/40 transform rotate-45 -mt-1.5 z-10 shadow-[2px_2px_4px_rgba(0,0,0,0.04)] backdrop-blur-md"></div>
 
         <!-- Tooltip Label (Modern capsule pill) -->
-        <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-800/45 text-slate-800 dark:text-slate-250 text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 transition-transform">
+        <div class="absolute top-[38px] px-2 py-0.5 rounded-full bg-white/75 dark:bg-slate-900/75 border border-white/30 dark:border-white/10 text-slate-800 dark:text-slate-250 text-[9px] font-black tracking-tight whitespace-nowrap shadow-md z-30 transition-transform backdrop-blur-md">
           ${label}
         </div>
       </div>
@@ -644,13 +861,33 @@ const renderActiveRoute = () => {
       icon: createCustomMarker(step.condition, step.name, isEnd)
     }).addTo(map!);
 
+    const emojiMap: Record<string, string> = { cerah: '☀️', berawan: '☁️', hujan: '🌧️', badai: '⛈️' };
+    const emoji = emojiMap[step.condition] || '☀️';
+
     marker.bindPopup(`
-      <div class="text-left font-sans text-xs p-1">
-        <strong class="text-slate-800 dark:text-white block text-[11px] font-black">${step.name}</strong>
-        <span class="text-slate-500 dark:text-slate-400 block mt-0.5">${step.weather} — ${step.temp}°C</span>
-        <p class="text-slate-600 dark:text-slate-350 text-[10px] mt-1 italic leading-normal border-t pt-1 border-slate-100">${step.tips}</p>
+      <div class="text-left font-sans select-none min-w-[200px] py-0.5">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-500/10 dark:border-white/10 pb-1.5 mb-2">
+          <span class="text-[11px] font-black text-slate-800 dark:text-slate-200 leading-tight tracking-tight">${step.name}</span>
+        </div>
+        <div class="flex items-center gap-2.5 mb-2">
+          <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-slate-500/10 dark:bg-white/5 text-lg shrink-0">
+            ${emoji}
+          </div>
+          <div>
+            <span class="text-[13px] font-extrabold text-slate-850 dark:text-slate-100 leading-none block">${step.temp}°C</span>
+            <span class="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 leading-none mt-0.5 block">${step.weather}</span>
+          </div>
+        </div>
+        <div class="bg-blue-500/5 dark:bg-blue-400/5 border border-blue-500/15 dark:border-blue-400/10 rounded-xl p-2 flex items-start gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-[9px] font-bold text-slate-600 dark:text-slate-350 leading-normal m-0">${step.tips}</p>
+        </div>
       </div>
-    `);
+    `, {
+      maxWidth: 240
+    });
 
     mapMarkers.push(marker);
   });
@@ -1269,10 +1506,28 @@ onUnmounted(() => {
               ></div>
             </div>
 
+            <!-- Hero Title (overview only) -->
+            <div v-if="currentStep === 'overview'" class="px-5 pt-1 pb-3 shrink-0">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 w-8 h-8 shrink-0 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/25">
+                  <MapPin class="w-4 h-4 text-white" />
+                </div>
+                <div class="min-w-0">
+                  <h2 class="text-[15px] font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                    Kondisi Jalur &amp; Lokasi Tujuan
+                  </h2>
+                  <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                    Cek cuaca real-time di sepanjang rute sebelum kamu berangkat
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <!-- Search Bar inside Bottom Sheet -->
             <div v-if="currentStep !== 'directions'" class="px-4 pb-3 flex items-center gap-2 shrink-0">
-              <!-- Back button circle -->
+              <!-- Back button circle (hidden in default overview) -->
               <button 
+                v-if="currentStep !== 'overview'"
                 type="button"
                 @click="goBack"
                 class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-white flex items-center justify-center border border-slate-200/60 dark:border-slate-700/30 shadow-sm hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
@@ -1281,19 +1536,18 @@ onUnmounted(() => {
               </button>
               
               <!-- Search input container -->
-              <div class="flex-grow relative flex items-center bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-sm">
-                <Search class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+              <div class="flex-grow relative flex items-center bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 rounded-full pl-4 pr-1.5 py-1.5 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-4 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-md">
+                <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
                 <input 
                   type="text" 
-                  placeholder="Cari di peta" 
+                  placeholder="Cari lokasi tujuan" 
                   v-model="searchQuery"
                   @focus="startSearch"
                   autocomplete="off"
                   autocorrect="off"
                   autocapitalize="off"
                   spellcheck="false"
-                  class="w-full bg-transparent border-none outline-none placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-1 py-1"
-                  style="font-size: 16px; line-height: 1.2; transform: scale(1);"
+                  class="w-full bg-transparent border-none outline-none text-base lg:text-xs placeholder:text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 pl-2.5 pr-1.5 py-0.5"
                 />
                 <!-- Clear / X button -->
                 <button 
@@ -1323,6 +1577,28 @@ onUnmounted(() => {
               >
                 <Locate class="w-4 h-4" :class="{'animate-spin text-blue-500 dark:text-brand-cyan': isLocating}" />
               </button>
+            </div>
+
+            <!-- Transport Hub Quick Filter (overview only) -->
+            <div v-if="currentStep === 'overview'" class="px-4 pb-2.5 shrink-0">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[8.5px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Transportasi Publik Terdekat</span>
+              </div>
+              <div class="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                <button
+                  v-for="opt in transportFilterOptions"
+                  :key="opt.id"
+                  @click="showTransportHubs(opt.id)"
+                  type="button"
+                  class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold transition-all duration-200 active:scale-95 cursor-pointer select-none shadow-sm"
+                  :class="activeTransportFilter === opt.id
+                    ? opt.activeColor
+                    : ('bg-white dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700/30 text-slate-600 dark:text-slate-300 ' + opt.hoverColor)"
+                >
+                  <component :is="opt.icon" class="w-3 h-3 shrink-0" />
+                  {{ opt.label }}
+                </button>
+              </div>
             </div>
 
             <!-- Scrollable Content Area -->
@@ -1359,15 +1635,15 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Custom Alerts Box -->
-                <div class="space-y-2">
-                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-blue-500 bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-slate-300">
-                    <CloudRain class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span class="flex-grow text-left">Tidak ada curah hujan setidaknya selama 1 jam.</span>
+                <div v-if="alertDetails" class="relative overflow-hidden p-3.5 rounded-2xl border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
+                  <div class="flex gap-2.5">
+                    <component :is="alertDetails.icon" class="w-4 h-4 shrink-0 mt-0.5 animate-pulse" :class="alertDetails.iconColor" />
+                    <span class="flex-grow text-left">
+                      Cuaca di <span class="font-bold" :class="alertDetails.boldTextColor">{{ startLocation.name }}</span>, {{ startLocation.region }} {{ alertDetails.messageSuffix }}
+                    </span>
                   </div>
-                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-amber-500 bg-amber-50 dark:bg-slate-950/20 text-amber-700 dark:text-slate-300">
-                    <Sun class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                    <span class="flex-grow text-left">Tidak direkomendasikan untuk aktivitas luar ruangan</span>
-                  </div>
+                  <!-- Floating decorative background circle at bottom right -->
+                  <div class="absolute -bottom-6 -right-6 w-14 h-14 rounded-full blur-md pointer-events-none" :class="alertDetails.decorColor"></div>
                 </div>
 
                 <!-- Section Heading -->
@@ -1440,7 +1716,7 @@ onUnmounted(() => {
                           >
                             <!-- Time -->
                             <div class="h-7 flex flex-col items-center justify-center">
-                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 uppercase tracking-wide">Skrng</span>
+                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 tracking-wide">Sekarang</span>
                               <span
                                 class="text-[10px] font-bold leading-none"
                                 :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'"
@@ -1582,15 +1858,15 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Custom Alerts Box -->
-                <div class="space-y-2">
-                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-blue-500 bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-slate-300">
-                    <CloudRain class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span class="flex-grow text-left">Tidak ada curah hujan setidaknya selama 1 jam.</span>
+                <div v-if="alertDetails && destinationLocation" class="relative overflow-hidden p-3.5 rounded-2xl border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
+                  <div class="flex gap-2.5">
+                    <component :is="alertDetails.icon" class="w-4 h-4 shrink-0 mt-0.5 animate-pulse" :class="alertDetails.iconColor" />
+                    <span class="flex-grow text-left">
+                      Cuaca di <span class="font-bold" :class="alertDetails.boldTextColor">{{ destinationLocation.name }}</span>, {{ destinationLocation.region }} {{ alertDetails.messageSuffix }}
+                    </span>
                   </div>
-                  <div class="flex gap-2.5 text-[10.5px] font-semibold leading-relaxed p-3 rounded-xl border-l-2 border-l-amber-500 bg-amber-50 dark:bg-slate-950/20 text-amber-700 dark:text-slate-300">
-                    <Sun class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                    <span class="flex-grow text-left">Tidak direkomendasikan untuk aktivitas luar ruangan</span>
-                  </div>
+                  <!-- Floating decorative background circle at bottom right -->
+                  <div class="absolute -bottom-6 -right-6 w-14 h-14 rounded-full blur-md pointer-events-none" :class="alertDetails.decorColor"></div>
                 </div>
 
                 <!-- Weather Timeline Grid — Reactive 10-day + Scrollable Hourly -->
@@ -1650,7 +1926,7 @@ onUnmounted(() => {
                             :class="idx === activeHourIndex ? 'bg-blue-500/10 dark:bg-blue-500/15' : ''"
                           >
                             <div class="h-7 flex flex-col items-center justify-center">
-                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 uppercase tracking-wide">Skrng</span>
+                              <span v-if="idx === activeHourIndex" class="text-[8px] font-black text-blue-500 dark:text-blue-400 leading-none mb-0.5 tracking-wide">Sekarang</span>
                               <span class="text-[10px] font-bold leading-none" :class="idx === activeHourIndex ? 'text-blue-500 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'">{{ slot.time }}</span>
                             </div>
                             <div class="h-6 flex items-center justify-center">
@@ -2146,5 +2422,60 @@ onUnmounted(() => {
 .expand-leave-to {
   max-height: 0;
   opacity: 0;
+}
+
+/* Custom Leaflet Popup premium glassmorphism styles */
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: none !important;
+}
+
+.dark .leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  font-family: inherit !important;
+}
+
+.leaflet-popup-close-button {
+  top: 8px !important;
+  right: 8px !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  transition: color 0.2s ease !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #475569 !important;
+}
+
+.dark .leaflet-popup-close-button:hover {
+  color: #f1f5f9 !important;
 }
 </style>

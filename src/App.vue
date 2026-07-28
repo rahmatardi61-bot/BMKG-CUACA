@@ -152,36 +152,45 @@ const detectRealtimeLocation = () => {
         
         if (data && data.address) {
           const addr = data.address;
-          // Nominatim field mapping untuk Indonesia:
-          // village/suburb/neighbourhood = Kelurahan/Desa
-          // city_district/town = Kecamatan (Kecamatan biasanya masuk 'town' jika berada di dalam kabupaten/county)
-          // county/city/regency = Kabupaten/Kota
-          // state = Provinsi
-          const village = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || '';
+          // Nominatim field mapping for Indonesian administrative levels:
+          // - county/regency/city = Kabupaten/Kota
+          // - state = Provinsi
+          const state = addr.state || '';
+          const kabupaten = addr.county || addr.city || addr.regency || addr.municipal || '';
           
           let kecamatan = '';
-          let kabupaten = '';
+          let village = '';
           
-          const candidateKecamatan = addr.city_district || addr.subdistrict || addr.quarter || '';
-          const candidateKabupaten = addr.county || addr.city || addr.regency || '';
-          
-          if (candidateKabupaten) {
-            kabupaten = candidateKabupaten;
-            // Jika ada kabupaten, field 'town' kemungkinan besar adalah kecamatan (seperti Kasihan di Kabupaten Bantul)
-            kecamatan = candidateKecamatan || addr.town || '';
+          if (addr.county || addr.regency) {
+            // Under a Regency (Kabupaten):
+            // - 'town' is usually the subdistrict / Kecamatan (e.g., Sedayu, Kasihan)
+            // - 'village' or 'city_district' is usually the village / Desa (e.g., Argomulyo, Bangunjiwo)
+            kecamatan = addr.town || addr.subdistrict || addr.municipality || addr.city_district || '';
+            village = addr.village || (addr.city_district !== kecamatan ? addr.city_district : '') || addr.suburb || addr.neighbourhood || addr.hamlet || '';
           } else {
-            // Jika tidak ada kabupaten/kota lain, maka 'town' dianggap sebagai kabupaten/kota utama
-            kabupaten = addr.town || '';
-            kecamatan = candidateKecamatan;
+            // Under a major city (Kota):
+            // - 'city_district' or 'subdistrict' is usually the Kecamatan
+            // - 'suburb', 'village', or 'neighbourhood' is usually the Kelurahan
+            kecamatan = addr.city_district || addr.subdistrict || addr.town || addr.municipality || '';
+            village = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || '';
           }
           
-          const state = addr.state || '';
 
-          let formattedAddress = '';
-          if (village)   formattedAddress += village;
-          if (kecamatan) formattedAddress += `, Kec. ${kecamatan.replace(/Kecamatan\s*/gi, '').trim()}`;
-          if (kabupaten) formattedAddress += `, ${kabupaten.replace(/Kabupaten\s*/gi, 'Kab. ').trim()}`;
-          if (state)     formattedAddress += `, ${state.trim()}`;
+          const addressParts = [];
+          if (village && village !== kecamatan) {
+            addressParts.push(village);
+          }
+          if (kecamatan) {
+            addressParts.push(`Kec. ${kecamatan.replace(/Kecamatan\s*/gi, '').trim()}`);
+          }
+          if (kabupaten) {
+            addressParts.push(kabupaten.replace(/Kabupaten\s*/gi, 'Kab. ').trim());
+          }
+          if (state) {
+            addressParts.push(state.trim());
+          }
+          
+          const formattedAddress = addressParts.filter(Boolean).join(', ');
           
           if (formattedAddress) {
             generateMockWeatherForCity(formattedAddress);

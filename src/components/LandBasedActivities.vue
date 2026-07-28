@@ -38,6 +38,7 @@ import { hourlyForecastsMap } from '../data/mockData';
 const props = defineProps<{
   isOpen: boolean;
   selectedCity: string;
+  initialDestination?: { name: string; lat: number; lng: number; location: string } | null;
 }>();
 
 const emit = defineEmits<{
@@ -211,6 +212,7 @@ let _weatherClockInterval: ReturnType<typeof setInterval> | null = null;
 
 // Steps & Interactive states
 const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
+const userRequestedRoute = ref(false); // Only true when user explicitly clicks Petunjuk Arah
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
 const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
@@ -432,40 +434,87 @@ interface TransportHub {
 }
 
 const transportHubsData: TransportHub[] = [
-  // Terminal Bus
-  { name: 'Terminal Giwangan', lat: -7.8280, lng: 110.3848, type: 'terminal', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Cuaca mendukung keberangkatan.' },
-  { name: 'Terminal Jombor', lat: -7.7446, lng: 110.3582, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Waspadai awan mendung.' },
-  { name: 'Terminal Pulogadung', lat: -6.1853, lng: 106.9019, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 33, tips: 'Cuaca aman, panas terik.' },
-  { name: 'Terminal Tirtonadi Solo', lat: -7.5604, lng: 110.8265, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Kondisi normal.' },
-  { name: 'Terminal Bungurasih', lat: -7.3497, lng: 112.7383, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Jalur masuk terminal lancar.' },
-  // Stasiun Kereta Api
-  { name: 'Stasiun Tugu Yogyakarta', lat: -7.7894, lng: 110.3649, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Cuaca baik untuk perjalanan kereta.' },
-  { name: 'Stasiun Lempuyangan', lat: -7.7919, lng: 110.3756, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Jalur aman.' },
-  { name: 'Stasiun Gambir Jakarta', lat: -6.1763, lng: 106.8307, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 33, tips: 'Panas terik, sediakan air minum.' },
-  { name: 'Stasiun Gubeng Surabaya', lat: -7.2648, lng: 112.7467, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Kondisi cerah, perjalanan nyaman.' },
-  { name: 'Stasiun Bandung', lat: -6.9124, lng: 107.6097, type: 'stasiun', condition: 'berawan', weather: 'Berawan Tebal', temp: 24, tips: 'Suhu sejuk, bawa jaket.' },
-  { name: 'Stasiun Purwokerto', lat: -7.4255, lng: 109.2365, type: 'stasiun', condition: 'hujan', weather: 'Hujan Ringan', temp: 26, tips: 'Bawa payung.' },
-  // Bandara
-  { name: 'Bandara YIA Kulon Progo', lat: -7.9002, lng: 110.0570, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Visibilitas tinggi, penerbangan lancar.' },
-  { name: 'Bandara Soekarno-Hatta', lat: -6.1256, lng: 106.6558, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Cuaca stabil, tidak ada delay cuaca.' },
-  { name: 'Bandara Juanda Surabaya', lat: -7.3798, lng: 112.7869, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Angin tenang, penerbangan normal.' },
-  { name: 'Bandara I Gusti Ngurah Rai', lat: -8.7481, lng: 115.1671, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Cuaca Bali cerah, penerbangan aman.' },
-  { name: 'Bandara Adisutjipto', lat: -7.7880, lng: 110.4318, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Kondisi normal.' },
-  // Pelabuhan — Pantai Selatan DIY & Jateng
-  { name: 'Pelabuhan Sadeng', lat: -8.1637, lng: 110.7742, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Pelabuhan nelayan Gunungkidul. Ombak selatan tenang hari ini.' },
-  { name: 'Pel. Tanjung Adikarta', lat: -7.9134, lng: 110.1058, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan niaga Kulon Progo, angin barat daya 15 km/j.' },
-  { name: 'Pelabuhan Gesing', lat: -7.9720, lng: 110.1780, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Pelabuhan nelayan Gunungkidul barat. Akses jalan baik.' },
+  // === YOGYAKARTA / DIY ===
+  { name: 'Terminal Giwangan', lat: -7.8280, lng: 110.3848, type: 'terminal', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Terminal utama Yogyakarta Selatan.' },
+  { name: 'Terminal Jombor', lat: -7.7446, lng: 110.3582, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Akses bus antar-kota wilayah utara.' },
+  { name: 'Stasiun Tugu Yogyakarta', lat: -7.7894, lng: 110.3649, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Stasiun Utama DIY, keberangkatan kereta eksekutif.' },
+  { name: 'Stasiun Lempuyangan', lat: -7.7919, lng: 110.3756, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Stasiun kereta api kelas ekonomi.' },
+  { name: 'Bandara YIA Kulon Progo', lat: -7.9002, lng: 110.0570, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Bandara Internasional Yogyakarta.' },
+  { name: 'Bandara Adisutjipto', lat: -7.7880, lng: 110.4318, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Bandara domestik dan militer DIY.' },
+  { name: 'Pelabuhan Sadeng', lat: -8.1637, lng: 110.7742, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Pelabuhan nelayan Gunungkidul. Ombak selatan tenang.' },
+  { name: 'Pel. Tanjung Adikarta', lat: -7.9134, lng: 110.1058, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan Kulon Progo, angin barat daya 15 km/jam.' },
+  { name: 'Pelabuhan Gesing', lat: -7.9720, lng: 110.1780, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Pelabuhan nelayan pantai selatan.' },
   { name: 'Pelabuhan Cilacap', lat: -7.7276, lng: 108.9939, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan niaga utama Jateng selatan.' },
-  { name: 'Pelabuhan Karangwuni', lat: -7.9014, lng: 110.0810, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Pelabuhan kecil Kulon Progo, layar nelayan aktif.' },
-  // Pelabuhan — Jawa Timur & penyeberangan
-  { name: 'Pelabuhan Tanjung Perak', lat: -7.2013, lng: 112.7317, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Gelombang laut tenang.' },
-  { name: 'Pelabuhan Tanjung Emas', lat: -6.9645, lng: 110.4196, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Pelabuhan utama Semarang, ombak Jawa utara tenang.' },
-  // Pelabuhan — Selat Sunda & penyeberangan
-  { name: 'Pelabuhan Merak', lat: -5.9326, lng: 106.0011, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 31, tips: 'Angin sedang, ferry normal.' },
-  { name: 'Pelabuhan Bakauheni', lat: -5.8775, lng: 105.7381, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 31, tips: 'Gelombang tenang, layanan lancar.' },
-  // Pelabuhan — Bali
-  { name: 'Pelabuhan Ketapang', lat: -8.1529, lng: 114.3840, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Cuaca baik untuk penyeberangan.' },
-  { name: 'Pelabuhan Gilimanuk', lat: -8.1633, lng: 114.4372, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 30, tips: 'Penyeberangan aman.' },
+  { name: 'Pelabuhan Karangwuni', lat: -7.9014, lng: 110.0810, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Akses pantai nelayan.' },
+
+  // === JAKARTA ===
+  { name: 'Stasiun Gambir Jakarta', lat: -6.1763, lng: 106.8307, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 33, tips: 'Stasiun utama dekat Monas. Sedia air minum.' },
+  { name: 'Stasiun Palmerah', lat: -6.2071, lng: 106.7975, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 32, tips: 'Stasiun commuter line terdekat dari Senayan Park.' },
+  { name: 'Stasiun MRT Senayan', lat: -6.2256, lng: 106.8015, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 32, tips: 'Akses MRT bawah tanah dekat Senayan.' },
+  { name: 'Stasiun LRT Sudirman', lat: -6.2018, lng: 106.8242, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 33, tips: 'Akses integrasi LRT Jabodebek.' },
+  { name: 'Terminal Pulogadung', lat: -6.1853, lng: 106.9019, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 33, tips: 'Akses bus luar kota wilayah Jakarta Timur.' },
+  { name: 'Terminal Kampung Rambutan', lat: -6.3094, lng: 106.8831, type: 'terminal', condition: 'cerah', weather: 'Cerah Berawan', temp: 32, tips: 'Hub bus antar kota Jakarta Selatan.' },
+  { name: 'Bandara Soekarno-Hatta', lat: -6.1256, lng: 106.6558, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Bandara Internasional Soetta, akses via tol bandara.' },
+  { name: 'Bandara Halim Perdanakusuma', lat: -6.2687, lng: 106.8920, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 33, tips: 'Bandara domestik komersial & militer.' },
+  { name: 'Pelabuhan Tanjung Priok', lat: -6.1033, lng: 106.8814, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 31, tips: 'Pelabuhan penumpang & barang utama Jakarta.' },
+
+  // === SURABAYA ===
+  { name: 'Stasiun Wonokromo', lat: -7.3015, lng: 112.7372, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Dekat dengan Kebun Binatang & Taman Bungkul.' },
+  { name: 'Stasiun Gubeng Surabaya', lat: -7.2648, lng: 112.7467, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Stasiun utama Surabaya Timur.' },
+  { name: 'Stasiun Pasar Turi', lat: -7.2482, lng: 112.7303, type: 'stasiun', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Akses kereta api jalur utara Jawa.' },
+  { name: 'Terminal Purabaya (Bungurasih)', lat: -7.3497, lng: 112.7383, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Terminal tersibuk di Indonesia.' },
+  { name: 'Bandara Juanda Surabaya', lat: -7.3798, lng: 112.7869, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Penerbangan berjalan normal.' },
+  { name: 'Pelabuhan Tanjung Perak', lat: -7.2013, lng: 112.7317, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Penyeberangan Madura & kapal laut nasional.' },
+
+  // === BANDUNG ===
+  { name: 'Stasiun Bandung', lat: -6.9124, lng: 107.6097, type: 'stasiun', condition: 'berawan', weather: 'Berawan Tebal', temp: 24, tips: 'Suhu sejuk, bawa jaket.' },
+  { name: 'Terminal Leuwipanjang', lat: -6.9458, lng: 107.5925, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 25, tips: 'Terminal bus arah barat.' },
+  { name: 'Bandara Husein Sastranegara', lat: -6.9009, lng: 107.5796, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 24, tips: 'Penerbangan charter & militer.' },
+
+  // === MEDAN ===
+  { name: 'Stasiun Medan', lat: 3.5923, lng: 98.6791, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Stasiun utama terintegrasi kereta bandara ARS.' },
+  { name: 'Terminal Terpadu Amplas', lat: 3.5358, lng: 98.7186, type: 'terminal', condition: 'hujan', weather: 'Hujan Ringan', temp: 27, tips: 'Sediakan jas hujan / payung.' },
+  { name: 'Bandara Kualanamu', lat: 3.6422, lng: 98.8852, type: 'bandara', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Bandara Kualanamu Deli Serdang.' },
+  { name: 'Pelabuhan Belawan', lat: 3.7853, lng: 98.6917, type: 'pelabuhan', condition: 'hujan', weather: 'Hujan Sedang', temp: 28, tips: 'Aktivitas bongkar muat laut.' },
+
+  // === SEMARANG ===
+  { name: 'Stasiun Semarang Tawang', lat: -6.9644, lng: 110.4278, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Dekat kawasan Kota Lama.' },
+  { name: 'Stasiun Semarang Poncol', lat: -6.9728, lng: 110.4149, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Akses kereta ekonomi & komuter.' },
+  { name: 'Terminal Terboyo', lat: -6.9587, lng: 110.4611, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Terminal kawasan timur Semarang.' },
+  { name: 'Bandara Ahmad Yani', lat: -6.9726, lng: 110.3752, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Bandara terapung Ahmad Yani.' },
+  { name: 'Pelabuhan Tanjung Emas', lat: -6.9645, lng: 110.4196, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 32, tips: 'Waspadai banjir rob musiman.' },
+
+  // === MAKASSAR ===
+  { name: 'Terminal Daya', lat: -5.1118, lng: 119.5083, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Terminal bus utama Makassar.' },
+  { name: 'Bandara Sultan Hasanuddin', lat: -5.0616, lng: 119.5539, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Hub penerbangan Indonesia Timur.' },
+  { name: 'Pelabuhan Soekarno-Hatta', lat: -5.1226, lng: 119.4078, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Pelabuhan laut utama Sulawesi Selatan.' },
+
+  // === PALEMBANG ===
+  { name: 'Stasiun LRT Ampera', lat: -2.9912, lng: 104.7618, type: 'stasiun', condition: 'cerah', weather: 'Cerah Berawan', temp: 32, tips: 'LRT stasiun terdekat Ampera.' },
+  { name: 'Stasiun Kertapati', lat: -3.0233, lng: 104.7297, type: 'stasiun', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Hub kereta api jalur Divre III.' },
+  { name: 'Terminal Alang-Alang Lebar', lat: -2.9094, lng: 104.6789, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Terminal antar kota Sumsel.' },
+  { name: 'Bandara Sultan Mahmud Badaruddin II', lat: -2.9009, lng: 104.7007, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Penerbangan normal.' },
+  { name: 'Pelabuhan Boom Baru', lat: -2.9739, lng: 104.7812, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Pelabuhan sungai Musi Palembang.' },
+
+  // === BATAM ===
+  { name: 'Pelabuhan Batam Centre', lat: 1.1278, lng: 104.0538, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Ferry penyeberangan ke Singapura.' },
+  { name: 'Pelabuhan Harbor Bay', lat: 1.1511, lng: 103.9967, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Penyeberangan ferry internasional.' },
+  { name: 'Pelabuhan Sekupang', lat: 1.1239, lng: 103.9292, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Ferry domestik dan internasional.' },
+  { name: 'Bandara Hang Nadim', lat: 1.1211, lng: 104.1189, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Bandara Internasional Batam.' },
+  { name: 'Terminal Jodoh', lat: 1.1442, lng: 104.0153, type: 'terminal', condition: 'berawan', weather: 'Berawan', temp: 29, tips: 'Terminal angkutan kota Batam.' },
+
+  // === PEKANBARU ===
+  { name: 'Bandara Sultan Syarif Kasim II', lat: 0.4611, lng: 101.4489, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 32, tips: 'Akses dekat dari Labersa Golf.' },
+  { name: 'Terminal Bandar Raya Payung Sekaki', lat: 0.5392, lng: 101.3853, type: 'terminal', condition: 'cerah', weather: 'Cerah Berawan', temp: 31, tips: 'Terminal utama Pekanbaru.' },
+  { name: 'Pelabuhan Sungai Duku', lat: 0.5383, lng: 101.4647, type: 'pelabuhan', condition: 'berawan', weather: 'Berawan', temp: 30, tips: 'Pelabuhan sungai Siak.' },
+
+  // === BALI / DENPASAR ===
+  { name: 'Bandara I Gusti Ngurah Rai', lat: -8.7481, lng: 115.1671, type: 'bandara', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Dekat dengan Kuta dan Beachwalk.' },
+  { name: 'Pelabuhan Benoa', lat: -8.7453, lng: 115.2120, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 30, tips: 'Pelabuhan kapal pesiar & marina.' },
+  { name: 'Pelabuhan Sanur', lat: -8.6744, lng: 115.2631, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 30, tips: 'Pelabuhan fast boat ke Nusa Penida.' },
+  { name: 'Pelabuhan Ketapang', lat: -8.1529, lng: 114.3840, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Penyeberangan utama Jawa-Bali.' },
+  { name: 'Pelabuhan Gilimanuk', lat: -8.1633, lng: 114.4372, type: 'pelabuhan', condition: 'cerah', weather: 'Cerah Berawan', temp: 30, tips: 'Penyeberangan Bali-Jawa.' },
+  { name: 'Terminal Ubung', lat: -8.6253, lng: 115.2078, type: 'terminal', condition: 'cerah', weather: 'Cerah', temp: 31, tips: 'Akses angkutan pulau Bali.' }
 ];
 
 const transportFilterOptions: { id: TransportType; label: string; icon: any; activeColor: string; hoverColor: string; markerColor: string }[] = [
@@ -503,9 +552,23 @@ const showTransportHubs = (type: TransportType) => {
 
   const option = transportFilterOptions.find(o => o.id === type)!;
   const MAX_RADIUS_KM = 70;
+  
+  // Use destination location if in selected step, otherwise start location
+  const referenceLoc = (currentStep.value === 'selected' && destinationLocation.value) 
+    ? destinationLocation.value 
+    : startLocation.value;
+
+  // Render the reference marker so it remains visible
+  if (currentStep.value === 'selected' && destinationLocation.value) {
+    const destMarker = L.marker([destinationLocation.value.lat, destinationLocation.value.lng], {
+      icon: createCustomMarker(destinationLocation.value.condition, destinationLocation.value.name, true)
+    }).addTo(map);
+    mapMarkers.push(destMarker);
+  }
+
   const hubs = transportHubsData.filter(h => {
     if (h.type !== type) return false;
-    const dist = haversineDistance(startLocation.value.lat, startLocation.value.lng, h.lat, h.lng);
+    const dist = haversineDistance(referenceLoc.lat, referenceLoc.lng, h.lat, h.lng);
     return dist <= MAX_RADIUS_KM;
   });
   const bounds: [number, number][] = [];
@@ -569,8 +632,8 @@ const showTransportHubs = (type: TransportType) => {
       maxZoom: 12
     });
   } else {
-    // No hubs within 70km — zoom to start location so user understands the empty area
-    map.setView([startLocation.value.lat, startLocation.value.lng], 10, { animate: true });
+    // No hubs within 70km — zoom to reference location so user understands the empty area
+    map.setView([referenceLoc.lat, referenceLoc.lng], 10, { animate: true });
     if (isMobile.value) {
       setTimeout(() => {
         map?.panBy([0, 180], { animate: true });
@@ -864,7 +927,7 @@ const initMap = () => {
     renderMarkersForCurrentStep();
   }, 300);
 
-  calculateRoute();
+  // Route is calculated only when user explicitly clicks "Petunjuk Arah" via getDirections()
 
   // Initialize theme MutationObserver to watch html class changes
   if (!themeObserver) {
@@ -1177,11 +1240,25 @@ const calculateRoute = async () => {
       let detour1 = hasBadWeather ? findBestDetourCity(primaryCoords, []) : null;
       let detour2 = hasBadWeather && detour1 ? findBestDetourCity(primaryCoords, [detour1.id]) : null;
 
+      // Helper function to fetch with timeout limit
+      const fetchWithTimeout = async (resource: string, options = {}) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), 4000); // 4 seconds timeout limit
+        try {
+          const response = await fetch(resource, { ...options, signal: controller.signal });
+          clearTimeout(id);
+          return response;
+        } catch (error) {
+          clearTimeout(id);
+          throw error;
+        }
+      };
+
       // --- Route 1 (Cuaca Aman): Detour via detour1, fallback to standard alternative ---
       if (detour1) {
         try {
           const detourUrl = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${detour1.lng},${detour1.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&steps=true`;
-          const detourRes = await fetch(detourUrl);
+          const detourRes = await fetchWithTimeout(detourUrl);
           const detourData = await detourRes.json();
           if (detourData.code === 'Ok' && detourData.routes && detourData.routes.length > 0) {
             const route1 = detourData.routes[0];
@@ -1194,7 +1271,7 @@ const calculateRoute = async () => {
             }
           }
         } catch (e) {
-          console.warn('Failed to fetch detour1 route', e);
+          console.warn('Failed to fetch detour1 route (timeout/offline), using standard fallback', e);
         }
       }
 
@@ -1210,7 +1287,7 @@ const calculateRoute = async () => {
       if (detour2) {
         try {
           const detourUrl = `https://router.project-osrm.org/route/v1/driving/${startCity.lng},${startCity.lat};${detour2.lng},${detour2.lat};${endCity.lng},${endCity.lat}?overview=full&geometries=geojson&steps=true`;
-          const detourRes = await fetch(detourUrl);
+          const detourRes = await fetchWithTimeout(detourUrl);
           const detourData = await detourRes.json();
           if (detourData.code === 'Ok' && detourData.routes && detourData.routes.length > 0) {
             const route2 = detourData.routes[0];
@@ -1223,7 +1300,7 @@ const calculateRoute = async () => {
             }
           }
         } catch (e) {
-          console.warn('Failed to fetch detour2 route', e);
+          console.warn('Failed to fetch detour2 route (timeout/offline), using standard fallback', e);
         }
       }
 
@@ -1309,12 +1386,14 @@ const calculateRoute = async () => {
   if (osrmSteps.length > 0) {
     let cumDist = 0;
     for (const step of osrmSteps) {
-      const key = `${step.maneuver.location[1].toFixed(5)},${step.maneuver.location[0].toFixed(5)}`;
-      osrmStepCumDist.set(key, cumDist);
-      cumDist += (step.distance || 0);
+      if (step?.maneuver?.location) {
+        const key = `${step.maneuver.location[1].toFixed(5)},${step.maneuver.location[0].toFixed(5)}`;
+        osrmStepCumDist.set(key, cumDist);
+      }
+      cumDist += (step?.distance || 0);
     }
   }
-  const osrmTotalRoadDist = osrmSteps.reduce((sum: number, s: any) => sum + (s.distance || 0), 0) || 1;
+  const osrmTotalRoadDist = osrmSteps.reduce((sum: number, s: any) => sum + (s?.distance || 0), 0) || 1;
 
   const generateCheckpointsForOption = (coords: [number, number][], weatherMode: 'standard' | 'safe' | 'dry', totalSecs: number) => {
     const list: AlternativeRoute['checkpoints'] = [];
@@ -1533,7 +1612,9 @@ const renderMarkersForCurrentStep = (shouldCenter = true) => {
       }, 50);
     }
   } else if (currentStep.value === 'directions' && destinationLocation.value) {
-    calculateRoute();
+    if (userRequestedRoute.value) {
+      calculateRoute();
+    }
   }
 };
 
@@ -1728,6 +1809,7 @@ watch(directionsCheckpoints, (newVal) => {
 }, { immediate: true });
 
 const getDirections = () => {
+  userRequestedRoute.value = true; // Mark that user explicitly requested route
   currentStep.value = 'directions';
   expandedCheckpoints.value = new Set([0]);
 };
@@ -1762,7 +1844,7 @@ const clearSearch = () => {
 
 // Map init on drawer open or selectedCity change
 watch(
-  () => [props.isOpen, props.selectedCity],
+  () => [props.isOpen, props.selectedCity, props.initialDestination],
   ([isOpenVal]) => {
     if (isOpenVal) {
       document.body.classList.add('drawer-open');
@@ -1783,6 +1865,27 @@ watch(
       // Immediately query browser GPS geolocation
       tryGetUserLocation();
 
+      // Check if opened with a specific landmark shortcut from an activity card click
+      if (props.initialDestination && props.initialDestination.lat && props.initialDestination.lng) {
+        // Build a synthetic LocationData entry using the card's exact coordinates
+        const customDest: import('../data/landBasedActivitiesData').LocationData = {
+          id: `custom_${props.initialDestination.lat}_${props.initialDestination.lng}`,
+          name: props.initialDestination.name,
+          type: 'Tempat Wisata',
+          region: props.initialDestination.location,
+          lat: props.initialDestination.lat,
+          lng: props.initialDestination.lng,
+          temp: 30,
+          weather: 'Cerah Berawan',
+          uv: 5,
+          condition: 'cerah',
+          tips: 'Destinasi pilihan Anda. Gunakan petunjuk arah untuk navigasi ke lokasi ini.',
+        };
+        destinationLocation.value = customDest;
+        currentStep.value = 'selected';
+        expandedCheckpoints.value = new Set([0]);
+      }
+
       // Init map after Vue has flushed DOM (nextTick) then wait for
       // the drawer CSS transition to finish (≈500ms) before mounting Leaflet.
       // Multiple progressive invalidateSize calls ensure tiles render even if
@@ -1790,11 +1893,15 @@ watch(
       nextTick(() => {
         // Mobile needs longer delay: CSS transition is ≈400ms
         const initDelay = isMobile.value ? 350 : 150;
-        setTimeout(() => { initMap(); }, initDelay);
+        setTimeout(() => { 
+          initMap(); 
+        }, initDelay);
 
         // Safety retry: if initMap failed (container not ready), try once more
         setTimeout(() => {
-          if (!map && mapEl.value) { initMap(); }
+          if (!map && mapEl.value) { 
+            initMap(); 
+          }
         }, 800);
 
         // Progressive invalidations to recover from any pending reflows
@@ -1804,6 +1911,11 @@ watch(
       });
     } else {
       document.body.classList.remove('drawer-open');
+      // Reset state so next open always starts fresh
+      currentStep.value = 'overview';
+      destinationLocation.value = null;
+      searchQuery.value = '';
+      userRequestedRoute.value = false; // Reset route flag
       if (map) {
         clearMapDrawings();
         map.remove();
@@ -1996,8 +2108,8 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- Transport Hub Quick Filter (overview only) -->
-            <div v-if="currentStep === 'overview'" class="px-4 pb-2.5 shrink-0">
+            <!-- Transport Hub Quick Filter (overview or selected step) -->
+            <div v-if="currentStep === 'overview' || currentStep === 'selected'" class="px-4 pb-2.5 shrink-0">
               <div class="flex items-center gap-1.5 mb-1.5">
                 <span class="text-[8.5px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Transportasi Publik Terdekat</span>
               </div>

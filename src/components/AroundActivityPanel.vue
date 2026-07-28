@@ -11,6 +11,10 @@ const props = defineProps<{
   selectedCity: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'select-course', course: GolfCourse): void;
+}>();
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HourlyForecast {
   time: string;
@@ -27,6 +31,8 @@ interface GolfCourse {
   name: string;
   distance: string;
   location: string;
+  lat: number;
+  lng: number;
   comfortIndex: 'Nyaman' | 'Cukup';
   comfortEmoji: string;
   rainWarning: string;
@@ -216,71 +222,71 @@ const golfCourses = computed<GolfCourse[]>(() => {
 
   if (cityLower.includes('jakarta') || cityLower.includes('gambir')) {
     raw = [
-      { id: 101, name: 'Monumen Nasional (Monas)', distance: 'Radius • 1.2 km', location: 'Jakarta Pusat, DKI Jakarta', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Tidak ada potensi curah hujan siang ini.', uvWarning: 'Indeks UV ekstrem. Disarankan memakai kacamata hitam dan tabir surya.', hourly: generateHourlyForGolf('Cukup', 33, 'Sun'), advisorType: 'land', colorKey: 'amber', category: 'heritage', tags: ['Wisata Sejarah', 'Edukasi', 'Fotografi'] },
-      { id: 102, name: 'Royale Jakarta Golf Club', distance: 'Radius • 16 km', location: 'Jakarta Timur, DKI Jakarta', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 2 jam.', uvWarning: 'Kondisi angin sepoi-sepoi, nyaman untuk berolahraga outdoor.', hourly: generateHourlyForGolf('Nyaman', 32, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Olahraga', 'Golf', 'Premium'] },
-      { id: 103, name: 'Senayan Park (SPARK)', distance: 'Radius • 4.5 km', location: 'Jakarta Pusat, DKI Jakarta', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Cuaca cerah berawan, tidak ada potensi hujan.', uvWarning: 'Suhu cukup gerah di area terbuka. Sangat cocok dikunjungi sore hari.', hourly: generateHourlyForGolf('Cukup', 32, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Kuliner', 'Belanja'] },
+      { id: 101, name: 'Monumen Nasional (Monas)', distance: 'Radius • 1.2 km', location: 'Jakarta Pusat, DKI Jakarta', lat: -6.1754, lng: 106.8272, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Tidak ada potensi curah hujan siang ini.', uvWarning: 'Indeks UV ekstrem. Disarankan memakai kacamata hitam dan tabir surya.', hourly: generateHourlyForGolf('Cukup', 33, 'Sun'), advisorType: 'land', colorKey: 'amber', category: 'heritage', tags: ['Wisata Sejarah', 'Edukasi', 'Fotografi'] },
+      { id: 102, name: 'Royale Jakarta Golf Club', distance: 'Radius • 16 km', location: 'Jakarta Timur, DKI Jakarta', lat: -6.2804, lng: 106.9507, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 2 jam.', uvWarning: 'Kondisi angin sepoi-sepoi, nyaman untuk berolahraga outdoor.', hourly: generateHourlyForGolf('Nyaman', 32, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Olahraga', 'Golf', 'Premium'] },
+      { id: 103, name: 'Senayan Park (SPARK)', distance: 'Radius • 4.5 km', location: 'Jakarta Pusat, DKI Jakarta', lat: -6.2271, lng: 106.7994, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Cuaca cerah berawan, tidak ada potensi hujan.', uvWarning: 'Suhu cukup gerah di area terbuka. Sangat cocok dikunjungi sore hari.', hourly: generateHourlyForGolf('Cukup', 32, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Kuliner', 'Belanja'] },
     ];
   } else if (cityLower.includes('surabaya') || cityLower.includes('gubeng')) {
     raw = [
-      { id: 201, name: 'Taman Bungkul', distance: 'Radius • 3.2 km', location: 'Wonokromo, Kota Surabaya, Jawa Timur', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sepanjang hari.', uvWarning: 'Aman untuk aktivitas santai sore dan olahraga ringan.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Olahraga', 'Keluarga'] },
-      { id: 202, name: 'Ciputra Golf Club Surabaya', distance: 'Radius • 14 km', location: 'Lakarsantri, Kota Surabaya, Jawa Timur', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Tidak ada curah hujan setidaknya selama 1 jam.', uvWarning: 'Suhu cukup terik di siang hari, siapkan air minum ekstra.', hourly: generateHourlyForGolf('Cukup', 34, 'Sun'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
-      { id: 203, name: 'Jalan Tunjungan (Tunjungan Street)', distance: 'Radius • 1.8 km', location: 'Genteng, Kota Surabaya, Jawa Timur', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah sepanjang malam, sangat cocok untuk kulineran malam.', uvWarning: 'Aman untuk nongkrong outdoor setelah pukul 16:00 WIB.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Kuliner', 'Wisata Sejarah'] },
+      { id: 201, name: 'Taman Bungkul', distance: 'Radius • 3.2 km', location: 'Wonokromo, Kota Surabaya, Jawa Timur', lat: -7.2939, lng: 112.7371, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sepanjang hari.', uvWarning: 'Aman untuk aktivitas santai sore dan olahraga ringan.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Olahraga', 'Keluarga'] },
+      { id: 202, name: 'Ciputra Golf Club Surabaya', distance: 'Radius • 14 km', location: 'Lakarsantri, Kota Surabaya, Jawa Timur', lat: -7.3153, lng: 112.6431, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Tidak ada curah hujan setidaknya selama 1 jam.', uvWarning: 'Suhu cukup terik di siang hari, siapkan air minum ekstra.', hourly: generateHourlyForGolf('Cukup', 34, 'Sun'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
+      { id: 203, name: 'Jalan Tunjungan (Tunjungan Street)', distance: 'Radius • 1.8 km', location: 'Genteng, Kota Surabaya, Jawa Timur', lat: -7.2617, lng: 112.7414, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah sepanjang malam, sangat cocok untuk kulineran malam.', uvWarning: 'Aman untuk nongkrong outdoor setelah pukul 16:00 WIB.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Kuliner', 'Wisata Sejarah'] },
     ];
   } else if (cityLower.includes('bandung') || cityLower.includes('braga')) {
     raw = [
-      { id: 301, name: 'Dago Heritage 1917 Golf', distance: 'Radius • 6.8 km', location: 'Bandung Utara, Jawa Barat', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 3 jam.', uvWarning: 'Suhu sejuk (24°C). Sangat direkomendasikan untuk aktivitas luar ruangan.', hourly: generateHourlyForGolf('Nyaman', 24, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Sejuk'] },
-      { id: 302, name: 'Kawah Putih Ciwidey', distance: 'Radius • 42 km', location: 'Kabupaten Bandung, Jawa Barat', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi kabut tebal dan gerimis ringan sore hari.', uvWarning: 'Suhu dingin (18°C). Disarankan membawa jaket tebal.', hourly: generateHourlyForGolf('Cukup', 18, 'Cloud'), advisorType: 'land', colorKey: 'teal', category: 'nature', tags: ['Wisata Alam', 'Petualangan', 'Fotografi'] },
-      { id: 303, name: 'Jalan Braga (Braga Street)', distance: 'Radius • 0.5 km', location: 'Sumur Bandung, Kota Bandung, Jawa Barat', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Udara sejuk dengan potensi gerimis tipis sore hari.', uvWarning: 'Suhu nyaman (22°C). Sangat asyik untuk jalan kaki santai.', hourly: generateHourlyForGolf('Nyaman', 23, 'Cloud'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Kuliner', 'Belanja'] },
+      { id: 301, name: 'Dago Heritage 1917 Golf', distance: 'Radius • 6.8 km', location: 'Bandung Utara, Jawa Barat', lat: -6.8679, lng: 107.6217, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 3 jam.', uvWarning: 'Suhu sejuk (24°C). Sangat direkomendasikan untuk aktivitas luar ruangan.', hourly: generateHourlyForGolf('Nyaman', 24, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Sejuk'] },
+      { id: 302, name: 'Kawah Putih Ciwidey', distance: 'Radius • 42 km', location: 'Kabupaten Bandung, Jawa Barat', lat: -7.1662, lng: 107.4021, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi kabut tebal dan gerimis ringan sore hari.', uvWarning: 'Suhu dingin (18°C). Disarankan membawa jaket tebal.', hourly: generateHourlyForGolf('Cukup', 18, 'Cloud'), advisorType: 'land', colorKey: 'teal', category: 'nature', tags: ['Wisata Alam', 'Petualangan', 'Fotografi'] },
+      { id: 303, name: 'Jalan Braga (Braga Street)', distance: 'Radius • 0.5 km', location: 'Sumur Bandung, Kota Bandung, Jawa Barat', lat: -6.9131, lng: 107.6066, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Udara sejuk dengan potensi gerimis tipis sore hari.', uvWarning: 'Suhu nyaman (22°C). Sangat asyik untuk jalan kaki santai.', hourly: generateHourlyForGolf('Nyaman', 23, 'Cloud'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Kuliner', 'Belanja'] },
     ];
   } else if (cityLower.includes('medan') || cityLower.includes('sikambing')) {
     raw = [
-      { id: 401, name: 'Taman Cadika Pramuka', distance: 'Radius • 8.2 km', location: 'Medan Johor, Kota Medan, Sumatera Utara', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca berawan tipis. Tidak ada potensi hujan.', uvWarning: 'Aman untuk aktivitas piknik keluarga luar ruangan.', hourly: generateHourlyForGolf('Nyaman', 29, 'Cloud'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Keluarga', 'Olahraga'] },
-      { id: 402, name: 'Royal Sumatra Golf Course', distance: 'Radius • 12 km', location: 'Medan Tuntungan, Sumatera Utara', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi mendung tebal mulai pukul 15:00 WIB.', uvWarning: 'Kelembapan tinggi, udara terasa sedikit gerah.', hourly: generateHourlyForGolf('Cukup', 30, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
-      { id: 403, name: 'Pos Bloc Medan', distance: 'Radius • 2.0 km', location: 'Medan Barat, Kota Medan, Sumatera Utara', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tebal berawan, tidak ada potensi hujan lebat.', uvWarning: 'Kelembapan tinggi, udara terasa hangat namun teduh.', hourly: generateHourlyForGolf('Cukup', 29, 'Cloud'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Seni & Budaya', 'Kuliner'] },
+      { id: 401, name: 'Taman Cadika Pramuka', distance: 'Radius • 8.2 km', location: 'Medan Johor, Kota Medan, Sumatera Utara', lat: 3.5430, lng: 98.6851, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca berawan tipis. Tidak ada potensi hujan.', uvWarning: 'Aman untuk aktivitas piknik keluarga luar ruangan.', hourly: generateHourlyForGolf('Nyaman', 29, 'Cloud'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Keluarga', 'Olahraga'] },
+      { id: 402, name: 'Royal Sumatra Golf Course', distance: 'Radius • 12 km', location: 'Medan Tuntungan, Sumatera Utara', lat: 3.5018, lng: 98.6060, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi mendung tebal mulai pukul 15:00 WIB.', uvWarning: 'Kelembapan tinggi, udara terasa sedikit gerah.', hourly: generateHourlyForGolf('Cukup', 30, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
+      { id: 403, name: 'Pos Bloc Medan', distance: 'Radius • 2.0 km', location: 'Medan Barat, Kota Medan, Sumatera Utara', lat: 3.5952, lng: 98.6722, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tebal berawan, tidak ada potensi hujan lebat.', uvWarning: 'Kelembapan tinggi, udara terasa hangat namun teduh.', hourly: generateHourlyForGolf('Cukup', 29, 'Cloud'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Seni & Budaya', 'Kuliner'] },
     ];
   } else if (cityLower.includes('semarang') || cityLower.includes('pandanaran')) {
     raw = [
-      { id: 411, name: 'Lawang Sewu', distance: 'Radius • 1.5 km', location: 'Semarang Tengah, Kota Semarang, Jawa Tengah', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca berawan sejuk sore hari.', uvWarning: 'Sangat cocok untuk wisata sejarah outdoor.', hourly: generateHourlyForGolf('Nyaman', 28, 'Cloud'), advisorType: 'land', colorKey: 'amber', category: 'heritage', tags: ['Wisata Sejarah', 'Edukasi', 'Fotografi'] },
-      { id: 412, name: 'Gombel Golf Semarang', distance: 'Radius • 8.0 km', location: 'Banyumanik, Kota Semarang, Jawa Tengah', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Kondisi berawan sejuk tanpa curah hujan.', uvWarning: 'Permainan golf sangat ideal dengan angin bukit yang menyegarkan.', hourly: generateHourlyForGolf('Nyaman', 27, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Pemandangan'] },
-      { id: 413, name: 'Kota Lama Semarang', distance: 'Radius • 0.8 km', location: 'Semarang Utara, Kota Semarang, Jawa Tengah', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca sangat bersahabat, cerah berawan semilir.', uvWarning: 'Sangat direkomendasikan untuk hunting foto and jalan sore.', hourly: generateHourlyForGolf('Nyaman', 28, 'SunDim'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Wisata Sejarah', 'Kuliner'] },
+      { id: 411, name: 'Lawang Sewu', distance: 'Radius • 1.5 km', location: 'Semarang Tengah, Kota Semarang, Jawa Tengah', lat: -6.9836, lng: 110.4107, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca berawan sejuk sore hari.', uvWarning: 'Sangat cocok untuk wisata sejarah outdoor.', hourly: generateHourlyForGolf('Nyaman', 28, 'Cloud'), advisorType: 'land', colorKey: 'amber', category: 'heritage', tags: ['Wisata Sejarah', 'Edukasi', 'Fotografi'] },
+      { id: 412, name: 'Gombel Golf Semarang', distance: 'Radius • 8.0 km', location: 'Banyumanik, Kota Semarang, Jawa Tengah', lat: -7.0393, lng: 110.4248, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Kondisi berawan sejuk tanpa curah hujan.', uvWarning: 'Permainan golf sangat ideal dengan angin bukit yang menyegarkan.', hourly: generateHourlyForGolf('Nyaman', 27, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Pemandangan'] },
+      { id: 413, name: 'Kota Lama Semarang', distance: 'Radius • 0.8 km', location: 'Semarang Utara, Kota Semarang, Jawa Tengah', lat: -6.9666, lng: 110.4263, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca sangat bersahabat, cerah berawan semilir.', uvWarning: 'Sangat direkomendasikan untuk hunting foto and jalan sore.', hourly: generateHourlyForGolf('Nyaman', 28, 'SunDim'), advisorType: 'land', colorKey: 'orange', category: 'heritage', tags: ['Gaya Hidup', 'Wisata Sejarah', 'Kuliner'] },
     ];
   } else if (cityLower.includes('makassar') || cityLower.includes('mariso')) {
     raw = [
-      { id: 501, name: 'Pantai Losari Makassar', distance: 'Radius • 2.5 km', location: 'Ujung Pandang, Kota Makassar, Sulawesi Selatan', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 2 jam.', uvWarning: 'Angin laut kencang sepoi-sepoi, nyaman untuk jogging sore.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'beach', tags: ['Wisata Bahari', 'Olahraga', 'Sunset'] },
-      { id: 502, name: 'Padi Valley Golf Club', distance: 'Radius • 24 km', location: 'Gowa, Sulawesi Selatan', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi hujan ringan singkat lewat sore hari.', uvWarning: 'Suhu siang hari terik, disarankan memakai topi.', hourly: generateHourlyForGolf('Cukup', 32, 'Sun'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Alam Terbuka'] },
-      { id: 503, name: 'Center Point of Indonesia (CPI)', distance: 'Radius • 3.0 km', location: 'Mamajang, Kota Makassar, Sulawesi Selatan', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan dengan hembusan angin laut sedang.', uvWarning: 'Indikasi UV sedang, nyaman untuk berfoto di sunset quay.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'sea', colorKey: 'rose', category: 'commercial', tags: ['Gaya Hidup', 'Wisata Bahari', 'Belanja'] },
+      { id: 501, name: 'Pantai Losari Makassar', distance: 'Radius • 2.5 km', location: 'Ujung Pandang, Kota Makassar, Sulawesi Selatan', lat: -5.1481, lng: 119.4048, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Tidak ada curah hujan setidaknya selama 2 jam.', uvWarning: 'Angin laut kencang sepoi-sepoi, nyaman untuk jogging sore.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'beach', tags: ['Wisata Bahari', 'Olahraga', 'Sunset'] },
+      { id: 502, name: 'Padi Valley Golf Club', distance: 'Radius • 24 km', location: 'Gowa, Sulawesi Selatan', lat: -5.2850, lng: 119.4811, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi hujan ringan singkat lewat sore hari.', uvWarning: 'Suhu siang hari terik, disarankan memakai topi.', hourly: generateHourlyForGolf('Cukup', 32, 'Sun'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Alam Terbuka'] },
+      { id: 503, name: 'Center Point of Indonesia (CPI)', distance: 'Radius • 3.0 km', location: 'Mamajang, Kota Makassar, Sulawesi Selatan', lat: -5.1558, lng: 119.4120, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan dengan hembusan angin laut sedang.', uvWarning: 'Indikasi UV sedang, nyaman untuk berfoto di sunset quay.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'sea', colorKey: 'rose', category: 'commercial', tags: ['Gaya Hidup', 'Wisata Bahari', 'Belanja'] },
     ];
   } else if (cityLower.includes('palembang') || cityLower.includes('ilir barat')) {
     raw = [
-      { id: 511, name: 'Jembatan Ampera & BKB', distance: 'Radius • 0.5 km', location: 'Ilir Barat I, Kota Palembang, Sumatera Selatan', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan tanpa potensi hujan.', uvWarning: 'Angin sungai Musi sepoi-sepoi mendukung jalan santai sore.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'sea', colorKey: 'orange', category: 'heritage', tags: ['Wisata Sejarah', 'Wisata Sungai', 'Fotografi'] },
-      { id: 512, name: 'Palembang Golf Club', distance: 'Radius • 5.0 km', location: 'Kota Palembang, Sumatera Selatan', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tipis berawan.', uvWarning: 'Suhu siang terik basah, terapkan tabir surya.', hourly: generateHourlyForGolf('Cukup', 33, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
-      { id: 513, name: 'Jakabaring Lake Side', distance: 'Radius • 6.5 km', location: 'Seberang Ulu I, Kota Palembang, Sumatera Selatan', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca teduh berawan tanpa potensi hujan.', uvWarning: 'Angin sepoi-sepoi, cocok untuk olahraga sore atau piknik.', hourly: generateHourlyForGolf('Nyaman', 30, 'Cloud'), advisorType: 'sea', colorKey: 'teal', category: 'nature', tags: ['Olahraga', 'Wisata Danau', 'Keluarga'] },
+      { id: 511, name: 'Jembatan Ampera & BKB', distance: 'Radius • 0.5 km', location: 'Ilir Barat I, Kota Palembang, Sumatera Selatan', lat: -2.9938, lng: 104.7626, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan tanpa potensi hujan.', uvWarning: 'Angin sungai Musi sepoi-sepoi mendukung jalan santai sore.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'sea', colorKey: 'orange', category: 'heritage', tags: ['Wisata Sejarah', 'Wisata Sungai', 'Fotografi'] },
+      { id: 512, name: 'Palembang Golf Club', distance: 'Radius • 5.0 km', location: 'Kota Palembang, Sumatera Selatan', lat: -3.0123, lng: 104.8091, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tipis berawan.', uvWarning: 'Suhu siang terik basah, terapkan tabir surya.', hourly: generateHourlyForGolf('Cukup', 33, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
+      { id: 513, name: 'Jakabaring Lake Side', distance: 'Radius • 6.5 km', location: 'Seberang Ulu I, Kota Palembang, Sumatera Selatan', lat: -3.0182, lng: 104.7801, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca teduh berawan tanpa potensi hujan.', uvWarning: 'Angin sepoi-sepoi, cocok untuk olahraga sore atau piknik.', hourly: generateHourlyForGolf('Nyaman', 30, 'Cloud'), advisorType: 'sea', colorKey: 'teal', category: 'nature', tags: ['Olahraga', 'Wisata Danau', 'Keluarga'] },
     ];
   } else if (cityLower.includes('batam') || cityLower.includes('belian')) {
     raw = [
-      { id: 521, name: 'Jembatan Barelang Batam', distance: 'Radius • 20 km', location: 'Batam Kota, Kota Batam, Kepulauan Riau', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Angin kencang mendukung wisata pemandangan.', uvWarning: 'Suhu laut bersahabat, siapkan kacamata hitam.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'heritage', tags: ['Wisata Bahari', 'Fotografi', 'Road Trip'] },
-      { id: 522, name: 'SouthLinks Country Club Batam', distance: 'Radius • 6.0 km', location: 'Sekupang, Kota Batam, Kepulauan Riau', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi gerimis ringan di sore hari.', uvWarning: 'Kelembapan tinggi, disarankan hidrasi berkala.', hourly: generateHourlyForGolf('Cukup', 31, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
-      { id: 523, name: 'Mega Wisata Ocarina Batam', distance: 'Radius • 4.5 km', location: 'Batam Kota, Kota Batam, Kepulauan Riau', comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Hembusan angin laut kencang disertai awan mendung tipis.', uvWarning: 'Paparan UV rendah, cocok untuk rekreasi pantai berbayang.', hourly: generateHourlyForGolf('Cukup', 29, 'Cloud'), advisorType: 'sea', colorKey: 'indigo', category: 'beach', tags: ['Wisata Bahari', 'Gaya Hidup', 'Keluarga'] },
+      { id: 521, name: 'Jembatan Barelang Batam', distance: 'Radius • 20 km', location: 'Batam Kota, Kota Batam, Kepulauan Riau', lat: 0.9244, lng: 103.9854, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Angin kencang mendukung wisata pemandangan.', uvWarning: 'Suhu laut bersahabat, siapkan kacamata hitam.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'heritage', tags: ['Wisata Bahari', 'Fotografi', 'Road Trip'] },
+      { id: 522, name: 'SouthLinks Country Club Batam', distance: 'Radius • 6.0 km', location: 'Sekupang, Kota Batam, Kepulauan Riau', lat: 1.1120, lng: 103.9534, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Potensi gerimis ringan di sore hari.', uvWarning: 'Kelembapan tinggi, disarankan hidrasi berkala.', hourly: generateHourlyForGolf('Cukup', 31, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
+      { id: 523, name: 'Mega Wisata Ocarina Batam', distance: 'Radius • 4.5 km', location: 'Batam Kota, Kota Batam, Kepulauan Riau', lat: 1.1512, lng: 104.0268, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Hembusan angin laut kencang disertai awan mendung tipis.', uvWarning: 'Paparan UV rendah, cocok untuk rekreasi pantai berbayang.', hourly: generateHourlyForGolf('Cukup', 29, 'Cloud'), advisorType: 'sea', colorKey: 'indigo', category: 'beach', tags: ['Wisata Bahari', 'Gaya Hidup', 'Keluarga'] },
     ];
   } else if (cityLower.includes('pekanbaru') || cityLower.includes('tampan')) {
     raw = [
-      { id: 531, name: 'Labersa Golf & Country Club', distance: 'Radius • 8.0 km', location: 'Siak Hulu, Dekat Pekanbaru, Riau', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sangat bersahabat.', uvWarning: 'Aman beraktivitas golf dengan tingkat paparan UV sedang.', hourly: generateHourlyForGolf('Nyaman', 32, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
-      { id: 532, name: 'Taman Wisata Alam Mayang', distance: 'Radius • 6.0 km', location: 'Tenayan Raya, Kota Pekanbaru, Riau', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Udara bersih teduh berawan.', uvWarning: 'Ideal untuk rekreasi keluarga di bawah pepohonan hijau rindang.', hourly: generateHourlyForGolf('Nyaman', 30, 'Cloud'), advisorType: 'land', colorKey: 'emerald', category: 'nature', tags: ['Wisata Alam', 'Keluarga', 'Petualangan'] },
-      { id: 533, name: 'Riau Creative Hub', distance: 'Radius • 2.2 km', location: 'Sail, Kota Pekanbaru, Riau', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sangat bersahabat sore ini.', uvWarning: 'Tingkat UV aman, ideal untuk nongkrong outdoor komunitas.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Seni & Budaya', 'Komunitas'] },
+      { id: 531, name: 'Labersa Golf & Country Club', distance: 'Radius • 8.0 km', location: 'Siak Hulu, Dekat Pekanbaru, Riau', lat: 0.4546, lng: 101.3441, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sangat bersahabat.', uvWarning: 'Aman beraktivitas golf dengan tingkat paparan UV sedang.', hourly: generateHourlyForGolf('Nyaman', 32, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Premium'] },
+      { id: 532, name: 'Taman Wisata Alam Mayang', distance: 'Radius • 6.0 km', location: 'Tenayan Raya, Kota Pekanbaru, Riau', lat: 0.5071, lng: 101.4559, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Udara bersih teduh berawan.', uvWarning: 'Ideal untuk rekreasi keluarga di bawah pepohonan hijau rindang.', hourly: generateHourlyForGolf('Nyaman', 30, 'Cloud'), advisorType: 'land', colorKey: 'emerald', category: 'nature', tags: ['Wisata Alam', 'Keluarga', 'Petualangan'] },
+      { id: 533, name: 'Riau Creative Hub', distance: 'Radius • 2.2 km', location: 'Sail, Kota Pekanbaru, Riau', lat: 0.5102, lng: 101.4381, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan sangat bersahabat sore ini.', uvWarning: 'Tingkat UV aman, ideal untuk nongkrong outdoor komunitas.', hourly: generateHourlyForGolf('Nyaman', 31, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Seni & Budaya', 'Komunitas'] },
     ];
   } else if (cityLower.includes('denpasar') || cityLower.includes('dauh puri') || cityLower.includes('bali') || cityLower.includes('kuta')) {
     raw = [
-      { id: 601, name: 'Bali National Golf Club', distance: 'Radius • 18 km', location: 'Nusa Dua, Kabupaten Badung, Bali', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca pantai cerah mendukung penuh permainan golf.', uvWarning: 'Aman beraktivitas luar ruangan. Tetap terapkan sunscreen.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Resor'] },
-      { id: 602, name: 'Pantai Kuta Bali', distance: 'Radius • 9.5 km', location: 'Kuta, Kabupaten Badung, Bali', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan. Gelombang laut terpantau sedang.', uvWarning: 'Sangat baik untuk selancar, berjemur, atau jalan santai pesisir.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'beach', tags: ['Wisata Bahari', 'Surfing', 'Sunset'] },
-      { id: 603, name: 'Beachwalk Shopping Center', distance: 'Radius • 0.2 km', location: 'Kuta, Kabupaten Badung, Bali', comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan pantai mendukung aktivitas belanja.', uvWarning: 'Aman dan teduh berkat arsitektur semi-outdoor yang asri.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'rose', category: 'commercial', tags: ['Gaya Hidup', 'Belanja', 'Kuliner'] },
+      { id: 601, name: 'Bali National Golf Club', distance: 'Radius • 18 km', location: 'Nusa Dua, Kabupaten Badung, Bali', lat: -8.7951, lng: 115.2283, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca pantai cerah mendukung penuh permainan golf.', uvWarning: 'Aman beraktivitas luar ruangan. Tetap terapkan sunscreen.', hourly: generateHourlyForGolf('Nyaman', 30, 'SunDim'), advisorType: 'land', colorKey: 'blue', category: 'golf', tags: ['Golf', 'Olahraga', 'Resor'] },
+      { id: 602, name: 'Pantai Kuta Bali', distance: 'Radius • 9.5 km', location: 'Kuta, Kabupaten Badung, Bali', lat: -8.7195, lng: 115.1686, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cerah berawan. Gelombang laut terpantau sedang.', uvWarning: 'Sangat baik untuk selancar, berjemur, atau jalan santai pesisir.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'cyan', category: 'beach', tags: ['Wisata Bahari', 'Surfing', 'Sunset'] },
+      { id: 603, name: 'Beachwalk Shopping Center', distance: 'Radius • 0.2 km', location: 'Kuta, Kabupaten Badung, Bali', lat: -8.7188, lng: 115.1686, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca cerah berawan pantai mendukung aktivitas belanja.', uvWarning: 'Aman dan teduh berkat arsitektur semi-outdoor yang asri.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'sea', colorKey: 'rose', category: 'commercial', tags: ['Gaya Hidup', 'Belanja', 'Kuliner'] },
     ];
   } else {
     const mainName = props.selectedCity.split(',')[0].trim();
     const subName = props.selectedCity.split(',').slice(1).join(', ').trim() || props.selectedCity;
     raw = [
-      { id: 901, name: `${mainName} Central Park`, distance: 'Radius • 1.5 km', location: subName, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Kondisi udara sejuk dan tidak ada potensi hujan.', uvWarning: 'Sangat baik untuk jalan santai dan rekreasi keluarga.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Keluarga', 'Olahraga'] },
-      { id: 902, name: `${mainName} Sports Complex`, distance: 'Radius • 4.2 km', location: subName, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tipis, angin bertiup sedang.', uvWarning: 'Cocok untuk olahraga sore luar ruangan.', hourly: generateHourlyForGolf('Cukup', 30, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'park', tags: ['Olahraga', 'Fasilitas Publik'] },
-      { id: 903, name: `${mainName} Culinary District`, distance: 'Radius • 2.0 km', location: subName, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca bersahabat untuk aktivitas kuliner luar ruangan.', uvWarning: 'Aman dinikmati bersama teman atau keluarga.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Kuliner', 'Komunitas'] },
+      { id: 901, name: `${mainName} Central Park`, distance: 'Radius • 1.5 km', location: subName, lat: 0, lng: 0, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Kondisi udara sejuk dan tidak ada potensi hujan.', uvWarning: 'Sangat baik untuk jalan santai dan rekreasi keluarga.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'land', colorKey: 'emerald', category: 'park', tags: ['Taman Kota', 'Keluarga', 'Olahraga'] },
+      { id: 902, name: `${mainName} Sports Complex`, distance: 'Radius • 4.2 km', location: subName, lat: 0, lng: 0, comfortIndex: 'Cukup', comfortEmoji: '😐', rainWarning: 'Mendung tipis, angin bertiup sedang.', uvWarning: 'Cocok untuk olahraga sore luar ruangan.', hourly: generateHourlyForGolf('Cukup', 30, 'Cloud'), advisorType: 'land', colorKey: 'blue', category: 'park', tags: ['Olahraga', 'Fasilitas Publik'] },
+      { id: 903, name: `${mainName} Culinary District`, distance: 'Radius • 2.0 km', location: subName, lat: 0, lng: 0, comfortIndex: 'Nyaman', comfortEmoji: '😊', rainWarning: 'Cuaca bersahabat untuk aktivitas kuliner luar ruangan.', uvWarning: 'Aman dinikmati bersama teman atau keluarga.', hourly: generateHourlyForGolf('Nyaman', 29, 'SunDim'), advisorType: 'land', colorKey: 'purple', category: 'commercial', tags: ['Gaya Hidup', 'Kuliner', 'Komunitas'] },
     ];
   }
 
@@ -343,12 +349,13 @@ const transitionName = computed(() =>
             <div
               v-if="activeMobileCourse"
               :key="activeMobileCourse.id"
-              class="rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full"
+              @click="emit('select-course', activeMobileCourse)"
+              class="rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
               :class="getColor(activeMobileCourse.colorKey).border"
             >
               <!-- Gradient top strip -->
               <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(activeMobileCourse.colorKey).topBar"></div>
-
+ 
               <div class="p-3.5 px-4">
                 <!-- Name + Location -->
                 <div class="flex items-center gap-2.5 mb-2.5">
@@ -365,7 +372,7 @@ const transitionName = computed(() =>
                     </p>
                   </div>
                 </div>
-
+ 
                 <!-- Chips row -->
                 <div class="flex flex-wrap items-center gap-1.5 mb-2.5">
                   <span
@@ -396,7 +403,7 @@ const transitionName = computed(() =>
                     {{ tag }}
                   </span>
                 </div>
-
+ 
                 <!-- Advisory Box -->
                 <div class="rounded-xl p-2.5 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
                   <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
@@ -410,7 +417,7 @@ const transitionName = computed(() =>
             </div>
           </Transition>
         </div>
-
+ 
         <!-- Next button -->
         <button
           type="button"
@@ -421,20 +428,21 @@ const transitionName = computed(() =>
           <ChevronRight class="w-4 h-4" />
         </button>
       </div>
-
+ 
     </div>
-
+ 
     <!-- ─── DESKTOP VIEW: Multi-Card Flex Row (MD and up) ──────────────────── -->
     <div class="hidden md:flex md:flex-row-reverse gap-2.5 w-full">
       <div
         v-for="course in golfCourses"
         :key="course.id"
-        class="flex-1 min-w-0 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border"
+        @click="emit('select-course', course)"
+        class="flex-1 min-w-0 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
         :class="getColor(course.colorKey).border"
       >
         <!-- Gradient top strip -->
         <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(course.colorKey).topBar"></div>
-
+ 
         <div class="p-3.5">
           <!-- Name + Location -->
           <div class="flex items-start gap-2.5 mb-2.5">

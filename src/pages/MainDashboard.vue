@@ -335,7 +335,24 @@ const openAviationAdvisor = (sectorId?: string) => {
 };
 
 const isLandDrawerOpen = ref(false);
+const initialDestination = ref<{ name: string; lat: number; lng: number; location: string } | null>(null);
+
 const openLandAdvisor = () => {
+  initialDestination.value = null; // reset if opened manually
+  isLandDrawerOpen.value = true;
+};
+
+const handleSelectCourse = (course: any) => {
+  if (course.lat && course.lng) {
+    initialDestination.value = {
+      name: course.name,
+      lat: course.lat,
+      lng: course.lng,
+      location: course.location,
+    };
+  } else {
+    initialDestination.value = null;
+  }
   isLandDrawerOpen.value = true;
 };
 
@@ -767,7 +784,11 @@ onUnmounted(() => {
         </div> <!-- End of backdrop container -->
 
         <!-- Around Activity -->
-        <AroundActivityPanel v-if="!isLocating && !(isGeolocated && selectedCity === cities[0])" :selected-city="selectedCity" />
+        <AroundActivityPanel 
+          v-if="!isLocating && !(isGeolocated && selectedCity === cities[0])" 
+          :selected-city="selectedCity" 
+          @select-course="handleSelectCourse($event)"
+        />
       </div>
       
       <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
@@ -828,6 +849,7 @@ onUnmounted(() => {
   <LandBasedActivities
     :is-open="isLandDrawerOpen"
     :selected-city="selectedCity"
+    :initial-destination="initialDestination"
     @close="isLandDrawerOpen = false"
   />
 </template>

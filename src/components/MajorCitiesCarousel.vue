@@ -220,12 +220,12 @@ const scrollCarousel = (direction: 'left' | 'right') => {
       <!-- Ring border -->
       <div class="absolute inset-0 rounded-3xl ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.07] pointer-events-none"></div>
 
-      <!-- Photo: positioned lower and shifted left to prevent clipping of head and arm -->
+      <!-- Photo: positioned lower and shifted right to sit closer to right border -->
       <img
         src="/app-download-bg.png"
         alt=""
         aria-hidden="true"
-        class="cta-photo absolute bottom-[-20%] right-[6%] sm:bottom-[-15%] sm:right-[5%] h-[120%] sm:h-[115%] lg:bottom-0 lg:right-0 lg:h-[88%] object-contain object-bottom pointer-events-none select-none"
+        class="cta-photo absolute bottom-[-20%] right-[1.5%] sm:bottom-[-15%] sm:right-[1%] h-[120%] sm:h-[115%] lg:bottom-0 lg:right-0 lg:h-[88%] object-contain object-bottom pointer-events-none select-none"
         draggable="false"
       />
 

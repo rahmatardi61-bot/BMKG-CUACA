@@ -420,7 +420,7 @@ const getCourseImage = (course: GolfCourse) => {
                 </div>
  
                 <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
-                <div class="flex gap-3 items-start">
+                <div class="flex gap-3.5 items-start">
                   <!-- Left column: Premium Image (1x1 square) -->
                   <div class="w-[90px] h-[90px] shrink-0 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
                     <img 
@@ -432,7 +432,7 @@ const getCourseImage = (course: GolfCourse) => {
                   </div>
 
                   <!-- Right column: Details -->
-                  <div class="flex-1 min-w-0 space-y-2">
+                  <div class="flex-1 min-w-0 space-y-1.5">
                     <!-- Comfort + Chips row -->
                     <div class="flex flex-wrap items-center gap-1.5">
                       <span
@@ -454,12 +454,12 @@ const getCourseImage = (course: GolfCourse) => {
                       </span>
                     </div>
 
-                    <!-- Advisor box from cityAnalysisMap -->
-                    <div class="rounded-xl p-2.5 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
-                      <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                    <!-- Advisor box from cityAnalysisMap (clamped to 2 lines for perfect mobile display) -->
+                    <div class="rounded-xl p-2 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
+                      <p class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
                         {{ getAdvisorForCourse(activeMobileCourse).label }}
                       </p>
-                      <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
+                      <p class="text-[10px] text-slate-600 dark:text-slate-300 leading-normal line-clamp-2">
                         {{ getAdvisorForCourse(activeMobileCourse).text }}
                       </p>
                     </div>

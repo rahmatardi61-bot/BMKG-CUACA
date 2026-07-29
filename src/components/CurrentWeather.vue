@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { 
   Droplets, 
   Wind, 
@@ -13,15 +13,10 @@ import {
   CloudLightning,
   Thermometer,
   Navigation,
-  X,
   MessageSquare,
-  MapPin,
-  Home,
   Sunrise,
   Sunset,
-  Moon,
-  ChevronDown,
-  Search
+  Moon
 } from 'lucide-vue-next';
 import type { WeatherData } from '../types/weather';
 import { getCityTheme } from '../data/cityThemes';
@@ -345,51 +340,7 @@ const handleCityScroll = () => {
 };
 
 
-const splitLocation = (fullName: string) => {
-  if (!fullName) return { main: '', sub: '' };
-  const parts = fullName.split(',');
-  const main = parts[0].trim();
-  const sub = parts.slice(1).map(p => p.trim()).join(', ');
-  return { main, sub };
-};
 
-const majorCitiesList = [
-  'DKI Jakarta',
-  'Surabaya',
-  'Bandung',
-  'Medan',
-  'Semarang',
-  'Makassar',
-  'Palembang',
-  'Batam',
-  'Pekanbaru',
-  'Denpasar'
-];
-
-const otherCities = computed(() => {
-  return props.cities.slice(1).filter(city => {
-    return !majorCitiesList.some(major => 
-      city.toLowerCase() === major.toLowerCase() || 
-      city.toLowerCase().startsWith(major.toLowerCase() + ',')
-    );
-  });
-});
-
-const handleSearchOtherLocation = () => {
-  showCityDropdown.value = false;
-  nextTick(() => {
-    const isMobile = window.innerWidth < 1024;
-    const searchInputId = isMobile ? 'search-input-mobile' : 'search-input-desktop';
-    const inputEl = document.getElementById(searchInputId);
-    if (inputEl) {
-      inputEl.focus();
-      inputEl.classList.add('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
-      setTimeout(() => {
-        inputEl.classList.remove('ring-2', 'ring-blue-500', 'dark:ring-brand-cyan');
-      }, 1500);
-    }
-  });
-};
 
 onMounted(() => {
   document.addEventListener('click', handleCityClickOutside);
@@ -403,131 +354,6 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="space-y-6">
-    <!-- City Navigation Tabs -->
-    <div class="flex items-center gap-2 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-      
-      <!-- Fixed Location: Lokasi Saya -->
-      <div 
-        v-for="city in [cities[0]]" 
-        v-if="cities.length > 0"
-        :key="city"
-        :id="'city-tab-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
-        @click="emit('select-city', city)"
-        class="flex items-center gap-2 pl-3.5 pr-2 py-1.5 text-xs font-semibold rounded-full shrink-0 transition-all duration-300 border backdrop-blur-md cursor-pointer select-none active:scale-95 active:duration-75"
-        :class="city === selectedCity 
-          ? 'bg-blue-50/85 text-blue-600 border-blue-200/50 shadow-sm shadow-blue-500/5 dark:bg-brand-cyan/10 dark:text-brand-cyan dark:border-brand-cyan/30 dark:shadow-brand-cyan/5 font-bold' 
-          : 'bg-white/45 text-slate-500 hover:bg-slate-50/70 hover:text-slate-700 border-slate-200/30 dark:bg-brand-navy-900/35 dark:text-slate-400 dark:hover:bg-brand-navy-850/60 dark:hover:text-slate-100 dark:border-brand-navy-800/20'"
-      >
-        <Home class="w-3.5 h-3.5 shrink-0" />
-        <span>{{ city.split(',')[0] }}</span>
-        
-        <!-- Live GPS Signal Dot -->
-        <div 
-          class="w-[18px] h-[18px] rounded-full flex items-center justify-center border backdrop-blur-[2px]"
-          :class="city === selectedCity 
-            ? 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30' 
-            : 'bg-slate-200/40 text-slate-500 border-slate-300/30 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'"
-          title="Lokasi Saat Ini"
-        >
-          <span class="relative flex h-1.5 w-1.5 shrink-0">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-              :class="city === selectedCity ? 'bg-blue-500 dark:bg-brand-cyan' : 'bg-slate-400 dark:bg-slate-500'"
-            ></span>
-            <span class="relative inline-flex rounded-full h-1.5 w-1.5"
-              :class="city === selectedCity ? 'bg-blue-500 dark:bg-brand-cyan' : 'bg-slate-400 dark:bg-slate-500'"
-            ></span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Elegant separator line -->
-      <div class="w-px h-5 bg-slate-200/60 dark:bg-brand-navy-800/50 shrink-0 mx-1"></div>
-
-      <!-- Dropdown Wrapper for Other Cities -->
-      <div class="relative" ref="cityDropdownContainer">
-        <button 
-          id="city-dropdown-toggle"
-          @click="showCityDropdown = !showCityDropdown"
-          class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-full border backdrop-blur-md cursor-pointer select-none active:scale-95 transition-all duration-300"
-          :class="selectedCity !== cities[0]
-            ? 'bg-blue-50/85 text-blue-600 border-blue-200/50 shadow-sm shadow-blue-500/5 dark:bg-brand-cyan/10 dark:text-brand-cyan dark:border-brand-cyan/30 dark:shadow-brand-cyan/5 font-bold' 
-            : 'bg-white/45 text-slate-500 hover:bg-slate-50/70 hover:text-slate-700 border-slate-200/30 dark:bg-brand-navy-900/35 dark:text-slate-400 dark:hover:bg-brand-navy-850/60 dark:hover:text-slate-100 dark:border-brand-navy-800/20'"
-        >
-          <span>{{ selectedCity !== cities[0] ? selectedCity.split(',')[0] : 'Wilayah Lain' }}</span>
-          <ChevronDown class="w-3.5 h-3.5 transition-transform duration-300" :class="{ 'rotate-180': showCityDropdown }" />
-        </button>
-
-        <!-- Dropdown Menu -->
-        <div 
-          v-if="showCityDropdown"
-          class="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] rounded-2xl shadow-xl border overflow-hidden py-2 z-50 animate-fade-in
-            bg-white/95 border-slate-100/80 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
-        >
-          <button 
-            v-for="city in otherCities"
-            :key="city"
-            :id="'city-dropdown-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
-            @click="emit('select-city', city); showCityDropdown = false"
-            class="w-full text-left px-4 py-2.5 hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-all flex flex-col gap-0.5 cursor-pointer relative"
-            :class="city === selectedCity ? 'bg-slate-50/50 dark:bg-brand-navy-950/20' : ''"
-          >
-            <div class="flex items-center justify-between w-full">
-              <span 
-                class="text-xs tracking-tight transition-colors"
-                :class="city === selectedCity ? 'font-black text-blue-600 dark:text-brand-cyan' : 'font-bold text-slate-700 dark:text-slate-200'"
-              >
-                {{ splitLocation(city).main }}
-              </span>
-              
-              <div class="flex items-center gap-2 shrink-0 ml-2">
-                <span v-if="city === selectedCity" class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
-                
-                <!-- Delete button inside dropdown -->
-                <button 
-                  :id="'city-dropdown-delete-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
-                  @click.stop="emit('delete-city', city)"
-                  class="w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all duration-200
-                    bg-slate-200/40 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20
-                    dark:bg-white/5 dark:hover:bg-red-500/20 dark:hover:text-red-400 dark:hover:border-red-500/30
-                    border border-slate-300/30 dark:border-white/10 backdrop-blur-[2px]
-                    active:scale-90"
-                  title="Hapus kota"
-                >
-                  <X class="w-2.5 h-2.5" />
-                </button>
-              </div>
-            </div>
-            
-            <span class="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate w-full pr-4 text-left">
-              {{ splitLocation(city).sub }}
-            </span>
-          </button>
-
-          <!-- If no other custom cities are saved, show a modern & elegant empty state with search button -->
-          <div 
-            v-if="otherCities.length === 0"
-            class="px-4 py-5 flex flex-col items-center justify-center text-center gap-2.5"
-          >
-            <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-brand-navy-950 flex items-center justify-center border border-slate-100 dark:border-brand-navy-800/40 text-slate-400 dark:text-slate-500 shrink-0">
-              <MapPin class="w-4 h-4 opacity-80" />
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <p class="text-xs font-black text-slate-700 dark:text-slate-200">Tidak Ada Wilayah Lain</p>
-              <p class="text-[9px] text-slate-400 dark:text-slate-500 font-bold leading-relaxed max-w-[210px] uppercase tracking-wider">
-                Simpan kelurahan atau desa favorit Anda untuk akses cepat.
-              </p>
-            </div>
-            <button
-              @click="handleSearchOtherLocation"
-              class="mt-1.5 w-full py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider text-white bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 dark:text-brand-navy-950 transition-all duration-300 shadow-md shadow-blue-500/10 dark:shadow-brand-cyan/10 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <Search class="w-3.5 h-3.5" />
-              Cari Lokasi Lain
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
 
     <!-- Full Width: Large Hero Weather Card -->

@@ -306,6 +306,52 @@ const activeMobileCourse = computed(() => {
 const transitionName = computed(() =>
   slideDir.value === 'left' ? 'slide-left' : 'slide-right'
 );
+
+const getCourseImage = (course: GolfCourse) => {
+  const images: Record<number, string> = {
+    // Jakarta
+    101: '/monas.png', // Monas
+    102: '/royale_golf.png', // Royale Golf
+    103: '/senayan_park.png', // SPARK
+    // Surabaya
+    201: '/taman_bungkul.png', // Taman Bungkul
+    202: '/ciputra_golf.png', // Ciputra Golf
+    203: '/tunjungan.png', // Tunjungan
+    // Bandung
+    301: '/dago_golf.png', // Dago Golf
+    302: '/kawah_putih.png', // Kawah Putih
+    303: '/braga.png', // Braga
+    // Medan
+    401: '/taman_cadika.jpg', // Cadika
+    402: '/royal_sumatra.png', // Royal Sumatra
+    403: '/pos_bloc.jpg', // Pos Bloc
+    // Semarang
+    411: '/lawang_sewu.png', // Lawang Sewu
+    412: '/gombel_golf.png', // Gombel
+    413: '/kota_lama.png', // Kota Lama
+    // Makassar
+    501: '/losari.jpg', // Pantai Losari
+    502: '/padi_valley.png', // Padi Valley
+    503: '/cpi.png', // CPI
+    // Palembang
+    511: '/ampera.png', // Ampera
+    512: '/palembang_golf.png', // Palembang Golf
+    513: '/jakabaring.png', // Jakabaring
+    // Batam
+    521: '/barelang.png', // Barelang
+    522: '/south_links.png', // SouthLinks
+    523: '/ocarina.jpg', // Ocarina
+    // Pekanbaru
+    531: '/labersa.png', // Labersa
+    532: '/alam_mayang.jpg', // Alam Mayang
+    533: '/riau_creative.jpg', // Creative Hub
+    // Denpasar/Bali
+    601: '/bali_golf.jpg', // Bali Golf
+    602: '/kuta_beach.jpg', // Kuta
+    603: '/beachwalk.png', // Beachwalk
+  };
+  return images[course.id] || 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=300&q=80';
+};
 </script>
 
 <template>
@@ -350,7 +396,7 @@ const transitionName = computed(() =>
               v-if="activeMobileCourse"
               :key="activeMobileCourse.id"
               @click="emit('select-course', activeMobileCourse)"
-              class="rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+              class="rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-[transform,box-shadow,border-color] duration-300 ease-out transform-gpu"
               :class="getColor(activeMobileCourse.colorKey).border"
             >
               <!-- Gradient top strip -->
@@ -373,28 +419,55 @@ const transitionName = computed(() =>
                   </div>
                 </div>
  
-                <!-- Chips row -->
-                <div class="flex flex-wrap items-center gap-1.5 mb-2.5">
-                  <span
-                    class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
-                    :class="activeMobileCourse.comfortIndex === 'Nyaman'
-                      ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                      : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
-                  >
-                    {{ activeMobileCourse.comfortIndex }} {{ activeMobileCourse.comfortEmoji }}
-                  </span>
-                  <span
-                    class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
-                    :class="activeMobileCourse.advisorType === 'sea'
-                      ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
-                      : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
-                  >
-                    <component :is="activeMobileCourse.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
-                    {{ activeMobileCourse.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
-                  </span>
+                <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
+                <div class="flex gap-3 items-start">
+                  <!-- Left column: Premium Image (1x1 square) -->
+                  <div class="w-[90px] h-[90px] shrink-0 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
+                    <img 
+                      :src="getCourseImage(activeMobileCourse)" 
+                      :alt="activeMobileCourse.name" 
+                      class="w-full h-full object-cover" 
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <!-- Right column: Details -->
+                  <div class="flex-1 min-w-0 space-y-2">
+                    <!-- Comfort + Chips row -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span
+                        class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
+                        :class="activeMobileCourse.comfortIndex === 'Nyaman'
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                          : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
+                      >
+                        {{ activeMobileCourse.comfortIndex }} {{ activeMobileCourse.comfortEmoji }}
+                      </span>
+                      <span
+                        class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
+                        :class="activeMobileCourse.advisorType === 'sea'
+                          ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
+                          : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
+                      >
+                        <component :is="activeMobileCourse.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
+                        {{ activeMobileCourse.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
+                      </span>
+                    </div>
+
+                    <!-- Advisor box from cityAnalysisMap -->
+                    <div class="rounded-xl p-2.5 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
+                      <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                        {{ getAdvisorForCourse(activeMobileCourse).label }}
+                      </p>
+                      <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
+                        {{ getAdvisorForCourse(activeMobileCourse).text }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <!-- Category Tags -->
-                <div class="flex flex-wrap gap-1 mb-2.5">
+
+                <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
+                <div class="flex flex-wrap gap-1 mt-2.5">
                   <span
                     v-for="tag in activeMobileCourse.tags"
                     :key="tag"
@@ -402,16 +475,6 @@ const transitionName = computed(() =>
                   >
                     {{ tag }}
                   </span>
-                </div>
- 
-                <!-- Advisory Box -->
-                <div class="rounded-xl p-2.5 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
-                  <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
-                    {{ getAdvisorForCourse(activeMobileCourse).label }}
-                  </p>
-                  <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
-                    {{ getAdvisorForCourse(activeMobileCourse).text }}
-                  </p>
                 </div>
               </div>
             </div>
@@ -432,79 +495,102 @@ const transitionName = computed(() =>
     </div>
  
     <!-- ─── DESKTOP VIEW: Multi-Card Flex Row (MD and up) ──────────────────── -->
-    <div class="hidden md:flex md:flex-row-reverse gap-2.5 w-full">
+    <div class="hidden md:block relative w-full">
+      <!-- Scrollable row -->
       <div
-        v-for="course in golfCourses"
-        :key="course.id"
-        @click="emit('select-course', course)"
-        class="flex-1 min-w-0 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
-        :class="getColor(course.colorKey).border"
+        ref="desktopScroll"
+        class="flex flex-row gap-3.5 w-full overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-1.5 px-0"
       >
-        <!-- Gradient top strip -->
-        <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(course.colorKey).topBar"></div>
- 
-        <div class="p-3.5">
-          <!-- Name + Location -->
-          <div class="flex items-start gap-2.5 mb-2.5">
-            <div
-              class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
-              :class="getColor(course.colorKey).icon"
-            >
-              <component :is="getCategoryIcon(course.category)" class="w-4 h-4" />
+        <div
+          v-for="course in golfCourses"
+          :key="course.id"
+          @click="emit('select-course', course)"
+          class="snap-start shrink-0 w-[425px] rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border cursor-pointer group"
+          :class="getColor(course.colorKey).border"
+        >
+          <!-- Gradient top strip -->
+          <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(course.colorKey).topBar"></div>
+   
+          <div class="p-3.5">
+            <!-- Name + Location -->
+            <div class="flex items-start gap-2.5 mb-2.5">
+              <div
+                class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                :class="getColor(course.colorKey).icon"
+              >
+                <component :is="getCategoryIcon(course.category)" class="w-4 h-4" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
+                  {{ course.name }}
+                </h4>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
+                  <MapPin class="w-2.5 h-2.5 shrink-0" />
+                  <span class="truncate">{{ course.distance }}</span>
+                </p>
+              </div>
             </div>
-            <div class="min-w-0 flex-1">
-              <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
-                {{ course.name }}
-              </h4>
-              <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
-                <MapPin class="w-2.5 h-2.5 shrink-0" />
-                <span class="truncate">{{ course.distance }}</span>
-              </p>
+  
+            <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
+            <div class="flex gap-3.5 items-start">
+              <!-- Left column: Premium Image (1x1 square) -->
+              <div class="w-[95px] h-[95px] shrink-0 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
+                <img 
+                  :src="getCourseImage(course)" 
+                  :alt="course.name" 
+                  class="w-full h-full object-cover" 
+                  loading="lazy"
+                />
+              </div>
+  
+              <!-- Right column: Details -->
+              <div class="flex-1 min-w-0 space-y-2">
+                <!-- Comfort + Chips row -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
+                    :class="course.comfortIndex === 'Nyaman'
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                      : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
+                  >
+                    {{ course.comfortIndex }} {{ course.comfortEmoji }}
+                  </span>
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
+                    :class="course.advisorType === 'sea'
+                      ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
+                  >
+                    <component :is="course.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
+                    {{ course.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
+                  </span>
+                </div>
+  
+                <!-- Advisor box from cityAnalysisMap -->
+                <div
+                  class="rounded-xl p-2.5 border space-y-0.5"
+                  :class="getColor(course.colorKey).advisorBg"
+                >
+                  <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                    {{ getAdvisorForCourse(course).label }}
+                  </p>
+                  <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+                    {{ getAdvisorForCourse(course).text }}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <!-- Comfort + Chips row -->
-          <div class="flex flex-wrap items-center gap-1.5 mb-2">
-            <span
-              class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
-              :class="course.comfortIndex === 'Nyaman'
-                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
-            >
-              {{ course.comfortIndex }} {{ course.comfortEmoji }}
-            </span>
-            <span
-              class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
-              :class="course.advisorType === 'sea'
-                ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
-                : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
-            >
-              <component :is="course.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
-              {{ course.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
-            </span>
-          </div>
-          <!-- Category Tags -->
-          <div class="flex flex-wrap gap-1 mb-2.5">
-            <span
-              v-for="tag in course.tags"
-              :key="tag"
-              class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100/80 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 border border-slate-200/60 dark:border-slate-600/30 tracking-wide"
-            >
-              {{ tag }}
-            </span>
-          </div>
-
-          <!-- Advisor box from cityAnalysisMap -->
-          <div
-            class="rounded-xl p-2.5 border space-y-0.5"
-            :class="getColor(course.colorKey).advisorBg"
-          >
-            <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
-              {{ getAdvisorForCourse(course).label }}
-            </p>
-            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
-              {{ getAdvisorForCourse(course).text }}
-            </p>
+  
+            <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
+            <div class="flex flex-wrap gap-1 mt-2.5">
+              <span
+                v-for="tag in course.tags"
+                :key="tag"
+                class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100/80 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 border border-slate-200/60 dark:border-slate-600/30 tracking-wide"
+              >
+                {{ tag }}
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { WeatherData, CityAnalysis } from '../types/weather';
+import { computed } from 'vue';
 import { 
   Compass, 
   Waves, 
@@ -12,7 +13,7 @@ import {
   Droplets 
 } from 'lucide-vue-next';
 
-defineProps<{
+const props = defineProps<{
   weatherData: WeatherData;
   currentAnalysis: CityAnalysis;
   additionalInfo: {
@@ -30,6 +31,30 @@ const emit = defineEmits<{
   (e: 'open-aviation-advisor', sectorId?: string): void;
   (e: 'open-land-advisor'): void;
 }>();
+
+// Map city to nearest airport short name
+const nearestAirportName = computed(() => {
+  const lc = props.selectedCity.toLowerCase();
+  if (lc.includes('jakarta') || lc.includes('gambir') || lc.includes('dki')) return 'SOEKARNO-HATTA';
+  if (lc.includes('surabaya') || lc.includes('gubeng')) return 'JUANDA';
+  if (lc.includes('bandung') || lc.includes('braga')) return 'HUSEIN';
+  if (lc.includes('medan') || lc.includes('sikambing')) return 'KUALANAMU';
+  if (lc.includes('semarang') || lc.includes('pandanaran')) return 'AHMAD YANI';
+  if (lc.includes('makassar') || lc.includes('mariso')) return 'SULTAN HASANUDDIN';
+  if (lc.includes('palembang') || lc.includes('ilir barat')) return 'SMB II';
+  if (lc.includes('batam') || lc.includes('belian')) return 'HANG NADIM';
+  if (lc.includes('pekanbaru') || lc.includes('tampan')) return 'SULTAN SYARIF';
+  if (lc.includes('denpasar') || lc.includes('bali') || lc.includes('kuta')) return 'NGURAH RAI';
+  if (lc.includes('yogyakarta') || lc.includes('jogja')) return 'YIA / ADISUTJIPTO';
+  if (lc.includes('balikpapan')) return 'SEPINGGAN';
+  if (lc.includes('banjarmasin')) return 'SYAMSUDDIN NOOR';
+  if (lc.includes('pontianak')) return 'SUPADIO';
+  if (lc.includes('manado')) return 'SAM RATULANGI';
+  if (lc.includes('jayapura')) return 'SENTANI';
+  if (lc.includes('lombok')) return 'ZAINUDDIN ABDUL';
+  // fallback: use city name
+  return props.selectedCity.split(',')[0].trim().toUpperCase();
+});
 
 function lockHeight(el: Element) {
   const wrapper = (el as HTMLElement).parentElement;
@@ -347,10 +372,10 @@ function unlockHeight(el: Element) {
               </h4>
             </div>
             
-            <!-- Futuristic City Badge -->
+            <!-- Nearest Airport Badge -->
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/8 dark:bg-indigo-500/12 border border-indigo-500/20 dark:border-indigo-500/25 text-[9px] font-black uppercase tracking-wider text-indigo-600/80 dark:text-indigo-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-indigo-500/15 group-hover:border-indigo-500/35">
-              <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
-              <span>{{ currentCityShortName }}</span>
+              <Plane class="w-3 h-3 shrink-0" />
+              <span>{{ nearestAirportName }}</span>
             </div>
           </div>
           

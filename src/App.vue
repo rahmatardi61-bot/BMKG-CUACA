@@ -67,6 +67,10 @@ const activeTransportStatuses = computed(() => {
 
 // Computed per-city warning alerts
 const activeWarningAlerts = computed(() => {
+  // Disable warning alert for sample layout of the user's current geolocated location
+  if (selectedCity.value === cities.value[0]) {
+    return [];
+  }
   return warningAlertsMap[selectedCity.value] || warningAlertsMap['DKI Jakarta'];
 });
 

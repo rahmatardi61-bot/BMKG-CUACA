@@ -225,7 +225,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
         src="/app-download-bg.png"
         alt=""
         aria-hidden="true"
-        class="cta-photo absolute bottom-[-20%] right-[1.5%] sm:bottom-[-15%] sm:right-[1%] h-[120%] sm:h-[115%] lg:bottom-0 lg:right-0 lg:h-[88%] object-contain object-bottom pointer-events-none select-none"
+        class="cta-photo absolute bottom-[-20%] right-[-3.5%] sm:bottom-[-15%] sm:right-[-2%] h-[120%] sm:h-[115%] lg:bottom-0 lg:right-0 lg:h-[88%] object-contain object-bottom pointer-events-none select-none"
         draggable="false"
       />
 

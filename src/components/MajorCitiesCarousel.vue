@@ -203,7 +203,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
         v-if="showActivities || !cityLandmarks.some(l => l.fullName === selectedCity)" 
         :selected-city="activeCarouselCity" 
         @select-course="emit('select-course', $event)"
-        class="pt-5 border-t border-slate-100 dark:border-brand-navy-800/60"
+        class="pt-4"
       />
     </div>
     <!-- End Left Column -->

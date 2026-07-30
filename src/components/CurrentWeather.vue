@@ -358,7 +358,7 @@ onUnmounted(() => {
 
     <!-- Full Width: Large Hero Weather Card -->
     <div 
-      class="w-full rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-lg flex flex-col transition-all duration-500 gap-8 group"
+      class="w-full rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-lg flex flex-col gap-8 group weather-card-dynamic text-white"
       :class="cityTheme.cardBg"
     >
       <!-- Decorative Glow Overlay -->

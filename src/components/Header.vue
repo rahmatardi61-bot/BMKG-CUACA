@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { Search, Sun, Moon, Bell, User, X, LogOut, Settings } from 'lucide-vue-next';
+import { Search, Sun, Moon, Bell, User, X, LogOut, Settings, Sparkles } from 'lucide-vue-next';
 
 const props = withDefaults(defineProps<{
-  darkMode: boolean;
+  themeMode: 'light' | 'dark' | 'auto';
   selectedCity: string;
   cities: string[];
   isLoggedIn: boolean;
@@ -153,16 +153,20 @@ onUnmounted(() => {
         <button 
           id="theme-toggle-button"
           @click="emit('toggle-theme')" 
-          class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5
-            bg-slate-50 border-slate-200 hover:bg-slate-100 text-amber-500
-            dark:bg-brand-navy-900 dark:border-brand-navy-700 dark:hover:bg-brand-navy-800 dark:text-brand-cyan
-            active:scale-95 active:duration-75"
-          title="Ubah Tema"
+          class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5 active:scale-95 active:duration-75"
+          :class="[
+            themeMode === 'light' ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 hover:bg-amber-500/20' : '',
+            themeMode === 'dark' ? 'bg-brand-navy-900 border-brand-navy-700 hover:bg-brand-navy-800 text-brand-cyan' : '',
+            themeMode === 'auto' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/35 dark:text-brand-cyan hover:bg-blue-500/20 dark:hover:bg-brand-cyan/25' : ''
+          ]"
+          title="Ubah Tema (Terang / Gelap / Otomatis)"
         >
-          <Sun v-if="darkMode" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
-          <Moon v-else class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
-          <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider select-none text-amber-600 dark:text-brand-cyan">
-            {{ darkMode ? 'Tema Gelap' : 'Tema Terang' }}
+          <Sun v-if="themeMode === 'light'" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
+          <Moon v-else-if="themeMode === 'dark'" class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
+          <Sparkles v-else class="w-4 h-4 transition-pulse duration-300" />
+          
+          <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider select-none">
+            {{ themeMode === 'light' ? 'Terang' : themeMode === 'dark' ? 'Gelap' : 'Otomatis' }}
           </span>
         </button>
 

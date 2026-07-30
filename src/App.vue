@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
+import { ref, computed, onMounted, defineAsyncComponent, watch } from 'vue';
 import { X } from 'lucide-vue-next';
 
 // ── Skeleton (tiny, load synchronously) ───────────────────────────────────────
@@ -28,14 +28,16 @@ import {
   generateMockWeatherForCity
 } from './data/mockData';
 
-// Helper to determine if it is night time (6 PM to 6 AM)
-const isNightTime = () => {
-  const hour = new Date().getHours();
-  return hour < 6 || hour >= 18;
+// Helper to determine night time based on hour
+const isNightTimeHour = (hour: number) => {
+  return hour < 5 || hour >= 18;
 };
 
-// Theme Mode state
-const darkMode = ref(isNightTime()); // Defaulting to light during day, dark during night
+// Theme Mode state: 'light' | 'dark' | 'auto'
+const themeMode = ref<'light' | 'dark' | 'auto'>('auto');
+
+// Real-time ticking time state for local clock theme checking
+const localClockTime = ref(new Date());
 
 // Active selected location state
 const selectedCity = ref('Mencari lokasi...');
@@ -74,20 +76,67 @@ const activeWarningAlerts = computed(() => {
   return warningAlertsMap[selectedCity.value] || warningAlertsMap['DKI Jakarta'];
 });
 
-// Function to toggle Dark/Light mode theme instantly
+// Helper to get local hour of selected city
+const getCityLocalHour = () => {
+  const utc = localClockTime.value.getTime() + (localClockTime.value.getTimezoneOffset() * 60000);
+  
+  // Detect city timezone offset
+  const name = selectedCity.value.toLowerCase();
+  let offset = 7; // WIB (default)
+  if (name.includes('denpasar') || name.includes('makassar') || name.includes('wita')) {
+    offset = 8; // WITA
+  } else if (name.includes('jayapura') || name.includes('wit')) {
+    offset = 9; // WIT
+  }
+  
+  const localTime = new Date(utc + (3600000 * offset));
+  return localTime.getHours();
+};
+
+// Calculate sub-theme string based on local time and weather condition
+const calculateAutoThemeState = () => {
+  const hour = getCityLocalHour();
+  const status = (activeWeatherData.value?.status || '').toLowerCase();
+  
+  // 1. Check for extreme weather condition first (Rainy / Stormy)
+  if (status.includes('hujan') || status.includes('gerimis')) {
+    return { isDark: hour < 5 || hour >= 18, themeClass: 'theme-rainy' };
+  }
+  if (status.includes('petir') || status.includes('badai')) {
+    return { isDark: true, themeClass: 'theme-stormy' }; // Storm is always visually dark/moody
+  }
+  if (status.includes('berawan tebal')) {
+    return { isDark: hour < 5 || hour >= 18, themeClass: 'theme-cloudy' };
+  }
+  
+  // 2. Clear / Partly Cloudy - follow day cycle
+  if (hour >= 5 && hour < 10) {
+    return { isDark: false, themeClass: 'theme-morning' };
+  } else if (hour >= 10 && hour < 15) {
+    return { isDark: false, themeClass: 'theme-day' };
+  } else if (hour >= 15 && hour < 18) {
+    return { isDark: false, themeClass: 'theme-evening' };
+  } else {
+    return { isDark: true, themeClass: 'theme-night' };
+  }
+};
+
+// Cycle: 'light' -> 'dark' -> 'auto'
 const toggleTheme = () => {
   const root = document.documentElement;
-
-  // Temporarily apply no-transitions helper class to skip animations
   root.classList.add('no-transitions');
 
-  darkMode.value = !darkMode.value;
+  if (themeMode.value === 'light') {
+    themeMode.value = 'dark';
+  } else if (themeMode.value === 'dark') {
+    themeMode.value = 'auto';
+  } else {
+    themeMode.value = 'light';
+  }
+
   applyTheme();
 
-  // Force a style reflow to apply the styling change instantly
-  void root.offsetHeight;
-
-  // Remove the helper class in the next frame so regular animations continue working
+  void root.offsetHeight; // Force reflow
   requestAnimationFrame(() => {
     root.classList.remove('no-transitions');
   });
@@ -95,14 +144,41 @@ const toggleTheme = () => {
 
 const applyTheme = () => {
   const root = document.documentElement;
-  if (darkMode.value) {
+  
+  // Clean up all theme-specific dynamic classes first
+  root.classList.remove(
+    'theme-morning', 'theme-day', 'theme-evening', 'theme-night', 
+    'theme-rainy', 'theme-stormy', 'theme-cloudy', 'dark'
+  );
+
+  let isDarkClassApplied = false;
+
+  if (themeMode.value === 'dark') {
     root.classList.add('dark');
+    isDarkClassApplied = true;
     localStorage.setItem('bmkg-theme', 'dark');
-  } else {
-    root.classList.remove('dark');
+  } else if (themeMode.value === 'light') {
     localStorage.setItem('bmkg-theme', 'light');
+  } else {
+    // Mode 'auto': dynamically decide light/dark + sub-theme
+    const autoTheme = calculateAutoThemeState();
+    root.classList.add(autoTheme.themeClass);
+    if (autoTheme.isDark) {
+      root.classList.add('dark');
+      isDarkClassApplied = true;
+    }
+    localStorage.setItem('bmkg-theme', 'auto');
   }
+
+  // Update a reactive state if needed or trigger updates
 };
+
+// Watch for city/weather updates to refresh auto theme instantly
+watch([selectedCity, activeWeatherData], () => {
+  if (themeMode.value === 'auto') {
+    applyTheme();
+  }
+});
 
 // Geolocation state
 const isLocating = ref(false);
@@ -290,12 +366,12 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
-  // Load preferences from local storage or default based on time (siang light, malam dark)
+  // Load preferences from local storage or default to 'auto'
   const storedTheme = localStorage.getItem('bmkg-theme');
-  if (storedTheme) {
-    darkMode.value = storedTheme === 'dark';
+  if (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') {
+    themeMode.value = storedTheme as 'light' | 'dark' | 'auto';
   } else {
-    darkMode.value = isNightTime();
+    themeMode.value = 'auto';
   }
   applyTheme();
 
@@ -399,7 +475,7 @@ onMounted(() => {
       <Header 
         :active-tab="activeTab"
         @change-tab="activeTab = $event"
-        :dark-mode="darkMode" 
+        :theme-mode="themeMode" 
         :selected-city="selectedCity"
         :cities="cities"
         :is-logged-in="isLoggedIn"

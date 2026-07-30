@@ -98,18 +98,30 @@ const calculateAutoThemeState = () => {
   const hour = getCityLocalHour();
   const status = (activeWeatherData.value?.status || '').toLowerCase();
   
-  // 1. Check for extreme weather condition first (Rainy / Stormy)
-  if (status.includes('hujan') || status.includes('gerimis')) {
+  // 1. Badai / Petir / Kilat / Halilintar (Stormy)
+  if (status.includes('petir') || status.includes('badai') || status.includes('kilat') || status.includes('halilintar')) {
+    return { isDark: true, themeClass: 'theme-stormy' };
+  }
+  
+  // 2. Hujan / Gerimis / Deras / Lebat (Rainy)
+  if (status.includes('hujan') || status.includes('gerimis') || status.includes('deras') || status.includes('lebat')) {
     return { isDark: hour < 5 || hour >= 18, themeClass: 'theme-rainy' };
   }
-  if (status.includes('petir') || status.includes('badai')) {
-    return { isDark: true, themeClass: 'theme-stormy' }; // Storm is always visually dark/moody
-  }
-  if (status.includes('berawan tebal')) {
+  
+  // 3. Berawan / Mendung / Overcast / Kabut / Asap / Kabur (Cloudy/Foggy)
+  if (
+    status === 'berawan' || 
+    status.includes('berawan tebal') || 
+    status.includes('mendung') || 
+    status.includes('overcast') || 
+    status.includes('kabut') || 
+    status.includes('asap') || 
+    status.includes('kabur')
+  ) {
     return { isDark: hour < 5 || hour >= 18, themeClass: 'theme-cloudy' };
   }
   
-  // 2. Clear / Partly Cloudy - follow day cycle
+  // 4. Cerah / Cerah Berawan / Sunny / Partly Cloudy (Follow Day Cycle)
   if (hour >= 5 && hour < 10) {
     return { isDark: false, themeClass: 'theme-morning' };
   } else if (hour >= 10 && hour < 15) {
@@ -469,7 +481,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-brand-sky-100 text-slate-800 dark:bg-brand-navy-950 dark:text-slate-100">
+  <div class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100">
     <template v-if="!showLogin">
       <!-- Main Header -->
       <Header 

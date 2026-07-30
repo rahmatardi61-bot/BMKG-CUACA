@@ -84,7 +84,7 @@ function unlockHeight(el: Element) {
         <!-- Card 1: Darat -->
         <div 
           @click="emit('open-land-advisor')"
-          class="gpu-card group relative bg-white dark:bg-brand-navy-900 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/12 dark:bg-orange-500/18 blur-2xl group-hover:bg-orange-500/30 dark:group-hover:bg-orange-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -191,7 +191,7 @@ function unlockHeight(el: Element) {
         <!-- Card 2: Pesisir & Laut -->
         <div 
           @click="emit('open-maritime-advisor', 'shipping')"
-          class="gpu-card group relative bg-white dark:bg-brand-navy-900 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/12 dark:bg-cyan-500/18 blur-2xl group-hover:bg-cyan-500/30 dark:group-hover:bg-cyan-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -295,7 +295,7 @@ function unlockHeight(el: Element) {
         <!-- Card 3: Penerbangan -->
         <div 
           @click="emit('open-aviation-advisor', 'commercial')"
-          class="gpu-card group relative bg-white dark:bg-brand-navy-900 border border-slate-200 dark:border-brand-navy-700/50 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/12 dark:bg-indigo-500/18 blur-2xl group-hover:bg-indigo-500/30 dark:group-hover:bg-indigo-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -397,10 +397,10 @@ function unlockHeight(el: Element) {
             </div>
             <span
               @click.stop="emit('open-aviation-advisor', 'commercial')"
-              class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors font-black cursor-pointer"
+              class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-750 dark:hover:text-indigo-300 hover:underline transition-colors font-black cursor-pointer"
             >
               Selengkapnya
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
                 <polyline points="7 7 17 7 17 17"></polyline>
               </svg>

@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -39,6 +40,7 @@ html.theme-rainy body {
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
   color: #1e293b !important;
 }
+
 html.dark.theme-rainy body {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 70%, #0f172a 100%) !important;
   color: #f1f5f9 !important;
@@ -53,6 +55,7 @@ html.theme-cloudy body {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%) !important;
   color: #1e293b !important;
 }
+
 html.dark.theme-cloudy body {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 80%, #111827 100%) !important;
   color: #f1f5f9 !important;
@@ -113,6 +116,7 @@ html.dark.theme-cloudy body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -166,45 +170,87 @@ html.dark.theme-cloudy body {
 
 /* Scale transforms */
 .touch-hovering.hover\:scale-105,
-.touch-hovering[class*="hover:scale-105"] { transform: scale(1.05) !important; }
+.touch-hovering[class*="hover:scale-105"] {
+  transform: scale(1.05) !important;
+}
+
 .touch-hovering.hover\:scale-110,
-.touch-hovering[class*="hover:scale-110"] { transform: scale(1.10) !important; }
+.touch-hovering[class*="hover:scale-110"] {
+  transform: scale(1.10) !important;
+}
 
 /* Opacity */
-.touch-hovering.hover\:opacity-90 { opacity: 0.9 !important; }
-.touch-hovering.hover\:opacity-95 { opacity: 0.95 !important; }
-.touch-hovering.hover\:opacity-100 { opacity: 1 !important; }
+.touch-hovering.hover\:opacity-90 {
+  opacity: 0.9 !important;
+}
+
+.touch-hovering.hover\:opacity-95 {
+  opacity: 0.95 !important;
+}
+
+.touch-hovering.hover\:opacity-100 {
+  opacity: 1 !important;
+}
 
 /* Background highlights – light mode */
 .touch-hovering.hover\:bg-slate-100\/50,
-.touch-hovering.hover\:bg-slate-100 { background-color: rgb(241 245 249 / 0.5) !important; }
-.touch-hovering.hover\:bg-slate-200\/50 { background-color: rgb(226 232 240 / 0.5) !important; }
+.touch-hovering.hover\:bg-slate-100 {
+  background-color: rgb(241 245 249 / 0.5) !important;
+}
+
+.touch-hovering.hover\:bg-slate-200\/50 {
+  background-color: rgb(226 232 240 / 0.5) !important;
+}
 
 /* Background highlights – dark mode (applied when .dark is on <html>) */
 .dark .touch-hovering.hover\:bg-brand-navy-800\/50,
-.dark .touch-hovering[class*="dark:hover:bg-brand-navy-800"] { background-color: rgb(15 23 42 / 0.5) !important; }
-.dark .touch-hovering[class*="dark:hover:bg-brand-navy-900"] { background-color: rgb(9 14 26 / 0.4) !important; }
+.dark .touch-hovering[class*="dark:hover:bg-brand-navy-800"] {
+  background-color: rgb(15 23 42 / 0.5) !important;
+}
+
+.dark .touch-hovering[class*="dark:hover:bg-brand-navy-900"] {
+  background-color: rgb(9 14 26 / 0.4) !important;
+}
 
 /* Shadow glow on cards */
-.touch-hovering.hover\:shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; }
-.touch-hovering[class*="hover:shadow-lg"] { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important; }
+.touch-hovering.hover\:shadow-md {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.touch-hovering[class*="hover:shadow-lg"] {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
 
 /* Text color changes */
-.touch-hovering.hover\:text-slate-800 { color: rgb(30 41 59) !important; }
-.dark .touch-hovering[class*="dark:hover:text-white"] { color: rgb(255 255 255) !important; }
+.touch-hovering.hover\:text-slate-800 {
+  color: rgb(30 41 59) !important;
+}
+
+.dark .touch-hovering[class*="dark:hover:text-white"] {
+  color: rgb(255 255 255) !important;
+}
 
 /* Border highlight */
-.touch-hovering[class*="hover:border-orange-500"] { border-color: rgb(249 115 22 / 0.25) !important; }
-.touch-hovering[class*="hover:border-blue-500"] { border-color: rgb(59 130 246 / 0.4) !important; }
+.touch-hovering[class*="hover:border-orange-500"] {
+  border-color: rgb(249 115 22 / 0.25) !important;
+}
+
+.touch-hovering[class*="hover:border-blue-500"] {
+  border-color: rgb(59 130 246 / 0.4) !important;
+}
 
 /* ── Group hover children ──────────────────────────────────────────────────
    When a .group ancestor has .touch-hovering, child group-hover: classes fire */
 
 /* Opacity reveal on group-hover children */
-.touch-hovering .group-hover\:opacity-\[0\.45\] { opacity: 0.45 !important; }
+.touch-hovering .group-hover\:opacity-\[0\.45\] {
+  opacity: 0.45 !important;
+}
 
 /* Scale on group-hover icon badge */
-.touch-hovering .group-hover\:scale-105 { transform: scale(1.05) !important; }
+.touch-hovering .group-hover\:scale-105 {
+  transform: scale(1.05) !important;
+}
 
 /* Shadow glow reveal on group-hover badge */
 .touch-hovering .group-hover\:shadow-\[0_4px_12px_rgba\(37\,99\,235\,0\.12\)\] {
@@ -212,22 +258,41 @@ html.dark.theme-cloudy body {
 }
 
 /* Background ambient glow on group-hover */
-.touch-hovering .group-hover\:bg-orange-500\/25 { background-color: rgb(249 115 22 / 0.25) !important; }
-.touch-hovering .group-hover\:scale-125 { transform: scale(1.25) !important; }
-.touch-hovering .group-hover\:bg-blue-500\/20 { background-color: rgb(59 130 246 / 0.2) !important; }
+.touch-hovering .group-hover\:bg-orange-500\/25 {
+  background-color: rgb(249 115 22 / 0.25) !important;
+}
+
+.touch-hovering .group-hover\:scale-125 {
+  transform: scale(1.25) !important;
+}
+
+.touch-hovering .group-hover\:bg-blue-500\/20 {
+  background-color: rgb(59 130 246 / 0.2) !important;
+}
 
 /* Illustration opacity reveal on card group-hover */
-.touch-hovering .group-hover\:opacity-\[0\.55\] { opacity: 0.55 !important; }
-.touch-hovering .group-hover\:opacity-100 { opacity: 1 !important; }
+.touch-hovering .group-hover\:opacity-\[0\.55\] {
+  opacity: 0.55 !important;
+}
+
+.touch-hovering .group-hover\:opacity-100 {
+  opacity: 1 !important;
+}
 
 /* Text color on group-hover children */
-.touch-hovering .group-hover\:text-slate-600 { color: rgb(71 85 105) !important; }
-.dark .touch-hovering .group-hover\:text-white { color: white !important; }
+.touch-hovering .group-hover\:text-slate-600 {
+  color: rgb(71 85 105) !important;
+}
+
+.dark .touch-hovering .group-hover\:text-white {
+  color: white !important;
+}
 
 /* Disable scroll and block interactions on app content when drawer/modal is open */
 body.drawer-open {
   overflow: hidden !important;
 }
+
 body.drawer-open #app {
   pointer-events: none !important;
   user-select: none !important;
@@ -341,7 +406,10 @@ body.is-scrolling .group:hover .group-hover\:bg-indigo-500\/30 {
 
 /* Global iOS Auto-Zoom Fix on mobile input focus */
 @media screen and (max-width: 767px) {
-  input, select, textarea {
+
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -364,6 +432,7 @@ body.is-scrolling .group:hover .group-hover\:bg-indigo-500\/30 {
 /* Disable backdrop-blur on all "bg-white/70" style section cards in
    the main scroll area by using a performance-friendly bg instead */
 @layer utilities {
+
   /* Targeted override — only affects non-drawer, non-header blur contexts */
   .no-blur {
     backdrop-filter: none !important;
@@ -412,3 +481,446 @@ html.theme-cloudy .weather-card-dynamic {
   border-color: rgba(100, 116, 139, 0.2) !important;
 }
 
+/* ── SOFT DYNAMIC WEATHER CARD, HEADER & FOOTER OVERRIDES (Mode Auto Only) ── */
+/* ── SOFT DYNAMIC THEME VARIABLES ── */
+html.theme-morning {
+  --soft-theme-bg: linear-gradient(135deg, rgba(254, 243, 199, 0.55) 0%, rgba(253, 230, 138, 0.25) 100%);
+  --soft-theme-border: rgba(245, 158, 11, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(245, 158, 11, 0.1);
+  --soft-accent-bg: rgba(245, 158, 11, 0.08);
+  --soft-accent-border: rgba(245, 158, 11, 0.2);
+  --soft-accent-text: #d97706;
+}
+html.dark.theme-morning {
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(120, 53, 4, 0.08) 0%, rgba(120, 53, 4, 0.03) 100%);
+  --soft-theme-border-dark: rgba(245, 158, 11, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg-dark: rgba(245, 158, 11, 0.12);
+  --soft-accent-border-dark: rgba(245, 158, 11, 0.25);
+  --soft-accent-text-dark: #fb923c;
+}
+
+html.theme-day {
+  --soft-theme-bg: linear-gradient(135deg, rgba(224, 242, 254, 0.55) 0%, rgba(186, 230, 253, 0.25) 100%);
+  --soft-theme-border: rgba(14, 165, 233, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15), 0 8px 10px -6px rgba(14, 165, 233, 0.1);
+  --soft-accent-bg: rgba(14, 165, 233, 0.08);
+  --soft-accent-border: rgba(14, 165, 233, 0.2);
+  --soft-accent-text: #0284c7;
+}
+html.dark.theme-day {
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(3, 105, 161, 0.08) 0%, rgba(3, 105, 161, 0.03) 100%);
+  --soft-theme-border-dark: rgba(14, 165, 233, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg-dark: rgba(56, 189, 248, 0.12);
+  --soft-accent-border-dark: rgba(56, 189, 248, 0.25);
+  --soft-accent-text-dark: #38bdf8;
+}
+
+html.theme-evening {
+  --soft-theme-bg: linear-gradient(135deg, rgba(255, 237, 213, 0.55) 0%, rgba(254, 215, 170, 0.25) 100%);
+  --soft-theme-border: rgba(249, 115, 22, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.15), 0 8px 10px -6px rgba(249, 115, 22, 0.1);
+  --soft-accent-bg: rgba(249, 115, 22, 0.08);
+  --soft-accent-border: rgba(249, 115, 22, 0.2);
+  --soft-accent-text: #c2410c;
+}
+html.dark.theme-evening {
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(124, 45, 18, 0.08) 0%, rgba(124, 45, 18, 0.03) 100%);
+  --soft-theme-border-dark: rgba(249, 115, 22, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg-dark: rgba(251, 146, 60, 0.12);
+  --soft-accent-border-dark: rgba(251, 146, 60, 0.25);
+  --soft-accent-text-dark: #fb923c;
+}
+
+html.theme-night {
+  --soft-theme-bg: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.3) 100%);
+  --soft-theme-border: rgba(99, 102, 241, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.25), 0 8px 10px -6px rgba(99, 102, 241, 0.15);
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.3) 100%);
+  --soft-theme-border-dark: rgba(99, 102, 241, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg: rgba(99, 102, 241, 0.12);
+  --soft-accent-border: rgba(99, 102, 241, 0.2);
+  --soft-accent-text: #818cf8;
+  --soft-accent-bg-dark: rgba(99, 102, 241, 0.12);
+  --soft-accent-border-dark: rgba(99, 102, 241, 0.2);
+  --soft-accent-text-dark: #818cf8;
+}
+
+html.theme-rainy {
+  --soft-theme-bg: linear-gradient(135deg, rgba(241, 245, 249, 0.55) 0%, rgba(226, 232, 240, 0.3) 100%);
+  --soft-theme-border: rgba(14, 165, 233, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.12), 0 8px 10px -6px rgba(148, 163, 184, 0.08);
+  --soft-accent-bg: rgba(148, 163, 184, 0.08);
+  --soft-accent-border: rgba(148, 163, 184, 0.2);
+  --soft-accent-text: #475569;
+}
+html.dark.theme-rainy {
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(15, 23, 42, 0.45) 0%, rgba(30, 41, 59, 0.25) 100%);
+  --soft-theme-border-dark: rgba(148, 163, 184, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg-dark: rgba(148, 163, 184, 0.12);
+  --soft-accent-border-dark: rgba(148, 163, 184, 0.25);
+  --soft-accent-text-dark: #94a3b8;
+}
+
+html.theme-stormy {
+  --soft-theme-bg: linear-gradient(135deg, rgba(9, 5, 20, 0.5) 0%, rgba(30, 27, 75, 0.25) 100%);
+  --soft-theme-border: rgba(139, 92, 246, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.25), 0 8px 10px -6px rgba(139, 92, 246, 0.15);
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(9, 5, 20, 0.5) 0%, rgba(30, 27, 75, 0.25) 100%);
+  --soft-theme-border-dark: rgba(139, 92, 246, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg: rgba(139, 92, 246, 0.12);
+  --soft-accent-border: rgba(139, 92, 246, 0.2);
+  --soft-accent-text: #a78bfa;
+  --soft-accent-bg-dark: rgba(139, 92, 246, 0.12);
+  --soft-accent-border-dark: rgba(139, 92, 246, 0.2);
+  --soft-accent-text-dark: #a78bfa;
+}
+
+html.theme-cloudy {
+  --soft-theme-bg: linear-gradient(135deg, rgba(248, 250, 252, 0.55) 0%, rgba(241, 245, 249, 0.3) 100%);
+  --soft-theme-border: rgba(148, 163, 184, 0.15);
+  --soft-theme-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.12), 0 8px 10px -6px rgba(148, 163, 184, 0.08);
+  --soft-accent-bg: rgba(148, 163, 184, 0.08);
+  --soft-accent-border: rgba(148, 163, 184, 0.2);
+  --soft-accent-text: #64748b;
+}
+html.dark.theme-cloudy {
+  --soft-theme-bg-dark: linear-gradient(135deg, rgba(30, 41, 59, 0.45) 0%, rgba(15, 23, 42, 0.25) 100%);
+  --soft-theme-border-dark: rgba(148, 163, 184, 0.15);
+  --soft-theme-shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --soft-accent-bg-dark: rgba(148, 163, 184, 0.12);
+  --soft-accent-border-dark: rgba(148, 163, 184, 0.25);
+  --soft-accent-text-dark: #94a3b8;
+}
+
+/* Apply variables to Header, Footer, Cards and Tab buttons */
+html[class*="theme-"] header,
+html[class*="theme-"] footer,
+html[class*="theme-"] .weather-metric-card,
+html[class*="theme-"] .bg-white\/90,
+html[class*="theme-"] .bg-white\/85,
+html[class*="theme-"] .bg-white\/80,
+html[class*="theme-"] .bg-white\/95,
+html[class*="theme-"] .bg-white\/75,
+html[class*="theme-"] .bg-white\/70,
+html[class*="theme-"] .bg-white\/50,
+html[class*="theme-"] .bg-slate-100\/50,
+html[class*="theme-"] .bg-slate-100\/60,
+html[class*="theme-"] .bg-slate-100,
+html[class*="theme-"] .bg-slate-50\/80,
+html[class*="theme-"] .bg-slate-50\/90,
+html[class*="theme-"] .bg-slate-50\/60,
+html[class*="theme-"] button.bg-white,
+html[class*="theme-"] .border-slate-100\/60,
+html[class*="theme-"] .border-slate-200\/60,
+html[class*="theme-"] .border-slate-200\/40,
+html[class*="theme-"] .border-slate-200,
+html[class*="theme-"] .border-slate-100,
+html[class*="theme-"] .cta-card {
+  background: var(--soft-theme-bg) !important;
+  border-color: var(--soft-theme-border) !important;
+}
+
+html.dark[class*="theme-"] header,
+html.dark[class*="theme-"] footer,
+html.dark[class*="theme-"] .weather-metric-card,
+html.dark[class*="theme-"] .bg-white\/90,
+html.dark[class*="theme-"] .bg-white\/85,
+html.dark[class*="theme-"] .bg-white\/80,
+html.dark[class*="theme-"] .bg-white\/95,
+html.dark[class*="theme-"] .bg-white\/75,
+html.dark[class*="theme-"] .bg-white\/50,
+html.dark[class*="theme-"] .bg-slate-100\/50,
+html.dark[class*="theme-"] .bg-slate-100\/60,
+html.dark[class*="theme-"] .bg-slate-50\/60,
+html.dark[class*="theme-"] .cta-card,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-950\/75,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-950,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/90,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/80,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/75,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/70,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/65,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/60,
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/50,
+html.dark[class*="theme-"] .dark\:border-brand-navy-700\/30 {
+  background: var(--soft-theme-bg-dark) !important;
+  border-color: var(--soft-theme-border-dark) !important;
+}
+
+/* Active and hover states for dynamic theme buttons/cards */
+html[class*="theme-"] .bg-blue-500\/15 {
+  background: var(--soft-accent-border) !important;
+}
+html[class*="theme-"] .border-blue-400\/60 {
+  border-color: var(--soft-accent-text) !important;
+}
+html[class*="theme-"] .bg-blue-500 {
+  background-color: var(--soft-accent-text) !important;
+}
+html[class*="theme-"] .text-blue-500 {
+  color: var(--soft-accent-text) !important;
+}
+
+/* Eye-catching warning alerts colors in automatic theme only (more specific to override soft gradients) */
+html[class*="theme-"] .border-l-red-500.bg-white\/80,
+html[class*="theme-"] .border-l-red-500.bg-white\/90,
+html[class*="theme-"] .border-l-red-500 {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.2) rgba(239, 68, 68, 0.2) rgba(239, 68, 68, 0.2) #ef4444 !important;
+}
+html[class*="theme-"] .border-l-red-500.bg-white\/80:hover,
+html[class*="theme-"] .border-l-red-500.bg-white\/90:hover,
+html[class*="theme-"] .border-l-red-500:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+html[class*="theme-"] .border-l-orange-500.bg-white\/80,
+html[class*="theme-"] .border-l-orange-500.bg-white\/90,
+html[class*="theme-"] .border-l-orange-500 {
+  background: rgba(249, 115, 22, 0.08) !important;
+  border-color: rgba(249, 115, 22, 0.2) rgba(249, 115, 22, 0.2) rgba(249, 115, 22, 0.2) #f97316 !important;
+}
+html[class*="theme-"] .border-l-orange-500.bg-white\/80:hover,
+html[class*="theme-"] .border-l-orange-500.bg-white\/90:hover,
+html[class*="theme-"] .border-l-orange-500:hover {
+  background: rgba(249, 115, 22, 0.12) !important;
+}
+
+html[class*="theme-"] .border-l-amber-500.bg-white\/80,
+html[class*="theme-"] .border-l-amber-500.bg-white\/90,
+html[class*="theme-"] .border-l-amber-500 {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.2) rgba(245, 158, 11, 0.2) rgba(245, 158, 11, 0.2) #f59e0b !important;
+}
+html[class*="theme-"] .border-l-amber-500.bg-white\/80:hover,
+html[class*="theme-"] .border-l-amber-500.bg-white\/90:hover,
+html[class*="theme-"] .border-l-amber-500:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+/* Dark mode eye-catching warning alerts colors in automatic theme only */
+html.dark[class*="theme-"] .border-l-red-500.dark\:bg-brand-navy-900\/70,
+html.dark[class*="theme-"] .border-l-red-500 {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.25) rgba(239, 68, 68, 0.25) rgba(239, 68, 68, 0.25) #ef4444 !important;
+}
+html.dark[class*="theme-"] .border-l-red-500.dark\:bg-brand-navy-900\/70:hover,
+html.dark[class*="theme-"] .border-l-red-500:hover {
+  background: rgba(239, 68, 68, 0.16) !important;
+}
+
+html.dark[class*="theme-"] .border-l-orange-500.dark\:bg-brand-navy-900\/70,
+html.dark[class*="theme-"] .border-l-orange-500 {
+  background: rgba(249, 115, 22, 0.12) !important;
+  border-color: rgba(249, 115, 22, 0.25) rgba(249, 115, 22, 0.25) rgba(249, 115, 22, 0.25) #f97316 !important;
+}
+html.dark[class*="theme-"] .border-l-orange-500.dark\:bg-brand-navy-900\/70:hover,
+html.dark[class*="theme-"] .border-l-orange-500:hover {
+  background: rgba(249, 115, 22, 0.16) !important;
+}
+
+html.dark[class*="theme-"] .border-l-amber-500.dark\:bg-brand-navy-900\/70,
+html.dark[class*="theme-"] .border-l-amber-500 {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.25) rgba(245, 158, 11, 0.25) rgba(245, 158, 11, 0.25) #f59e0b !important;
+}
+html.dark[class*="theme-"] .border-l-amber-500.dark\:bg-brand-navy-900\/70:hover,
+html.dark[class*="theme-"] .border-l-amber-500:hover {
+  background: rgba(245, 158, 11, 0.16) !important;
+}
+
+/* ── DYNAMIC SOFT ACCENTS OVERRIDES (Mode Auto Only) ── */
+/* Dynamic Accent Backgrounds */
+html[class*="theme-"] .bg-blue-50\/90,
+html[class*="theme-"] .bg-emerald-50\/90,
+html[class*="theme-"] .bg-cyan-50\/90,
+html[class*="theme-"] .bg-indigo-50\/90,
+html[class*="theme-"] .bg-purple-50\/90,
+html[class*="theme-"] .bg-rose-50\/90,
+html[class*="theme-"] .bg-amber-50\/90,
+html[class*="theme-"] .bg-orange-50\/90,
+html[class*="theme-"] .bg-teal-50\/90,
+html[class*="theme-"] .bg-blue-50\/80,
+html[class*="theme-"] .bg-emerald-50\/80,
+html[class*="theme-"] .bg-cyan-50\/80,
+html[class*="theme-"] .bg-indigo-50\/80,
+html[class*="theme-"] .bg-purple-50\/80,
+html[class*="theme-"] .bg-rose-50\/80,
+html[class*="theme-"] .bg-amber-50\/80,
+html[class*="theme-"] .bg-orange-50\/80,
+html[class*="theme-"] .bg-teal-50\/80,
+html[class*="theme-"] .bg-blue-100,
+html[class*="theme-"] .bg-emerald-100,
+html[class*="theme-"] .bg-cyan-100,
+html[class*="theme-"] .bg-indigo-100,
+html[class*="theme-"] .bg-purple-100,
+html[class*="theme-"] .bg-rose-100,
+html[class*="theme-"] .bg-amber-100,
+html[class*="theme-"] .bg-orange-100,
+html[class*="theme-"] .bg-teal-100,
+html[class*="theme-"] .bg-blue-50,
+html[class*="theme-"] .bg-indigo-50,
+html[class*="theme-"] .bg-sky-50,
+html[class*="theme-"] .bg-slate-50,
+html[class*="theme-"] .bg-slate-100 {
+  background: var(--soft-accent-bg) !important;
+}
+
+/* Dark Accent Backgrounds */
+html.dark[class*="theme-"] .bg-blue-50\/90,
+html.dark[class*="theme-"] .bg-emerald-50\/90,
+html.dark[class*="theme-"] .bg-cyan-50\/90,
+html.dark[class*="theme-"] .bg-indigo-50\/90,
+html.dark[class*="theme-"] .bg-purple-50\/90,
+html.dark[class*="theme-"] .bg-rose-50\/90,
+html.dark[class*="theme-"] .bg-amber-50\/90,
+html.dark[class*="theme-"] .bg-orange-50\/90,
+html.dark[class*="theme-"] .bg-teal-50\/90,
+html.dark[class*="theme-"] .bg-blue-50\/80,
+html.dark[class*="theme-"] .bg-emerald-50\/80,
+html.dark[class*="theme-"] .bg-cyan-50\/80,
+html.dark[class*="theme-"] .bg-indigo-50\/80,
+html.dark[class*="theme-"] .bg-purple-50\/80,
+html.dark[class*="theme-"] .bg-rose-50\/80,
+html.dark[class*="theme-"] .bg-amber-50\/80,
+html.dark[class*="theme-"] .bg-orange-50\/80,
+html.dark[class*="theme-"] .bg-teal-50\/80,
+html.dark[class*="theme-"] .bg-blue-100,
+html.dark[class*="theme-"] .bg-emerald-100,
+html.dark[class*="theme-"] .bg-cyan-100,
+html.dark[class*="theme-"] .bg-indigo-100,
+html.dark[class*="theme-"] .bg-purple-100,
+html.dark[class*="theme-"] .bg-rose-100,
+html.dark[class*="theme-"] .bg-amber-100,
+html.dark[class*="theme-"] .bg-orange-100,
+html.dark[class*="theme-"] .bg-teal-100,
+html.dark[class*="theme-"] .bg-slate-100,
+html.dark[class*="theme-"] .dark\:bg-blue-500\/20,
+html.dark[class*="theme-"] .dark\:bg-emerald-500\/20,
+html.dark[class*="theme-"] .dark\:bg-cyan-500\/20,
+html.dark[class*="theme-"] .dark\:bg-amber-500\/20,
+html.dark[class*="theme-"] .dark\:bg-purple-500\/20,
+html.dark[class*="theme-"] .dark\:bg-rose-500\/20,
+html.dark[class*="theme-"] .dark\:bg-teal-500\/20,
+html.dark[class*="theme-"] .dark\:bg-orange-500\/20,
+html.dark[class*="theme-"] .dark\:bg-indigo-500\/20,
+html.dark[class*="theme-"] .dark\:bg-blue-900\/20,
+html.dark[class*="theme-"] .dark\:bg-emerald-900\/20,
+html.dark[class*="theme-"] .dark\:bg-cyan-900\/20,
+html.dark[class*="theme-"] .dark\:bg-amber-900\/20,
+html.dark[class*="theme-"] .dark\:bg-purple-900\/20,
+html.dark[class*="theme-"] .dark\:bg-rose-900\/20,
+html.dark[class*="theme-"] .dark\:bg-teal-900\/20,
+html.dark[class*="theme-"] .dark\:bg-orange-900\/20,
+html.dark[class*="theme-"] .dark\:bg-indigo-900\/20,
+html.dark[class*="theme-"] .dark\:bg-slate-700\/40 {
+  background: var(--soft-accent-bg-dark) !important;
+}
+
+/* Dynamic Accent Borders */
+html[class*="theme-"] .border-blue-200\/60,
+html[class*="theme-"] .border-emerald-200\/60,
+html[class*="theme-"] .border-cyan-200\/60,
+html[class*="theme-"] .border-amber-200\/60,
+html[class*="theme-"] .border-purple-200\/60,
+html[class*="theme-"] .border-rose-200\/60,
+html[class*="theme-"] .border-teal-200\/60,
+html[class*="theme-"] .border-orange-200\/60,
+html[class*="theme-"] .border-indigo-200\/60,
+html[class*="theme-"] .border-blue-100,
+html[class*="theme-"] .border-emerald-100,
+html[class*="theme-"] .border-cyan-100,
+html[class*="theme-"] .border-amber-100,
+html[class*="theme-"] .border-purple-100,
+html[class*="theme-"] .border-rose-100,
+html[class*="theme-"] .border-teal-100,
+html[class*="theme-"] .border-orange-100,
+html[class*="theme-"] .border-indigo-100 {
+  border-color: var(--soft-accent-border) !important;
+}
+
+/* Dark Accent Borders */
+html.dark[class*="theme-"] .border-blue-200\/60,
+html.dark[class*="theme-"] .border-emerald-200\/60,
+html.dark[class*="theme-"] .border-cyan-200\/60,
+html.dark[class*="theme-"] .border-amber-200\/60,
+html.dark[class*="theme-"] .border-purple-200\/60,
+html.dark[class*="theme-"] .border-rose-200\/60,
+html.dark[class*="theme-"] .border-teal-200\/60,
+html.dark[class*="theme-"] .border-orange-200\/60,
+html.dark[class*="theme-"] .border-indigo-200\/60,
+html.dark[class*="theme-"] .border-blue-100,
+html.dark[class*="theme-"] .border-emerald-100,
+html.dark[class*="theme-"] .border-cyan-100,
+html.dark[class*="theme-"] .border-amber-100,
+html.dark[class*="theme-"] .border-purple-100,
+html.dark[class*="theme-"] .border-rose-100,
+html.dark[class*="theme-"] .border-teal-100,
+html.dark[class*="theme-"] .border-orange-100,
+html.dark[class*="theme-"] .border-indigo-100,
+html.dark[class*="theme-"] .dark\:border-blue-500\/10,
+html.dark[class*="theme-"] .dark\:border-emerald-500\/10,
+html.dark[class*="theme-"] .dark\:border-cyan-500\/10,
+html.dark[class*="theme-"] .dark\:border-amber-500\/10,
+html.dark[class*="theme-"] .dark\:border-purple-500\/10,
+html.dark[class*="theme-"] .dark\:border-rose-500\/10,
+html.dark[class*="theme-"] .dark\:border-teal-500\/10,
+html.dark[class*="theme-"] .dark\:border-orange-500\/10,
+html.dark[class*="theme-"] .dark\:border-indigo-500\/10 {
+  border-color: var(--soft-accent-border-dark) !important;
+}
+
+/* Dynamic Text Colors */
+html[class*="theme-"] .text-blue-650, /* dummy selector */
+html[class*="theme-"] .text-blue-600,
+html[class*="theme-"] .text-emerald-600,
+html[class*="theme-"] .text-cyan-600,
+html[class*="theme-"] .text-indigo-600,
+html[class*="theme-"] .text-purple-600,
+html[class*="theme-"] .text-rose-600,
+html[class*="theme-"] .text-amber-600,
+html[class*="theme-"] .text-orange-600,
+html[class*="theme-"] .text-teal-600,
+html[class*="theme-"] .text-blue-500,
+html[class*="theme-"] .text-indigo-500,
+html[class*="theme-"] .text-sky-500 {
+  color: var(--soft-accent-text) !important;
+}
+
+/* Dark Text Colors */
+html.dark[class*="theme-"] .text-blue-600,
+html.dark[class*="theme-"] .text-emerald-600,
+html.dark[class*="theme-"] .text-cyan-600,
+html.dark[class*="theme-"] .text-indigo-600,
+html.dark[class*="theme-"] .text-purple-600,
+html.dark[class*="theme-"] .text-rose-600,
+html.dark[class*="theme-"] .text-amber-600,
+html.dark[class*="theme-"] .text-orange-600,
+html.dark[class*="theme-"] .text-teal-600,
+html.dark[class*="theme-"] .dark\:text-blue-400,
+html.dark[class*="theme-"] .dark\:text-emerald-400,
+html.dark[class*="theme-"] .dark\:text-cyan-400,
+html.dark[class*="theme-"] .dark\:text-amber-400,
+html.dark[class*="theme-"] .dark\:text-purple-400,
+html.dark[class*="theme-"] .dark\:text-rose-400,
+html.dark[class*="theme-"] .dark\:text-teal-400,
+html.dark[class*="theme-"] .dark\:text-orange-400,
+html.dark[class*="theme-"] .dark\:text-indigo-400,
+html.dark[class*="theme-"] .dark\:text-slate-400,
+html.dark[class*="theme-"] .dark\:text-slate-300 {
+  color: var(--soft-accent-text-dark) !important;
+}
+
+/* Dynamic Soft Colored Shadows (Glow Effect) for Large Hero Weather Card only */
+html[class*="theme-"] .weather-card-dynamic {
+  box-shadow: var(--soft-theme-shadow) !important;
+}
+html.dark[class*="theme-"] .weather-card-dynamic {
+  box-shadow: var(--soft-theme-shadow-dark) !important;
+}

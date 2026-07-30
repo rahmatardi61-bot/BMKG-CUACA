@@ -160,8 +160,13 @@ const applyTheme = () => {
     'theme-rainy', 'theme-stormy', 'theme-cloudy', 'dark'
   );
 
+  let themeColor = '#f8fafc'; // default light background color fallback
+  let isDarkTheme = false;
+
   if (themeMode.value === 'dark') {
     root.classList.add('dark');
+    themeColor = '#0b0f19';
+    isDarkTheme = true;
     localStorage.setItem('bmkg-theme', 'dark');
   } else if (themeMode.value === 'light') {
     localStorage.setItem('bmkg-theme', 'light');
@@ -171,11 +176,42 @@ const applyTheme = () => {
     root.classList.add(autoTheme.themeClass);
     if (autoTheme.isDark) {
       root.classList.add('dark');
+      isDarkTheme = true;
+    }
+    
+    // Choose status bar color matching active weather condition background
+    switch (autoTheme.themeClass) {
+      case 'theme-morning': themeColor = '#fffbeb'; break;
+      case 'theme-day':     themeColor = '#f0f9ff'; break;
+      case 'theme-evening': themeColor = '#fff7ed'; break;
+      case 'theme-night':   themeColor = '#0f172a'; break;
+      case 'theme-rainy':   themeColor = '#f8fafc'; break;
+      case 'theme-stormy':  themeColor = '#090514'; break;
+      case 'theme-cloudy':  themeColor = '#f8fafc'; break;
     }
     localStorage.setItem('bmkg-theme', 'auto');
   }
 
-  // Update a reactive state if needed or trigger updates
+  // ─── Update Smartphone / Mobile Browser Status Bar Theme ───
+  try {
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', themeColor);
+
+    let appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (!appleStatusBar) {
+      appleStatusBar = document.createElement('meta');
+      appleStatusBar.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
+      document.head.appendChild(appleStatusBar);
+    }
+    appleStatusBar.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+  } catch (e) {
+    console.error("Failed to update status bar meta tags:", e);
+  }
 };
 
 // Watch for city/weather updates to refresh auto theme instantly

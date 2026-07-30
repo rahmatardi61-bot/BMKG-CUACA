@@ -616,14 +616,10 @@ html[class*="theme-"] .bg-slate-50\/80,
 html[class*="theme-"] .bg-slate-50\/90,
 html[class*="theme-"] .bg-slate-50\/60,
 html[class*="theme-"] button.bg-white,
-html[class*="theme-"] .border-slate-100\/60,
-html[class*="theme-"] .border-slate-200\/60,
-html[class*="theme-"] .border-slate-200\/40,
-html[class*="theme-"] .border-slate-200,
-html[class*="theme-"] .border-slate-100,
 html[class*="theme-"] .cta-card {
   background: var(--soft-theme-bg) !important;
   border-color: var(--soft-theme-border) !important;
+  transition-property: border-color, box-shadow, transform, opacity !important;
 }
 
 html.dark[class*="theme-"] header,
@@ -647,9 +643,27 @@ html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/75,
 html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/70,
 html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/65,
 html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/60,
-html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/50,
-html.dark[class*="theme-"] .dark\:border-brand-navy-700\/30 {
+html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/50 {
   background: var(--soft-theme-bg-dark) !important;
+  border-color: var(--soft-theme-border-dark) !important;
+  transition-property: border-color, box-shadow, transform, opacity !important;
+}
+
+/* Dynamic Theme Borders Only */
+html[class*="theme-"] .border-slate-100\/60,
+html[class*="theme-"] .border-slate-200\/60,
+html[class*="theme-"] .border-slate-200\/40,
+html[class*="theme-"] .border-slate-200,
+html[class*="theme-"] .border-slate-100 {
+  border-color: var(--soft-theme-border) !important;
+}
+
+html.dark[class*="theme-"] .border-slate-100\/60,
+html.dark[class*="theme-"] .border-slate-200\/60,
+html.dark[class*="theme-"] .border-slate-200\/40,
+html.dark[class*="theme-"] .border-slate-200,
+html.dark[class*="theme-"] .border-slate-100,
+html.dark[class*="theme-"] .dark\:border-brand-navy-700\/30 {
   border-color: var(--soft-theme-border-dark) !important;
 }
 
@@ -923,4 +937,32 @@ html[class*="theme-"] .weather-card-dynamic {
 }
 html.dark[class*="theme-"] .weather-card-dynamic {
   box-shadow: var(--soft-theme-shadow-dark) !important;
+}
+
+/* Glassmorphism styling for Desktop/Mobile Floating Detail Panels (Semi-translucent with heavy blur) */
+html[class*="theme-"] .desktop-floating-panel {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(35px) !important;
+  -webkit-backdrop-filter: blur(35px) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+html.dark[class*="theme-"] .desktop-floating-panel {
+  background: rgba(15, 23, 42, 0.94) !important;
+  backdrop-filter: blur(35px) !important;
+  -webkit-backdrop-filter: blur(35px) !important;
+  border-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+/* Glassmorphism styling for Land Route Drawer (Kondisi Jalan & Lokasi Tujuan - Translucent with frosted map blur) */
+html[class*="theme-"] .land-route-drawer {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+html.dark[class*="theme-"] .land-route-drawer {
+  background: rgba(24, 34, 50, 0.76) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }

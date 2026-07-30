@@ -1983,7 +1983,7 @@ onUnmounted(() => {
         <Transition name="drawer-slide" appear>
           <div 
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
             :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
           >
             <!-- Drag Handle / Bar at the top of the sheet -->

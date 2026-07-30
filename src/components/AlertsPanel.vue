@@ -203,7 +203,7 @@ const transitionName = computed(() =>
       <Transition name="float-drop">
         <div
           v-if="showMobileDetail && currentAlert"
-          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100/60 dark:border-brand-navy-700/40 overflow-hidden"
+          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100/60 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
         >
           <div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
             <div class="flex items-start gap-2.5">
@@ -279,7 +279,7 @@ const transitionName = computed(() =>
       <Transition name="float-drop">
         <div
           v-if="openDesktopIndex !== null && alerts[openDesktopIndex]"
-          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100 dark:border-brand-navy-700/40 overflow-hidden"
+          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
         >
           <div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
             <div class="flex items-start gap-2.5">

@@ -373,6 +373,22 @@ onMounted(() => {
 
   document.addEventListener('touchend', onTouchEnd, { passive: true });
   document.addEventListener('touchcancel', () => { clearTouched(); }, { passive: true });
+
+  // ── Scroll Jank Prevention ─────────────────────────────────────────────
+  // During scroll, suppress expensive group-hover effects (blur scale animations)
+  // that trigger GPU compositing and cause frame drops.
+  let scrollTimer: ReturnType<typeof setTimeout> | null = null;
+  const onScroll = () => {
+    if (!document.body.classList.contains('is-scrolling')) {
+      document.body.classList.add('is-scrolling');
+    }
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      document.body.classList.remove('is-scrolling');
+      scrollTimer = null;
+    }, 150);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
 });
 </script>
 

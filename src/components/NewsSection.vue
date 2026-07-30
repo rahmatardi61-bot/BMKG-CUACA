@@ -37,7 +37,7 @@ const getCategoryClass = (category: string) => {
       <div 
         v-for="article in articles" 
         :key="article.id"
-        class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group backdrop-blur-md"
+        class="bg-white/90 dark:bg-brand-navy-900/90 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-[box-shadow] duration-300 flex flex-col group no-blur"
       >
         <!-- Article Image Thumbnail -->
         <div class="relative h-44 overflow-hidden bg-slate-100/60 dark:bg-brand-navy-950 shrink-0">

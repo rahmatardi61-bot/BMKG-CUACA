@@ -207,6 +207,86 @@ body.drawer-open #app {
   contain: layout style;
 }
 
+/* ── Scroll Performance ─────────────────────────────────────────────────────
+   Reduce composite cost during scroll by isolating heavy sections.
+   .scroll-section: wraps a visually independent block — browser can skip
+   repainting it when only the scroll position changes outside of it.
+   .gpu-card: promotes card elements that have hover animations to own layer
+   so hover effects don't trigger full-page repaint during scroll. */
+
+.scroll-section {
+  contain: layout style;
+}
+
+.gpu-card {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Blur Reduction on Scroll ───────────────────────────────────────────────
+   During active scroll, backdrops that re-composite on every frame are very
+   expensive. We promote them to their own layers to avoid cascading repaints. */
+.backdrop-blur-md,
+.backdrop-blur-xl {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ── Ambient Glow Orbs ──────────────────────────────────────────────────────
+   Glow orbs using blur-2xl/blur-3xl are the most expensive filter ops.
+   Cap their repaint scope with isolation so they don't dirty sibling layers. */
+.glow-orb {
+  isolation: isolate;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* ── Weather Card Illustrations ─────────────────────────────────────────────
+   SVG illustrations inside cards: contain so they don't trigger full-card
+   repaint when parent scrolls. */
+.card-illustration {
+  contain: strict;
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+/* ── Turbine & Animation Perf ───────────────────────────────────────────────
+   Spinning SVG elements need GPU promotion to avoid jank during scroll. */
+.turbine-blades {
+  will-change: transform;
+}
+
+/* ── Disable expensive hover effects during scroll ──────────────────────────
+   Add 'is-scrolling' class to body via JS to suppress expensive hover effects.
+   This avoids hover-triggered filter recalculations during scroll. */
+body.is-scrolling .group:hover .group-hover\:scale-125,
+body.is-scrolling .group:hover .group-hover\:bg-orange-500\/30,
+body.is-scrolling .group:hover .group-hover\:bg-cyan-500\/30,
+body.is-scrolling .group:hover .group-hover\:bg-indigo-500\/30 {
+  transform: none !important;
+  background-color: inherit !important;
+}
+
+/* ── Snap scroll optimization ───────────────────────────────────────────────
+   Horizontal snap containers: force GPU compositing on snap items */
+.snap-start {
+  transform: translateZ(0);
+}
+
+/* ── Weather Metric Cards ───────────────────────────────────────────────────
+   All metric cards in CurrentWeather share .weather-metric-card class.
+   Promote to own GPU layer so hover:shadow-lg doesn't repaint siblings.
+   Remove backdrop-filter (most expensive filter on scroll) — the high bg
+   opacity (bg-white) already provides sufficient visual separation. */
+.weather-metric-card {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  isolation: isolate;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
 /* ── iOS Safe Area Utility ──────────────────────────────────────────────────
    .pb-safe: adds padding-bottom = env(safe-area-inset-bottom) for notch/home
    bar devices (iPhone X+). Used on mobile bottom sheet drawers. */
@@ -218,6 +298,31 @@ body.drawer-open #app {
 @media screen and (max-width: 767px) {
   input, select, textarea {
     font-size: 16px !important;
+  }
+}
+
+/* ── Backdrop-blur Performance Overrides ────────────────────────────────────
+   Removes backdrop-filter from major scroll-area panels.
+   These components use bg-white/70 or bg-brand-navy/60 which already provides
+   enough visual separation. The blur filter triggers expensive GPU composition
+   on every scroll frame and is the #1 cause of janky scrolling on lower-end
+   hardware.
+   ONLY keep blur on: sticky header, drawers/modals (overlays), and
+   active/focused interactive elements. */
+
+/* ForecastPanel wrapper */
+.forecast-scroll-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Disable backdrop-blur on all "bg-white/70" style section cards in
+   the main scroll area by using a performance-friendly bg instead */
+@layer utilities {
+  /* Targeted override — only affects non-drawer, non-header blur contexts */
+  .no-blur {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 

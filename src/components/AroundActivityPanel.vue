@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 import {
   Building2, TreePine, Waves, MapPin, CloudRain,
   Sun, ArrowDown, ArrowDownLeft, ArrowDownRight, Moon, Cloud, Flag,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, CornerUpRight
 } from 'lucide-vue-next';
 import { cityAnalysisMap } from '../data/mockData';
 
@@ -352,6 +352,56 @@ const getCourseImage = (course: GolfCourse) => {
   };
   return images[course.id] || 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=300&q=80';
 };
+
+// Map specific tag categories to distinct, vibrant styling
+const getTagClass = (tag: string) => {
+  const t = tag.toLowerCase();
+  
+  // History & Education: Warm Amber
+  if (t.includes('sejarah') || t.includes('edukasi') || t.includes('budaya') || t.includes('seni')) {
+    return 'bg-amber-50/90 text-amber-600 border-amber-200/50 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
+  }
+  
+  // Sports & Facilities: Cool Blue
+  if (t.includes('olahraga') || t.includes('golf') || t.includes('fasilitas') || t.includes('publik')) {
+    return 'bg-blue-50/90 text-blue-600 border-blue-200/50 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
+  }
+  
+  // Premium & Lifestyle: Royal Purple
+  if (t.includes('premium') || t.includes('resor') || t.includes('gaya hidup') || t.includes('belanja')) {
+    return 'bg-purple-50/90 text-purple-600 border-purple-200/50 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20';
+  }
+  
+  // Culinary: Sunset Rose
+  if (t.includes('kuliner') || t.includes('makanan') || t.includes('restoran')) {
+    return 'bg-rose-50/90 text-rose-600 border-rose-200/50 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20';
+  }
+  
+  // Nature & Parks: Fresh Emerald/Green
+  if (t.includes('taman') || t.includes('keluarga') || t.includes('alam') || t.includes('petualangan') || t.includes('sejuk')) {
+    return 'bg-emerald-50/90 text-emerald-600 border-emerald-200/50 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20';
+  }
+  
+  // Maritime & Water: Sky Cyan
+  if (t.includes('bahari') || t.includes('surfing') || t.includes('sungai') || t.includes('sunset') || t.includes('danau') || t.includes('pantai')) {
+    return 'bg-cyan-50/90 text-cyan-600 border-cyan-200/50 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20';
+  }
+  
+  // Photography & Communities: Creative Indigo
+  if (t.includes('fotografi') || t.includes('pemandangan') || t.includes('road trip') || t.includes('komunitas')) {
+    return 'bg-indigo-50/90 text-indigo-600 border-indigo-200/50 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20';
+  }
+  
+  // Fallback styling
+  return 'bg-slate-50/90 text-slate-550 border-slate-200/40 dark:bg-slate-700/40 dark:text-slate-400 dark:border-slate-600/30';
+};
+
+// Open route on Google Maps
+const openRoute = (course: GolfCourse) => {
+  const query = `${course.name}, ${course.location}`;
+  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  window.open(url, '_blank');
+};
 </script>
 
 <template>
@@ -403,20 +453,34 @@ const getCourseImage = (course: GolfCourse) => {
               <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(activeMobileCourse.colorKey).topBar"></div>
  
               <div class="p-3.5 px-4">
-                <!-- Name + Location -->
-                <div class="flex items-center gap-2.5 mb-2.5">
-                  <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" :class="getColor(activeMobileCourse.colorKey).icon">
-                    <component :is="getCategoryIcon(activeMobileCourse.category)" class="w-4 h-4" />
+                <!-- Name + Location & Route Button Row -->
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" :class="getColor(activeMobileCourse.colorKey).icon">
+                      <component :is="getCategoryIcon(activeMobileCourse.category)" class="w-4 h-4" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
+                        {{ activeMobileCourse.name }}
+                      </h4>
+                      <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
+                        <MapPin class="w-2.5 h-2.5 shrink-0" />
+                        <span class="truncate">{{ activeMobileCourse.distance }}</span>
+                      </p>
+                    </div>
                   </div>
-                  <div class="min-w-0 flex-1">
-                    <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
-                      {{ activeMobileCourse.name }}
-                    </h4>
-                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
-                      <MapPin class="w-2.5 h-2.5 shrink-0" />
-                      <span class="truncate">{{ activeMobileCourse.distance }}</span>
-                    </p>
-                  </div>
+                  
+                  <!-- Route Button (Circular wrapper + Blue diamond + White CornerUpRight arrow) -->
+                  <button 
+                    type="button" 
+                    @click.stop="openRoute(activeMobileCourse)"
+                    class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50/80 dark:bg-brand-navy-950/40 hover:bg-blue-50 dark:hover:bg-brand-cyan/10 border border-slate-200/40 dark:border-brand-navy-800/40 shadow-sm transition-all duration-300 shrink-0 cursor-pointer active:scale-95 group/route"
+                    title="Buka Rute di Google Maps"
+                  >
+                    <div class="w-4.5 h-4.5 rounded-[3px] bg-blue-600 dark:bg-brand-cyan rotate-45 flex items-center justify-center shadow-sm group-hover/route:bg-blue-700 dark:group-hover/route:bg-brand-cyan/85 transition-colors">
+                      <CornerUpRight class="w-2.5 h-2.5 text-white dark:text-brand-navy-950 -rotate-45" />
+                    </div>
+                  </button>
                 </div>
  
                 <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
@@ -466,15 +530,31 @@ const getCourseImage = (course: GolfCourse) => {
                   </div>
                 </div>
 
-                <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
-                <div class="flex flex-wrap gap-1 mt-2.5">
-                  <span
-                    v-for="tag in activeMobileCourse.tags"
-                    :key="tag"
-                    class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100/80 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 border border-slate-200/60 dark:border-slate-600/30 tracking-wide"
+                <!-- Tags & Real-time Weather Info Row -->
+                <div class="flex items-center justify-between gap-2 mt-2.5">
+                  <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="tag in activeMobileCourse.tags"
+                      :key="tag"
+                      class="px-1.5 py-0.5 rounded text-[9px] font-semibold border tracking-wide transition-colors"
+                      :class="getTagClass(tag)"
+                    >
+                      {{ tag }}
+                    </span>
+                  </div>
+
+                  <!-- Weather Info (Temp + Icon) -->
+                  <div 
+                    v-if="activeMobileCourse.hourly && activeMobileCourse.hourly.length"
+                    class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50/80 dark:bg-brand-navy-950/40 border border-slate-200/50 dark:border-brand-navy-800/40 text-slate-600 dark:text-slate-350 text-[10px] font-extrabold shrink-0 shadow-inner"
                   >
-                    {{ tag }}
-                  </span>
+                    <component 
+                      :is="activeMobileCourse.hourly.find(h => h.isCurrent)?.icon || activeMobileCourse.hourly[1]?.icon || activeMobileCourse.hourly[0]?.icon" 
+                      class="w-3.5 h-3.5 text-amber-500 dark:text-brand-cyan" 
+                    />
+                    <span>{{ activeMobileCourse.hourly.find(h => h.isCurrent)?.temp ?? activeMobileCourse.hourly[1]?.temp ?? activeMobileCourse.hourly[0]?.temp }}°C</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -512,23 +592,37 @@ const getCourseImage = (course: GolfCourse) => {
           <div class="h-[3px] w-full bg-gradient-to-r" :class="getColor(course.colorKey).topBar"></div>
    
           <div class="p-3.5">
-            <!-- Name + Location -->
-            <div class="flex items-start gap-2.5 mb-2.5">
-              <div
-                class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                :class="getColor(course.colorKey).icon"
+            <!-- Name + Location & Route Button Row -->
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <div
+                  class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  :class="getColor(course.colorKey).icon"
+                >
+                  <component :is="getCategoryIcon(course.category)" class="w-4 h-4" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
+                    {{ course.name }}
+                  </h4>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
+                    <MapPin class="w-2.5 h-2.5 shrink-0" />
+                    <span class="truncate">{{ course.distance }}</span>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Route Button (Circular wrapper + Blue diamond + White CornerUpRight arrow) -->
+              <button 
+                type="button" 
+                @click.stop="openRoute(course)"
+                class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50/80 dark:bg-brand-navy-950/40 hover:bg-blue-50 dark:hover:bg-brand-cyan/10 border border-slate-200/40 dark:border-brand-navy-800/40 shadow-sm transition-all duration-300 shrink-0 cursor-pointer active:scale-95 group/route"
+                title="Buka Rute di Google Maps"
               >
-                <component :is="getCategoryIcon(course.category)" class="w-4 h-4" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
-                  {{ course.name }}
-                </h4>
-                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
-                  <MapPin class="w-2.5 h-2.5 shrink-0" />
-                  <span class="truncate">{{ course.distance }}</span>
-                </p>
-              </div>
+                <div class="w-4.5 h-4.5 rounded-[3px] bg-blue-600 dark:bg-brand-cyan rotate-45 flex items-center justify-center shadow-sm group-hover/route:bg-blue-700 dark:group-hover/route:bg-brand-cyan/85 transition-colors">
+                  <CornerUpRight class="w-2.5 h-2.5 text-white dark:text-brand-navy-950 -rotate-45" />
+                </div>
+              </button>
             </div>
   
             <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
@@ -581,15 +675,31 @@ const getCourseImage = (course: GolfCourse) => {
               </div>
             </div>
   
-            <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
-            <div class="flex flex-wrap gap-1 mt-2.5">
-              <span
-                v-for="tag in course.tags"
-                :key="tag"
-                class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100/80 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 border border-slate-200/60 dark:border-slate-600/30 tracking-wide"
+            <!-- Tags & Real-time Weather Info Row -->
+            <div class="flex items-center justify-between gap-2 mt-2.5">
+              <!-- Category Tags (Positioned below image block, memanjang ke kanan) -->
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="tag in course.tags"
+                  :key="tag"
+                  class="px-1.5 py-0.5 rounded text-[9px] font-semibold border tracking-wide transition-colors"
+                  :class="getTagClass(tag)"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+
+              <!-- Weather Info (Temp + Icon) -->
+              <div 
+                v-if="course.hourly && course.hourly.length"
+                class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50/80 dark:bg-brand-navy-950/40 border border-slate-200/50 dark:border-brand-navy-800/40 text-slate-600 dark:text-slate-350 text-[10px] font-extrabold shrink-0 shadow-inner"
               >
-                {{ tag }}
-              </span>
+                <component 
+                  :is="course.hourly.find(h => h.isCurrent)?.icon || course.hourly[1]?.icon || course.hourly[0]?.icon" 
+                  class="w-3.5 h-3.5 text-amber-500 dark:text-brand-cyan" 
+                />
+                <span>{{ course.hourly.find(h => h.isCurrent)?.temp ?? course.hourly[1]?.temp ?? course.hourly[0]?.temp }}°C</span>
+              </div>
             </div>
           </div>
         </div>

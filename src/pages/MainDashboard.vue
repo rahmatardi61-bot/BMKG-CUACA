@@ -415,7 +415,7 @@ onUnmounted(() => {
       </div>
       
       <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
-      <div class="lg:col-span-2 space-y-8 animate-fade-in" style="animation-delay: 100ms;">
+      <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
         <!-- Current Weather Overview -->
         <CurrentWeather 
           :weather-data="weatherData" 
@@ -431,7 +431,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->
-      <div class="lg:sticky lg:top-20 self-start space-y-8 animate-fade-in sidebar-contained" style="animation-delay: 200ms;">
+      <div class="lg:sticky lg:top-20 self-start space-y-8 animate-fade-in sidebar-contained scroll-section" style="animation-delay: 200ms;">
         <!-- Weather Activity & Analysis Section -->
         <WeatherActivity
           :weather-data="weatherData"
@@ -490,14 +490,19 @@ onUnmounted(() => {
   ── SLIDE LEFT  (klik kota di sebelah KANAN tab aktif)
      • Card lama: melesat keluar ke KIRI  (translateX  0 → -100%)
      • Card baru: masuk dari KANAN        (translateX +100% → 0)
+
+  PERF: filter:blur() removed — blur on transitioning elements
+  prevents the browser from using GPU-only compositing (transform/opacity)
+  and causes a full repaint + compositor upload on every frame.
+  Pure transform + opacity = smooth 60fps on compositor thread.
 */
 .slide-left-enter-active,
 .slide-left-leave-active {
   /* Perfectly synchronized — same duration & easing for both */
   transition:
     transform 0.36s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity   0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    filter    0.36s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity   0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 .slide-left-leave-active {
   /* Lift out of flow so incoming grid occupies space immediately */
@@ -510,23 +515,19 @@ onUnmounted(() => {
 .slide-left-enter-from {
   transform: translateX(100%);
   opacity: 0.4;
-  filter: blur(6px);
 }
 .slide-left-enter-to {
   transform: translateX(0);
   opacity: 1;
-  filter: blur(0px);
 }
 /* Old cards: blast out to the left */
 .slide-left-leave-from {
   transform: translateX(0);
   opacity: 1;
-  filter: blur(0px);
 }
 .slide-left-leave-to {
   transform: translateX(-100%);
   opacity: 0.4;
-  filter: blur(6px);
 }
 
 /*
@@ -538,8 +539,8 @@ onUnmounted(() => {
 .slide-right-leave-active {
   transition:
     transform 0.36s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity   0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    filter    0.36s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity   0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 .slide-right-leave-active {
   position: absolute;
@@ -551,22 +552,18 @@ onUnmounted(() => {
 .slide-right-enter-from {
   transform: translateX(-100%);
   opacity: 0.4;
-  filter: blur(6px);
 }
 .slide-right-enter-to {
   transform: translateX(0);
   opacity: 1;
-  filter: blur(0px);
 }
 /* Old cards: blast out to the right */
 .slide-right-leave-from {
   transform: translateX(0);
   opacity: 1;
-  filter: blur(0px);
 }
 .slide-right-leave-to {
   transform: translateX(100%);
   opacity: 0.4;
-  filter: blur(6px);
 }
 </style>

@@ -79,7 +79,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl shadow-sm backdrop-blur-md overflow-hidden transition-all duration-300">
+  <div class="bg-white/90 dark:bg-brand-navy-900/90 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl shadow-sm no-blur overflow-hidden transition-[box-shadow] duration-300">
     
     <!-- ── Header ─────────────────────────────── -->
     <div class="px-6 pt-6 pb-4 flex items-center justify-between gap-3 border-b border-slate-100/40 dark:border-brand-navy-800/30">

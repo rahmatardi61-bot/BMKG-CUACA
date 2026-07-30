@@ -44,12 +44,11 @@ const scrollCarousel = (direction: 'left' | 'right') => {
   <div class="relative w-full mt-4 grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_340px] gap-4 items-stretch">
 
     <!-- Left: Carousel card with backdrop -->
-    <div class="relative bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 backdrop-blur-md rounded-3xl p-5 shadow-sm overflow-hidden">
-      <!-- Soft gradient glows in background -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-        <div class="absolute top-0 left-0 w-44 h-44 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 dark:from-blue-500/10 dark:to-indigo-600/10 blur-3xl translate-x-[-30%] translate-y-[-30%]"></div>
-        <div class="absolute bottom-0 right-0 w-52 h-52 rounded-full bg-gradient-to-br from-cyan-400/20 to-emerald-400/20 dark:from-cyan-500/10 dark:to-emerald-600/10 blur-3xl translate-x-[30%] translate-y-[30%]"></div>
-        <div class="absolute top-1/3 left-1/3 w-36 h-36 rounded-full bg-gradient-to-br from-pink-400/10 to-rose-400/10 dark:from-pink-500/8 dark:to-rose-600/8 blur-3xl"></div>
+    <div class="relative bg-white/85 dark:bg-brand-navy-900/80 border border-slate-100/50 dark:border-brand-navy-700/20 no-blur rounded-3xl p-5 shadow-sm overflow-hidden">
+      <!-- Soft gradient wash (no filter:blur — replaced with CSS gradient) -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl" aria-hidden="true">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(96,165,250,0.15)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08)_0%,transparent_60%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.12)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.06)_0%,transparent_60%)]"></div>
       </div>
 
       <!-- Title & Subtitle -->
@@ -67,7 +66,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
       <!-- Left Arrow Button -->
       <button 
         @click="scrollCarousel('left')"
-        class="absolute -left-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+        class="absolute -left-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md hover:scale-105 active:scale-95 transition-[transform,opacity,background-color,border-color] duration-200 opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white dark:bg-brand-navy-800 border-slate-200 dark:border-brand-navy-700 hover:bg-slate-50 dark:hover:bg-brand-navy-750 text-slate-800 dark:text-white transform-gpu will-change-transform"
         aria-label="Previous cities"
       >
         <ChevronLeft class="w-4 h-4 text-slate-800 dark:text-white" />
@@ -76,7 +75,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
       <!-- Right Arrow Button -->
       <button 
         @click="scrollCarousel('right')"
-        class="absolute -right-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md backdrop-blur-md hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white/40 border-slate-200/30 hover:bg-white/65 dark:bg-white/10 dark:border-white/10 dark:hover:bg-white/20"
+        class="absolute -right-3 top-[27px] -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full border shadow-md hover:scale-105 active:scale-95 transition-[transform,opacity,background-color,border-color] duration-200 opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex bg-white dark:bg-brand-navy-800 border-slate-200 dark:border-brand-navy-700 hover:bg-slate-50 dark:hover:bg-brand-navy-750 text-slate-800 dark:text-white transform-gpu will-change-transform"
         aria-label="Next cities"
       >
         <ChevronRight class="w-4 h-4 text-slate-800 dark:text-white" />
@@ -93,7 +92,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
           v-memo="[activeCarouselCity === landmark.fullName]"
           :id="'landmark-card-' + landmark.name.toLowerCase()"
           @click="emit('select-city', landmark.fullName)"
-          class="snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] backdrop-blur-md relative overflow-hidden group/card shadow-sm"
+          class="gpu-card snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] no-blur relative overflow-hidden group/card shadow-sm"
           :class="[
             activeCarouselCity === landmark.fullName
               ? {
@@ -114,7 +113,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
           <!-- Animated background pulse highlight on active -->
           <div 
             v-if="activeCarouselCity === landmark.fullName"
-            class="absolute -right-6 -top-6 w-16 h-16 rounded-full blur-xl animate-pulse"
+            class="glow-orb absolute -right-6 -top-6 w-16 h-16 rounded-full blur-xl animate-pulse"
             :class="[
               {
                 'Jakarta': 'bg-blue-500/10 dark:bg-blue-500/15',

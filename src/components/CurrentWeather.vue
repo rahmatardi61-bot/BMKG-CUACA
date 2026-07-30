@@ -602,7 +602,7 @@ onUnmounted(() => {
       <!-- Card 1: Suhu -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🌡️ Temperature Illustration: Village + sun/clouds + thermometer -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="suhuBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -672,7 +672,7 @@ onUnmounted(() => {
       <!-- Card 2: Angin -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 💨 Wind Illustration: Turbines + hills + wind lines -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="anginBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -727,7 +727,7 @@ onUnmounted(() => {
       <!-- Card 3: Arah Angin -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🧭 Compass Illustration: Compass rose + countryside -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="arahBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -793,7 +793,7 @@ onUnmounted(() => {
       <!-- Card 4: Kelembapan -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 💧 Humidity Illustration: Rainforest + water drops -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="humBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -842,7 +842,7 @@ onUnmounted(() => {
       <!-- Card 5: Indeks UV -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- ☀️ UV Illustration: Beach + palm + umbrella + intense sun -->
-        <div class="absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
             <defs>
               <linearGradient id="uvBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -907,7 +907,7 @@ onUnmounted(() => {
       <!-- Card 6: Visibilitas -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 backdrop-blur-xl relative overflow-hidden group">
         <!-- 👁️ Visibility Illustration: Mountain road -->
-        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
             <defs>
               <linearGradient id="visBgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -955,7 +955,7 @@ onUnmounted(() => {
       <!-- Card 7: Fase Bulan -->
       <div class="weather-metric-card bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-300 col-span-2 md:col-span-3 lg:col-span-2 backdrop-blur-xl relative overflow-hidden group">
         <!-- 🌙 Moon Illustration: Starry night + mountains + crescent moon -->
-        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+        <div class="card-illustration absolute inset-0 pointer-events-none select-none overflow-hidden opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
           <svg viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
             <defs>
               <linearGradient id="moonBgGradLight" x1="0" y1="0" x2="0" y2="1">

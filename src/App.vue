@@ -28,10 +28,7 @@ import {
   generateMockWeatherForCity
 } from './data/mockData';
 
-// Helper to determine night time based on hour
-const isNightTimeHour = (hour: number) => {
-  return hour < 5 || hour >= 18;
-};
+
 
 // Theme Mode state: 'light' | 'dark' | 'auto'
 const themeMode = ref<'light' | 'dark' | 'auto'>('auto');
@@ -163,11 +160,8 @@ const applyTheme = () => {
     'theme-rainy', 'theme-stormy', 'theme-cloudy', 'dark'
   );
 
-  let isDarkClassApplied = false;
-
   if (themeMode.value === 'dark') {
     root.classList.add('dark');
-    isDarkClassApplied = true;
     localStorage.setItem('bmkg-theme', 'dark');
   } else if (themeMode.value === 'light') {
     localStorage.setItem('bmkg-theme', 'light');
@@ -177,7 +171,6 @@ const applyTheme = () => {
     root.classList.add(autoTheme.themeClass);
     if (autoTheme.isDark) {
       root.classList.add('dark');
-      isDarkClassApplied = true;
     }
     localStorage.setItem('bmkg-theme', 'auto');
   }

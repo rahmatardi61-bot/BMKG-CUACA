@@ -162,7 +162,7 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen && activity" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between">
+      <div v-if="isOpen && activity" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between fullscreen-map-container">
         <!-- Background Map -->
         <div class="absolute inset-0 w-full h-full z-0 bg-slate-800">
           <div ref="mapEl" class="w-full h-full"></div>
@@ -172,7 +172,7 @@ onUnmounted(() => {
         <button
           type="button"
           @click="emit('close')"
-          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer"
+          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer map-close-btn"
         >
           <X class="w-5 h-5" />
         </button>
@@ -181,7 +181,7 @@ onUnmounted(() => {
         <Transition name="drawer-slide" appear>
           <div
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)]"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
           >
             <!-- Drag handle -->
             <div class="py-3 flex items-center justify-center shrink-0">

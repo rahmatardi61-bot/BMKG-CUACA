@@ -966,3 +966,37 @@ html.dark[class*="theme-"] .land-route-drawer {
   -webkit-backdrop-filter: blur(25px) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Fullscreen map viewport and safe areas handling for mobile browser */
+.fullscreen-map-container {
+  height: 100vh !important;
+  height: 100dvh !important;
+  width: 100vw !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .map-close-btn {
+    top: calc(16px + env(safe-area-inset-top, 0px)) !important;
+  }
+  .land-route-drawer {
+    margin-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Glassmorphism styling for Side Advisor Drawers (Maritime & Aviation - Semi-translucent with heavy blur) */
+html[class*="theme-"] .side-advisor-drawer {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(35px) !important;
+  -webkit-backdrop-filter: blur(35px) !important;
+  border-left: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+html.dark[class*="theme-"] .side-advisor-drawer {
+  background: rgba(11, 15, 25, 0.94) !important;
+  backdrop-filter: blur(35px) !important;
+  -webkit-backdrop-filter: blur(35px) !important;
+  border-left: 1px solid rgba(30, 41, 59, 0.8) !important;
+}

@@ -522,27 +522,40 @@ onUnmounted(() => {
     </div>
 
     <!-- Full Width: Index Kenyamanan Card -->
-    <div class="bg-white/80 dark:bg-brand-navy-900/75 border border-white/60 dark:border-white/[0.06] rounded-2xl p-6 shadow-sm backdrop-blur-xl">
-      <!-- Title Header Area -->
-      <div class="mb-4">
+    <div class="relative w-full rounded-3xl p-5 overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50 text-left">
+      <!-- Top Glow Border Line -->
+      <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent rounded-t-2xl"></div>
+
+      <!-- Header Area -->
+      <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-brand-navy-800/60 relative z-10">
         <div class="flex items-center gap-2">
-          <!-- Custom thermal stress / comfort index icon -->
-          <svg class="w-4 h-4 text-blue-500 dark:text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.15" />
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M17.66 6.34l-1.41 1.41M7.76 16.24l-1.41 1.41M6.34 6.34l1.41 1.41M16.24 16.24l1.41 1.41" />
-          </svg>
-          <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            Indeks Kenyamanan
-          </h3>
+          <div class="p-2 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/10">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.15" />
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M17.66 6.34l-1.41 1.41M7.76 16.24l-1.41 1.41M6.34 6.34l1.41 1.41M16.24 16.24l1.41 1.41" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-xs sm:text-sm font-black tracking-tight text-slate-800 dark:text-white uppercase leading-none mb-1">
+              Indeks Kenyamanan
+            </h4>
+            <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">
+              Analisis Paparan Panas &amp; Kenyamanan Aktivitas
+            </p>
+          </div>
         </div>
-        <p class="text-xs text-slate-400 dark:text-slate-400 font-medium mt-1">
+      </div>
+      
+      <!-- Sub-description below header -->
+      <div class="relative z-10 mb-4">
+        <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
           {{ comfortIndex.desc }}
         </p>
       </div>
 
       <!-- Actionable Details Row -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mt-5">
+      <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-4 items-center mt-5">
 
         <!-- Good Heat Index Quality Indicator Box (span 2 of 4 cols) -->
         <div class="md:col-span-2 rounded-xl p-4 flex items-center gap-4 border border-transparent" :class="comfortIndex.colorClass">

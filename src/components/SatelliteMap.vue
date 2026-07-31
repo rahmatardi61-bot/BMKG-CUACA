@@ -420,14 +420,23 @@ onUnmounted(() => {
 
       <!-- Floating Timeline Controller (bottom-right) -->
       <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-xl p-1.5 text-white flex items-center gap-2 z-20 shadow-lg">
-        <button 
-          @click="togglePlay"
-          class="w-6 h-6 flex-shrink-0 flex items-center justify-center bg-blue-600 dark:bg-brand-cyan hover:bg-blue-500 dark:hover:bg-brand-cyan/80 active:scale-95 text-white dark:text-brand-navy-950 rounded-lg transition-all cursor-pointer"
-          title="Play/Pause Satelit"
-        >
-          <Play v-if="!isPlaying" class="w-3 h-3 fill-current" />
-          <Pause v-else class="w-3 h-3 fill-current" />
-        </button>
+        <div class="relative group flex-shrink-0">
+          <button 
+            @click="togglePlay"
+            class="w-6 h-6 flex items-center justify-center bg-blue-600 dark:bg-brand-cyan hover:bg-blue-500 dark:hover:bg-brand-cyan/80 active:scale-95 text-white dark:text-brand-navy-950 rounded-lg transition-all cursor-pointer"
+          >
+            <Play v-if="!isPlaying" class="w-3 h-3 fill-current" />
+            <Pause v-else class="w-3 h-3 fill-current" />
+          </button>
+
+          <!-- Premium Tooltip -->
+          <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
+            <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+              <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+              <span>Play/Pause Satelit</span>
+            </div>
+          </div>
+        </div>
         
         <div class="flex items-center gap-0.5">
           <button 

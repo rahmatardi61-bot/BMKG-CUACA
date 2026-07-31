@@ -95,7 +95,7 @@ onUnmounted(() => {
         id="nav-drawer-toggle-desktop"
         @click="isNavDrawerOpen = true"
         class="flex items-center gap-2.5 shrink-0 cursor-pointer group hover:opacity-95 select-none"
-        title="Buka Menu"
+        title=""
       >
         <img src="../assets/logo.svg" alt="Logo BMKG" class="w-8 h-8 md:w-9 md:h-9 object-contain transition-transform group-hover:scale-105 duration-300" />
         
@@ -150,42 +150,60 @@ onUnmounted(() => {
         </button>
 
         <!-- Theme Toggle Button -->
-        <button 
-          id="theme-toggle-button"
-          @click="emit('toggle-theme')" 
-          class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5 active:scale-95 active:duration-75"
-          :class="[
-            themeMode === 'light' ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 hover:bg-amber-500/20' : '',
-            themeMode === 'dark' ? 'bg-brand-navy-900 border-brand-navy-700 hover:bg-brand-navy-800 text-brand-cyan' : '',
-            themeMode === 'auto' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/35 dark:text-brand-cyan hover:bg-blue-500/20 dark:hover:bg-brand-cyan/25' : ''
-          ]"
-          title="Ubah Tema (Terang / Gelap / Otomatis)"
-        >
-          <Sun v-if="themeMode === 'light'" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
-          <Moon v-else-if="themeMode === 'dark'" class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
-          <Sparkles v-else class="w-4 h-4 transition-pulse duration-300" />
-          
-          <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider select-none">
-            {{ themeMode === 'light' ? 'Terang' : themeMode === 'dark' ? 'Gelap' : 'Otomatis' }}
-          </span>
-        </button>
+        <div class="relative group shrink-0">
+          <button 
+            id="theme-toggle-button"
+            @click="emit('toggle-theme')" 
+            class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5 active:scale-95 active:duration-75 cursor-pointer"
+            :class="[
+              themeMode === 'light' ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 hover:bg-amber-500/20' : '',
+              themeMode === 'dark' ? 'bg-brand-navy-900 border-brand-navy-700 hover:bg-brand-navy-800 text-brand-cyan' : '',
+              themeMode === 'auto' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:bg-brand-cyan/15 dark:border-brand-cyan/35 dark:text-brand-cyan hover:bg-blue-500/20 dark:hover:bg-brand-cyan/25' : ''
+            ]"
+          >
+            <Sun v-if="themeMode === 'light'" class="w-4 h-4 transition-transform hover:rotate-45 duration-300" />
+            <Moon v-else-if="themeMode === 'dark'" class="w-4 h-4 transition-transform hover:-rotate-12 duration-300" />
+            <Sparkles v-else class="w-4 h-4 transition-pulse duration-300" />
+            
+            <span class="hidden sm:inline text-[9px] font-black uppercase tracking-wider select-none">
+              {{ themeMode === 'light' ? 'Terang' : themeMode === 'dark' ? 'Gelap' : 'Otomatis' }}
+            </span>
+          </button>
+
+          <!-- Premium Tooltip -->
+          <div class="absolute left-1/2 -translate-x-1/2 top-full mt-2.5 z-[100] pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
+            <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+              <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+              <span>Ubah Tema (Terang / Gelap / Otomatis)</span>
+            </div>
+          </div>
+        </div>
 
         <!-- User Profile (Clickable Login Trigger / Profile Dropdown) -->
         <div ref="profileDropdownContainer" class="relative">
-          <button 
-            id="user-profile-button"
-            @click="handleUserClick" 
-            class="w-7 h-7 rounded-full flex items-center justify-center shadow-sm shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none border"
-            :class="[
-              isLoggedIn 
-                ? 'bg-blue-600 border-blue-500 text-white font-extrabold text-[10px] tracking-tight dark:bg-brand-cyan dark:border-brand-cyan/60 dark:text-brand-navy-950'
-                : 'bg-slate-100 dark:bg-brand-navy-900/60 border-slate-200/60 dark:border-brand-navy-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-brand-navy-800/60'
-            ]"
-            :title="isLoggedIn ? 'Kelola Akun (' + userProfile?.name + ')' : 'Masuk ke Portal'"
-          >
-            <span v-if="isLoggedIn">{{ userInitials }}</span>
-            <User v-else class="w-3.5 h-3.5" />
-          </button>
+          <div class="relative group">
+            <button 
+              id="user-profile-button"
+              @click="handleUserClick" 
+              class="w-7 h-7 rounded-full flex items-center justify-center shadow-sm shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none border"
+              :class="[
+                isLoggedIn 
+                  ? 'bg-blue-600 border-blue-500 text-white font-extrabold text-[10px] tracking-tight dark:bg-brand-cyan dark:border-brand-cyan/60 dark:text-brand-navy-950'
+                  : 'bg-slate-100 dark:bg-brand-navy-900/60 border-slate-200/60 dark:border-brand-navy-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-brand-navy-800/60'
+              ]"
+            >
+              <span v-if="isLoggedIn">{{ userInitials }}</span>
+              <User v-else class="w-3.5 h-3.5" />
+            </button>
+
+            <!-- Premium Tooltip -->
+            <div class="absolute right-0 top-full mt-2.5 z-[100] pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
+              <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+                <div class="absolute -top-1 right-2.5 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                <span>{{ isLoggedIn ? 'Kelola Akun (' + userProfile?.name + ')' : 'Masuk ke Portal' }}</span>
+              </div>
+            </div>
+          </div>
 
           <!-- Profile Dropdown Menu -->
           <div 

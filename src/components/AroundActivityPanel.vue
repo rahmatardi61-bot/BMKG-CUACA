@@ -195,15 +195,15 @@ const getAdvisorForCourse = (course: GolfCourse) => {
 
 // ─── Color palette per card ───────────────────────────────────────────────────
 const COLOR_MAP: Record<string, { topBar: string; icon: string; advisorBg: string; border: string }> = {
-  blue:    { topBar: 'from-blue-500 via-blue-400 to-indigo-500',    icon: 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',       advisorBg: 'bg-blue-50/80 dark:bg-blue-900/20 border-blue-100 dark:border-blue-500/10',       border: 'border-blue-200/60 dark:border-blue-500/10' },
-  emerald: { topBar: 'from-emerald-500 via-green-400 to-teal-500',  icon: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400', advisorBg: 'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-500/10', border: 'border-emerald-200/60 dark:border-emerald-500/10' },
-  cyan:    { topBar: 'from-cyan-500 via-sky-400 to-blue-400',       icon: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400',         advisorBg: 'bg-cyan-50/80 dark:bg-cyan-900/20 border-cyan-100 dark:border-cyan-500/10',         border: 'border-cyan-200/60 dark:border-cyan-500/10' },
-  amber:   { topBar: 'from-amber-500 via-yellow-400 to-orange-400', icon: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',     advisorBg: 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-100 dark:border-amber-500/10',     border: 'border-amber-200/60 dark:border-amber-500/10' },
-  purple:  { topBar: 'from-purple-500 via-violet-400 to-fuchsia-400', icon: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400', advisorBg: 'bg-purple-50/80 dark:bg-purple-900/20 border-purple-100 dark:border-purple-500/10', border: 'border-purple-200/60 dark:border-purple-500/10' },
-  rose:    { topBar: 'from-rose-500 via-pink-400 to-fuchsia-500',   icon: 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400',         advisorBg: 'bg-rose-50/80 dark:bg-rose-900/20 border-rose-100 dark:border-rose-500/10',         border: 'border-rose-200/60 dark:border-rose-500/10' },
-  teal:    { topBar: 'from-teal-500 via-cyan-400 to-emerald-400',   icon: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400',         advisorBg: 'bg-teal-50/80 dark:bg-teal-900/20 border-teal-100 dark:border-teal-500/10',         border: 'border-teal-200/60 dark:border-teal-500/10' },
-  orange:  { topBar: 'from-orange-500 via-amber-400 to-yellow-400', icon: 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400', advisorBg: 'bg-orange-50/80 dark:bg-orange-900/20 border-orange-100 dark:border-orange-500/10', border: 'border-orange-200/60 dark:border-orange-500/10' },
-  indigo:  { topBar: 'from-indigo-500 via-blue-400 to-violet-500',  icon: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400', advisorBg: 'bg-indigo-50/80 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-500/10', border: 'border-indigo-200/60 dark:border-indigo-500/10' },
+  blue:    { topBar: 'from-blue-500 via-blue-400 to-indigo-500',    icon: 'bg-blue-100 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300',       advisorBg: 'bg-blue-50/80 dark:bg-blue-900/20 border-blue-100 dark:border-blue-500/10',       border: 'border-blue-200/60 dark:border-blue-500/10' },
+  emerald: { topBar: 'from-emerald-500 via-green-400 to-teal-500',  icon: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/30 dark:text-emerald-300', advisorBg: 'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-500/10', border: 'border-emerald-200/60 dark:border-emerald-500/10' },
+  cyan:    { topBar: 'from-cyan-500 via-sky-400 to-blue-400',       icon: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/30 dark:text-cyan-300',         advisorBg: 'bg-cyan-50/80 dark:bg-cyan-900/20 border-cyan-100 dark:border-cyan-500/10',         border: 'border-cyan-200/60 dark:border-cyan-500/10' },
+  amber:   { topBar: 'from-amber-500 via-yellow-400 to-orange-400', icon: 'bg-amber-100 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300',     advisorBg: 'bg-amber-50/80 dark:bg-amber-900/20 border-amber-100 dark:border-amber-500/10',     border: 'border-amber-200/60 dark:border-amber-500/10' },
+  purple:  { topBar: 'from-purple-500 via-violet-400 to-fuchsia-400', icon: 'bg-purple-100 text-purple-600 dark:bg-purple-500/30 dark:text-purple-300', advisorBg: 'bg-purple-50/80 dark:bg-purple-900/20 border-purple-100 dark:border-purple-500/10', border: 'border-purple-200/60 dark:border-purple-500/10' },
+  rose:    { topBar: 'from-rose-500 via-pink-400 to-fuchsia-500',   icon: 'bg-rose-100 text-rose-600 dark:bg-rose-500/30 dark:text-rose-300',         advisorBg: 'bg-rose-50/80 dark:bg-rose-900/20 border-rose-100 dark:border-rose-500/10',         border: 'border-rose-200/60 dark:border-rose-500/10' },
+  teal:    { topBar: 'from-teal-500 via-cyan-400 to-emerald-400',   icon: 'bg-teal-100 text-teal-600 dark:bg-teal-500/30 dark:text-teal-300',         advisorBg: 'bg-teal-50/80 dark:bg-teal-900/20 border-teal-100 dark:border-teal-500/10',         border: 'border-teal-200/60 dark:border-teal-500/10' },
+  orange:  { topBar: 'from-orange-500 via-amber-400 to-yellow-400', icon: 'bg-orange-100 text-orange-600 dark:bg-orange-500/30 dark:text-orange-300', advisorBg: 'bg-orange-50/80 dark:bg-orange-900/20 border-orange-100 dark:border-orange-500/10', border: 'border-orange-200/60 dark:border-orange-500/10' },
+  indigo:  { topBar: 'from-indigo-500 via-blue-400 to-violet-500',  icon: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/30 dark:text-indigo-300', advisorBg: 'bg-indigo-50/80 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-500/10', border: 'border-indigo-200/60 dark:border-indigo-500/10' },
 };
 const getColor = (key: string) => COLOR_MAP[key] ?? COLOR_MAP.blue;
 
@@ -463,7 +463,7 @@ const openRoute = (course: GolfCourse) => {
                       <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
                         {{ activeMobileCourse.name }}
                       </h4>
-                      <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
+                      <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-0.5 flex items-center gap-0.5 min-w-0">
                         <MapPin class="w-2.5 h-2.5 shrink-0" />
                         <span class="truncate">{{ activeMobileCourse.distance }}</span>
                       </p>
@@ -475,7 +475,6 @@ const openRoute = (course: GolfCourse) => {
                     type="button" 
                     @click.stop="openRoute(activeMobileCourse)"
                     class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50/80 dark:bg-brand-navy-950/40 hover:bg-blue-50 dark:hover:bg-brand-cyan/10 border border-slate-200/40 dark:border-brand-navy-800/40 shadow-sm transition-all duration-300 shrink-0 cursor-pointer active:scale-95 group/route"
-                    title="Buka Rute di Google Maps"
                   >
                     <div class="w-4.5 h-4.5 rounded-[3px] bg-blue-600 dark:bg-brand-cyan rotate-45 flex items-center justify-center shadow-sm group-hover/route:bg-blue-700 dark:group-hover/route:bg-brand-cyan/85 transition-colors">
                       <CornerUpRight class="w-2.5 h-2.5 text-white dark:text-brand-navy-950 -rotate-45" />
@@ -502,16 +501,16 @@ const openRoute = (course: GolfCourse) => {
                       <span
                         class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
                         :class="activeMobileCourse.comfortIndex === 'Nyaman'
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                          : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
+                          : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'"
                       >
                         {{ activeMobileCourse.comfortIndex }} {{ activeMobileCourse.comfortEmoji }}
                       </span>
                       <span
                         class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
                         :class="activeMobileCourse.advisorType === 'sea'
-                          ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
-                          : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
+                          ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300 dark:border dark:border-sky-500/25'
+                          : 'backdrop-blur-sm bg-white/60 text-slate-600 border border-slate-200/60 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
                       >
                         <component :is="activeMobileCourse.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
                         {{ activeMobileCourse.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
@@ -520,10 +519,10 @@ const openRoute = (course: GolfCourse) => {
 
                     <!-- Advisor box from cityAnalysisMap (clamped to 2 lines for perfect mobile display) -->
                     <div class="rounded-xl p-2 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
-                      <p class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                      <p class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 leading-none">
                         {{ getAdvisorForCourse(activeMobileCourse).label }}
                       </p>
-                      <p class="text-[10px] text-slate-600 dark:text-slate-300 leading-normal line-clamp-2">
+                      <p class="text-[10px] text-slate-650 dark:text-slate-200 leading-normal line-clamp-2">
                         {{ getAdvisorForCourse(activeMobileCourse).text }}
                       </p>
                     </div>
@@ -547,7 +546,7 @@ const openRoute = (course: GolfCourse) => {
                   <!-- Weather Info (Temp + Icon) -->
                   <div 
                     v-if="activeMobileCourse.hourly && activeMobileCourse.hourly.length"
-                    class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50/80 dark:bg-brand-navy-950/40 border border-slate-200/50 dark:border-brand-navy-800/40 text-slate-600 dark:text-slate-350 text-[10px] font-extrabold shrink-0 shadow-inner"
+                    class="flex items-center gap-1 px-2 py-0.5 rounded-lg backdrop-blur-sm bg-white/60 dark:bg-white/10 border border-slate-200/50 dark:border-white/15 text-slate-600 dark:text-slate-200 text-[10px] font-extrabold shrink-0 shadow-sm"
                   >
                     <component 
                       :is="activeMobileCourse.hourly.find(h => h.isCurrent)?.icon || activeMobileCourse.hourly[1]?.icon || activeMobileCourse.hourly[0]?.icon" 
@@ -605,7 +604,7 @@ const openRoute = (course: GolfCourse) => {
                   <h4 class="text-[13px] font-bold text-slate-800 dark:text-white leading-tight line-clamp-1">
                     {{ course.name }}
                   </h4>
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-0.5 min-w-0">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-400 mt-0.5 flex items-center gap-0.5 min-w-0">
                     <MapPin class="w-2.5 h-2.5 shrink-0" />
                     <span class="truncate">{{ course.distance }}</span>
                   </p>
@@ -616,8 +615,7 @@ const openRoute = (course: GolfCourse) => {
               <button 
                 type="button" 
                 @click.stop="openRoute(course)"
-                class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50/80 dark:bg-brand-navy-950/40 hover:bg-blue-50 dark:hover:bg-brand-cyan/10 border border-slate-200/40 dark:border-brand-navy-800/40 shadow-sm transition-all duration-300 shrink-0 cursor-pointer active:scale-95 group/route"
-                title="Buka Rute di Google Maps"
+                class="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm bg-white/60 dark:bg-white/10 hover:bg-blue-50 dark:hover:bg-brand-cyan/10 border border-slate-200/50 dark:border-white/15 shadow-sm transition-all duration-300 shrink-0 cursor-pointer active:scale-95 group/route"
               >
                 <div class="w-4.5 h-4.5 rounded-[3px] bg-blue-600 dark:bg-brand-cyan rotate-45 flex items-center justify-center shadow-sm group-hover/route:bg-blue-700 dark:group-hover/route:bg-brand-cyan/85 transition-colors">
                   <CornerUpRight class="w-2.5 h-2.5 text-white dark:text-brand-navy-950 -rotate-45" />
@@ -644,16 +642,16 @@ const openRoute = (course: GolfCourse) => {
                   <span
                     class="px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shrink-0"
                     :class="course.comfortIndex === 'Nyaman'
-                      ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                      : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'"
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
+                      : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'"
                   >
                     {{ course.comfortIndex }} {{ course.comfortEmoji }}
                   </span>
                   <span
                     class="px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 shrink-0"
                     :class="course.advisorType === 'sea'
-                      ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
-                      : 'bg-slate-100 text-slate-500 dark:bg-slate-700/40 dark:text-slate-400'"
+                      ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300 dark:border dark:border-sky-500/25'
+                      : 'backdrop-blur-sm bg-white/60 text-slate-600 border border-slate-200/60 dark:bg-white/10 dark:text-slate-200 dark:border-white/15'"
                   >
                     <component :is="course.advisorType === 'sea' ? Waves : TreePine" class="w-2.5 h-2.5" />
                     {{ course.advisorType === 'sea' ? 'Pesisir' : 'Darat' }}
@@ -665,10 +663,10 @@ const openRoute = (course: GolfCourse) => {
                   class="rounded-xl p-2.5 border space-y-0.5"
                   :class="getColor(course.colorKey).advisorBg"
                 >
-                  <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
+                  <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 leading-none">
                     {{ getAdvisorForCourse(course).label }}
                   </p>
-                  <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+                  <p class="text-[11px] text-slate-650 dark:text-slate-200 leading-relaxed line-clamp-2">
                     {{ getAdvisorForCourse(course).text }}
                   </p>
                 </div>
@@ -692,7 +690,7 @@ const openRoute = (course: GolfCourse) => {
               <!-- Weather Info (Temp + Icon) -->
               <div 
                 v-if="course.hourly && course.hourly.length"
-                class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-50/80 dark:bg-brand-navy-950/40 border border-slate-200/50 dark:border-brand-navy-800/40 text-slate-600 dark:text-slate-350 text-[10px] font-extrabold shrink-0 shadow-inner"
+                class="flex items-center gap-1 px-2 py-0.5 rounded-lg backdrop-blur-sm bg-white/60 dark:bg-white/10 border border-slate-200/50 dark:border-white/15 text-slate-600 dark:text-slate-200 text-[10px] font-extrabold shrink-0 shadow-sm"
               >
                 <component 
                   :is="course.hourly.find(h => h.isCurrent)?.icon || course.hourly[1]?.icon || course.hourly[0]?.icon" 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Info
 } from 'lucide-vue-next';
 
 import AroundActivityPanel from './AroundActivityPanel.vue';
@@ -21,11 +22,61 @@ import { cityLandmarks } from '../data/cityLandmarks';
 
 const carouselContainer = ref<HTMLElement | null>(null);
 
-// Determine the active city in the 10 major cities carousel. If not in the major cities list, fallback to 'DKI Jakarta'
-const activeCarouselCity = computed(() => {
-  const isMajorCity = cityLandmarks.some(l => l.fullName === props.selectedCity);
-  return isMajorCity ? props.selectedCity : 'DKI Jakarta';
-});
+const localActiveCity = ref('DKI Jakarta');
+const hasUserSelectedCity = ref(false);
+
+// Determine the active city in the 10 major cities carousel
+const activeCarouselCity = computed(() => localActiveCity.value);
+
+// ─── Auto Slide Timer Logic (10 seconds interval) ───
+let autoSlideInterval: number | null = null;
+
+const stopAutoSlide = () => {
+  if (autoSlideInterval) {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = null;
+  }
+};
+
+const startAutoSlide = () => {
+  stopAutoSlide();
+  if (hasUserSelectedCity.value) return;
+  
+  autoSlideInterval = window.setInterval(() => {
+    const currentIndex = cityLandmarks.findIndex(l => l.fullName === activeCarouselCity.value);
+    if (currentIndex !== -1) {
+      const nextIndex = (currentIndex + 1) % cityLandmarks.length;
+      const nextCity = cityLandmarks[nextIndex];
+      
+      // Auto-slide only changes the local highlight/landmark card view
+      // and does not change the parent dashboard's selected city.
+      localActiveCity.value = nextCity.fullName;
+    }
+  }, 10000); // 10 seconds
+};
+
+const selectCityManually = (city: string) => {
+  hasUserSelectedCity.value = true;
+  stopAutoSlide();
+  emit('select-city', city);
+};
+
+// Sync localActiveCity with selectedCity when selectedCity is one of the 10 major cities
+watch(
+  () => props.selectedCity,
+  (newCity) => {
+    const isMajor = cityLandmarks.some(l => l.fullName === newCity);
+    if (isMajor) {
+      localActiveCity.value = newCity;
+    } else {
+      // If it is a custom location (e.g. user clicked "Lokasi Saya" in the parent),
+      // we reset hasUserSelectedCity so the auto slide resumes.
+      hasUserSelectedCity.value = false;
+      startAutoSlide();
+    }
+  },
+  { immediate: true }
+);
 
 const scrollCarousel = (direction: 'left' | 'right') => {
   if (!carouselContainer.value) return;
@@ -37,6 +88,61 @@ const scrollCarousel = (direction: 'left' | 'right') => {
     container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 };
+
+const scrollToActiveCard = async () => {
+  await nextTick();
+  if (!carouselContainer.value) return;
+  
+  const currentLandmark = cityLandmarks.find(l => l.fullName === activeCarouselCity.value);
+  if (!currentLandmark) return;
+  
+  const activeCard = document.getElementById('landmark-card-' + currentLandmark.name.toLowerCase());
+  if (activeCard && carouselContainer.value) {
+    const container = carouselContainer.value;
+    const cardLeft = activeCard.offsetLeft;
+    const cardWidth = activeCard.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    container.scrollTo({
+      left: cardLeft - (containerWidth / 2) + (cardWidth / 2),
+      behavior: 'smooth'
+    });
+  }
+};
+
+const showHint = ref(false);
+const hintContainer = ref<HTMLElement | null>(null);
+
+const handleClickOutsideHint = (event: MouseEvent) => {
+  if (
+    showHint.value &&
+    hintContainer.value &&
+    !hintContainer.value.contains(event.target as Node)
+  ) {
+    showHint.value = false;
+  }
+};
+
+// Reset auto-slide timer and scroll active card into view when active city changes
+watch(activeCarouselCity, () => {
+  scrollToActiveCard();
+  if (!hasUserSelectedCity.value) {
+    startAutoSlide(); // resets the 10s timer
+  }
+});
+
+onMounted(() => {
+  startAutoSlide();
+  // Scroll to active card on initial load
+  setTimeout(() => {
+    scrollToActiveCard();
+  }, 350);
+  document.addEventListener('click', handleClickOutsideHint);
+});
+
+onUnmounted(() => {
+  stopAutoSlide();
+  document.removeEventListener('click', handleClickOutsideHint);
+});
 </script>
 
 <template>
@@ -51,14 +157,100 @@ const scrollCarousel = (direction: 'left' | 'right') => {
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.12)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.06)_0%,transparent_60%)]"></div>
       </div>
 
-      <!-- Title & Subtitle -->
-      <div class="relative space-y-0.5 mb-5 text-left">
-        <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-white">
-          Kondisi Terkini
-        </h3>
-        <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500">
-          10 Kota Besar Indonesia
-        </p>
+      <!-- Title & Subtitle + Hints Button -->
+      <div class="relative flex items-start justify-between mb-5">
+        <div class="space-y-0.5 text-left">
+          <h3 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-800 dark:text-white">
+            Kondisi Terkini
+          </h3>
+          <p class="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500">
+            Pilih kota besar untuk informasi lebih lanjut
+          </p>
+        </div>
+        
+        <div 
+          class="relative shrink-0" 
+          ref="hintContainer"
+          @mouseenter="showHint = true"
+          @mouseleave="showHint = false"
+        >
+          <button 
+            @click.stop="showHint = !showHint"
+            class="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-brand-navy-800/50 transition-colors duration-200 outline-none cursor-pointer flex items-center justify-center"
+            aria-label="Informasi Navigasi"
+          >
+            <Info class="w-5 h-5" />
+          </button>
+          
+          <!-- Popover -->
+          <Transition name="fade-scale">
+            <div 
+              v-if="showHint"
+              class="absolute right-0 mt-3 w-72 sm:w-85 rounded-2xl p-5 z-30 text-left
+                bg-slate-900/70 dark:bg-slate-950/60 border border-white/10 dark:border-slate-800/60 backdrop-blur-xl text-slate-300 shadow-[0_25px_60px_-15px_rgba(6,182,212,0.25)]"
+            >
+              <!-- Top Glow Line -->
+              <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/60 dark:via-brand-cyan/60 to-transparent rounded-t-2xl"></div>
+
+              <!-- Arrow pointing to the button (top-right of popover) -->
+              <div class="absolute top-[-6px] right-4 w-3 h-3 bg-slate-900/70 dark:bg-slate-950/60 backdrop-blur-xl rotate-45 border-t border-l border-white/10 dark:border-slate-800/60 z-10"></div>
+
+              <!-- Header with Cyan Title & Info Badge -->
+              <div class="flex items-center gap-2 mb-3 relative z-20">
+                <h4 class="text-sm font-black tracking-wide text-cyan-400 dark:text-brand-cyan">
+                  Panduan Navigasi
+                </h4>
+                <span class="px-1.5 py-0.5 text-[8px] font-black uppercase rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 tracking-wider">
+                  INFO
+                </span>
+              </div>
+              
+              <!-- Subtitle / Description -->
+              <p class="text-[10px] sm:text-xs text-slate-400 font-medium leading-relaxed mb-4 relative z-20">
+                Panduan perilaku carousel 10 kota besar &amp; cara kembali ke lokasi Anda saat ini.
+              </p>
+
+              <!-- Bullets List -->
+              <ul class="space-y-3.5 text-[10px] sm:text-xs font-normal leading-relaxed relative z-20">
+                <!-- Bullet 1 -->
+                <li class="flex items-start gap-2.5">
+                  <span class="relative flex h-2 w-2 mt-1.5 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 dark:bg-brand-cyan opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 dark:bg-brand-cyan"></span>
+                  </span>
+                  <div>
+                    <span class="font-extrabold text-white">Slide Otomatis:</span>
+                    <span class="text-slate-300"> Mempresentasikan cuaca kota secara bergantian setiap 10 detik. Pada lokasi kustom/GPS, slide berjalan lokal tanpa mengubah cuaca utama Anda.</span>
+                  </div>
+                </li>
+                <!-- Bullet 2 -->
+                <li class="flex items-start gap-2.5">
+                  <span class="relative flex h-2 w-2 mt-1.5 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 dark:bg-brand-cyan opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 dark:bg-brand-cyan"></span>
+                  </span>
+                  <div>
+                    <span class="font-extrabold text-white">Pilih Kota:</span>
+                    <span class="text-slate-300"> Klik kartu kota manapun untuk beralih secara manual dan mengunci tampilan cuaca pada kota besar tersebut.</span>
+                  </div>
+                </li>
+                <!-- Bullet 3 -->
+                <li class="flex items-start gap-2.5">
+                  <span class="relative flex h-2 w-2 mt-1.5 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+                  </span>
+                  <div>
+                    <span class="font-extrabold text-amber-400">Lokasi Saya:</span>
+                    <span class="text-slate-300"> Klik tombol </span>
+                    <span class="text-amber-400 font-bold">"LOKASI SAYA"</span>
+                    <span class="text-slate-300"> di dropdown lokasi bagian atas layar untuk mengembalikan cuaca ke GPS wilayah Anda saat ini.</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </Transition>
+        </div>
       </div>
 
     <!-- Carousel Wrapper -->
@@ -91,7 +283,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
           :key="landmark.name"
           v-memo="[activeCarouselCity === landmark.fullName]"
           :id="'landmark-card-' + landmark.name.toLowerCase()"
-          @click="emit('select-city', landmark.fullName)"
+          @click="selectCityManually(landmark.fullName)"
           class="gpu-card snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] no-blur relative overflow-hidden group/card shadow-sm"
           :class="[
             activeCarouselCity === landmark.fullName
@@ -136,18 +328,29 @@ const scrollCarousel = (direction: 'left' | 'right') => {
             :class="[
               activeCarouselCity === landmark.fullName
                 ? {
-                    'Jakarta': 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/25 dark:text-blue-400',
-                    'Surabaya': 'bg-cyan-500/20 text-cyan-600 dark:bg-cyan-500/25 dark:text-cyan-400',
-                    'Bandung': 'bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/25 dark:text-emerald-400',
-                    'Medan': 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/25 dark:text-amber-400',
-                    'Semarang': 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/25 dark:text-purple-400',
-                    'Makassar': 'bg-red-500/20 text-red-600 dark:bg-red-500/25 dark:text-red-400',
-                    'Palembang': 'bg-orange-500/20 text-orange-600 dark:bg-orange-500/25 dark:text-orange-400',
-                    'Batam': 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/25 dark:text-indigo-400',
-                    'Pekanbaru': 'bg-teal-500/20 text-teal-600 dark:bg-teal-500/25 dark:text-teal-400',
-                    'Denpasar': 'bg-rose-500/20 text-rose-600 dark:bg-rose-500/25 dark:text-rose-400'
-                  }[landmark.name] || 'bg-blue-500/20 text-blue-600 dark:bg-brand-cyan/25 dark:text-brand-cyan'
-                : 'bg-slate-100 dark:bg-brand-navy-800/80 ' + landmark.color
+                    'Jakarta': 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300',
+                    'Surabaya': 'bg-cyan-500/20 text-cyan-600 dark:bg-cyan-500/30 dark:text-cyan-300',
+                    'Bandung': 'bg-emerald-500/20 text-emerald-600 dark:bg-emerald-500/30 dark:text-emerald-300',
+                    'Medan': 'bg-amber-500/20 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300',
+                    'Semarang': 'bg-purple-500/20 text-purple-600 dark:bg-purple-500/30 dark:text-purple-300',
+                    'Makassar': 'bg-red-500/20 text-red-600 dark:bg-red-500/30 dark:text-red-300',
+                    'Palembang': 'bg-orange-500/20 text-orange-600 dark:bg-orange-500/30 dark:text-orange-300',
+                    'Batam': 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/30 dark:text-indigo-300',
+                    'Pekanbaru': 'bg-teal-500/20 text-teal-600 dark:bg-teal-500/30 dark:text-teal-300',
+                    'Denpasar': 'bg-rose-500/20 text-rose-600 dark:bg-rose-500/30 dark:text-rose-300'
+                  }[landmark.name] || 'bg-blue-500/20 text-blue-600 dark:bg-brand-cyan/30 dark:text-brand-cyan'
+                : {
+                    'Jakarta': 'bg-blue-50 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400',
+                    'Surabaya': 'bg-cyan-50 text-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400',
+                    'Bandung': 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/20 dark:text-emerald-400',
+                    'Medan': 'bg-amber-50 text-amber-500 dark:bg-amber-500/20 dark:text-amber-400',
+                    'Semarang': 'bg-purple-50 text-purple-500 dark:bg-purple-500/20 dark:text-purple-400',
+                    'Makassar': 'bg-red-50 text-red-500 dark:bg-red-500/20 dark:text-red-400',
+                    'Palembang': 'bg-orange-50 text-orange-500 dark:bg-orange-500/20 dark:text-orange-400',
+                    'Batam': 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400',
+                    'Pekanbaru': 'bg-teal-50 text-teal-500 dark:bg-teal-500/20 dark:text-teal-400',
+                    'Denpasar': 'bg-rose-50 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400'
+                  }[landmark.name] || 'bg-slate-100 text-slate-500 dark:bg-slate-700/30 dark:text-slate-400'
             ]"
             v-html="landmark.svg"
           ></div>
@@ -173,7 +376,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
                       'Pekanbaru': 'text-teal-500/80 dark:text-teal-400/80',
                       'Denpasar': 'text-rose-500/80 dark:text-rose-400/80'
                     }[landmark.name] || 'text-blue-500/80 dark:text-brand-cyan/80'
-                  : 'text-slate-400 dark:text-slate-500'
+                  : 'text-slate-400 dark:text-slate-300/70'
               ]"
             >
               {{ activeCarouselCity === landmark.fullName ? 'Aktif' : 'Pilih Kota' }}
@@ -189,7 +392,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
         <button
           v-for="landmark in cityLandmarks"
           :key="'dot-' + landmark.name"
-          @click="emit('select-city', landmark.fullName)"
+          @click="selectCityManually(landmark.fullName)"
           class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
           :class="activeCarouselCity === landmark.fullName
             ? 'w-5 bg-blue-500 dark:bg-brand-cyan'
@@ -233,7 +436,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
 
         <!-- Top: Icon + title -->
         <div class="flex flex-col gap-3.5">
-          <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/70 dark:bg-white/5 backdrop-blur-md border border-slate-200/50 dark:border-white/10 shadow-sm p-2 select-none">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/70 dark:bg-white/15 backdrop-blur-md border border-slate-200/50 dark:border-white/20 shadow-sm dark:shadow-white/5 p-2 select-none">
             <img src="../assets/logo.svg" alt="Info BMKG Logo" class="w-full h-full object-contain" />
           </div>
           <div class="mt-0.5">
@@ -252,7 +455,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
           <div class="flex flex-row gap-2 w-full max-w-[280px]">
             <!-- Google Play -->
             <a href="https://play.google.com/store/apps/details?id=com.Info_BMKG" target="_blank" rel="noopener noreferrer"
-               class="h-9 px-3 rounded-lg border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-700 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800 flex-1 min-w-0">
+               class="h-9 px-3 rounded-lg border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-700 text-white dark:bg-brand-navy-900/ dark:border-brand-navy-800 flex-1 min-w-0">
               <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-emerald-400 shrink-0">
                 <path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.58-1.408V3.222c0-.528.22-1.01.58-1.408zM14.5 12.707l2.846 2.846-13.018 7.502a1.99 1.99 0 0 1-.718.131c-.52 0-.996-.2-1.378-.528L14.5 12.707zm7.558-.918l-3.328-1.92-2.176 2.176 2.176 2.176 3.328-1.92a1.144 1.144 0 0 0 0-2.022zM14.5 11.293L2.232 3.223c.382-.328.858-.528 1.378-.528.254 0 .5.048.718.131l13.018 7.502-2.846 2.965z"/>
               </svg>
@@ -264,7 +467,7 @@ const scrollCarousel = (direction: 'left' | 'right') => {
 
             <!-- App Store -->
             <a href="https://apps.apple.com/id/app/info-bmkg/id1114372539" target="_blank" rel="noopener noreferrer"
-               class="h-9 px-3 rounded-lg border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-700 text-white dark:bg-brand-navy-900 dark:border-brand-navy-800 flex-1 min-w-0">
+               class="h-9 px-3 rounded-lg border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 bg-slate-900 border-slate-700 text-white dark:bg-brand-navy-900/ dark:border-brand-navy-800 flex-1 min-w-0">
               <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-slate-100 shrink-0">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.45-.6.7-1.13 1.84-.99 2.94.12.01.24.02.36.02.94 0 2.01-.54 2.46-1.35z"/>
               </svg>
@@ -283,6 +486,22 @@ const scrollCarousel = (direction: 'left' | 'right') => {
 </template>
 
 <style scoped>
+/* Transition fade-scale */
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-6px);
+}
+.fade-scale-enter-to,
+.fade-scale-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
 /* ── CTA Card — Light Mode ── */
 .cta-card {
   background-color: rgba(255, 255, 255, 0.7);

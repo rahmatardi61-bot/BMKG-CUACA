@@ -79,24 +79,29 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white/90 dark:bg-brand-navy-900/90 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl shadow-sm no-blur overflow-hidden transition-[box-shadow] duration-300">
+  <div class="relative w-full rounded-3xl overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50">
+    <!-- Top Glow Border Line -->
+    <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent rounded-t-2xl"></div>
     
     <!-- ── Header ─────────────────────────────── -->
-    <div class="px-6 pt-6 pb-4 flex items-center justify-between gap-3 border-b border-slate-100/40 dark:border-brand-navy-800/30">
+    <div class="p-5 pb-3.5 flex items-center justify-between gap-3 border-b border-slate-100/40 dark:border-brand-navy-800/30 relative z-10">
       <!-- Left: Title -->
-      <div>
-        <div class="flex items-center gap-2">
-          <!-- Hourly forecast clock icon -->
-          <svg class="w-4 h-4 text-blue-500 dark:text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="flex items-center gap-2">
+        <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 text-blue-500 dark:text-brand-cyan border border-blue-500/10">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            Prakiraan Perjam
-          </h3>
         </div>
-        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 transition-all duration-300">{{ headerDate }}</p>
+        <div>
+          <h4 class="text-xs sm:text-sm font-black tracking-tight text-slate-800 dark:text-white uppercase leading-none mb-1">
+            Prakiraan Perjam
+          </h4>
+          <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 transition-all duration-300">
+            {{ headerDate || 'Parameter Cuaca Hari Ini' }}
+          </p>
+        </div>
       </div>
 
       <!-- Right: Dropdown with glassmorphism and dynamic icon -->

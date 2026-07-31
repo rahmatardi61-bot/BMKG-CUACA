@@ -30,6 +30,7 @@ const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/A
 const LandBasedActivities = defineAsyncComponent(() => import('../components/LandBasedActivities.vue'));
 const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 
 import type { 
   WeatherData, 
@@ -244,7 +245,7 @@ onUnmounted(() => {
         <!-- Modern borderless location selector -->
         <div class="flex items-center justify-between pb-1">
           <div class="relative" ref="dropdownContainer">
-            <button 
+            <div 
               id="location-dropdown-toggle"
               @click="showDropdown = !showDropdown"
               class="flex flex-col items-start gap-1 py-1.5 text-left transition-all select-none hover:opacity-90 active:scale-[0.98] duration-200 outline-none cursor-pointer group"
@@ -262,52 +263,68 @@ onUnmounted(() => {
                   <ChevronDown class="w-5 h-5 text-slate-400 transition-transform duration-300 shrink-0 group-hover:text-slate-600 dark:group-hover:text-slate-350 ml-0.5" :class="{ 'rotate-180': showDropdown }" />
 
                   <!-- Lokasi Saya Badge (Clickable button) -->
-                  <button 
-                    type="button"
-                    @click.stop="detectLocation"
-                    v-if="isCustomGeolocated"
-                    class="shrink-0 inline-flex items-center gap-1 pl-1.5 pr-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none"
-                    title="Dapatkan lokasi realtime Anda"
-                  >
-                    <!-- Live GPS Signal Dot -->
-                    <span 
-                      class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30"
+                  <div v-if="isCustomGeolocated" class="relative group shrink-0">
+                    <button 
+                      type="button"
+                      @click.stop="detectLocation"
+                      class="shrink-0 inline-flex items-center gap-1 pl-1.5 pr-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none"
                     >
-                      <span class="relative flex h-1 w-1 shrink-0">
-                        <span v-if="isLocating" class="animate-spin h-2 w-2 border border-current rounded-full border-t-transparent"></span>
-                        <template v-else>
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-brand-cyan opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-500 dark:bg-brand-cyan"></span>
-                        </template>
+                      <!-- Live GPS Signal Dot -->
+                      <span 
+                        class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30"
+                      >
+                        <span class="relative flex h-1 w-1 shrink-0">
+                          <span v-if="isLocating" class="animate-spin h-2 w-2 border border-current rounded-full border-t-transparent"></span>
+                          <template v-else>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-brand-cyan opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-500 dark:bg-brand-cyan"></span>
+                          </template>
+                        </span>
                       </span>
-                    </span>
-                    <span>{{ isLocating ? 'Mencari...' : 'Lokasi Saya' }}</span>
-                  </button>
+                      <span>{{ isLocating ? 'Mencari...' : 'Lokasi Saya' }}</span>
+                    </button>
+
+                    <!-- Premium Tooltip -->
+                    <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
+                      <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                        <span>Dapatkan lokasi realtime Anda</span>
+                      </div>
+                    </div>
+                  </div>
 
                   <!-- Cari Lokasi Saya Button (Clickable button, shown when not geolocated) -->
-                  <button 
-                    type="button"
-                    @click.stop="detectLocation"
-                    v-else
-                    class="shrink-0 inline-flex items-center gap-1.5 pl-2 pr-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none"
-                    title="Cari lokasi realtime Anda menggunakan GPS"
-                  >
-                    <!-- GPS Target Dot (pulsing if searching location) -->
-                    <span 
-                      class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30"
+                  <div v-else class="relative group shrink-0">
+                    <button 
+                      type="button"
+                      @click.stop="detectLocation"
+                      class="shrink-0 inline-flex items-center gap-1.5 pl-2 pr-2.5 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none"
                     >
-                      <span class="relative flex h-1 w-1 shrink-0">
-                        <span v-if="isLocating" class="animate-spin h-2 w-2 border border-current rounded-full border-t-transparent"></span>
-                        <template v-else>
-                          <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-500 dark:bg-brand-cyan"></span>
-                        </template>
+                      <!-- GPS Target Dot (pulsing if searching location) -->
+                      <span 
+                        class="w-[14px] h-[14px] rounded-full flex items-center justify-center border backdrop-blur-[2px] bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:border-brand-cyan/30"
+                      >
+                        <span class="relative flex h-1 w-1 shrink-0">
+                          <span v-if="isLocating" class="animate-spin h-2 w-2 border border-current rounded-full border-t-transparent"></span>
+                          <template v-else>
+                            <span class="relative inline-flex rounded-full h-1 w-1 bg-blue-500 dark:bg-brand-cyan"></span>
+                          </template>
+                        </span>
                       </span>
-                    </span>
-                    <span>{{ isLocating ? 'Mencari...' : 'Cari Lokasi Saya' }}</span>
-                  </button>
+                      <span>{{ isLocating ? 'Mencari...' : 'Cari Lokasi Saya' }}</span>
+                    </button>
+
+                    <!-- Premium Tooltip -->
+                    <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
+                      <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
+                        <span>Cari lokasi realtime Anda menggunakan GPS</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </button>
+            </div>
 
             <!-- Dropdown List -->
             <div 
@@ -428,6 +445,13 @@ onUnmounted(() => {
 
         <!-- Temperature Trend Line Graph & Hourly Flex -->
         <ForecastPanel :forecasts="forecasts" />
+
+        <!-- Real-time Earthquake Seismic Proximity Monitor -->
+        <EarthquakeHistory 
+          :selected-city="selectedCity"
+          :user-lat="userLat"
+          :user-lng="userLng"
+        />
       </div>
 
       <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->

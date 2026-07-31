@@ -66,8 +66,8 @@ const activeTransportStatuses = computed(() => {
 
 // Computed per-city warning alerts
 const activeWarningAlerts = computed(() => {
-  // Disable warning alert for sample layout of the user's current geolocated location
-  if (selectedCity.value === cities.value[0]) {
+  // Only suppress alerts when user has real GPS location (mock data has no real alerts)
+  if (isGeolocated.value && selectedCity.value === cities.value[0]) {
     return [];
   }
   return warningAlertsMap[selectedCity.value] || warningAlertsMap['DKI Jakarta'];
@@ -181,9 +181,9 @@ const applyTheme = () => {
     
     // Choose status bar color matching active weather condition background
     switch (autoTheme.themeClass) {
-      case 'theme-morning': themeColor = '#fffbeb'; break;
+      case 'theme-morning': themeColor = '#fdf2f8'; break;
       case 'theme-day':     themeColor = '#f0f9ff'; break;
-      case 'theme-evening': themeColor = '#fff7ed'; break;
+      case 'theme-evening': themeColor = '#fff1f2'; break;
       case 'theme-night':   themeColor = '#0f172a'; break;
       case 'theme-rainy':   themeColor = '#f8fafc'; break;
       case 'theme-stormy':  themeColor = '#090514'; break;
@@ -571,7 +571,7 @@ onMounted(() => {
     <Transition name="slide-fade">
       <div 
         v-if="toastMessage"
-        class="fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-2xl shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
+        class="fixed top-6 left-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-2xl shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
       >
         <!-- Warning Icon -->
         <div class="p-1 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
@@ -618,9 +618,9 @@ onMounted(() => {
 }
 
 /* Toast Slide In animation */
-@keyframes slideInRight {
+@keyframes slideInLeft {
   from {
-    transform: translateX(120%);
+    transform: translateX(-120%);
     opacity: 0;
   }
   to {
@@ -629,6 +629,6 @@ onMounted(() => {
   }
 }
 .animate-slide-in {
-  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 </style>

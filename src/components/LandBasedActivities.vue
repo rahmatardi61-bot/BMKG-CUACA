@@ -1967,15 +1967,21 @@ onUnmounted(() => {
         </div>
 
         <!-- Floating Close X Button on Map -->
-        <button 
+        <div
           v-if="currentStep !== 'search'"
-          type="button"
-          @click="emit('close')"
-          class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer map-close-btn"
-          title="Tutup Rute"
+          class="premium-tooltip-container absolute right-4 top-4 z-50"
         >
-          <X class="w-5 h-5" />
-        </button>
+          <button 
+            type="button"
+            @click="emit('close')"
+            class="w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-800 active:scale-95 transition-all cursor-pointer map-close-btn"
+          >
+            <X class="w-5 h-5" />
+          </button>
+          <div class="premium-tooltip tooltip-bottom tooltip-right">
+            <span>Tutup Rute</span>
+          </div>
+        </div>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
              2. BOTTOM SHEET: Drawer content for all steps
@@ -1991,7 +1997,7 @@ onUnmounted(() => {
               class="py-3 flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
               @pointerdown.prevent="onSheetDragStart"
               @click="toggleSheetExpanded"
-              title="Seret untuk minimize/expand"
+
             >
               <div 
                 class="h-1 rounded-full transition-all duration-300"
@@ -2400,15 +2406,19 @@ onUnmounted(() => {
                       <span class="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-brand-cyan"></span>
                       Mencari...
                     </div>
-                    <button
-                      v-if="!searchQuery.trim() && searchHistory.length > 0"
-                      @click="clearSearchHistory"
-                      class="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer py-1 px-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10"
-                      title="Hapus riwayat"
-                    >
-                      <Trash2 class="w-3 h-3" />
-                      Hapus
-                    </button>
+                    <div class="premium-tooltip-container">
+                      <button
+                        v-if="!searchQuery.trim() && searchHistory.length > 0"
+                        @click="clearSearchHistory"
+                        class="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer py-1 px-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10"
+                      >
+                        <Trash2 class="w-3 h-3" />
+                        Hapus
+                      </button>
+                      <div class="premium-tooltip tooltip-bottom">
+                        <span>Hapus riwayat pencarian</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

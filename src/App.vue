@@ -510,7 +510,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100">
+  <div class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100 overflow-x-hidden w-full">
     <template v-if="!showLogin">
       <!-- Main Header -->
       <Header 

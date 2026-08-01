@@ -623,7 +623,7 @@ onUnmounted(() => {
         <!-- Horizontal scroll container -->
         <div
           ref="scrollContainer"
-          class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative will-change-scroll"
+          class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative will-change-scroll min-w-0"
           @scroll="onScroll"
         >
           <!-- Tooltip overlay -->

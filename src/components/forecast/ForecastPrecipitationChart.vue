@@ -354,7 +354,7 @@ const tooltipTop = computed(() => {
       <!-- SVG chart (scrollable) -->
       <div
         ref="precipScrollContainer"
-        class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative"
+        class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative min-w-0"
         @mousemove="onPrecipMouseMove"
         @mouseleave="onPrecipMouseLeave"
       >

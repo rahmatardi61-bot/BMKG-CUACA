@@ -580,7 +580,7 @@ onUnmounted(() => {
             <!-- Horizontal scroll container (with overflow-y-hidden) -->
             <div
               ref="scrollContainer"
-              class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative"
+              class="flex-grow overflow-x-auto overflow-y-hidden no-scrollbar relative min-w-0"
               @scroll="updateScrollButtons"
             >
               <div :style="{ width: scrollContentWidth + 'px' }" class="relative">

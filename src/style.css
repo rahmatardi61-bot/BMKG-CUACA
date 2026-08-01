@@ -7,6 +7,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* Enforce font family on Leaflet elements globally */
@@ -20,7 +22,7 @@ body {
 
 body {
   @apply bg-brand-sky-100 text-slate-800 dark:bg-brand-navy-950 dark:text-slate-100;
-  overflow-x: clip;
+  overflow-x: hidden;
   transition: background-color 1s ease, color 0.5s ease;
 }
 

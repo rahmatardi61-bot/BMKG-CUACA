@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { 
   Activity, 
   Compass, 
@@ -74,6 +74,7 @@ const showSafety = ref(false);
 
 // Map Modal state
 const isMapModalOpen = ref(false);
+const isDrawerMinimized = ref(true);
 let leafletMap: L.Map | null = null;
 let tileLayer: L.TileLayer | null = null;
 let themeObserver: MutationObserver | null = null;
@@ -92,6 +93,7 @@ const closeModal = () => {
 
 const openMapModal = async () => {
   isMapModalOpen.value = true;
+  isDrawerMinimized.value = true;
   await nextTick();
   initLeafletMap();
 };
@@ -100,6 +102,98 @@ const closeMapModal = () => {
   destroyLeafletMap();
   isMapModalOpen.value = false;
 };
+
+// --- Detail Drawer Map State & Handlers ---
+const detailMapEl = ref<HTMLElement | null>(null);
+let detailMap: L.Map | null = null;
+let detailTileLayer: L.TileLayer | null = null;
+let detailMarker: L.Marker | null = null;
+
+const initDetailMap = () => {
+  if (!detailMapEl.value || !selectedEvent.value) return;
+  
+  if (detailMap) {
+    detailMap.setView([selectedEvent.value.lat, selectedEvent.value.lng], 9);
+    updateDetailMarker();
+    return;
+  }
+
+  detailMap = L.map(detailMapEl.value, {
+    zoomControl: false,
+    attributionControl: false,
+    scrollWheelZoom: false,
+    touchZoom: false
+  }).setView([selectedEvent.value.lat, selectedEvent.value.lng], 9);
+
+  updateDetailMapTheme();
+  updateDetailMarker();
+
+  detailMap.whenReady(() => {
+    detailMap?.invalidateSize();
+  });
+};
+
+const updateDetailMarker = () => {
+  if (!detailMap || !selectedEvent.value) return;
+  if (detailMarker) {
+    detailMap.removeLayer(detailMarker);
+  }
+
+  const markerColor = selectedEvent.value.magnitude >= 6 ? '#ef4444' : (selectedEvent.value.magnitude >= 5 ? '#f59e0b' : '#3b82f6');
+  const pulseHtml = `
+    <div class="relative flex items-center justify-center">
+      <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full opacity-75" style="background-color: ${markerColor}"></span>
+      <div class="relative w-4 h-4 rounded-full border border-white shadow-md" style="background-color: ${markerColor}"></div>
+    </div>
+  `;
+  const detailIcon = L.divIcon({
+    html: pulseHtml,
+    className: 'custom-detail-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+
+  detailMarker = L.marker([selectedEvent.value.lat, selectedEvent.value.lng], { icon: detailIcon }).addTo(detailMap);
+};
+
+const updateDetailMapTheme = () => {
+  if (!detailMap) return;
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const lightUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  const darkUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png';
+  const selectedUrl = isDarkMode ? darkUrl : lightUrl;
+
+  if (detailTileLayer) {
+    detailMap.removeLayer(detailTileLayer);
+  }
+
+  detailTileLayer = L.tileLayer(selectedUrl, {
+    maxZoom: 18
+  }).addTo(detailMap);
+};
+
+const destroyDetailMap = () => {
+  if (detailMap) {
+    detailMap.remove();
+    detailMap = null;
+  }
+  detailTileLayer = null;
+  detailMarker = null;
+};
+
+watch(
+  () => [isModalOpen.value, selectedEvent.value] as const,
+  async ([isOpenVal, eventVal]) => {
+    if (isOpenVal && eventVal) {
+      await nextTick();
+      setTimeout(() => {
+        initDetailMap();
+      }, 350); // Matches the drawer right slide animation duration
+    } else {
+      destroyDetailMap();
+    }
+  }
+);
 
 const updateMapTheme = () => {
   if (!leafletMap) return;
@@ -145,6 +239,7 @@ const initLeafletMap = () => {
   if (!themeObserver) {
     themeObserver = new MutationObserver(() => {
       updateMapTheme();
+      updateDetailMapTheme();
       // Close any open popup so next open picks up the new theme colors
       if (leafletMap) leafletMap.closePopup();
     });
@@ -358,6 +453,7 @@ const destroyLeafletMap = () => {
   }
   tileLayer = null;
   markerMap.clear();
+  destroyDetailMap();
 };
 
 const flyToEpicenter = (eq: EarthquakeEvent) => {
@@ -669,27 +765,52 @@ const getMmiWidth = (mmi: string) => {
             <Transition name="drawer-slide" appear>
               <div 
                 v-if="isMapModalOpen"
-                class="w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/10 dark:border-brand-navy-850/50 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left pointer-events-auto h-[75vh] md:h-full max-h-[75vh] md:max-h-[calc(100vh-140px)] animate-fade-in"
+                :class="[
+                  isDrawerMinimized ? 'h-[88px] max-h-[88px]' : 'h-[75vh] max-h-[75vh]',
+                  'w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/10 dark:border-brand-navy-850/50 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left pointer-events-auto md:h-full md:max-h-[calc(100vh-140px)] animate-fade-in transition-all duration-300'
+                ]"
               >
                 <!-- Drag Handle / Visual top line -->
-                <div class="py-3 flex items-center justify-center shrink-0">
+                <div 
+                  @click="isDrawerMinimized = !isDrawerMinimized"
+                  class="py-3 flex items-center justify-center shrink-0 cursor-pointer select-none hover:bg-slate-500/5 dark:hover:bg-white/5 transition-colors"
+                >
                   <div class="w-16 h-1 rounded-full bg-slate-300 dark:bg-slate-500/90"></div>
                 </div>
 
                 <!-- Sticky Header -->
-                <div class="px-5 pb-3.5 border-b border-slate-100/50 dark:border-brand-navy-800/40 flex items-center gap-2 shrink-0">
-                  <div class="p-2 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/10">
-                    <Globe class="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <h4 class="text-xs sm:text-sm font-black tracking-tight text-slate-800 dark:text-white uppercase leading-none mb-1">
-                      Peta Seismik Nasional
-                    </h4>
-                    <div class="flex items-center gap-1 mt-0.5 text-[9px] font-semibold text-slate-400 dark:text-slate-500">
-                      <MapPin class="w-3 h-3 text-brand-cyan" />
-                      <span>Posisi Episentrum Relatif ke {{ props.selectedCity }}</span>
+                <div 
+                  @click="isDrawerMinimized ? (isDrawerMinimized = false) : null"
+                  :class="[
+                    isDrawerMinimized ? 'cursor-pointer hover:bg-slate-500/5 dark:hover:bg-white/5 transition-colors' : '',
+                    'px-5 pb-3.5 border-b border-slate-100/50 dark:border-brand-navy-800/40 flex items-center justify-between gap-2 shrink-0 select-none'
+                  ]"
+                >
+                  <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/10">
+                      <Globe class="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <h4 class="text-xs sm:text-sm font-black tracking-tight text-slate-800 dark:text-white uppercase leading-none mb-1">
+                        Peta Seismik Nasional
+                      </h4>
+                      <div class="flex items-center gap-1 mt-0.5 text-[9px] font-semibold text-slate-400 dark:text-slate-500">
+                        <MapPin class="w-3 h-3 text-brand-cyan" />
+                        <span>Posisi Episentrum Relatif ke {{ props.selectedCity }}</span>
+                      </div>
                     </div>
                   </div>
+                  <!-- Mini chevron indicator for state (mobile only) -->
+                  <button 
+                    type="button"
+                    @click.stop="isDrawerMinimized = !isDrawerMinimized"
+                    class="md:hidden p-1.5 rounded-lg bg-slate-50 dark:bg-brand-navy-800/60 border border-slate-200/40 dark:border-brand-navy-700/30 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 cursor-pointer active:scale-95 transition-all"
+                  >
+                    <ChevronDown 
+                      class="w-3.5 h-3.5 transition-transform duration-300"
+                      :class="{ 'rotate-180': isDrawerMinimized }"
+                    />
+                  </button>
                 </div>
 
                 <!-- Content Area (Scrollable List Only) -->
@@ -786,6 +907,7 @@ const getMmiWidth = (mmi: string) => {
               <div 
                 v-if="isMapModalOpen"
                 class="w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/20 dark:border-brand-navy-850/50 shadow-xl rounded-2xl p-3.5 text-slate-800 dark:text-slate-100 transition-all duration-300 pointer-events-auto shrink-0"
+                :class="[isDrawerMinimized ? 'hidden md:block' : 'block']"
               >
                 <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-2.5">
                   Legenda Kekuatan Gempa
@@ -818,53 +940,67 @@ const getMmiWidth = (mmi: string) => {
     </Teleport>
 
     <!-- ─── Modal Detail Popup ─── -->
-    <Transition name="fade-scale">
-      <div 
-        v-if="isModalOpen && selectedEvent"
-        class="fixed inset-0 bg-slate-950/70 dark:bg-slate-950/80 backdrop-blur-sm z-[999] flex items-center justify-center p-4"
-        @click.self="closeModal"
-      >
-        <div 
-          class="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 rounded-3xl p-6 shadow-2xl text-slate-600 dark:text-slate-300 overflow-y-auto max-h-[90vh] text-left backdrop-blur-xl animate-fade-in"
-        >
-          <!-- Top Glow Line inside Modal -->
-          <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/60 dark:via-brand-cyan/60 to-transparent rounded-t-3xl"></div>
-
-          <!-- Close Button -->
-          <button 
-            type="button"
+    <Teleport to="body">
+      <div v-if="isModalOpen && selectedEvent" class="fixed inset-0 z-[9999] overflow-hidden flex flex-col justify-end md:flex-row md:justify-end">
+        <!-- Backdrop -->
+        <Transition name="drawer-fade" appear>
+          <div
+            v-if="isModalOpen && selectedEvent"
+            class="absolute inset-0 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm cursor-default"
             @click="closeModal"
-            class="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer"
-            aria-label="Tutup Detail"
+          />
+        </Transition>
+
+        <!-- Drawer Panel -->
+        <Transition name="drawer-slide" appear>
+          <div
+            v-if="isModalOpen && selectedEvent"
+            class="relative w-full h-full md:max-w-lg bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+20px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col justify-between overflow-hidden rounded-none side-advisor-drawer"
           >
-            <X class="w-5 h-5" />
-          </button>
+            <!-- Ambient glow -->
+            <div 
+              class="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl pointer-events-none"
+              :class="selectedEvent.magnitude >= 6 ? 'bg-red-500/10' : (selectedEvent.magnitude >= 5 ? 'bg-amber-500/10' : 'bg-blue-500/10')"
+            />
 
-          <!-- Modal Header -->
-          <div class="flex items-center gap-2 pb-3.5 mb-5 border-b border-slate-100 dark:border-slate-800/60">
-            <div class="p-2 rounded-xl bg-red-500/10 text-red-500 dark:text-red-400">
-              <Activity class="w-4.5 h-4.5 animate-pulse" />
-            </div>
-            <div>
-              <h4 class="text-sm font-black tracking-tight text-slate-800 dark:text-white uppercase leading-none mb-1">
-                Laporan Parameter Gempa
-              </h4>
-              <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">
-                Pusat Gempa Nasional BMKG • Jarak {{ selectedEvent.distance }} km dari Anda
-              </p>
-            </div>
-          </div>
+            <!-- Close button -->
+            <button
+              @click="closeModal"
+              class="absolute top-[calc(env(safe-area-inset-top,16px)+4px)] right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer z-10 md:top-4"
+            >
+              <X class="w-4 h-4" />
+            </button>
 
-          <!-- Detailed Info Columns (reproducing EarthquakeActivity premium layout) -->
-          <div class="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-5">
-            
-            <!-- Left sub-column: stats cards & coordinates -->
-            <div class="flex flex-col gap-4">
-              
+            <!-- Header -->
+            <div class="mb-4 pr-8 text-left">
+              <!-- Title & Icon Row -->
+              <div class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/30">
+                <div 
+                  class="p-2.5 rounded-2xl flex items-center justify-center border shrink-0 shadow-sm"
+                  :class="selectedEvent.magnitude >= 6 
+                    ? 'bg-gradient-to-br from-red-500/20 to-orange-500/10 dark:from-red-400/20 dark:to-orange-400/10 border-red-500/25 dark:border-red-400/25 text-red-500' 
+                    : 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10 dark:from-amber-400/20 dark:to-yellow-400/10 border-amber-500/25 dark:border-amber-400/25 text-amber-500'"
+                >
+                  <Activity class="w-5 h-5 animate-pulse" />
+                </div>
+                <div class="text-left min-w-0 flex-grow">
+                  <span class="text-[8.5px] font-black uppercase tracking-[0.18em] text-red-500 dark:text-red-400 block">Laporan Parameter Gempa</span>
+                  <h3 class="text-[13px] font-black text-slate-800 dark:text-white leading-snug mt-0.5 tracking-tight">
+                    BMKG Pusat • Jarak {{ selectedEvent.distance }} km dari Anda
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div
+              class="flex-grow overflow-y-auto pl-1 -ml-1 pr-1 -mr-2 space-y-5 py-3 pb-12 text-left no-scrollbar"
+              style="will-change: scroll-position; -webkit-overflow-scrolling: touch;"
+            >
               <!-- 3-Column stats -->
               <div class="grid grid-cols-3 gap-3">
                 <!-- Magnitude -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Kekuatan</span>
                   <div class="my-1.5 flex items-center justify-center relative w-12 h-12">
                     <div 
@@ -882,7 +1018,7 @@ const getMmiWidth = (mmi: string) => {
                 </div>
 
                 <!-- Depth -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Kedalaman</span>
                   <div class="my-1.5 flex flex-col items-center gap-0.5 justify-center h-12">
                     <Compass class="w-5 h-5 text-indigo-400 dark:text-brand-cyan" />
@@ -894,7 +1030,7 @@ const getMmiWidth = (mmi: string) => {
                 </div>
 
                 <!-- Tsunami -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Tsunami</span>
                   <div class="my-1.5 flex flex-col items-center gap-0.5 justify-center h-12">
                     <ShieldCheck v-if="!selectedEvent.tsunamiPotential" class="w-5 h-5 text-emerald-500" />
@@ -913,7 +1049,7 @@ const getMmiWidth = (mmi: string) => {
               </div>
 
               <!-- Epicenter and Coordinates Info -->
-              <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3">
+              <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3">
                 <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 dark:text-brand-cyan flex items-center justify-center shrink-0">
                   <MapPin class="w-4.5 h-4.5" />
                 </div>
@@ -928,23 +1064,18 @@ const getMmiWidth = (mmi: string) => {
                 </div>
               </div>
 
-            </div>
-
-            <!-- Right sub-column: felt intensities (MMI) & Safety Guide -->
-            <div class="flex flex-col justify-between gap-4">
-              
               <!-- MMI felt list -->
-              <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex-1 flex flex-col">
+              <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col">
                 <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2.5">
                   Daftar Wilayah Dirasakan (Skala MMI)
                 </span>
-                <div class="flex flex-col gap-2.5 flex-1 justify-center">
+                <div class="flex flex-col gap-2.5 justify-center">
                   <div 
                     v-for="felt in selectedEvent.feltMmi" 
                     :key="felt.area"
                     class="flex items-center justify-between text-[10px] font-semibold"
                   >
-                    <span class="text-slate-700 dark:text-slate-350 font-extrabold truncate w-24">{{ felt.area }}</span>
+                    <span class="text-slate-700 dark:text-slate-350 font-extrabold truncate w-32">{{ felt.area }}</span>
                     <div class="flex-1 mx-2.5 h-1 bg-slate-200 dark:bg-brand-navy-850 rounded-full overflow-hidden flex justify-start">
                       <div class="h-full rounded-full" :class="getMmiWidth(felt.mmi)"></div>
                     </div>
@@ -992,15 +1123,22 @@ const getMmiWidth = (mmi: string) => {
                   </div>
                 </div>
               </div>
-
             </div>
 
+            <!-- Map Card View at the very bottom -->
+            <div class="p-4 border-t border-slate-100 dark:border-brand-navy-800/40 bg-slate-50/50 dark:bg-brand-navy-950/20 shrink-0">
+              <p class="text-[8.5px] font-black uppercase tracking-widest text-slate-450 dark:text-slate-400 block mb-2 leading-none">
+                Peta Lokasi Episentrum
+              </p>
+              <div class="h-[180px] w-full rounded-2xl overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/40 relative shadow-inner">
+                <div ref="detailMapEl" class="w-full h-full z-10 bg-slate-800"></div>
+              </div>
+            </div>
           </div>
-        </div>
+        </Transition>
       </div>
-    </Transition>
+    </Teleport>
   </div>
-
 </template>
 
 <style scoped>
@@ -1027,5 +1165,34 @@ const getMmiWidth = (mmi: string) => {
 .map-eq-item {
   opacity: 0;
   animation: eq-item-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Drawer transitions matching Aviation/Maritime advisors */
+.drawer-fade-enter-active,
+.drawer-fade-leave-active {
+  transition: opacity 0.28s ease;
+}
+.drawer-fade-enter-from,
+.drawer-fade-leave-to {
+  opacity: 0;
+}
+
+.drawer-slide-enter-active,
+.drawer-slide-leave-active {
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+}
+.drawer-slide-enter-from,
+.drawer-slide-leave-to {
+  /* Mobile: slide up from bottom */
+  transform: translateY(100%);
+  opacity: 0.9;
+}
+@media (min-width: 768px) {
+  .drawer-slide-enter-from,
+  .drawer-slide-leave-to {
+    /* Desktop: slide in from right */
+    transform: translateX(100%);
+    opacity: 0.9;
+  }
 }
 </style>

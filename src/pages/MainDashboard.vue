@@ -455,9 +455,10 @@ onUnmounted(() => {
       </div>
 
       <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->
-      <div class="lg:sticky lg:top-20 self-start space-y-8 animate-fade-in sidebar-contained scroll-section" style="animation-delay: 200ms;">
-        <!-- Weather Activity & Analysis Section -->
-        <WeatherActivity
+      <div class="lg:sticky lg:top-24 self-start z-30">
+        <div class="space-y-8 animate-fade-in sidebar-contained scroll-section" style="animation-delay: 200ms;">
+          <!-- Weather Activity & Analysis Section -->
+          <WeatherActivity
           :weather-data="weatherData"
           :current-analysis="currentAnalysis"
           :additional-info="additionalInfo"
@@ -474,6 +475,8 @@ onUnmounted(() => {
         <!-- Traffic & Transport advisories -->
         <TransportWeather :statuses="transportStatuses" />
       </div>
+    </div>
+
 
     </div>
   </main>

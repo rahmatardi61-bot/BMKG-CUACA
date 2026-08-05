@@ -1,0 +1,45 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bdSun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffedd5" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#fdba74" stop-opacity="0.3" />
+    </linearGradient>
+    <linearGradient id="bdRoof" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ea580c" />
+      <stop offset="100%" stop-color="#991b1b" />
+    </linearGradient>
+    <linearGradient id="bdWalls" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e2e8f0" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+    <radialGradient id="bdSatayBall" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="40%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#854d0e" />
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="36" fill="url(#bdSun)" />
+  <path d="M 8 36 C 18 30, 28 30, 32 36 C 36 36, 38 40, 35 44 H 5 Z" fill="#ffffff" opacity="0.35" />
+  <rect x="5" y="76" width="90" height="12" rx="2" fill="url(#bdWalls)" />
+  <rect x="8" y="78" width="84" height="2" fill="#94a3b8" />
+  <rect x="22" y="58" width="56" height="18" fill="url(#bdWalls)" />
+  <rect x="28" y="64" width="6" height="8" rx="1" fill="#475569" opacity="0.8" />
+  <rect x="38" y="64" width="6" height="8" rx="1" fill="#475569" opacity="0.8" />
+  <rect x="47" y="64" width="6" height="8" rx="1" fill="#475569" opacity="0.8" />
+  <rect x="56" y="64" width="6" height="8" rx="1" fill="#475569" opacity="0.8" />
+  <rect x="66" y="64" width="6" height="8" rx="1" fill="#475569" opacity="0.8" />
+  <path d="M 16 58 L 84 58 L 76 50 L 24 50 Z" fill="url(#bdRoof)" />
+  <rect x="32" y="44" width="36" height="8" fill="url(#bdWalls)" />
+  <path d="M 28 44 L 72 44 L 66 36 L 34 36 Z" fill="url(#bdRoof)" />
+  <rect x="44" y="24" width="12" height="12" fill="url(#bdWalls)" />
+  <rect x="48" y="28" width="4" height="6" fill="#1e293b" />
+  <path d="M 40 24 L 60 24 L 54 18 L 46 18 Z" fill="url(#bdRoof)" />
+  <line x1="50" y1="18" x2="50" y2="2" stroke="#475569" stroke-width="2.5" stroke-linecap="round" />
+  <circle cx="50" cy="4.5" r="3.5" fill="url(#bdSatayBall)" />
+  <circle cx="50" cy="10" r="3.5" fill="url(#bdSatayBall)" />
+  <circle cx="50" cy="15.5" r="3.5" fill="url(#bdSatayBall)" />
+  <circle cx="48.5" cy="3" r="0.75" fill="#ffffff" opacity="0.6" />
+  <circle cx="48.5" cy="8.5" r="0.75" fill="#ffffff" opacity="0.6" />
+  <circle cx="48.5" cy="14" r="0.75" fill="#ffffff" opacity="0.6" />
+</svg>

@@ -1,0 +1,13 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dfSun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#312e81" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Neutral skyline landscape for fallback -->
+  <circle cx="50" cy="50" r="32" fill="url(#dfSun)" />
+  <!-- City silhouette lines -->
+  <path d="M 5 82 L 15 72 L 25 78 L 35 62 L 45 74 L 55 58 L 65 72 L 75 64 L 85 76 L 95 82 Z M 5 82 L 95 82" stroke="#475569" stroke-width="2" stroke-linejoin="round" fill="none" opacity="0.4" />
+  <rect x="5" y="82" width="90" height="6" rx="1" fill="#475569" opacity="0.5" />
+</svg>

@@ -1,0 +1,39 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="jkSun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+    <linearGradient id="jkFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ea580c" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+    <linearGradient id="jkShaft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#cbd5e1" />
+      <stop offset="35%" stop-color="#f1f5f9" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="85%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+    <linearGradient id="jkCup" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8" />
+      <stop offset="50%" stop-color="#cbd5e1" />
+      <stop offset="100%" stop-color="#64748b" />
+    </linearGradient>
+  </defs>
+  <circle cx="76" cy="32" r="16" fill="url(#jkSun)" opacity="0.9" />
+  <path d="M 58 40 C 64 32, 80 32, 86 40 C 92 40, 94 46, 88 50 C 88 52, 58 52, 58 40 Z" fill="#ffffff" opacity="0.45" />
+  <path d="M 25 24 C 30 18, 42 18, 46 24 C 50 24, 52 28, 48 31 H 23 Z" fill="#ffffff" opacity="0.25" />
+  <rect x="10" y="86" width="80" height="4" rx="1.5" fill="#94a3b8" />
+  <rect x="18" y="78" width="64" height="8" rx="1" fill="#cbd5e1" />
+  <rect x="26" y="72" width="48" height="6" rx="1" fill="#e2e8f0" />
+  <path d="M 32 72 L 37 60 L 63 60 L 68 72 Z" fill="url(#jkCup)" />
+  <path d="M 36 60 L 64 60 L 60 72 L 40 72 Z" fill="#ffffff" opacity="0.3" />
+  <path d="M 46 25 L 47 60 L 53 60 L 54 25 Z" fill="url(#jkShaft)" />
+  <path d="M 42 25 L 45 20 L 55 20 L 58 25 Z" fill="url(#jkCup)" />
+  <circle cx="50" cy="11" r="9" fill="#fef08a" opacity="0.4" />
+  <path d="M 50 2 C 43 9, 47 20, 50 20 C 53 20, 57 9, 50 2 Z" fill="url(#jkFlame)" />
+  <path d="M 50 7 C 46 11, 48 20, 50 20 C 52 20, 54 11, 50 7 Z" fill="#facc15" />
+  <path d="M 50 12 C 48 14, 49 20, 50 20 C 51 20, 52 14, 50 12 Z" fill="#ffffff" opacity="0.8" />
+</svg>

@@ -365,10 +365,11 @@ onUnmounted(() => {
       <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10 blur-2xl"></div>
       <div class="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-black/10 blur-2xl"></div>
 
-      <!-- City Landmark Watermark SVG Overlay -->
-      <div class="absolute bottom-0 right-0 w-64 h-64 pointer-events-none opacity-80 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 translate-x-2 drop-shadow-md">
-        <svg viewBox="0 0 100 100" fill="none" class="w-full h-full" v-html="cityTheme.landmarkSvg"></svg>
+      <!-- City Landmark Watermark Image Overlay (Full Card Background) -->
+      <div v-if="cityTheme.landmarkImg" class="absolute inset-0 pointer-events-none opacity-20 group-hover:opacity-30 transition-all duration-500 z-0">
+        <img :src="cityTheme.landmarkImg" alt="City Landmark" class="w-full h-full object-cover" />
       </div>
+
 
       <!-- Dynamic Weather Animations Background Overlays -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">

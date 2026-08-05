@@ -310,45 +310,45 @@ const transitionName = computed(() =>
 const getCourseImage = (course: GolfCourse) => {
   const images: Record<number, string> = {
     // Jakarta
-    101: '/monas.png', // Monas
-    102: '/royale_golf.png', // Royale Golf
-    103: '/senayan_park.png', // SPARK
+    101: '/monas.webp', // Monas
+    102: '/royale_golf.webp', // Royale Golf
+    103: '/senayan_park.webp', // SPARK
     // Surabaya
-    201: '/taman_bungkul.png', // Taman Bungkul
-    202: '/ciputra_golf.png', // Ciputra Golf
-    203: '/tunjungan.png', // Tunjungan
+    201: '/taman_bungkul.webp', // Taman Bungkul
+    202: '/ciputra_golf.webp', // Ciputra Golf
+    203: '/tunjungan.webp', // Tunjungan
     // Bandung
-    301: '/dago_golf.png', // Dago Golf
-    302: '/kawah_putih.png', // Kawah Putih
-    303: '/braga.png', // Braga
+    301: '/dago_golf.webp', // Dago Golf
+    302: '/kawah_putih.webp', // Kawah Putih
+    303: '/braga.webp', // Braga
     // Medan
-    401: '/taman_cadika.jpg', // Cadika
-    402: '/royal_sumatra.png', // Royal Sumatra
-    403: '/pos_bloc.jpg', // Pos Bloc
+    401: '/taman_cadika.webp', // Cadika
+    402: '/royal_sumatra.webp', // Royal Sumatra
+    403: '/pos_bloc.webp', // Pos Bloc
     // Semarang
-    411: '/lawang_sewu.png', // Lawang Sewu
-    412: '/gombel_golf.png', // Gombel
-    413: '/kota_lama.png', // Kota Lama
+    411: '/lawang_sewu.webp', // Lawang Sewu
+    412: '/gombel_golf.webp', // Gombel
+    413: '/kota_lama.webp', // Kota Lama
     // Makassar
-    501: '/losari.jpg', // Pantai Losari
-    502: '/padi_valley.png', // Padi Valley
-    503: '/cpi.png', // CPI
+    501: '/losari.webp', // Pantai Losari
+    502: '/padi_valley.webp', // Padi Valley
+    503: '/cpi.webp', // CPI
     // Palembang
-    511: '/ampera.png', // Ampera
-    512: '/palembang_golf.png', // Palembang Golf
-    513: '/jakabaring.png', // Jakabaring
+    511: '/ampera.webp', // Ampera
+    512: '/palembang_golf.webp', // Palembang Golf
+    513: '/jakabaring.webp', // Jakabaring
     // Batam
-    521: '/barelang.png', // Barelang
-    522: '/south_links.png', // SouthLinks
-    523: '/ocarina.jpg', // Ocarina
+    521: '/barelang.webp', // Barelang
+    522: '/south_links.webp', // SouthLinks
+    523: '/ocarina.webp', // Ocarina
     // Pekanbaru
-    531: '/labersa.png', // Labersa
-    532: '/alam_mayang.jpg', // Alam Mayang
-    533: '/riau_creative.jpg', // Creative Hub
+    531: '/labersa.webp', // Labersa
+    532: '/alam_mayang.webp', // Alam Mayang
+    533: '/riau_creative.webp', // Creative Hub
     // Denpasar/Bali
-    601: '/bali_golf.jpg', // Bali Golf
-    602: '/kuta_beach.jpg', // Kuta
-    603: '/beachwalk.png', // Beachwalk
+    601: '/bali_golf.webp', // Bali Golf
+    602: '/kuta_beach.webp', // Kuta
+    603: '/beachwalk.webp', // Beachwalk
   };
   return images[course.id] || 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=300&q=80';
 };

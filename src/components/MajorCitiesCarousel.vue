@@ -424,7 +424,7 @@ onUnmounted(() => {
 
       <!-- Photo: positioned lower and shifted right to sit closer to right border -->
       <img
-        src="/app-download-bg.png"
+        src="/app-download-bg.webp"
         alt=""
         aria-hidden="true"
         class="cta-photo absolute bottom-[-20%] right-[-3.5%] sm:bottom-[-15%] sm:right-[-2%] h-[120%] sm:h-[115%] lg:bottom-0 lg:right-0 lg:h-[88%] object-contain object-bottom pointer-events-none select-none"

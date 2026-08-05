@@ -629,16 +629,37 @@ const getMmiWidth = (mmi: string) => {
         Gempa Terdekat dari Koordinat Kota
       </h5>
       
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-6 gap-2">
-        <div class="relative flex h-6 w-6 shrink-0">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-6 w-6 bg-red-500/20 text-red-500 items-center justify-center">
-            <Activity class="w-3.5 h-3.5 animate-pulse" />
+      <!-- Premium loading skeleton for earthquake list -->
+      <div v-if="isLoading" class="space-y-2.5 py-1">
+        <!-- Animated BMKG connecting indicator -->
+        <div class="flex items-center gap-2 mb-3 px-1">
+          <div class="relative flex h-4 w-4 shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-60"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500/20 text-red-500 items-center justify-center">
+              <Activity class="w-2.5 h-2.5" />
+            </span>
+          </div>
+          <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-widest uppercase" style="animation: shimmer 1.6s ease-in-out infinite; background: linear-gradient(90deg, #94a3b8 0%, #64748b 50%, #94a3b8 100%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Menghubungkan ke BMKG...
           </span>
         </div>
-        <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-wider uppercase animate-pulse">
-          Menghubungkan ke BMKG...
-        </span>
+
+        <!-- Skeleton rows mimicking earthquake list items -->
+        <div
+          v-for="i in 3" :key="i"
+          class="flex items-center gap-3 py-2.5 px-2 rounded-2xl"
+          :style="{ animationDelay: `${(i - 1) * 150}ms` }"
+        >
+          <!-- Dot / icon placeholder -->
+          <div class="sk-block skeleton-shimmer w-9 h-9 rounded-xl shrink-0" :style="{ animationDelay: `${(i - 1) * 150}ms` }"></div>
+          <!-- Text lines -->
+          <div class="flex-1 space-y-2">
+            <div class="sk-bar skeleton-shimmer h-2.5" :class="i === 1 ? 'w-3/4' : i === 2 ? 'w-2/3' : 'w-1/2'" :style="{ animationDelay: `${(i - 1) * 150 + 60}ms` }"></div>
+            <div class="sk-bar skeleton-shimmer h-2 w-1/3" :style="{ animationDelay: `${(i - 1) * 150 + 120}ms` }"></div>
+          </div>
+          <!-- Badge placeholder -->
+          <div class="sk-bar skeleton-shimmer h-5 w-10 rounded-lg shrink-0" :style="{ animationDelay: `${(i - 1) * 150 + 80}ms` }"></div>
+        </div>
       </div>
 
       <!-- Premium earthquake list with timeline -->

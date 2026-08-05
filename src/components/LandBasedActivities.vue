@@ -2678,49 +2678,52 @@ onUnmounted(() => {
                 </div>
 
                 <!-- ── CHECKPOINT CARDS LIST ── -->
-                <div v-if="isRouting" class="space-y-4 pt-1 animate-pulse">
+                <div v-if="isRouting" class="space-y-4 pt-1">
                   <!-- Header skeleton -->
                   <div class="flex items-center justify-between px-1">
-                    <div class="h-3 w-1/3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
-                    <div class="h-3 w-1/4 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                    <div class="sk-bar skeleton-shimmer h-2.5 w-1/3"></div>
+                    <div class="sk-bar skeleton-shimmer h-2.5 w-1/4" style="animation-delay:80ms"></div>
                   </div>
 
                   <!-- Destination Overview Card Skeleton -->
-                  <div class="bg-slate-100/70 dark:bg-[#1c2d3f]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-4">
+                  <div class="skeleton-card p-4 space-y-4 overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"></div>
                     <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700/80 shrink-0"></div>
+                      <div class="sk-block skeleton-shimmer w-9 h-9 rounded-xl shrink-0"></div>
                       <div class="flex-grow space-y-2">
-                        <div class="h-3.5 w-2/3 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
-                        <div class="h-2.5 w-1/2 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
+                        <div class="sk-bar skeleton-shimmer h-3 w-2/3"></div>
+                        <div class="sk-bar skeleton-shimmer h-2.5 w-1/2" style="animation-delay:60ms"></div>
                       </div>
                     </div>
                     <!-- Mock alert block -->
-                    <div class="h-10 bg-slate-200/40 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300/40 dark:border-slate-700/30 flex items-center px-3.5 gap-2">
-                      <div class="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700/80"></div>
-                      <div class="h-2 w-3/4 bg-slate-200 dark:bg-slate-700/80 rounded-full"></div>
-                    </div>
+                    <div class="sk-block skeleton-shimmer h-9 w-full rounded-xl" style="animation-delay:80ms"></div>
                     <!-- Detailed stats shimmer -->
-                    <div class="bg-white/50 dark:bg-[#111e2b]/40 border border-slate-200/50 dark:border-slate-800/30 rounded-xl p-3 space-y-3">
+                    <div class="rounded-xl border border-slate-200/30 dark:border-slate-800/20 p-3 space-y-3">
                       <div class="grid grid-cols-4 gap-2">
-                        <div v-for="j in 4" :key="j" class="h-3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                        <div v-for="j in 4" :key="j" class="sk-bar skeleton-shimmer h-2.5" :style="{ animationDelay: `${j * 60}ms` }"></div>
                       </div>
-                      <div class="h-8 bg-slate-200 dark:bg-slate-700/60 rounded-lg"></div>
+                      <div class="sk-block skeleton-shimmer h-7 w-full rounded-lg" style="animation-delay:100ms"></div>
                     </div>
                   </div>
 
                   <!-- Intermediate Cards Skeletons -->
-                  <div v-for="i in 3" :key="'skel-'+i" class="bg-slate-100/50 dark:bg-[#1c2d3f]/30 border border-slate-200/50 dark:border-slate-800/30 rounded-2xl p-4 space-y-3">
+                  <div
+                    v-for="i in 3" :key="'skel-'+i"
+                    class="skeleton-card p-4 space-y-3 overflow-hidden"
+                    :style="{ animationDelay: `${i * 80}ms` }"
+                  >
+                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" :style="{ animationDelay: `${i * 80}ms` }"></div>
                     <div class="flex items-center justify-between">
                       <div class="flex-grow space-y-2">
-                        <div class="h-3 w-1/3 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
-                        <div class="h-2 w-1/2 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                        <div class="sk-bar skeleton-shimmer h-2.5 w-1/3" :style="{ animationDelay: `${i * 80}ms` }"></div>
+                        <div class="sk-bar skeleton-shimmer h-2 w-1/2" :style="{ animationDelay: `${i * 80 + 60}ms` }"></div>
                       </div>
-                      <div class="w-4 h-4 bg-slate-200 dark:bg-slate-700/60 rounded-full shrink-0"></div>
+                      <div class="w-4 h-4 skeleton-shimmer rounded-full shrink-0" :style="{ animationDelay: `${i * 80}ms` }"></div>
                     </div>
-                    <div class="h-px bg-slate-200/60 dark:bg-slate-800/40"></div>
+                    <div class="h-px bg-slate-200/40 dark:bg-slate-800/30"></div>
                     <div class="flex justify-between items-center">
-                      <div class="h-2.5 w-3/5 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
-                      <div class="h-2 w-1/6 bg-slate-200 dark:bg-slate-700/60 rounded-full"></div>
+                      <div class="sk-bar skeleton-shimmer h-2.5 w-3/5" :style="{ animationDelay: `${i * 80 + 40}ms` }"></div>
+                      <div class="sk-bar skeleton-shimmer h-2 w-1/6" :style="{ animationDelay: `${i * 80 + 80}ms` }"></div>
                     </div>
                   </div>
                 </div>

@@ -1,69 +1,137 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Radar, Waves, Wind, ChevronDown, Navigation, Activity } from 'lucide-vue-next';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ChevronDown, Radar, Waves, Wind, Activity } from 'lucide-vue-next';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const props = defineProps<{
   selectedCity: string;
 }>();
 
-type WaveTab = 'gelombang' | 'angin';
-const activeTab = ref<WaveTab>('gelombang');
-
-const tabs = [
-  { id: 'gelombang' as WaveTab, label: 'Tinggi Gelombang', icon: Waves },
-  { id: 'angin' as WaveTab, label: 'Kecepatan Angin', icon: Wind },
-];
-
+type Mode = 'gelombang' | 'angin';
+const activeMode = ref<Mode>('gelombang');
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const mapEl = ref<HTMLElement | null>(null);
 
-const activeTabInfo = computed(() => tabs.find(t => t.id === activeTab.value) || tabs[0]);
+const modes = [
+  { id: 'gelombang' as Mode, label: 'Tinggi Gelombang', icon: Waves },
+  { id: 'angin' as Mode, label: 'Kecepatan Angin', icon: Wind },
+];
+const activeModeInfo = computed(() => modes.find(m => m.id === activeMode.value) || modes[0]);
 
-// Maritime zones with approximate map positions (x%, y%)
-const zones = [
-  { name: 'Perairan Utara Aceh', x: '7%', y: '18%', wave: 2.4, wind: 22 },
-  { name: 'Perairan Sumatera Utara', x: '14%', y: '30%', wave: 1.8, wind: 18 },
-  { name: 'Perairan Kep. Riau', x: '17%', y: '44%', wave: 1.1, wind: 12 },
-  { name: 'Selat Sunda', x: '22%', y: '58%', wave: 0.9, wind: 10 },
-  { name: 'Teluk Jakarta', x: '25%', y: '62%', wave: 0.4, wind: 8 },
-  { name: 'Perairan Selatan Jawa', x: '33%', y: '72%', wave: 2.8, wind: 24 },
-  { name: 'Selat Bali', x: '47%', y: '67%', wave: 2.2, wind: 20 },
-  { name: 'Perairan Sulawesi Selatan', x: '54%', y: '50%', wave: 3.2, wind: 26 },
-  { name: 'Perairan Maluku', x: '68%', y: '38%', wave: 1.6, wind: 15 },
-  { name: 'Laut Arafura', x: '74%', y: '58%', wave: 2.6, wind: 23 },
+// Zona perairan Indonesia (lat/lng + data maritim mock)
+interface Zone { name: string; lat: number; lng: number; wave: number; wind: number; }
+const zones: Zone[] = [
+  { name: 'Perairan Utara Aceh', lat: 5.5, lng: 96.0, wave: 2.4, wind: 22 },
+  { name: 'Perairan Sumatera Utara', lat: 3.6, lng: 98.5, wave: 1.8, wind: 18 },
+  { name: 'Perairan Kep. Riau', lat: 1.5, lng: 105.0, wave: 1.1, wind: 12 },
+  { name: 'Selat Sunda', lat: -5.9, lng: 105.5, wave: 0.9, wind: 10 },
+  { name: 'Teluk Jakarta', lat: -5.9, lng: 106.8, wave: 0.4, wind: 8 },
+  { name: 'Perairan Selatan Jawa', lat: -8.6, lng: 110.5, wave: 2.8, wind: 24 },
+  { name: 'Selat Bali', lat: -8.5, lng: 115.4, wave: 2.2, wind: 20 },
+  { name: 'Perairan Sulawesi Selatan', lat: -4.5, lng: 119.5, wave: 3.2, wind: 26 },
+  { name: 'Perairan Maluku', lat: -3.5, lng: 128.0, wave: 1.6, wind: 15 },
+  { name: 'Laut Arafura', lat: -7.0, lng: 135.0, wave: 2.6, wind: 23 },
 ];
 
 const waveLevel = (w: number) => {
-  if (w < 1) return { label: 'Rendah', color: 'text-emerald-400 border-emerald-400/40 bg-emerald-500/15', dot: 'bg-emerald-400' };
-  if (w < 2) return { label: 'Sedang', color: 'text-amber-400 border-amber-400/40 bg-amber-500/15', dot: 'bg-amber-400' };
-  if (w < 3) return { label: 'Tinggi', color: 'text-orange-400 border-orange-400/40 bg-orange-500/15', dot: 'bg-orange-400' };
-  return { label: 'Sangat Tinggi', color: 'text-red-400 border-red-400/40 bg-red-500/15', dot: 'bg-red-400' };
+  if (w < 1) return { label: 'Rendah', color: '#34d399', level: 0 };
+  if (w < 2) return { label: 'Sedang', color: '#fbbf24', level: 1 };
+  if (w < 3) return { label: 'Tinggi', color: '#fb923c', level: 2 };
+  return { label: 'Sangat Tinggi', color: '#f87171', level: 3 };
 };
+
+const windLevel = (w: number) => {
+  if (w < 15) return { label: 'Rendah', color: '#34d399', level: 0 };
+  if (w < 25) return { label: 'Sedang', color: '#fbbf24', level: 1 };
+  if (w < 35) return { label: 'Tinggi', color: '#fb923c', level: 2 };
+  return { label: 'Sangat Tinggi', color: '#f87171', level: 3 };
+};
+
+const valueOf = (zone: Zone, mode: Mode) => mode === 'gelombang' ? zone.wave : zone.wind;
+const levelOf = (zone: Zone, mode: Mode) => mode === 'gelombang' ? waveLevel(zone.wave) : windLevel(zone.wind);
+const unitOf = (mode: Mode) => mode === 'gelombang' ? ' m' : ' kt';
+
+// ── Leaflet map ─────────────────────────────────────────────────────────────
+let map: L.Map | null = null;
+let zoneLayer: L.LayerGroup | null = null;
 
 const selectedZone = computed(() => {
   const lc = props.selectedCity.toLowerCase();
-  const match = zones.find(z => {
-    const zoneLc = z.name.toLowerCase();
-    return lc.includes('jakarta') ? zoneLc.includes('teluk jakarta')
-      : lc.includes('surabaya') ? zoneLc.includes('selat bali')
-      : lc.includes('medan') ? zoneLc.includes('sumatera utara')
-      : lc.includes('makassar') ? zoneLc.includes('sulawesi selatan')
-      : lc.includes('semarang') || lc.includes('yogyakarta') ? zoneLc.includes('selatan jawa')
-      : lc.includes('palembang') || lc.includes('batam') ? zoneLc.includes('kep. riau')
-      : lc.includes('bandung') ? zoneLc.includes('selat sunda')
-      : lc.includes('denpasar') || lc.includes('bali') ? zoneLc.includes('selat bali')
-      : zoneLc.includes(lc.split(',')[0].trim());
-  });
-  return match || zones[3];
+  return (
+    zones.find(z => {
+      const n = z.name.toLowerCase();
+      return lc.includes('jakarta') ? n.includes('teluk jakarta')
+        : lc.includes('surabaya') || lc.includes('bali') || lc.includes('denpasar') ? n.includes('selat bali')
+        : lc.includes('medan') ? n.includes('sumatera utara')
+        : lc.includes('makassar') ? n.includes('sulawesi selatan')
+        : lc.includes('semarang') || lc.includes('yogyakarta') ? n.includes('selatan jawa')
+        : lc.includes('palembang') || lc.includes('batam') ? n.includes('kep. riau')
+        : lc.includes('bandung') ? n.includes('selat sunda')
+        : lc.includes('aceh') ? n.includes('utara aceh')
+        : n.includes(lc.split(',')[0].trim());
+    }) || zones[4]
+  );
 });
 
-const hoveredZone = ref<string | null>(null);
-const activeTooltipZone = computed(() => hoveredZone.value || selectedZone.value.name);
+function renderZones() {
+  if (!map || !zoneLayer) return;
+  zoneLayer.clearLayers();
+  const mode = activeMode.value;
 
-const isSelectedZone = (name: string) => selectedZone.value.name === name;
+  zones.forEach(zone => {
+    const isSel = zone.name === selectedZone.value.name;
+    const val = valueOf(zone, mode);
+    const lvl = levelOf(zone, mode);
+    const radius = Math.max(6, Math.min(22, (mode === 'gelombang' ? val * 4 : val * 0.6) + 4));
+
+    const marker = L.circleMarker([zone.lat, zone.lng], {
+      radius: isSel ? radius + 4 : radius,
+      color: isSel ? '#e2e8f0' : lvl.color,
+      weight: isSel ? 2.5 : 1.5,
+      fillColor: lvl.color,
+      fillOpacity: isSel ? 0.85 : 0.5,
+    });
+
+    marker.bindTooltip(
+      `<div class="wave-tip ${isSel ? 'wave-tip-sel' : ''}">
+        <span class="wave-tip-name">${zone.name}</span>
+        <span class="wave-tip-val">${val.toFixed(mode === 'gelombang' ? 1 : 0)}${unitOf(mode)}</span>
+        <span class="wave-tip-lvl" style="color:${lvl.color}">${lvl.label}</span>
+      </div>`,
+      { permanent: true, direction: 'top', offset: [0, -6], className: 'wave-tip-wrap' }
+    );
+
+    marker.on('click', () => {
+      map?.flyTo([zone.lat, zone.lng], 6, { duration: 0.8 });
+      renderZones();
+    });
+
+    marker.addTo(zoneLayer!);
+  });
+}
+
+function initMap() {
+  if (!mapEl.value || map) return;
+  map = L.map(mapEl.value, {
+    zoomControl: false,
+    attributionControl: true,
+    minZoom: 4,
+    maxZoom: 10,
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO • Data: cuaca.bmkg.go.id/map#Maritim',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+  map.setView([selectedZone.value.lat, selectedZone.value.lng], 6);
+  zoneLayer = L.layerGroup().addTo(map);
+  renderZones();
+}
 
 const toggleDropdown = () => { isDropdownOpen.value = !isDropdownOpen.value; };
-const selectTab = (id: WaveTab) => { activeTab.value = id; isDropdownOpen.value = false; };
+const selectMode = (id: Mode) => { activeMode.value = id; isDropdownOpen.value = false; };
 
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
@@ -71,8 +139,30 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-onMounted(() => window.addEventListener('click', handleClickOutside));
-onUnmounted(() => window.removeEventListener('click', handleClickOutside));
+watch(activeMode, () => renderZones());
+
+watch(() => props.selectedCity, () => {
+  nextTick(() => {
+    if (map) {
+      map.flyTo([selectedZone.value.lat, selectedZone.value.lng], 6, { duration: 0.8 });
+      renderZones();
+    }
+  });
+});
+
+onMounted(() => {
+  window.addEventListener('click', handleClickOutside);
+  initMap();
+  // Card masuk via lazy-load: pastikan ukuran container sudah benar
+  setTimeout(() => map?.invalidateSize(), 150);
+  setTimeout(() => map?.invalidateSize(), 600);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleClickOutside);
+  if (map) { map.remove(); map = null; }
+  zoneLayer = null;
+});
 </script>
 
 <template>
@@ -90,14 +180,14 @@ onUnmounted(() => window.removeEventListener('click', handleClickOutside));
         </p>
       </div>
 
-      <!-- Wave subtabs dropdown -->
-      <div ref="dropdownRef" class="relative z-50 shrink-0">
+      <!-- Mode dropdown -->
+      <div ref="dropdownRef" class="relative z-[500] shrink-0">
         <button
           @click="toggleDropdown"
           class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer select-none bg-slate-100/60 border-transparent hover:bg-slate-200/50 text-slate-700 dark:bg-brand-navy-900/60 dark:hover:bg-brand-navy-800/50 dark:text-slate-200"
         >
-          <component :is="activeTabInfo.icon" class="w-3.5 h-3.5 text-cyan-500 dark:text-brand-cyan" />
-          <span class="text-xs tracking-wide">{{ activeTabInfo.label }}</span>
+          <component :is="activeModeInfo.icon" class="w-3.5 h-3.5 text-cyan-500 dark:text-brand-cyan" />
+          <span class="text-xs tracking-wide">{{ activeModeInfo.label }}</span>
           <ChevronDown class="w-3.5 h-3.5 text-slate-400 transition-transform duration-300" :class="{ 'rotate-180': isDropdownOpen }" />
         </button>
         <transition
@@ -113,110 +203,39 @@ onUnmounted(() => window.removeEventListener('click', handleClickOutside));
             class="absolute right-0 mt-2 w-48 rounded-xl shadow-lg border overflow-hidden py-1.5 z-50 bg-white/95 border-slate-100 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
           >
             <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              @click="selectTab(tab.id)"
+              v-for="mode in modes"
+              :key="mode.id"
+              @click="selectMode(mode.id)"
               class="w-full text-left px-4 py-2.5 text-xs hover:bg-slate-100/50 dark:hover:bg-brand-navy-800/50 transition-colors flex items-center justify-between"
-              :class="activeTab === tab.id ? 'font-bold text-cyan-600 dark:text-brand-cyan' : 'text-slate-600 dark:text-slate-300'"
+              :class="activeMode === mode.id ? 'font-bold text-cyan-600 dark:text-brand-cyan' : 'text-slate-600 dark:text-slate-300'"
             >
               <span class="flex items-center gap-2">
-                <component :is="tab.icon" class="w-3.5 h-3.5" />
-                {{ tab.label }}
+                <component :is="mode.icon" class="w-3.5 h-3.5" />
+                {{ mode.label }}
               </span>
-              <span v-if="activeTab === tab.id" class="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-brand-cyan"></span>
+              <span v-if="activeMode === mode.id" class="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-brand-cyan"></span>
             </button>
           </div>
         </transition>
       </div>
     </div>
 
-    <!-- Map container -->
-    <div class="relative w-full h-[280px] rounded-2xl overflow-hidden bg-slate-900 select-none shadow-inner border border-transparent">
-      <!-- Radar grid mesh overlay -->
-      <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-      <!-- Coordinate lines -->
-      <div class="absolute inset-x-0 top-1/2 h-[1px] bg-slate-700/30 border-dashed pointer-events-none"></div>
-      <div class="absolute inset-y-0 left-1/2 w-[1px] bg-slate-700/30 border-dashed pointer-events-none"></div>
-
-      <!-- Oceanic gradient backdrop -->
-      <div class="absolute inset-0 bg-gradient-to-br from-cyan-950/80 via-slate-950 to-indigo-950/90"></div>
-      <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_30%,#22d3ee_0%,transparent_50%),radial-gradient(circle_at_70%_70%,#3b82f6_0%,transparent_50%)]"></div>
-
-      <!-- Selected zone spotlight -->
-      <div
-        class="absolute inset-0 pointer-events-none transition-all duration-700 ease-in-out"
-        :style="{
-          background: `radial-gradient(circle at ${selectedZone.x} ${selectedZone.y}, rgba(34,211,238,0.45) 0%, rgba(34,211,238,0.15) 28%, transparent 62%)`
-        }"
-      ></div>
-
-      <!-- Maritime zone pins -->
-      <div
-        v-for="zone in zones"
-        :key="zone.name"
-        class="absolute"
-        :style="{ left: zone.x, top: zone.y }"
-        @mouseenter="hoveredZone = zone.name"
-        @mouseleave="hoveredZone = null"
-      >
-        <div class="relative flex items-center justify-center cursor-pointer group">
-          <span
-            class="absolute rounded-full animate-ping"
-            :class="isSelectedZone(zone.name) ? 'w-8 h-8 bg-cyan-400/50' : 'w-6 h-6 bg-cyan-500/30'"
-            style="animation-duration: 2.5s;"
-          ></span>
-          <span
-            class="absolute w-3 h-3 rounded-full border-2 transition-all duration-300"
-            :class="isSelectedZone(zone.name) ? 'bg-cyan-300 border-cyan-100 shadow-[0_0_8px_2px_rgba(34,211,238,0.7)]' : 'bg-cyan-500 border-white/30'"
-          ></span>
-
-          <span
-            class="absolute top-4.5 px-2 py-0.5 backdrop-blur-sm rounded-full text-[9px] font-bold whitespace-nowrap shadow-md"
-            :class="isSelectedZone(zone.name) ? 'bg-cyan-400 text-slate-900 border border-cyan-200' : 'bg-slate-900/90 border border-slate-700/40 text-white'"
-          >
-            {{ zone.wave.toFixed(1) }} m • {{ zone.wind }} kt
-          </span>
-
-          <div
-            v-if="activeTooltipZone === zone.name"
-            class="absolute bottom-10 left-1/2 -translate-x-1/2 w-40 rounded-xl p-3 z-30 shadow-2xl border text-white backdrop-blur-md animate-fade-in pointer-events-none"
-            :class="isSelectedZone(zone.name) ? 'bg-cyan-950/90 border-cyan-600/40' : 'bg-slate-950/90 border-slate-800/40'"
-          >
-            <h5 class="text-[11px] font-bold tracking-wider border-b pb-1.5 mb-2"
-              :class="isSelectedZone(zone.name) ? 'border-cyan-700/50' : 'border-slate-800/50'"
-            >{{ zone.name }}</h5>
-            <div class="space-y-1.5 text-[10px] text-slate-300 font-medium">
-              <p class="flex justify-between">
-                <span class="flex items-center gap-1"><Waves class="w-3 h-3" /> Gelombang</span>
-                <span class="font-bold text-cyan-300">{{ zone.wave.toFixed(1) }} m</span>
-              </p>
-              <p class="flex justify-between">
-                <span class="flex items-center gap-1"><Wind class="w-3 h-3" /> Angin</span>
-                <span class="font-bold text-cyan-300">{{ zone.wind }} knot</span>
-              </p>
-              <p class="flex justify-between items-center">
-                <span class="flex items-center gap-1"><Navigation class="w-3 h-3" /> Status</span>
-                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-black border" :class="waveLevel(zone.wave).color">
-                  {{ waveLevel(zone.wave).label }}
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- Map container (Leaflet) -->
+    <div class="relative w-full h-[360px] rounded-2xl overflow-hidden border border-slate-200/50 dark:border-brand-navy-800/40 shadow-inner">
+      <div ref="mapEl" class="absolute inset-0 z-0"></div>
 
       <!-- Floating metadata badge -->
-      <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-xl p-2.5 text-white font-medium flex items-center gap-2 max-w-[170px] pointer-events-none z-20">
+      <div class="absolute bottom-3 left-3 z-[400] bg-slate-950/85 backdrop-blur-sm border border-slate-800/40 rounded-xl p-2.5 text-white font-medium flex items-center gap-2 max-w-[180px] pointer-events-none">
         <Activity class="w-3.5 h-3.5 text-cyan-400 animate-pulse shrink-0" />
         <div class="min-w-0">
           <p class="text-[8px] text-slate-400 font-bold tracking-widest uppercase leading-none">Data Maritim</p>
           <p class="text-[9px] font-black text-slate-100 mt-1 truncate">BMKG WaveWatch III</p>
-          <p class="text-[7px] text-slate-400 leading-none mt-0.5">{{ selectedZone.name }}</p>
+          <p class="text-[7px] text-slate-400 leading-none mt-0.5 truncate">{{ selectedZone.name }}</p>
         </div>
       </div>
 
       <!-- Legend -->
-      <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-xl px-2.5 py-2 z-20 flex items-center gap-2.5 shadow-lg">
+      <div class="absolute bottom-3 right-3 z-[400] bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-xl px-2.5 py-2 flex items-center gap-2.5 shadow-lg">
         <span v-for="lvl in ['Rendah', 'Sedang', 'Tinggi', 'Sangat Tinggi']" :key="lvl" class="flex items-center gap-1 text-[8px] font-bold text-slate-300">
           <span class="w-1.5 h-1.5 rounded-full" :class="{
             'bg-emerald-400': lvl === 'Rendah',
@@ -227,6 +246,59 @@ onUnmounted(() => window.removeEventListener('click', handleClickOutside));
           {{ lvl }}
         </span>
       </div>
+
+      <!-- Mode indicator (top-left) -->
+      <div class="absolute top-3 left-3 z-[400] bg-slate-950/85 backdrop-blur-sm border border-slate-800/40 rounded-full px-2.5 py-1 text-white font-medium flex items-center gap-1.5 pointer-events-none text-[8px]">
+        <component :is="activeModeInfo.icon" class="w-3 h-3 text-cyan-400" />
+        <span class="font-bold tracking-widest text-slate-300">{{ activeModeInfo.label }} • {{ selectedZone.name }}</span>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.wave-tip-wrap) {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+:deep(.wave-tip) {
+  background: rgba(2, 6, 23, 0.92);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 10px;
+  padding: 5px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 86px;
+  text-align: center;
+}
+:deep(.wave-tip-sel) {
+  border-color: rgba(34, 211, 238, 0.8);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35);
+}
+:deep(.wave-tip-name) {
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.95);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:deep(.wave-tip-val) {
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+}
+:deep(.wave-tip-lvl) {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+</style>

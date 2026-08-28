@@ -8,13 +8,11 @@ import {
   Wind,
   Thermometer,
   Cloud,
-  Activity,
   Moon
 } from 'lucide-vue-next';
 import type { HourlyForecast } from '../types/weather';
 import ForecastTemperatureChart from './forecast/ForecastTemperatureChart.vue';
 import ForecastPrecipitationChart from './forecast/ForecastPrecipitationChart.vue';
-import ForecastAirQualityChart from './forecast/ForecastAirQualityChart.vue';
 
 const props = defineProps<{
   forecasts: HourlyForecast[];
@@ -22,7 +20,7 @@ const props = defineProps<{
 
 // Navigation tab state
 const activeTab = ref('Suhu');
-const hourlyTabs = ['Suhu', 'Presipitasi', 'Angin', 'Kelembapan', 'Kualitas Udara'];
+const hourlyTabs = ['Suhu', 'Presipitasi', 'Angin', 'Kelembapan'];
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 
@@ -54,7 +52,6 @@ const getTabIcon = (tabName: string) => {
     case 'Presipitasi': return Droplet;
     case 'Angin': return Wind;
     case 'Kelembapan': return Cloud;
-    case 'Kualitas Udara': return Activity;
     default: return Thermometer;
   }
 };
@@ -155,7 +152,7 @@ onUnmounted(() => {
 
     <!-- ── Hourly Chart Section (Suhu / Angin / Kelembapan) ────────── -->
     <ForecastTemperatureChart
-      v-if="activeTab !== 'Presipitasi' && activeTab !== 'Kualitas Udara'"
+      v-if="activeTab !== 'Presipitasi'"
       :forecasts="forecasts"
       :active-tab="activeTab"
       :current-time="currentTime"
@@ -164,22 +161,14 @@ onUnmounted(() => {
 
     <!-- ── Precipitation View ────────────────────────────────────────── -->
     <ForecastPrecipitationChart
-      v-else-if="activeTab === 'Presipitasi'"
-      :forecasts="forecasts"
-      :current-time="currentTime"
-      @date-change="updateHeaderDate"
-    />
-
-    <!-- ── Air Quality View ────────────────────────────────────────── -->
-    <ForecastAirQualityChart
-      v-else-if="activeTab === 'Kualitas Udara'"
+      v-else
       :forecasts="forecasts"
       :current-time="currentTime"
       @date-change="updateHeaderDate"
     />
 
     <!-- ── Legend footer ─────────────────────── -->
-    <div v-if="activeTab !== 'Presipitasi' && activeTab !== 'Kualitas Udara'" class="px-6 pb-4 flex items-center justify-between flex-wrap gap-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 select-none">
+    <div v-if="activeTab !== 'Presipitasi'" class="px-6 pb-4 flex items-center justify-between flex-wrap gap-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 select-none">
       <div v-if="activeTab !== 'Presipitasi'" class="flex items-center gap-4">
         <!-- If Wind (Angin) tab -->
         <template v-if="activeTab === 'Angin'">

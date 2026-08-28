@@ -40,40 +40,39 @@ const comfortIndex = computed(() => getComfortIndex(props.temp));
         </p>
       </div>
 
-      <!-- Actionable Details Row -->
-      <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-4 items-center mt-5">
-
-        <!-- Good Heat Index Quality Indicator Box (span 2 of 4 cols) -->
-        <div class="md:col-span-2 rounded-xl p-4 flex items-center gap-4 border border-transparent" :class="comfortIndex.colorClass">
-          <div v-html="comfortIndex.smileySvg" class="w-9 h-9 shrink-0"></div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold leading-snug">{{ comfortIndex.quality }}</p>
-            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-              <span class="inline-flex items-center px-2.5 py-0.5 text-[9px] font-bold rounded-full tracking-wider whitespace-nowrap" :class="comfortIndex.pillClass">
-                {{ comfortIndex.status }}
-              </span>
-              <span class="text-[9px] font-semibold opacity-60 whitespace-nowrap">{{ comfortIndex.tempText }}</span>
-            </div>
+      <!-- Quality Indicator Box (full width, vertikal) -->
+      <div class="relative z-10 rounded-xl p-4 flex items-center gap-4 border border-transparent" :class="comfortIndex.colorClass">
+        <div v-html="comfortIndex.smileySvg" class="w-10 h-10 shrink-0"></div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-bold leading-snug">{{ comfortIndex.quality }}</p>
+          <div class="flex flex-wrap items-center gap-2 mt-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 text-[9px] font-bold rounded-full tracking-wider whitespace-nowrap" :class="comfortIndex.pillClass">
+              {{ comfortIndex.status }}
+            </span>
+            <span class="text-[9px] font-semibold opacity-60 whitespace-nowrap">{{ comfortIndex.tempText }}</span>
           </div>
         </div>
+      </div>
 
+      <!-- Recommendations (vertikal, full width) -->
+      <div class="relative z-10 mt-3 space-y-2.5">
         <!-- Recommendation 1 (Walking) -->
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-slate-100/50 dark:bg-brand-navy-950/60 shrink-0" :class="comfortIndex.iconColor">
+        <div class="flex items-start gap-3 rounded-xl px-3.5 py-3 bg-slate-100/50 dark:bg-brand-navy-950/60">
+          <div class="p-2.5 rounded-xl bg-slate-100/60 dark:bg-brand-navy-900/80 shrink-0" :class="comfortIndex.iconColor">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="4" r="1" />
               <path d="m9 20 2-4.5-1-2.5-1 3.5" />
               <path d="m15 20-2-6.5 2-2.5-1-2.5-2 1" />
             </svg>
           </div>
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 leading-snug">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-snug pt-0.5">
             {{ comfortIndex.recommendation1 }}
           </span>
         </div>
 
         <!-- Recommendation 2 (Windows) -->
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-xl bg-slate-100/50 dark:bg-brand-navy-950/60 shrink-0" :class="comfortIndex.iconColor">
+        <div class="flex items-start gap-3 rounded-xl px-3.5 py-3 bg-slate-100/50 dark:bg-brand-navy-950/60">
+          <div class="p-2.5 rounded-xl bg-slate-100/60 dark:bg-brand-navy-900/80 shrink-0" :class="comfortIndex.iconColor">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="4" y="3" width="16" height="18" rx="1" stroke-width="1.5" />
               <path d="M4 3 L2 5 L2 19 L4 21 Z" opacity="0.15" fill="currentColor" />
@@ -84,11 +83,10 @@ const comfortIndex = computed(() => getComfortIndex(props.temp));
               <line x1="4" y1="12" x2="20" y2="12" />
             </svg>
           </div>
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 leading-snug">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-snug pt-0.5">
             {{ comfortIndex.recommendation2 }}
           </span>
         </div>
-
       </div>
     </div>
 </template>

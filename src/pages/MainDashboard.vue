@@ -242,6 +242,65 @@ onUnmounted(() => {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       
       <!-- 3 Analysis Cards (Activity Advisories) - Full Width (Col Span 3) -->
+      <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
+        <!-- Current Weather Overview -->
+        <CurrentWeather 
+          :weather-data="weatherData" 
+          :cities="cities"
+          :selected-city="selectedCity"
+          :additional-info="additionalInfo"
+          :forecasts="forecasts"
+          @select-city="$emit('select-city', $event)"
+          @delete-city="$emit('delete-city', $event)"
+        />
+
+        <!-- Temperature Trend Line Graph & Hourly Flex -->
+        <ForecastPanel :forecasts="forecasts" />
+
+        <!-- Radar Cuaca Lokasi (Himawari-9) -->
+        <SatelliteMap :selected-city="selectedCity" @select-city="$emit('select-city', $event)" />
+
+        <!-- Radar Tinggi Gelombang (Maritim) -->
+        <WaveRadarMap :selected-city="selectedCity" />
+
+        <!-- Real-time Earthquake Seismic Proximity Monitor -->
+        <EarthquakeHistory 
+          :selected-city="selectedCity"
+          :user-lat="userLat"
+          :user-lng="userLng"
+        />
+      </div>
+
+      <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->
+      <div class="lg:sticky lg:top-24 self-start z-30">
+        <div class="space-y-8 animate-fade-in sidebar-contained scroll-section" style="animation-delay: 200ms;">
+          <!-- Indeks Kenyamanan (kolom kanan posisi 1) -->
+          <ComfortIndexCard :temp="weatherData.temp" />
+
+          <!-- Pengukuran Kualitas Udara (kolom kanan posisi 2) -->
+          <AirQualityCard :weather-data="weatherData" :selected-city="selectedCity" />
+
+          <!-- Weather Activity & Analysis Section -->
+          <WeatherActivity
+          :weather-data="weatherData"
+          :current-analysis="currentAnalysis"
+          :additional-info="additionalInfo"
+          :selected-city="selectedCity"
+          :slide-direction="slideDirection"
+          :current-city-landmark-svg="currentCityLandmarkSvg"
+          :current-city-short-name="currentCityShortName"
+          @open-maritime-advisor="openMaritimeAdvisor"
+          @open-aviation-advisor="openAviationAdvisor"
+          @open-land-advisor="openLandAdvisor"
+        />
+
+
+        <!-- Traffic & Transport advisories -->
+        <TransportWeather :statuses="transportStatuses" />
+      </div>
+    </div>
+
+
       <div class="lg:col-span-3 space-y-4">
         
         <!-- Emergency Alerts Cards -->
@@ -437,65 +496,6 @@ onUnmounted(() => {
       </div>
       
       <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
-      <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
-        <!-- Current Weather Overview -->
-        <CurrentWeather 
-          :weather-data="weatherData" 
-          :cities="cities"
-          :selected-city="selectedCity"
-          :additional-info="additionalInfo"
-          :forecasts="forecasts"
-          @select-city="$emit('select-city', $event)"
-          @delete-city="$emit('delete-city', $event)"
-        />
-
-        <!-- Temperature Trend Line Graph & Hourly Flex -->
-        <ForecastPanel :forecasts="forecasts" />
-
-        <!-- Radar Cuaca Lokasi (Himawari-9) -->
-        <SatelliteMap :selected-city="selectedCity" @select-city="$emit('select-city', $event)" />
-
-        <!-- Radar Tinggi Gelombang (Maritim) -->
-        <WaveRadarMap :selected-city="selectedCity" />
-
-        <!-- Real-time Earthquake Seismic Proximity Monitor -->
-        <EarthquakeHistory 
-          :selected-city="selectedCity"
-          :user-lat="userLat"
-          :user-lng="userLng"
-        />
-      </div>
-
-      <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->
-      <div class="lg:sticky lg:top-24 self-start z-30">
-        <div class="space-y-8 animate-fade-in sidebar-contained scroll-section" style="animation-delay: 200ms;">
-          <!-- Indeks Kenyamanan (kolom kanan posisi 1) -->
-          <ComfortIndexCard :temp="weatherData.temp" />
-
-          <!-- Pengukuran Kualitas Udara (kolom kanan posisi 2) -->
-          <AirQualityCard :weather-data="weatherData" :selected-city="selectedCity" />
-
-          <!-- Weather Activity & Analysis Section -->
-          <WeatherActivity
-          :weather-data="weatherData"
-          :current-analysis="currentAnalysis"
-          :additional-info="additionalInfo"
-          :selected-city="selectedCity"
-          :slide-direction="slideDirection"
-          :current-city-landmark-svg="currentCityLandmarkSvg"
-          :current-city-short-name="currentCityShortName"
-          @open-maritime-advisor="openMaritimeAdvisor"
-          @open-aviation-advisor="openAviationAdvisor"
-          @open-land-advisor="openLandAdvisor"
-        />
-
-
-        <!-- Traffic & Transport advisories -->
-        <TransportWeather :statuses="transportStatuses" />
-      </div>
-    </div>
-
-
     </div>
   </main>
 

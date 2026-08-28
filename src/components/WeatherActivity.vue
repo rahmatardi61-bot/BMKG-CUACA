@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { WeatherData, CityAnalysis } from '../types/weather';
+import { getSectorsDataForCity } from '../data/maritimeAdvisorData';
 import { computed } from 'vue';
 import { 
   Compass, 
@@ -54,6 +55,12 @@ const nearestAirportName = computed(() => {
   if (lc.includes('lombok')) return 'ZAINUDDIN ABDUL';
   // fallback: use city name
   return props.selectedCity.split(',')[0].trim().toUpperCase();
+});
+
+// Shipping sector (Aktivitas Pelayaran) for the selected city
+const shippingSector = computed(() => {
+  const sectors = getSectorsDataForCity(props.selectedCity);
+  return sectors.find(s => s.id === 'shipping') || sectors[0];
 });
 
 function lockHeight(el: Element) {
@@ -292,7 +299,93 @@ function unlockHeight(el: Element) {
           </div>
         </div>
 
-        <!-- Card 3: Penerbangan -->
+        <!-- Card 3: Pelayaran (Aktivitas Pelayaran) -->
+        <div 
+          @click="emit('open-maritime-advisor', 'shipping')"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-teal-500/40 dark:hover:border-teal-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-teal-500/50 dark:active:border-teal-400/50"
+        >
+          <!-- Colored Ambient Glow Overlay -->
+          <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-teal-500/12 dark:bg-teal-500/18 blur-2xl group-hover:bg-teal-500/30 dark:group-hover:bg-teal-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
+
+          <!-- ⛵ Shipping Illustration: Container ship + route + waves -->
+          <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
+            <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
+              <defs>
+                <linearGradient id="shipGradA" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#14b8a6" stop-opacity="0"/>
+                  <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.3"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="320" height="80" fill="url(#shipGradA)"/>
+              <!-- Sea base -->
+              <rect x="0" y="60" width="320" height="20" fill="#0f766e" opacity="0.5"/>
+              <!-- Wave back -->
+              <path d="M0 58 Q20 48 40 55 Q60 62 80 54 Q100 46 120 55 Q140 64 160 54 Q180 44 200 55 Q220 65 240 55 Q260 45 280 55 Q300 65 320 58 L320 80 L0 80Z" fill="#0d9488" opacity="0.45"/>
+              <!-- Wave front -->
+              <path d="M0 66 Q16 58 32 64 Q48 70 64 63 Q80 56 96 63 Q112 70 128 63 Q144 56 160 64 Q176 72 192 64 Q208 56 224 64 Q240 72 256 64 Q272 56 288 64 Q304 72 320 66 L320 80 L0 80Z" fill="#14b8a6" opacity="0.55"/>
+              <!-- Container ship -->
+              <path d="M52 62 L40 68 L140 68 L128 62Z" fill="#334155" opacity="0.8"/>
+              <rect x="62" y="52" width="18" height="10" fill="#475569" opacity="0.8" rx="1"/>
+              <rect x="84" y="46" width="10" height="16" fill="#64748b" opacity="0.75" rx="1"/>
+              <!-- Containers -->
+              <rect x="68" y="61" width="9" height="4" fill="#f43f5e" opacity="0.55" rx="0.3"/>
+              <rect x="78" y="61" width="9" height="4" fill="#3b82f6" opacity="0.55" rx="0.3"/>
+              <rect x="88" y="61" width="9" height="4" fill="#22c55e" opacity="0.55" rx="0.3"/>
+              <rect x="98" y="61" width="9" height="4" fill="#f59e0b" opacity="0.55" rx="0.3"/>
+              <!-- Route line dashed -->
+              <path d="M30 74 Q 80 68 140 73 Q 200 78 260 71 Q 290 68 320 72" stroke="#5eead4" stroke-width="0.8" stroke-dasharray="8 6" opacity="0.6"/>
+              <!-- Destination marker -->
+              <circle cx="285" cy="53" r="7" fill="#fbbf24" opacity="0.25"/>
+              <circle cx="285" cy="53" r="3" fill="#fbbf24" opacity="0.8"/>
+              <!-- Seagulls -->
+              <path d="M210 30 Q215 25 220 30" stroke="#99f6e4" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.7"/>
+              <path d="M230 22 Q234 18 238 22" stroke="#99f6e4" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.6"/>
+            </svg>
+          </div>
+
+          <div class="flex items-center justify-between z-10">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-teal-500/15 dark:bg-teal-500/25 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+                <Ship class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 group-active:-translate-y-0.5 group-active:scale-110" />
+              </div>
+              <h4 class="text-[11px] font-black uppercase tracking-widest text-teal-600 dark:text-teal-400">
+                Aktivitas Pelayaran
+              </h4>
+            </div>
+            
+            <!-- Port Badge -->
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/8 dark:bg-teal-500/12 border border-teal-500/20 dark:border-teal-500/25 text-[9px] font-black uppercase tracking-wider text-teal-600/80 dark:text-teal-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-teal-500/15 group-hover:border-teal-500/35 max-w-[55%] truncate">
+              <Ship class="w-3 h-3 shrink-0" />
+              <span class="truncate">{{ shippingSector.title }}</span>
+            </div>
+          </div>
+          
+          <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
+            {{ shippingSector.description }}
+          </p>
+
+          <!-- Card Footer Stats Row -->
+          <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-brand-navy-700/40 text-[11px] font-bold text-slate-800 dark:text-slate-100 z-10">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
+                <Waves class="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                <span>{{ shippingSector.riskScore }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-wider" :class="shippingSector.riskColor">{{ shippingSector.riskLevel }}</span>
+              </div>
+            </div>
+            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:text-teal-750 dark:hover:text-teal-300 hover:underline transition-colors font-black cursor-pointer">
+              Selengkapnya
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <!-- Card 4: Penerbangan -->
         <div 
           @click="emit('open-aviation-advisor', 'commercial')"
           class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"

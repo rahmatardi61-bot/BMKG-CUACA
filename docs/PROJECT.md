@@ -33,13 +33,16 @@ src/
 │   └── UnderMaintenance.vue      # fallback untuk tab yg belum dibangun
 ├── components/
 │   ├── Header.vue                # navbar: tab, tema, pilih kota, login
-│   ├── CurrentWeather.vue        # kartu cuaca utama terpilih
+│   ├── CurrentWeather.vue        # kartu cuaca utama terpilih (+ strip detail 7 hari)
+│   ├── ComfortIndexCard.vue      # Indeks Kenyamanan (kolom kanan)
+│   ├── AirQualityCard.vue        # Pengukuran Kualitas Udara (kolom kanan)
+│   ├── SatelliteMap.vue          # Radar cuaca satelit Himawari-9
+│   ├── WaveRadarMap.vue          # Radar tinggi gelombang (maritim)
 │   ├── ForecastPanel.vue         # ramalan 24jam/7hari
 │   ├── WeatherActivity.vue       # sidebar aktivitas (darat/laut/udara)
 │   ├── TransportWeather.vue      # status transportasi
 │   ├── AlertsPanel.vue           # peringatan cuaca
 │   ├── Earthquake*.vue           # gempa: aktivitas + riwayat
-│   ├── SatelliteMap.vue          # peta Leaflet
 │   ├── MajorCitiesCarousel.vue   # carousel kota besar
 │   ├── *Drawer.vue               # panel detail (maritim, penerbangan, lapor cuaca, dll)
 │   ├── NewsSection.vue / Footer.vue / LandBasedActivities.vue

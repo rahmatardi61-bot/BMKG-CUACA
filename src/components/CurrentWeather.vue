@@ -559,7 +559,11 @@ onUnmounted(() => {
 
     </div>
 
-    <!-- Responsive Weather Grid Cards -->
+    <!-- Kondisi Terkini: Responsive Weather Grid Cards -->
+    <div class="flex items-center gap-2 mt-2 mb-4">
+      <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Kondisi Terkini</h3>
+      <div class="h-px flex-1 bg-slate-200/60 dark:bg-brand-navy-800/60"></div>
+    </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
 
       <!-- ── Shared mini illustration helper (rendered inside each card) ────── -->

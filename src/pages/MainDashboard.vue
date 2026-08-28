@@ -240,6 +240,9 @@ onUnmounted(() => {
 <template>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
     
+  <!-- ALERTS (paling atas) -->
+  <AlertsPanel :alerts="alerts" class="mb-8" />
+
   <!-- TOP 2 ROWS: Kondisi Saat Ini | Indeks Kenyamanan / Kondisi Terkini | Kualitas Udara -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
     <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
@@ -261,11 +264,8 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <!-- FULL-WIDTH: Alerts + Location + Major Cities Carousel (Info BMKG) -->
+  <!-- FULL-WIDTH: Location + Major Cities Carousel (Info BMKG) -->
   <div class="lg:col-span-3 space-y-4">
-        
-        <!-- Emergency Alerts Cards -->
-        <AlertsPanel :alerts="alerts" />
 
         <!-- Modern borderless location selector -->
         <div class="flex items-center justify-between pb-1">

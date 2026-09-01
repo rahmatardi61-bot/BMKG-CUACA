@@ -57,7 +57,10 @@ const currentHourStr = computed(() => {
 });
 
 // ISO date of today 'YYYY-MM-DD'
-const todayIso = computed(() => weatherNow.value.toISOString().slice(0, 10));
+const todayIso = computed(() => {
+  const d = weatherNow.value;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+});
 
 // ── Generate realistic hourly data from a LocationData condition ─────────────
 // Active location for weather table (destination when selected, else start)

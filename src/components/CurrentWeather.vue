@@ -4,28 +4,18 @@ import {
   Droplets, 
   Wind, 
   Sun, 
-  SunDim,
-  Cloudy,
   Eye,
-  CloudSun,
-  Cloud,
-  CloudRain,
-  CloudLightning,
   Thermometer,
   Navigation,
-  MessageSquare,
   Sunrise,
   Sunset,
   Moon
 } from 'lucide-vue-next';
 import type { WeatherData } from '../types/weather';
-import { getCityTheme } from '../data/cityThemes';
 import type { AdditionalWeatherInfo } from '../data/weatherHelpers';
 import { 
   getAdditionalWeatherData, 
-  getComfortIndex, 
-  getNormalizedWeatherType, 
-  getFormattedTimeAndZone
+  getComfortIndex
 } from '../data/weatherHelpers';
 
 const props = defineProps<{
@@ -71,66 +61,7 @@ onUnmounted(() => {
   document.body.classList.remove('drawer-open');
 });
 
-// Computed time formatted with Indonesia timezones (WIB / WITA)
-const formattedTimeAndZone = computed(() => {
-  return getFormattedTimeAndZone(currentTime.value, props.selectedCity);
-});
-
-// Map weather status string to specific Lucide icons or gradients
-const weatherStyling = computed(() => {
-  const status = props.weatherData.status.toLowerCase();
-  if (status.includes('cerah') && !status.includes('berawan')) {
-    return {
-      gradient: 'from-amber-400 via-orange-400 to-yellow-500 text-white',
-      themeColor: 'text-amber-500',
-      icon: Sun
-    };
-  } else if (status.includes('cerah berawan')) {
-    return {
-      gradient: 'from-sky-400 via-blue-400 to-amber-300 text-white',
-      themeColor: 'text-sky-500',
-      icon: SunDim
-    };
-  } else if (status.includes('sebagian berawan')) {
-    return {
-      gradient: 'from-sky-400 via-blue-400 to-amber-300 text-white',
-      themeColor: 'text-sky-500',
-      icon: CloudSun
-    };
-  } else if (status.includes('hujan')) {
-    return {
-      gradient: 'from-slate-700 via-blue-800 to-slate-800 text-white dark:from-slate-900 dark:via-blue-950 dark:to-slate-950',
-      themeColor: 'text-blue-500',
-      icon: CloudRain
-    };
-  } else if (status.includes('petir') || status.includes('badai')) {
-    return {
-      gradient: 'from-indigo-900 via-slate-900 to-purple-950 text-white',
-      themeColor: 'text-indigo-500',
-      icon: CloudLightning
-    };
-  } else if (status.includes('berawan tebal')) {
-    return {
-      gradient: 'from-blue-500 via-slate-400 to-indigo-600 text-white dark:from-brand-navy-900 dark:via-slate-800 dark:to-brand-navy-950',
-      themeColor: 'text-slate-500',
-      icon: Cloudy
-    };
-  } else {
-    // Berawan / cloudy
-    return {
-      gradient: 'from-blue-500 via-slate-400 to-indigo-600 text-white dark:from-brand-navy-900 dark:via-slate-800 dark:to-brand-navy-950',
-      themeColor: 'text-slate-500',
-      icon: Cloud
-    };
-  }
-});
-
-// Playful, colorful landmarks and theme gradients for each city
-const cityTheme = computed(() => {
-  return getCityTheme(props.selectedCity);
-});
-
-// Additional weather details for full screen cards
+// Additional weather details for metric cards
 const additionalWeatherData = computed(() => {
   return props.additionalInfo || getAdditionalWeatherData(props.selectedCity);
 });
@@ -139,71 +70,6 @@ const additionalWeatherData = computed(() => {
 const comfortIndex = computed(() => {
   return getComfortIndex(props.weatherData.temp);
 });
-
-// Weather type normalization
-const normalizedWeatherType = computed(() => {
-  return getNormalizedWeatherType(props.weatherData.status);
-});
-
-
-const getRainStyle = (index: number, intensity: 'light' | 'heavy') => {
-  const seed = (index * 17) % 100;
-  const left = seed;
-  const duration = intensity === 'light'
-    ? 0.8 + ((index * 7) % 5) * 0.1
-    : 0.4 + ((index * 7) % 5) * 0.08;
-  const delay = -((index * 13) % 20) * 0.1;
-  const height = intensity === 'light'
-    ? 12 + ((index * 3) % 8)
-    : 20 + ((index * 5) % 12);
-  return {
-    left: `${left}%`,
-    top: `-32px`,
-    height: `${height}px`,
-    animationDuration: `${duration}s`,
-    animationDelay: `${delay}s`,
-  };
-};
-
-const getSnowStyle = (index: number) => {
-  const seed = (index * 23) % 100;
-  const left = seed;
-  const duration = 5 + ((index * 11) % 6) * 0.8; // 5s to 9s
-  const delay = -((index * 19) % 10); // 0s to -10s
-  const size = 3 + ((index * 3) % 5); // 3px to 8px
-  const opacity = 0.5 + ((index * 7) % 6) * 0.08; // 0.5 to 0.9
-  const swayDuration = 2 + ((index * 17) % 3) * 0.5; // 2s to 3s
-  return {
-    left: `${left}%`,
-    width: `${size}px`,
-    height: `${size}px`,
-    opacity: opacity,
-    animationDuration: `${duration}s, ${swayDuration}s`,
-    animationDelay: `${delay}s`,
-  };
-};
-
-import { toRef } from 'vue';
-import { useWeatherReport } from '../composables/useWeatherReport';
-import WeatherReportDrawer from './WeatherReportDrawer.vue';
-
-const {
-  isReportModalOpen,
-  reportSubmitting,
-  reportSuccess,
-  reportActiveTab,
-  overallConditions,
-  tempFeelings,
-  otherConditionsList,
-  reportForm,
-  reportHistory,
-  getConditionIconBg,
-  getConditionIconColor,
-  toggleOtherCondition,
-  openReportModal,
-  closeReportModal,
-  submitReport
-} = useWeatherReport(toRef(props, 'selectedCity'));
 
 
 const sunPosition = computed(() => {
@@ -354,173 +220,6 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="space-y-6">
-
-
-    <!-- Full Width: Large Hero Weather Card -->
-    <div 
-      class="w-full rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-lg flex flex-col gap-8 group weather-card-dynamic text-white"
-      :class="cityTheme.cardBg"
-    >
-      <!-- Decorative Glow Overlay -->
-      <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10 blur-2xl"></div>
-      <div class="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-black/10 blur-2xl"></div>
-
-      <!-- City Landmark Watermark Image Overlay (Full Card Background) -->
-      <div v-if="cityTheme.landmarkImg" class="absolute inset-0 pointer-events-none opacity-20 group-hover:opacity-30 transition-all duration-500 z-0">
-        <img :src="cityTheme.landmarkImg" alt="City Landmark" class="w-full h-full object-cover" />
-      </div>
-
-
-      <!-- Dynamic Weather Animations Background Overlays -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
-        <!-- Sunny (Cerah) Animation -->
-        <template v-if="normalizedWeatherType === 'sunny'">
-          <div class="absolute inset-0 bg-gradient-to-br from-amber-400/20 via-orange-400/12 to-transparent dark:from-amber-500/12 dark:via-orange-500/8 dark:to-transparent transition-all duration-500"></div>
-          <div class="sunny-aura absolute -right-20 -top-20 w-80 h-80 rounded-full bg-amber-400/30 dark:bg-yellow-400/18 blur-3xl"></div>
-          <div class="sun-rays absolute inset-0 overflow-hidden mix-blend-screen opacity-30">
-            <div class="sun-ray-1"></div>
-            <div class="sun-ray-2"></div>
-          </div>
-        </template>
-
-        <!-- Partly Cloudy (Berawan) Animation -->
-        <template v-if="normalizedWeatherType === 'partly-cloudy'">
-          <div class="absolute inset-0 bg-gradient-to-br from-sky-400/20 via-blue-400/12 to-amber-300/8 dark:from-sky-500/12 dark:via-blue-500/8 dark:to-amber-500/5 transition-all duration-500"></div>
-          <div class="clouds-container absolute inset-0 opacity-35 dark:opacity-22">
-            <div class="cloud-item cloud-1">
-              <svg viewBox="0 0 100 60" fill="currentColor"><path d="M20 40 a15 15 0 0 1 22 -13 a20 20 0 0 1 37 5 a15 15 0 0 1 11 15 a10 10 0 0 1 -10 10 h-50 a10 10 0 0 1 -10 -10 z" /></svg>
-            </div>
-            <div class="cloud-item cloud-2">
-              <svg viewBox="0 0 100 60" fill="currentColor"><path d="M20 40 a15 15 0 0 1 22 -13 a20 20 0 0 1 37 5 a15 15 0 0 1 11 15 a10 10 0 0 1 -10 10 h-50 a10 10 0 0 1 -10 -10 z" /></svg>
-            </div>
-          </div>
-        </template>
-
-        <!-- Cloudy (Mendung) Animation -->
-        <template v-if="normalizedWeatherType === 'cloudy'">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-400/25 via-slate-500/12 to-indigo-500/8 dark:from-slate-800/18 dark:via-slate-900/12 dark:to-indigo-950/8 transition-all duration-500"></div>
-          <div class="clouds-container cloudy-overcast absolute inset-0 opacity-55 dark:opacity-35">
-            <div class="cloud-item cloud-1">
-              <svg viewBox="0 0 100 60" fill="currentColor"><path d="M20 40 a15 15 0 0 1 22 -13 a20 20 0 0 1 37 5 a15 15 0 0 1 11 15 a10 10 0 0 1 -10 10 h-50 a10 10 0 0 1 -10 -10 z" /></svg>
-            </div>
-            <div class="cloud-item cloud-2">
-              <svg viewBox="0 0 100 60" fill="currentColor"><path d="M20 40 a15 15 0 0 1 22 -13 a20 20 0 0 1 37 5 a15 15 0 0 1 11 15 a10 10 0 0 1 -10 10 h-50 a10 10 0 0 1 -10 -10 z" /></svg>
-            </div>
-            <div class="cloud-item cloud-3">
-              <svg viewBox="0 0 100 60" fill="currentColor"><path d="M20 40 a15 15 0 0 1 22 -13 a20 20 0 0 1 37 5 a15 15 0 0 1 11 15 a10 10 0 0 1 -10 10 h-50 a10 10 0 0 1 -10 -10 z" /></svg>
-            </div>
-          </div>
-        </template>
-
-        <!-- Hujan Ringan (Light Rain) Animation -->
-        <template v-if="normalizedWeatherType === 'light-rain'">
-          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/25 via-slate-500/12 to-blue-600/10 dark:from-blue-900/18 dark:via-slate-900/10 dark:to-blue-950/10 transition-all duration-500"></div>
-          <div class="rain-container absolute inset-0 opacity-55">
-            <div v-for="n in 15" :key="'lr-'+n" class="rain-drop" :style="getRainStyle(n, 'light')"></div>
-          </div>
-        </template>
-
-        <!-- Hujan Lebat (Heavy Rain) Animation -->
-        <template v-if="normalizedWeatherType === 'heavy-rain'">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-600/30 via-blue-600/18 to-slate-700/12 dark:from-slate-950/22 dark:via-blue-950/15 dark:to-slate-900/15 transition-all duration-500"></div>
-          <div class="rain-container absolute inset-0 opacity-75">
-            <div v-for="n in 35" :key="'hr-'+n" class="rain-drop" :style="getRainStyle(n, 'heavy')"></div>
-          </div>
-        </template>
-
-        <!-- Badai Petir (Thunderstorm) Animation -->
-        <template v-if="normalizedWeatherType === 'thunderstorm'">
-          <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/30 via-slate-600/18 to-purple-600/12 dark:from-indigo-950/25 dark:via-slate-950/15 dark:to-purple-950/18 transition-all duration-500"></div>
-          <div class="lightning-overlay absolute inset-0 bg-white pointer-events-none mix-blend-overlay opacity-0 lightning-flash"></div>
-          <div class="rain-container absolute inset-0 opacity-75">
-            <div v-for="n in 40" :key="'ts-'+n" class="rain-drop" :style="getRainStyle(n, 'heavy')"></div>
-          </div>
-        </template>
-
-        <!-- Salju (Snow) Animation -->
-        <template v-if="normalizedWeatherType === 'snow'">
-          <div class="absolute inset-0 bg-gradient-to-br from-blue-100/25 via-white/10 to-blue-200/12 dark:from-blue-950/15 dark:via-slate-900/10 dark:to-blue-900/10 transition-all duration-500"></div>
-          <div class="snow-container absolute inset-0 opacity-85">
-            <div v-for="n in 20" :key="'sn-'+n" class="snow-flake" :style="getSnowStyle(n)"></div>
-          </div>
-        </template>
-      </div>
-
-      <!-- Top Row: Main Weather Stats & Summary -->
-      <div class="flex flex-col md:flex-row justify-between items-stretch gap-6 w-full z-10">
-        <!-- Card Left Portion -->
-        <div class="flex flex-col justify-between flex-1">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-black tracking-wider bg-current/10 px-2.5 py-1 rounded-full uppercase">
-                Kondisi Saat Ini
-              </span>
-              <span class="text-[10px] font-black bg-current/10 px-2.5 py-1 rounded-full tracking-wider whitespace-nowrap">
-                {{ formattedTimeAndZone }}
-              </span>
-            </div>
-            <h2 class="text-3xl md:text-4xl font-black mt-3 tracking-tight">
-              {{ weatherData.city.split(',')[0] }}
-            </h2>
-            <p class="text-[11px] font-bold opacity-80 mt-1.5 uppercase tracking-wider flex items-center gap-1 flex-wrap">
-              <template v-if="weatherData.city.split(',').length > 1 && weatherData.city.split(',')[1].trim()">
-                <span>{{ weatherData.city.split(',').slice(1).map(x => x.trim()).join(', ') }}</span>
-              </template>
-              <template v-else>
-                <span>{{ weatherData.city.split(',')[0] }}</span>
-              </template>
-            </p>
-          </div>
-          
-          <!-- Main Temp Info -->
-          <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-4">
-            <div class="flex items-baseline gap-1">
-              <span class="text-7xl md:text-8xl font-black tracking-tighter leading-none">{{ weatherData.temp }}</span>
-              <span class="text-3xl md:text-4xl font-bold">°C</span>
-            </div>
-
-            <!-- Lapor Cuaca Button -->
-            <button 
-              @click="openReportModal"
-              class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[12px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
-            >
-              <!-- Glowing active dot indicating live reporting state -->
-              <span class="w-1.5 h-1.5 rounded-full bg-current relative flex shrink-0">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
-              </span>
-              
-              <MessageSquare class="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-              <span>Lapor Cuaca</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Right Portion -->
-        <div class="flex flex-col justify-between items-end text-right gap-6">
-          <!-- Animated Status Weather Icon Container -->
-          <div class="p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 self-end">
-            <component :is="weatherStyling.icon" class="w-12 h-12 animate-bounce" style="animation-duration: 4s;" />
-          </div>
-
-          <!-- Temperature status summary -->
-          <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
-            <!-- Upper Panel: Status & Feels Like -->
-            <div class="p-3.5 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
-              <p class="text-xl md:text-2xl font-black tracking-tight leading-tight">{{ weatherData.status }}</p>
-              <p class="text-[11px] opacity-90 mt-1 font-semibold">Terasa seperti {{ weatherData.feelLike }}°C</p>
-            </div>
-            
-            <!-- Lower Panel: Min / Max -->
-            <div class="py-2.5 px-3.5 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
-              <span class="opacity-75 font-bold">Min / Max</span>
-              <span class="font-black">{{ weatherData.tempMin }}° / {{ weatherData.tempMax }}°</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
 
     <!-- Full Width: Index Kenyamanan Card -->
     <div class="relative w-full rounded-3xl p-5 overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50 text-left">
@@ -1223,30 +922,7 @@ onUnmounted(() => {
 
     </div>
 
-    <!-- Lapor Cuaca Drawer (extracted component) -->
-    <WeatherReportDrawer
-      :isOpen="isReportModalOpen"
-      :selectedCity="props.selectedCity"
-      :weatherTemp="weatherData.temp"
-      :weatherIcon="weatherStyling.icon"
-      :reportSubmitting="reportSubmitting"
-      :reportSuccess="reportSuccess"
-      :reportActiveTab="reportActiveTab"
-      :reportForm="reportForm"
-      :reportHistory="reportHistory"
-      :overallConditions="overallConditions"
-      :tempFeelings="tempFeelings"
-      :otherConditionsList="otherConditionsList"
-      :getConditionIconBg="getConditionIconBg"
-      :getConditionIconColor="getConditionIconColor"
-      @close="closeReportModal"
-      @update:reportActiveTab="reportActiveTab = $event"
-      @update:reportForm="reportForm = $event"
-      @toggleOtherCondition="toggleOtherCondition"
-      @submit="submitReport"
-    />
 </div>
-
 </template>
 <style scoped>
 /* Weather animations styling */

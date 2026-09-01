@@ -46,7 +46,8 @@ const canScrollRight = ref(true);
 
 // Today ISO date YYYY-MM-DD
 const todayIso = computed(() => {
-  return props.currentTime.toISOString().slice(0, 10);
+  const d = props.currentTime;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 });
 
 // Watch selected date to notify parent container for header date updates

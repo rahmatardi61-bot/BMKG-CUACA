@@ -28,8 +28,11 @@ const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel
 const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
 const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
 const LandBasedActivities = defineAsyncComponent(() => import('../components/LandBasedActivities.vue'));
+const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWeatherCard.vue'));
+const AppDownloadCTA = defineAsyncComponent(() => import('../components/AppDownloadCTA.vue'));
 const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 
 import type { 
@@ -422,6 +425,25 @@ onUnmounted(() => {
           </div>
         </div>
 
+        <!-- Top Hero Row: Large Hero Weather Card (Left) & Mobile App Download CTA (Right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_340px] gap-4 items-stretch mt-4">
+          <!-- Large Hero Weather Card -->
+          <HeroWeatherCard 
+            :weather-data="weatherData" 
+            :cities="cities"
+            :selected-city="selectedCity"
+            :additional-info="additionalInfo"
+            @select-city="$emit('select-city', $event)"
+            @delete-city="$emit('delete-city', $event)"
+          />
+
+          <!-- Mobile App Download CTA Card -->
+          <AppDownloadCTA />
+        </div>
+      </div>
+      
+      <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
+      <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
         <MajorCitiesCarousel 
           :selected-city="selectedCity" 
@@ -429,10 +451,7 @@ onUnmounted(() => {
           @select-city="$emit('select-city', $event)" 
           @select-course="handleSelectCourse($event)"
         />
-      </div>
-      
-      <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
-      <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 100ms;">
+
         <!-- Current Weather Overview -->
         <CurrentWeather 
           :weather-data="weatherData" 
@@ -445,6 +464,14 @@ onUnmounted(() => {
 
         <!-- Temperature Trend Line Graph & Hourly Flex -->
         <ForecastPanel :forecasts="forecasts" />
+
+        <!-- Interactive BMKG Weather Radar Map -->
+        <WeatherRadarMap
+          :selected-city="selectedCity"
+          :user-lat="userLat"
+          :user-lng="userLng"
+          :weather-data="weatherData"
+        />
 
         <!-- Real-time Earthquake Seismic Proximity Monitor -->
         <EarthquakeHistory 

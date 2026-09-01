@@ -508,36 +508,38 @@ const submitReport = () => {
             </p>
           </div>
           
-          <!-- Main Temp Info -->
-          <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-4">
-            <div class="flex items-baseline gap-1">
-              <span class="text-7xl md:text-8xl font-black tracking-tighter leading-none">{{ weatherData.temp }}</span>
-              <span class="text-3xl md:text-4xl font-bold">°C</span>
+          <!-- Main Temp Info & Animated Weather Icon (Sejajar Suhu & Icon Animasi Cuaca) -->
+          <div class="mt-6 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+            <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-4">
+              <div class="flex items-baseline gap-1">
+                <span class="text-7xl md:text-8xl font-black tracking-tighter leading-none">{{ weatherData.temp }}</span>
+                <span class="text-3xl md:text-4xl font-bold">°C</span>
+              </div>
+
+              <!-- Lapor Cuaca Button -->
+              <button 
+                @click="openReportModal"
+                class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[12px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-current relative flex shrink-0">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
+                </span>
+                
+                <MessageSquare class="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+                <span>Lapor Cuaca</span>
+              </button>
             </div>
 
-            <!-- Lapor Cuaca Button -->
-            <button 
-              @click="openReportModal"
-              class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[12px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-current relative flex shrink-0">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
-              </span>
-              
-              <MessageSquare class="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-              <span>Lapor Cuaca</span>
-            </button>
+            <!-- Animated Status Weather Icon Container (Sejajar dengan Suhu) -->
+            <div class="p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 shrink-0 self-end sm:self-center">
+              <component :is="weatherStyling.icon" class="w-12 h-12 md:w-14 md:h-14 animate-bounce" style="animation-duration: 4s;" />
+            </div>
           </div>
         </div>
 
-        <!-- Card Right Portion -->
-        <div class="flex flex-col justify-between items-end text-right gap-6">
-          <!-- Animated Status Weather Icon Container -->
-          <div class="p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 self-end">
-            <component :is="weatherStyling.icon" class="w-12 h-12 animate-bounce" style="animation-duration: 4s;" />
-          </div>
-
+        <!-- Card Right Portion (Status Summary) -->
+        <div class="flex flex-col justify-end items-end text-right gap-6">
           <!-- Temperature status summary -->
           <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
             <!-- Upper Panel: Status & Feels Like -->

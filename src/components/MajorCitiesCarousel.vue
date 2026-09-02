@@ -147,7 +147,7 @@ onUnmounted(() => {
 
 <template>
   <!-- Full-width: Carousel card with backdrop -->
-  <div class="relative w-full mt-4">
+  <div class="relative w-full">
 
     <!-- Carousel card with backdrop -->
     <div class="relative bg-white/85 dark:bg-brand-navy-900/80 border border-slate-100/50 dark:border-brand-navy-700/20 no-blur rounded-3xl p-5 shadow-sm overflow-hidden">

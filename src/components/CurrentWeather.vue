@@ -14,8 +14,7 @@ import {
 import type { WeatherData } from '../types/weather';
 import type { AdditionalWeatherInfo } from '../data/weatherHelpers';
 import { 
-  getAdditionalWeatherData, 
-  getComfortIndex
+  getAdditionalWeatherData
 } from '../data/weatherHelpers';
 
 const props = defineProps<{
@@ -66,10 +65,6 @@ const additionalWeatherData = computed(() => {
   return props.additionalInfo || getAdditionalWeatherData(props.selectedCity);
 });
 
-// Dynamic comfort index data based on temperature
-const comfortIndex = computed(() => {
-  return getComfortIndex(props.weatherData.temp);
-});
 
 
 const sunPosition = computed(() => {

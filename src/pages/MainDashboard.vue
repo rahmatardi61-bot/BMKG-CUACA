@@ -34,7 +34,7 @@ const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/Maj
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
-const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
+// const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 
 import type { 

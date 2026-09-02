@@ -32,6 +32,8 @@ const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWea
 const AppDownloadCTA = defineAsyncComponent(() => import('../components/AppDownloadCTA.vue'));
 const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
+const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
 const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 
@@ -465,13 +467,23 @@ onUnmounted(() => {
         <!-- Temperature Trend Line Graph & Hourly Flex -->
         <ForecastPanel :forecasts="forecasts" />
 
-        <!-- Interactive BMKG Weather Radar Map -->
+        <!-- BMKG Satellite Map -->
+        <SatelliteMap
+          :selected-city="selectedCity"
+          @select-city="$emit('select-city', $event)"
+        />
+
+        <!-- BMKG Maritime Weather Map -->
+        <MarineMap />
+
+        <!-- Interactive BMKG Weather Radar Map (Hidden)
         <WeatherRadarMap
           :selected-city="selectedCity"
           :user-lat="userLat"
           :user-lng="userLng"
           :weather-data="weatherData"
         />
+        -->
 
         <!-- Real-time Earthquake Seismic Proximity Monitor -->
         <EarthquakeHistory 

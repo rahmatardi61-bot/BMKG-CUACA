@@ -378,9 +378,12 @@ body.drawer-open #app {
   will-change: transform;
 }
 
-/* ── Disable expensive hover effects during scroll ──────────────────────────
+/* ── Disable expensive hover effects & pointer events during scroll ─────────
    Add 'is-scrolling' class to body via JS to suppress expensive hover effects.
-   This avoids hover-triggered filter recalculations during scroll. */
+   This avoids hover-triggered filter recalculations and hit testing during scroll. */
+body.is-scrolling * {
+  pointer-events: none !important;
+}
 body.is-scrolling .group:hover .group-hover\:scale-125,
 body.is-scrolling .group:hover .group-hover\:bg-orange-500\/30,
 body.is-scrolling .group:hover .group-hover\:bg-cyan-500\/30,

@@ -36,6 +36,7 @@ const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteM
 const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
 // const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
+import LazyCardLoader from '../components/LazyCardLoader.vue';
 
 import type { 
   WeatherData, 
@@ -467,14 +468,26 @@ onUnmounted(() => {
         <!-- Temperature Trend Line Graph & Hourly Flex -->
         <ForecastPanel :forecasts="forecasts" />
 
-        <!-- BMKG Satellite Map -->
-        <SatelliteMap
-          :selected-city="selectedCity"
-          @select-city="$emit('select-city', $event)"
-        />
+        <!-- BMKG Satellite Map with Lazy Viewport Skeleton Loader -->
+        <LazyCardLoader 
+          min-height="460px" 
+          title="Memuat Citra Satelit Himawari-9" 
+          subtitle="Menghubungkan citra satelit BMKG"
+        >
+          <SatelliteMap
+            :selected-city="selectedCity"
+            @select-city="$emit('select-city', $event)"
+          />
+        </LazyCardLoader>
 
-        <!-- BMKG Maritime Weather Map -->
-        <MarineMap />
+        <!-- BMKG Maritime Weather Map with Lazy Viewport Skeleton Loader -->
+        <LazyCardLoader 
+          min-height="540px" 
+          title="Memuat Peta Maritim INAWAVES" 
+          subtitle="Memuat data perairan & pelabuhan Indonesia"
+        >
+          <MarineMap />
+        </LazyCardLoader>
 
         <!-- Interactive BMKG Weather Radar Map (Hidden)
         <WeatherRadarMap
@@ -485,12 +498,18 @@ onUnmounted(() => {
         />
         -->
 
-        <!-- Real-time Earthquake Seismic Proximity Monitor -->
-        <EarthquakeHistory 
-          :selected-city="selectedCity"
-          :user-lat="userLat"
-          :user-lng="userLng"
-        />
+        <!-- Real-time Earthquake Seismic Proximity Monitor with Lazy Viewport Skeleton Loader -->
+        <LazyCardLoader 
+          min-height="480px" 
+          title="Memuat Sensor Seismik Gempa Real-time" 
+          subtitle="Sinkronisasi data sensor gempa BMKG"
+        >
+          <EarthquakeHistory 
+            :selected-city="selectedCity"
+            :user-lat="userLat"
+            :user-lng="userLng"
+          />
+        </LazyCardLoader>
       </div>
 
       <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->

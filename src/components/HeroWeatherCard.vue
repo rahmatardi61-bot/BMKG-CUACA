@@ -508,8 +508,8 @@ const submitReport = () => {
             </p>
           </div>
           
-          <!-- Main Temp Info & Animated Weather Icon (Sejajar Suhu & Icon Animasi Cuaca) -->
-          <div class="mt-6 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+          <!-- Main Temp Info & Animated Weather Icon (Mobile Only: Sejajar Suhu) -->
+          <div class="mt-6 flex items-end justify-between gap-4">
             <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-4">
               <div class="flex items-baseline gap-1">
                 <span class="text-7xl md:text-8xl font-black tracking-tighter leading-none">{{ weatherData.temp }}</span>
@@ -531,15 +531,20 @@ const submitReport = () => {
               </button>
             </div>
 
-            <!-- Animated Status Weather Icon Container (Sejajar dengan Suhu) -->
-            <div class="p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 shrink-0 self-end sm:self-center">
-              <component :is="weatherStyling.icon" class="w-12 h-12 md:w-14 md:h-14 animate-bounce" style="animation-duration: 4s;" />
+            <!-- Animated Status Weather Icon Container (Mobile Only: Sejajar Suhu) -->
+            <div class="flex md:hidden p-3 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 shrink-0 self-end sm:self-center">
+              <component :is="weatherStyling.icon" class="w-12 h-12 animate-bounce" style="animation-duration: 4s;" />
             </div>
           </div>
         </div>
 
         <!-- Card Right Portion (Status Summary) -->
-        <div class="flex flex-col justify-end items-end text-right gap-6">
+        <div class="flex flex-col justify-between items-end text-right gap-4 md:gap-6">
+          <!-- Animated Status Weather Icon Container (Desktop Only: Kanan Atas) -->
+          <div class="hidden md:flex p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 self-end">
+            <component :is="weatherStyling.icon" class="w-12 h-12 md:w-14 md:h-14 animate-bounce" style="animation-duration: 4s;" />
+          </div>
+
           <!-- Temperature status summary -->
           <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
             <!-- Upper Panel: Status & Feels Like -->

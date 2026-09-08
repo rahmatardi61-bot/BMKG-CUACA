@@ -551,10 +551,10 @@ const submitReport = () => {
         <div class="flex flex-col justify-between flex-1">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-black tracking-wider bg-current/10 px-2.5 py-1 rounded-[8px] uppercase">
+              <span class="text-[10px] font-black tracking-wider bg-current/10 px-2.5 py-1 rounded-[4px] uppercase">
                 Kondisi Saat Ini
               </span>
-              <span class="text-[10px] font-black bg-current/10 px-2.5 py-1 rounded-[8px] tracking-wider whitespace-nowrap">
+              <span class="text-[10px] font-black bg-current/10 px-2.5 py-1 rounded-[4px] tracking-wider whitespace-nowrap">
                 {{ formattedTimeAndZone }}
               </span>
             </div>
@@ -582,7 +582,7 @@ const submitReport = () => {
               <!-- Lapor Cuaca Button -->
               <button 
                 @click="openReportModal"
-                class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[8px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
+                class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[4px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
               >
                 <span class="w-1.5 h-1.5 rounded-full bg-current relative flex shrink-0">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
@@ -595,7 +595,7 @@ const submitReport = () => {
             </div>
 
             <!-- Animated Status Weather Icon Container (Mobile Only: Sejajar Suhu) -->
-            <div class="flex md:hidden p-3 bg-current/10 backdrop-blur-md rounded-[8px] border border-current/15 shrink-0 self-end sm:self-center">
+            <div class="flex md:hidden p-3 bg-current/10 backdrop-blur-md rounded-[4px] border border-current/15 shrink-0 self-end sm:self-center">
               <component :is="weatherStyling.icon" class="w-12 h-12 animate-bounce" style="animation-duration: 4s;" />
             </div>
           </div>
@@ -604,20 +604,20 @@ const submitReport = () => {
         <!-- Card Right Portion (Status Summary) -->
         <div class="flex flex-col justify-between items-end text-right gap-4 md:gap-6">
           <!-- Animated Status Weather Icon Container (Desktop Only: Kanan Atas) -->
-          <div class="hidden md:flex p-3.5 bg-current/10 backdrop-blur-md rounded-[8px] border border-current/15 self-end">
+          <div class="hidden md:flex p-3.5 bg-current/10 backdrop-blur-md rounded-[4px] border border-current/15 self-end">
             <component :is="weatherStyling.icon" class="w-12 h-12 md:w-14 md:h-14 animate-bounce" style="animation-duration: 4s;" />
           </div>
 
           <!-- Temperature status summary -->
           <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
             <!-- Upper Panel: Status & Feels Like -->
-            <div class="p-3.5 rounded-[8px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
+            <div class="p-3.5 rounded-[4px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
               <p class="text-xl md:text-2xl font-black tracking-tight leading-tight">{{ weatherData.status }}</p>
               <p class="text-[11px] opacity-90 mt-1 font-semibold">Terasa seperti {{ weatherData.feelLike }}°C</p>
             </div>
             
             <!-- Lower Panel: Max / Min -->
-            <div class="py-2.5 px-3.5 rounded-[8px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
+            <div class="py-2.5 px-3.5 rounded-[4px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
               <span class="opacity-75 font-bold">Max / Min</span>
               <span class="font-black">{{ weatherData.tempMax }}° / {{ weatherData.tempMin }}°</span>
             </div>
@@ -635,7 +635,7 @@ const submitReport = () => {
             v-for="(day, idx) in sevenDaysForecast"
             :key="day.date"
             @click="toggleDayTooltip(day.date, $event)"
-            class="group/day relative rounded-[8px] p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 backdrop-blur-xl border select-none cursor-pointer snap-start shrink-0 w-[96px] sm:w-[104px] md:w-auto md:shrink"
+            class="group/day relative rounded-[4px] p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 backdrop-blur-xl border select-none cursor-pointer snap-start shrink-0 w-[96px] sm:w-[104px] md:w-auto md:shrink"
             :class="[
               activeTooltipDate === day.date
                 ? 'bg-white/25 dark:bg-white/20 border-white/60 shadow-2xl ring-2 ring-blue-400 dark:ring-brand-cyan scale-[1.04] z-30'
@@ -658,7 +658,7 @@ const submitReport = () => {
             </div>
 
             <!-- Weather Icon Container -->
-            <div class="my-2 p-1.5 sm:p-2 rounded-[8px] transition-all duration-300 shadow-sm border flex items-center justify-center group-hover/day:scale-110" :class="day.iconBg">
+            <div class="my-2 p-1.5 sm:p-2 rounded-[4px] transition-all duration-300 shadow-sm border flex items-center justify-center group-hover/day:scale-110" :class="day.iconBg">
               <component :is="day.icon" class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300" :class="day.iconColor" />
             </div>
 
@@ -670,7 +670,7 @@ const submitReport = () => {
 
             <!-- Precipitation badge -->
             <div 
-              class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-[8px] text-[9px] font-bold tracking-wide transition-colors"
+              class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-[4px] text-[9px] font-bold tracking-wide transition-colors"
               :class="day.precipitation > 20 
                 ? 'bg-cyan-400/20 text-cyan-200 border border-cyan-400/30' 
                 : 'bg-white/10 text-white/70 border border-white/10'"
@@ -684,7 +684,7 @@ const submitReport = () => {
               <div
                 v-if="activeTooltipDate === day.date"
                 @click.stop
-                class="absolute bottom-full mb-3.5 z-50 w-72 p-3.5 rounded-[8px] backdrop-blur-2xl bg-slate-900/95 dark:bg-brand-navy-950/95 border border-white/20 dark:border-brand-navy-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.5)] text-left text-white pointer-events-auto cursor-default"
+                class="absolute bottom-full mb-3.5 z-50 w-72 p-3.5 rounded-[4px] backdrop-blur-2xl bg-slate-900/95 dark:bg-brand-navy-950/95 border border-white/20 dark:border-brand-navy-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.5)] text-left text-white pointer-events-auto cursor-default"
                 :class="idx === 0 ? 'left-0' : idx === 1 ? 'left-0 sm:-left-6' : idx >= 6 ? 'right-0' : 'left-1/2 -translate-x-1/2'"
               >
                 <!-- Tooltip Header -->
@@ -699,7 +699,7 @@ const submitReport = () => {
                   </div>
                   <button 
                     @click.stop="activeTooltipDate = null" 
-                    class="p-1 rounded hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
+                    class="p-1 rounded-[4px] hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
                   >
                     <X class="w-3.5 h-3.5" />
                   </button>
@@ -713,17 +713,17 @@ const submitReport = () => {
                 <!-- Key Parameters Grid -->
                 <div class="grid grid-cols-3 gap-1.5 pt-1">
                   <!-- Suhu Range -->
-                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                  <div class="p-1.5 rounded-[4px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
                     <span class="text-[9px] text-white/60 font-medium leading-none">Suhu</span>
                     <span class="text-[11px] font-black text-white mt-1">{{ day.tempMax }}° / {{ day.tempMin }}°</span>
                   </div>
                   <!-- Peluang Hujan -->
-                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                  <div class="p-1.5 rounded-[4px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
                     <span class="text-[9px] text-white/60 font-medium leading-none">Hujan</span>
                     <span class="text-[11px] font-black text-cyan-300 mt-1">{{ day.precipitation }}%</span>
                   </div>
                   <!-- Angin -->
-                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                  <div class="p-1.5 rounded-[4px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
                     <span class="text-[9px] text-white/60 font-medium leading-none">Angin</span>
                     <span class="text-[11px] font-black text-white mt-1">{{ day.windSpeed }} km/j</span>
                   </div>
@@ -743,12 +743,12 @@ const submitReport = () => {
 
     <!-- ── Mobile Standalone Card: Prakiraan Cuaca Harian (Soft White Dominan) ── -->
     <div 
-      class="block md:hidden mt-4 relative w-full rounded-2xl p-4 sm:p-5 overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 transition-all duration-300 bg-gradient-to-b from-white via-white to-blue-50/25 dark:from-slate-900 dark:via-slate-900 dark:to-slate-850"
+      class="block md:hidden mt-4 relative w-full rounded-[4px] p-4 sm:p-5 overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 transition-all duration-300 bg-gradient-to-b from-white via-white to-blue-50/25 dark:from-slate-900 dark:via-slate-900 dark:to-slate-850"
     >
       <!-- Header Card -->
       <div class="pb-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 relative z-10">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 border border-blue-100/80 dark:border-blue-800/40 flex items-center justify-center shadow-xs">
+          <div class="w-8 h-8 rounded-[4px] bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 border border-blue-100/80 dark:border-blue-800/40 flex items-center justify-center shadow-xs">
             <Calendar class="w-4 h-4" />
           </div>
           <div>
@@ -768,7 +768,7 @@ const submitReport = () => {
           v-for="day in sevenDaysForecast"
           :key="day.date"
           @click="toggleDayTooltip(day.date, $event)"
-          class="flex flex-col py-3 px-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer rounded-lg"
+          class="flex flex-col py-3 px-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer rounded-[4px]"
         >
           <!-- Main Row -->
           <div class="flex items-center justify-between w-full">
@@ -785,7 +785,7 @@ const submitReport = () => {
             <!-- Col 2: Weather Icon with Soft Pastel Backdrop Box -->
             <div class="flex items-center justify-center shrink-0">
               <div 
-                class="w-8 h-8 rounded-[10px] p-1.5 transition-all duration-200 border flex items-center justify-center shadow-xs" 
+                class="w-8 h-8 rounded-[4px] p-1.5 transition-all duration-200 border flex items-center justify-center shadow-xs" 
                 :class="day.mobileIconBg"
               >
                 <component 
@@ -819,7 +819,7 @@ const submitReport = () => {
             <div 
               v-if="activeTooltipDate === day.date"
               @click.stop
-              class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-left text-xs text-slate-700 dark:text-slate-200 shadow-sm"
+              class="mt-2.5 p-3 rounded-[4px] bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-left text-xs text-slate-700 dark:text-slate-200 shadow-sm"
             >
               <div class="flex items-center justify-between mb-1.5 font-bold text-slate-800 dark:text-slate-100">
                 <div class="flex items-center gap-1.5">
@@ -832,15 +832,15 @@ const submitReport = () => {
                 {{ getWeatherDescription(day.status, day.precipitation, day.tempMax) }}
               </p>
               <div class="grid grid-cols-3 gap-1.5 text-[10px] text-center pt-2 border-t border-slate-200/70 dark:border-slate-700/70">
-                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-[4px] border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
                   <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Peluang Hujan</div>
                   <div class="font-bold text-blue-600 dark:text-blue-400">{{ day.precipitation }}%</div>
                 </div>
-                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-[4px] border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
                   <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Kelembapan</div>
                   <div class="font-bold text-slate-800 dark:text-slate-100">{{ day.humidity }}%</div>
                 </div>
-                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-[4px] border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
                   <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Kec. Angin</div>
                   <div class="font-bold text-slate-800 dark:text-slate-100">{{ day.windSpeed }} km/j</div>
                 </div>

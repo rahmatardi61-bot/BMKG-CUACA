@@ -31,7 +31,7 @@ import {
 
 
 // Theme Mode state: 'light' | 'dark' | 'auto'
-const themeMode = ref<'light' | 'dark' | 'auto'>('auto');
+const themeMode = ref<'light' | 'dark' | 'auto'>('dark');
 
 // Real-time ticking time state for local clock theme checking
 const localClockTime = ref(new Date());
@@ -130,17 +130,17 @@ const calculateAutoThemeState = () => {
   }
 };
 
-// Cycle: 'light' -> 'dark' -> 'auto'
+// Cycle: 'dark' -> 'light' -> 'auto'
 const toggleTheme = () => {
   const root = document.documentElement;
   root.classList.add('no-transitions');
 
-  if (themeMode.value === 'light') {
-    themeMode.value = 'dark';
-  } else if (themeMode.value === 'dark') {
+  if (themeMode.value === 'dark') {
+    themeMode.value = 'light';
+  } else if (themeMode.value === 'light') {
     themeMode.value = 'auto';
   } else {
-    themeMode.value = 'light';
+    themeMode.value = 'dark';
   }
 
   applyTheme();
@@ -167,9 +167,9 @@ const applyTheme = () => {
     root.classList.add('dark');
     themeColor = '#0b0f19';
     isDarkTheme = true;
-    localStorage.setItem('bmkg-theme', 'dark');
+    localStorage.setItem('bmkg-theme-v2', 'dark');
   } else if (themeMode.value === 'light') {
-    localStorage.setItem('bmkg-theme', 'light');
+    localStorage.setItem('bmkg-theme-v2', 'light');
   } else {
     // Mode 'auto': dynamically decide light/dark + sub-theme
     const autoTheme = calculateAutoThemeState();
@@ -189,7 +189,7 @@ const applyTheme = () => {
       case 'theme-stormy':  themeColor = '#090514'; break;
       case 'theme-cloudy':  themeColor = '#f8fafc'; break;
     }
-    localStorage.setItem('bmkg-theme', 'auto');
+    localStorage.setItem('bmkg-theme-v2', 'auto');
   }
 
   // ─── Update Smartphone / Mobile Browser Status Bar Theme ───
@@ -410,12 +410,14 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
-  // Load preferences from local storage or default to 'auto'
-  const storedTheme = localStorage.getItem('bmkg-theme');
+  // Load preferences from local storage or default to 'dark'
+  const storedTheme = localStorage.getItem('bmkg-theme-v2');
   if (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') {
     themeMode.value = storedTheme as 'light' | 'dark' | 'auto';
   } else {
-    themeMode.value = 'auto';
+    themeMode.value = 'dark'; // Default: dark mode
+    localStorage.setItem('bmkg-theme-v2', 'dark');
+    localStorage.removeItem('bmkg-theme');
   }
   applyTheme();
 

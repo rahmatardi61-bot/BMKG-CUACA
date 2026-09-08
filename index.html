@@ -13,6 +13,18 @@
     <meta name="keywords" content="BMKG, Info BMKG, Cuaca Indonesia, Radar Cuaca, Satelit Himawari-9, Gempa Megathrust, Peringatan Dini" />
     <meta name="author" content="BMKG Indonesia" />
     <title>BMKG | Portal Informasi Cuaca, Iklim & Geofisika Indonesia</title>
+    <script>
+      (function() {
+        try {
+          const theme = localStorage.getItem('bmkg-theme-v2');
+          if (theme === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

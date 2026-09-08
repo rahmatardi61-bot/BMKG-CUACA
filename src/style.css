@@ -2,28 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: clip;
+  width: 100%;
+  background-color: #070c19;
+  color-scheme: dark;
+}
+
+html.dark {
+  background-color: #070c19 !important;
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: clip;
   width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #070c19;
+  @apply text-slate-800 dark:bg-brand-navy-950 dark:text-slate-100;
+  transition: background-color 0.5s ease, color 0.3s ease;
 }
 
-/* Enforce font family on Leaflet elements globally */
-.leaflet-container,
-.leaflet-popup,
-.leaflet-tooltip,
-.leaflet-popup-content-wrapper,
-.leaflet-popup-content {
-  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif !important;
-}
-
-body {
-  @apply bg-brand-sky-100 text-slate-800 dark:bg-brand-navy-950 dark:text-slate-100;
-  overflow-x: clip;
-  transition: background-color 1s ease, color 0.5s ease;
+html.dark body {
+  background-color: #070c19 !important;
 }
 
 

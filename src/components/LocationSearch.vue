@@ -14,7 +14,8 @@ import {
   Sparkles, 
   Building2, 
   Loader2,
-  CornerDownLeft
+  CornerDownLeft,
+  ArrowLeft
 } from 'lucide-vue-next';
 import { 
   POPULAR_RECOMMENDATIONS, 
@@ -40,6 +41,7 @@ const searchQuery = ref('');
 const isDropdownOpen = ref(false);
 const activeCategory = ref<POICategory>('all');
 const searchInputRef = ref<HTMLInputElement | null>(null);
+const mobileSearchInputRef = ref<HTMLInputElement | null>(null);
 const searchContainerRef = ref<HTMLElement | null>(null);
 const highlightedIndex = ref(-1);
 const isLoadingOnline = ref(false);
@@ -192,20 +194,32 @@ watch([searchQuery, activeCategory], ([newQuery, newCat]) => {
 // Open & close handlers
 const openSearch = () => {
   isDropdownOpen.value = true;
+  if (props.isMobile) {
+    document.body.classList.add('overflow-hidden');
+  }
   nextTick(() => {
-    searchInputRef.value?.focus();
+    if (props.isMobile) {
+      mobileSearchInputRef.value?.focus();
+    } else {
+      searchInputRef.value?.focus();
+    }
   });
 };
 
 const closeSearch = () => {
   isDropdownOpen.value = false;
   highlightedIndex.value = -1;
+  document.body.classList.remove('overflow-hidden');
 };
 
 const clearQuery = () => {
   searchQuery.value = '';
   onlineResults.value = [];
-  searchInputRef.value?.focus();
+  if (props.isMobile) {
+    mobileSearchInputRef.value?.focus();
+  } else {
+    searchInputRef.value?.focus();
+  }
 };
 
 // Select a location item
@@ -282,6 +296,9 @@ const handleKeydown = (e: KeyboardEvent) => {
 
 // Click outside handling
 const handleClickOutside = (e: MouseEvent) => {
+  if (props.isMobile) {
+    return; // Handled by dedicated mobile backdrop & cancel button
+  }
   if (
     searchContainerRef.value && 
     !searchContainerRef.value.contains(e.target as Node)
@@ -296,6 +313,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside);
+  document.body.classList.remove('overflow-hidden');
 });
 </script>
 
@@ -350,17 +368,18 @@ onUnmounted(() => {
         <span>K</span>
       </div>
 
-      <!-- Elegant 'Cari' Action Button -->
+      <!-- Elegant 'Cari' Action Button (Desktop Only, hidden on mobile to avoid squishing input) -->
       <button 
         @click="openSearch(); if (searchQuery.trim()) handleSelect(searchQuery.trim())"
-        class="bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer flex items-center gap-1"
+        class="hidden sm:flex bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1 rounded-[4px] text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer items-center gap-1"
       >
         <span>Cari</span>
       </button>
     </div>
 
-    <!-- ─── Floating Modern Autocomplete / Spotlight Dropdown ─── -->
+    <!-- ─── Desktop Floating Modern Autocomplete / Spotlight Dropdown ─── -->
     <Transition
+      v-if="!isMobile"
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="opacity-0 scale-95 -translate-y-2"
       enter-to-class="opacity-100 scale-100 translate-y-0"
@@ -558,6 +577,224 @@ onUnmounted(() => {
         </div>
       </div>
     </Transition>
+
+    <!-- ─── Mobile Full-Screen Modern Search Overlay (Teleported to body) ─── -->
+    <Teleport to="body" v-if="isMobile">
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2 scale-[0.98]"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 -translate-y-2 scale-[0.98]"
+      >
+        <div 
+          v-if="isDropdownOpen"
+          class="fixed inset-0 z-[99999] bg-slate-950/98 dark:bg-brand-navy-950/98 backdrop-blur-3xl flex flex-col text-slate-100 overflow-hidden"
+          style="padding-top: max(env(safe-area-inset-top, 0px), 8px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);"
+        >
+          <!-- Mobile Search Header Bar -->
+          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-white/10 bg-slate-900/60 dark:bg-black/40 shrink-0">
+            <!-- Back Button -->
+            <button 
+              @click="closeSearch"
+              class="w-9 h-9 rounded-[4px] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+              title="Kembali"
+            >
+              <ArrowLeft class="w-5 h-5" />
+            </button>
+
+            <!-- Search Input Box -->
+            <div class="flex-1 flex items-center bg-white/10 dark:bg-white/5 border border-white/15 focus-within:border-brand-cyan rounded-[4px] px-3 py-2 gap-2 transition-all">
+              <Loader2 v-if="isLoadingOnline" class="w-4 h-4 animate-spin text-brand-cyan shrink-0" />
+              <Search v-else class="w-4 h-4 text-slate-400 shrink-0" />
+              <input 
+                ref="mobileSearchInputRef"
+                v-model="searchQuery"
+                type="text"
+                :placeholder="currentPlaceholder"
+                @keydown="handleKeydown"
+                class="w-full bg-transparent border-none outline-none text-[16px] text-white placeholder-slate-400 placeholder:text-xs"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button 
+                v-if="searchQuery"
+                @click="clearQuery"
+                class="p-1 rounded-[4px] text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+
+            <!-- Batal Button -->
+            <button 
+              @click="closeSearch"
+              class="text-xs font-bold text-slate-300 hover:text-white px-2 py-1.5 shrink-0 cursor-pointer"
+            >
+              Batal
+            </button>
+          </div>
+
+          <!-- Mobile Category Tabs (Horizontal Scrollable) -->
+          <div class="px-3 py-2 border-b border-white/10 bg-slate-900/30 dark:bg-black/20 shrink-0">
+            <div class="flex items-center justify-between gap-2 mb-1.5 px-0.5">
+              <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Compass class="w-3 h-3 text-brand-cyan" />
+                Eksplorasi Wilayah &amp; Tempat
+              </span>
+              <span v-if="isLoadingOnline" class="text-[9px] text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
+                <Loader2 class="w-2.5 h-2.5 animate-spin" />
+                Mencari...
+              </span>
+            </div>
+
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              <button
+                v-for="tab in categoryTabs"
+                :key="tab.id"
+                @click="activeCategory = tab.id"
+                class="px-3 py-1 rounded-[4px] text-[11px] font-bold tracking-tight shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border"
+                :class="[
+                  activeCategory === tab.id
+                    ? 'bg-brand-cyan text-brand-navy-950 border-transparent shadow-sm'
+                    : 'bg-white/5 text-slate-300 border-white/10 hover:border-white/20'
+                ]"
+              >
+                <component :is="tab.icon" class="w-3.5 h-3.5" />
+                <span>{{ tab.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mobile Scrollable Results Body -->
+          <div class="flex-1 overflow-y-auto p-3 space-y-3 overscroll-contain">
+            <!-- Recent Searches -->
+            <div v-if="!searchQuery && recentSearches.length > 0" class="px-0.5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Clock class="w-3 h-3 text-slate-400" />
+                  Pencarian Terakhir
+                </span>
+                <button 
+                  @click="clearAllRecent"
+                  class="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                >
+                  Hapus Semua
+                </button>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="item in recentSearches"
+                  :key="item"
+                  @click="handleSelect(item)"
+                  class="group px-3 py-1.5 rounded-[4px] bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Clock class="w-3 h-3 text-slate-400 group-hover:text-brand-cyan" />
+                  <span class="truncate max-w-[200px]">{{ item }}</span>
+                  <X 
+                    @click.stop="removeRecentSearch(item, $event)" 
+                    class="w-3 h-3 text-slate-400 hover:text-rose-400 transition-colors" 
+                  />
+                </button>
+              </div>
+            </div>
+
+            <!-- Results List -->
+            <div>
+              <div class="px-0.5 py-1 flex items-center justify-between">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-400" />
+                  <Building2 v-else class="w-3 h-3 text-brand-cyan" />
+                  {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : 'Rekomendasi Tempat & Wilayah' }}
+                </span>
+                <span v-if="searchQuery" class="text-[9.5px] text-slate-400">
+                  Pilih lokasi
+                </span>
+              </div>
+
+              <!-- List Items (Full width on smartphone, no ugly cutoffs!) -->
+              <div class="space-y-1.5 mt-1.5">
+                <button
+                  v-for="item in displayedResults"
+                  :key="item.id"
+                  @click="handleSelect(item)"
+                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-white/5 bg-white/[0.03] active:bg-brand-cyan/15 active:border-brand-cyan/40"
+                >
+                  <!-- Category Icon Badge -->
+                  <div 
+                    class="w-8 h-8 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 shadow-sm"
+                    :class="getCategoryStyle(item.category)"
+                  >
+                    <component :is="getCategoryIcon(item.category)" class="w-4 h-4" />
+                  </div>
+
+                  <!-- Text info: Full name & Sublocation -->
+                  <div class="flex-1 min-w-0 flex flex-col gap-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs font-black text-white leading-snug">
+                        {{ item.name }}
+                      </span>
+                      <span 
+                        v-if="item.tag" 
+                        class="text-[8.5px] font-black uppercase px-1.5 py-0.5 rounded-[4px] border shrink-0"
+                        :class="getCategoryStyle(item.category)"
+                      >
+                        {{ item.tag }}
+                      </span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400 font-medium leading-tight">
+                      {{ item.subLocation }}
+                    </p>
+                  </div>
+
+                  <!-- Right Action Indicator -->
+                  <div class="shrink-0 flex items-center text-slate-500 mt-1">
+                    <ChevronRight class="w-4 h-4" />
+                  </div>
+                </button>
+              </div>
+
+              <!-- Empty State -->
+              <div 
+                v-if="displayedResults.length === 0 && !isLoadingOnline"
+                class="py-10 px-4 text-center flex flex-col items-center justify-center gap-2.5"
+              >
+                <div class="w-11 h-11 rounded-[4px] bg-white/5 flex items-center justify-center text-slate-400">
+                  <Search class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-200">
+                    Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
+                  </p>
+                  <p class="text-[11px] text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
+                    Coba ketik nama desa, kelurahan, kecamatan, kampus, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
+                  </p>
+                </div>
+                <button 
+                  @click="handleSelect(searchQuery)"
+                  class="mt-2 px-3.5 py-2 rounded-[4px] bg-brand-cyan text-brand-navy-950 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md"
+                >
+                  <span>Pakai "{{ searchQuery }}" Langsung</span>
+                  <CornerDownLeft class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Footer -->
+          <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/70 flex items-center justify-between text-[10px] text-slate-400 shrink-0">
+            <span class="text-brand-cyan font-bold flex items-center gap-1.5">
+              <Sparkles class="w-3 h-3" />
+              BMKG Realtime Maps POI
+            </span>
+            <span>Ketuk lokasi untuk melihat cuaca</span>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 

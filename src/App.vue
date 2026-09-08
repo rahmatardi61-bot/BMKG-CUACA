@@ -165,10 +165,11 @@ const applyTheme = () => {
 
   if (themeMode.value === 'dark') {
     root.classList.add('dark');
-    themeColor = '#0b0f19';
+    themeColor = '#070c19';
     isDarkTheme = true;
     localStorage.setItem('bmkg-theme-v2', 'dark');
   } else if (themeMode.value === 'light') {
+    themeColor = '#eef5ff';
     localStorage.setItem('bmkg-theme-v2', 'light');
   } else {
     // Mode 'auto': dynamically decide light/dark + sub-theme
@@ -184,13 +185,18 @@ const applyTheme = () => {
       case 'theme-morning': themeColor = '#fdf2f8'; break;
       case 'theme-day':     themeColor = '#f0f9ff'; break;
       case 'theme-evening': themeColor = '#fff1f2'; break;
-      case 'theme-night':   themeColor = '#0f172a'; break;
-      case 'theme-rainy':   themeColor = '#f8fafc'; break;
-      case 'theme-stormy':  themeColor = '#090514'; break;
-      case 'theme-cloudy':  themeColor = '#f8fafc'; break;
+      case 'theme-night':   themeColor = '#070c19'; break;
+      case 'theme-rainy':   themeColor = isDarkTheme ? '#070c19' : '#f8fafc'; break;
+      case 'theme-stormy':  themeColor = '#070c19'; break;
+      case 'theme-cloudy':  themeColor = isDarkTheme ? '#070c19' : '#f8fafc'; break;
     }
     localStorage.setItem('bmkg-theme-v2', 'auto');
   }
+
+  // Enforce root & body background color & color-scheme to eliminate white bars on iOS Safari
+  root.style.backgroundColor = themeColor;
+  root.style.colorScheme = isDarkTheme ? 'dark' : 'light';
+  document.body.style.backgroundColor = themeColor;
 
   // ─── Update Smartphone / Mobile Browser Status Bar Theme ───
   try {
@@ -209,6 +215,14 @@ const applyTheme = () => {
       document.head.appendChild(appleStatusBar);
     }
     appleStatusBar.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+
+    let metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+    if (!metaColorScheme) {
+      metaColorScheme = document.createElement('meta');
+      metaColorScheme.setAttribute('name', 'color-scheme');
+      document.head.appendChild(metaColorScheme);
+    }
+    metaColorScheme.setAttribute('content', isDarkTheme ? 'dark' : 'light');
   } catch (e) {
     console.error("Failed to update status bar meta tags:", e);
   }
@@ -515,7 +529,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100 w-full">
+  <div 
+    class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100 w-full"
+    style="padding-top: max(env(safe-area-inset-top, 0px), 0px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);"
+  >
     <template v-if="!showLogin">
       <!-- Main Header -->
       <Header 

@@ -1,0 +1,14 @@
+{
+ "message": "An Error Happened!",
+ "statusCode": 404,
+ "error": {
+  "url": "/area/ajax_maps_jalur_penyeberangan",
+  "statusCode": 404,
+  "statusMessage": "Page not found: /area/ajax_maps_jalur_penyeberangan",
+  "message": "Page not found: /area/ajax_maps_jalur_penyeberangan",
+  "stack": "",
+  "data": {
+   "path": "/area/ajax_maps_jalur_penyeberangan"
+  }
+ }
+}

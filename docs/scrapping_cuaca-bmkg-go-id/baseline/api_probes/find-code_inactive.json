@@ -1,0 +1,6 @@
+// 200 https://cuaca.bmkg.go.id/api/v1/setting/find-code?code=inactive
+{
+ "statusCode": 200,
+ "message": "OK!",
+ "data": null
+}

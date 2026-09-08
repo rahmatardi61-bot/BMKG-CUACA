@@ -1,0 +1,27 @@
+// 200 https://cuaca.bmkg.go.id/api/public/weather/video-latest?hashtag=infobmkgpws
+[
+ {
+  "title": "Prakiraan Cuaca Esok Hari, Selasa, 08 September 2026",
+  "videoUrl": "https://www.youtube.com/watch?v=cJVhqy-kVqc"
+ },
+ {
+  "title": "Prakiraan Cuaca Esok Hari, Senin, 07 September 2026",
+  "videoUrl": "https://www.youtube.com/watch?v=XcpcaPM0C04"
+ },
+ {
+  "title": "Prakiraan Cuaca Esok Hari, Minggu, 06 September 2026.",
+  "videoUrl": "https://www.youtube.com/watch?v=UzqZFrZZYpU"
+ },
+ {
+  "title": "Prakiraan Cuaca Esok Hari, Sabtu, 05 September 2026.",
+  "videoUrl": "https://www.youtube.com/watch?v=rjb0t_jA1_o"
+ },
+ {
+  "title": "Prakiraan Cuaca Esok Hari, Jumat, 04 September 2026",
+  "videoUrl": "https://www.youtube.com/watch?v=PdNLPjtl2b4"
+ },
+ {
+  "title": "Prakiraan Cuaca Esok Hari Kamis 03 September 2026",
+  "videoUrl": "https://www.youtube.com/watch?v=bVkaxuEpI1k"
+ }
+]

@@ -1,0 +1,5 @@
+// 500 https://cuaca.bmkg.go.id/api/v1/maps/aviation/metadata/tiles
+{
+ "statusCode": 500,
+ "message": "Internal server error"
+}

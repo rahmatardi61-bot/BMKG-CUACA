@@ -1,0 +1,14 @@
+// 200 https://cuaca.bmkg.go.id/api/df/v1/adm/coord?lat=3.595196&lon=98.672226
+{
+ "adm1": "12",
+ "adm2": "12.71",
+ "adm3": "12.71.05",
+ "adm4": "12.71.05.1002",
+ "provinsi": "Sumatera Utara",
+ "kotkab": "Kota Medan",
+ "kecamatan": "Medan Barat",
+ "desa": "Silalas",
+ "lon": 98.6715148831495,
+ "lat": 3.6008470509285644,
+ "distance": 0
+}

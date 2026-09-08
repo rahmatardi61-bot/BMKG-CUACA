@@ -1,0 +1,12 @@
+{
+ "url": "/api-client/proxy/cyclone-style",
+ "statusCode": 401,
+ "statusMessage": "Unauthorized",
+ "message": "[GET] \"https://cuaca.bmkg.go.id/api/public/tcwc/cyclone/current/style\": 401 Unauthorized",
+ "stack": "",
+ "data": {
+  "message": "Public access token invalid or expired",
+  "error": "Unauthorized",
+  "statusCode": 401
+ }
+}

@@ -1,0 +1,14 @@
+// 200 https://cuaca.bmkg.go.id/api/df/v1/adm/coord?lat=-2.591602&lon=140.669389
+{
+ "adm1": "91",
+ "adm2": "91.71",
+ "adm3": "91.71.03",
+ "adm4": "91.71.03.1014",
+ "provinsi": "Papua",
+ "kotkab": "Kota Jayapura",
+ "kecamatan": "Abepura",
+ "desa": "Vim",
+ "lon": 140.66144444941202,
+ "lat": -2.5935764402264323,
+ "distance": 0
+}

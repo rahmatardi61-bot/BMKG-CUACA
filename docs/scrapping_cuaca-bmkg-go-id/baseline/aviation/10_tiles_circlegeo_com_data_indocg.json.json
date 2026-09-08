@@ -1,0 +1,49 @@
+{
+ "tiles": [
+  "https://tiles.circlegeo.com/data/indocg/{z}/{x}/{y}.pbf"
+ ],
+ "name": "indocg.mbtiles",
+ "format": "pbf",
+ "basename": "indocg.mbtiles",
+ "id": "indocg",
+ "description": "indocg.mbtiles",
+ "version": "2",
+ "minzoom": 0,
+ "maxzoom": 10,
+ "center": [
+  55.019531,
+  25.324062,
+  10
+ ],
+ "bounds": [
+  -180,
+  -85.051129,
+  180,
+  83.634101
+ ],
+ "type": "overlay",
+ "generator": "tippecanoe v1.35.0",
+ "generator_options": "tippecanoe '--maximum-zoom=10' indocg.json -o indocg.mbtiles",
+ "vector_layers": [
+  {
+   "id": "indocg",
+   "description": "",
+   "minzoom": 0,
+   "maxzoom": 10,
+   "fields": {}
+  }
+ ],
+ "tilestats": {
+  "layerCount": 1,
+  "layers": [
+   {
+    "layer": "indocg",
+    "count": 10,
+    "geometry": "Polygon",
+    "attributeCount": 0,
+    "attributes": []
+   }
+  ]
+ },
+ "tilejson": "3.0.0"
+}

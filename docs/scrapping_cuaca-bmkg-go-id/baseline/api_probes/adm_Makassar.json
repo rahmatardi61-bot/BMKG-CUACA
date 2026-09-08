@@ -1,0 +1,14 @@
+// 200 https://cuaca.bmkg.go.id/api/df/v1/adm/coord?lat=-5.147665&lon=119.432731
+{
+ "adm1": "73",
+ "adm2": "73.71",
+ "adm3": "73.71.13",
+ "adm4": "73.71.13.1007",
+ "provinsi": "Sulawesi Selatan",
+ "kotkab": "Kota Makassar",
+ "kecamatan": "Rappocini",
+ "desa": "Balla Parang",
+ "lon": 119.43341843445022,
+ "lat": -5.149891085273544,
+ "distance": 0
+}

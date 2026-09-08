@@ -1,0 +1,50 @@
+// 200 https://cuaca.bmkg.go.id/api/v1/sunset/json?lat=-7.257472&lng=112.752083
+{
+ "results": {
+  "date": "2026-09-08",
+  "sunrise": "5:26:06 AM",
+  "sunset": "5:27:33 PM",
+  "first_light": "4:16:40 AM",
+  "last_light": "6:36:59 PM",
+  "dawn": "5:05:11 AM",
+  "dusk": "5:48:28 PM",
+  "solar_noon": "11:26:47 AM",
+  "golden_hour": "4:59:51 PM",
+  "day_length": "12:01:26",
+  "nautical_twilight_begin": "4:40:55 AM",
+  "nautical_twilight_end": "6:12:44 PM",
+  "timezone": "Asia/Jakarta",
+  "utc_offset": 420,
+  "sun_altitude": 77.05,
+  "sun_azimuth": 0,
+  "sunrise_azimuth": 84.28,
+  "sunset_azimuth": 275.53,
+  "moonrise": "2:52:34 AM",
+  "moonset": "2:56:01 PM",
+  "moon_illumination": 10.14,
+  "moon_phase": "Waning Crescent",
+  "moon_phase_value": 0.9,
+  "moon_always_up": false,
+  "moon_always_down": false,
+  "elevation": 6,
+  "sun_status": "normal",
+  "golden_hour_morning": {
+   "begin": "5:13:17 AM",
+   "end": "5:53:48 AM"
+  },
+  "golden_hour_evening": {
+   "begin": "4:59:51 PM",
+   "end": "5:40:22 PM"
+  },
+  "blue_hour_morning": {
+   "begin": "5:05:11 AM",
+   "end": "5:13:17 AM"
+  },
+  "blue_hour_evening": {
+   "begin": "5:40:22 PM",
+   "end": "5:48:28 PM"
+  }
+ },
+ "status": "OK",
+ "tzid": "Asia/Jakarta"
+}

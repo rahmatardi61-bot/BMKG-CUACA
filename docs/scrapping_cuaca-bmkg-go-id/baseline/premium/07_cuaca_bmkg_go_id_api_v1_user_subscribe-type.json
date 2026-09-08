@@ -1,0 +1,32 @@
+[
+ {
+  "id": "16fb3c96-fd94-479d-96e3-0bc3f230e022",
+  "name": "Standard",
+  "description": "Mulai sekarang! Akses informasi cuaca dasar dengan template laporan kami yang akurat.",
+  "fee": 375000,
+  "duration": "1 days",
+  "repeat": true,
+  "created_at": "2023-09-17T23:52:48.817Z",
+  "updated_at": "2023-09-17T23:52:48.817Z"
+ },
+ {
+  "id": "56f018f3-1413-4ed5-a239-25466b19e82a",
+  "name": "Professional",
+  "description": "Untuk profesional! Laporan cuaca mendalam dengan template kami.",
+  "fee": 700000,
+  "duration": "1 years",
+  "repeat": false,
+  "created_at": "2023-09-17T23:52:48.829Z",
+  "updated_at": "2023-09-17T23:52:48.829Z"
+ },
+ {
+  "id": "85b314ef-e68a-4f66-bd00-c2db371712c4",
+  "name": "Enterprise",
+  "description": "Solusi korporasi! Analisis cuaca canggih dan integrasi data.",
+  "fee": 1250000,
+  "duration": "1 days",
+  "repeat": false,
+  "created_at": "2023-12-05T09:05:07.159Z",
+  "updated_at": "2023-12-05T09:05:09.032Z"
+ }
+]

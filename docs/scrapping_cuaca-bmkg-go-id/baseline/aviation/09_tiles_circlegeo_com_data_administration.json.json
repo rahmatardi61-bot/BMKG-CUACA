@@ -1,0 +1,77 @@
+{
+ "tiles": [
+  "https://tiles.circlegeo.com/data/administration/{z}/{x}/{y}.pbf"
+ ],
+ "name": "/data/province.mbtiles + /data/city.mbtiles + /data/subdistrict.mbtiles",
+ "format": "pbf",
+ "basename": "administration.mbtiles",
+ "id": "administration",
+ "description": "/data/subdistrict.mbtiles",
+ "version": "2",
+ "minzoom": 0,
+ "maxzoom": 14,
+ "center": [
+  107.435303,
+  -6.937333,
+  14
+ ],
+ "bounds": [
+  -179.999989,
+  -85.051129,
+  179.999989,
+  83.6236
+ ],
+ "type": "overlay",
+ "generator": "tile-join v1.36.0",
+ "generator_options": "tippecanoe -z10 /data/province.geojson -o /data/province.mbtiles; tippecanoe -Z10 -z14 /data/city.geojson -o /data/city.mbtiles; tippecanoe -Z10 -z14 /data/subdistrict.geojson -o /data/subdistrict.mbtiles; tile-join /data/new/province.mbtiles /data/new/city.mbtiles /data/new/subdistrict.mbtiles -o /data/administration.mbtiles",
+ "vector_layers": [
+  {
+   "id": "city",
+   "description": "",
+   "minzoom": 10,
+   "maxzoom": 14,
+   "fields": {}
+  },
+  {
+   "id": "province",
+   "description": "",
+   "minzoom": 0,
+   "maxzoom": 10,
+   "fields": {}
+  },
+  {
+   "id": "subdistrict",
+   "description": "",
+   "minzoom": 10,
+   "maxzoom": 14,
+   "fields": {}
+  }
+ ],
+ "tilestats": {
+  "layerCount": 3,
+  "layers": [
+   {
+    "layer": "city",
+    "count": 177994,
+    "geometry": "LineString",
+    "attributeCount": 0,
+    "attributes": []
+   },
+   {
+    "layer": "province",
+    "count": 67916,
+    "geometry": "LineString",
+    "attributeCount": 0,
+    "attributes": []
+   },
+   {
+    "layer": "subdistrict",
+    "count": 471931,
+    "geometry": "LineString",
+    "attributeCount": 0,
+    "attributes": []
+   }
+  ]
+ },
+ "tilejson": "3.0.0"
+}

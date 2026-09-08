@@ -1,0 +1,5 @@
+// 200 https://cuaca.bmkg.go.id/api/v1/api/signature/impact/public/list/2026-09-08T07:00:00Z
+{
+ "status": "OK",
+ "data": []
+}

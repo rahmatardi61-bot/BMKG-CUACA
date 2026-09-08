@@ -1,0 +1,14 @@
+// 200 https://cuaca.bmkg.go.id/api/df/v1/adm/coord?lat=-6.2&lon=106.816666
+{
+ "adm1": "31",
+ "adm2": "31.71",
+ "adm3": "31.71.07",
+ "adm4": "31.71.07.1005",
+ "provinsi": "DKI Jakarta",
+ "kotkab": "Kota Adm. Jakarta Pusat",
+ "kecamatan": "Tanah Abang",
+ "desa": "Kebon Melati",
+ "lon": 106.81596823959143,
+ "lat": -6.197052719903746,
+ "distance": 0
+}

@@ -1,0 +1,6 @@
+// 200 https://cuaca.bmkg.go.id/api/public/banners
+{
+ "statusCode": 200,
+ "message": "OK!",
+ "data": []
+}

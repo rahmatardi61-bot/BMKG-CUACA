@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=-6.2&lon=106.816666
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 106.81596823959143,
+   "lat": -6.197052719903746,
+   "adm1": "31",
+   "adm2": "31.71",
+   "adm3": "31.71.07",
+   "adm4": "31.71.07.1005",
+   "provinsi": "DKI Jakarta",
+   "kotkab": "Kota Adm. Jakarta Pusat",
+   "kecamatan": "Tanah Abang",
+   "desa": "Kebon Melati",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 1,
+   "weather_desc": "Cerah",
+   "weather_desc_en": "Sunny",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 14:20:00",
+   "t": 32,
+   "tcc": 13,
+   "wd_deg": 358,
+   "wd": "NW",
+   "wd_to": "SE",
+   "ws": 12.4,
+   "hu": 51,
+   "vs": 6988,
+   "vs_text": "< 7 km"
+  }
+ }
+}

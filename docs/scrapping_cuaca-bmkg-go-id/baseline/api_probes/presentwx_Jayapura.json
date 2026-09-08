@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=-2.591602&lon=140.669389
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 140.66144444941202,
+   "lat": -2.5935764402264323,
+   "adm1": "91",
+   "adm2": "91.71",
+   "adm3": "91.71.03",
+   "adm4": "91.71.03.1014",
+   "provinsi": "Papua",
+   "kotkab": "Kota Jayapura",
+   "kecamatan": "Abepura",
+   "desa": "Vim",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 4,
+   "weather_desc": "Berawan Tebal",
+   "weather_desc_en": "Overcast",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/berawan tebal-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 16:20:00",
+   "t": 26,
+   "tcc": 70,
+   "wd_deg": 139,
+   "wd": "SE",
+   "wd_to": "NW",
+   "ws": 1.1,
+   "hu": 90,
+   "vs": 13260,
+   "vs_text": "> 10 km"
+  }
+ }
+}

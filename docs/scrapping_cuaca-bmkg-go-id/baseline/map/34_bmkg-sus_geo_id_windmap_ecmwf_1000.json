@@ -1,0 +1,550 @@
+{
+ "variables": [
+  {
+   "type": "maptiler_package",
+   "bounds": [
+    -20037508.342789244,
+    -20037471.205137074,
+    20037508.342789244,
+    20037471.205137093
+   ],
+   "tile_type": "raster",
+   "tile_matrix_set": {
+    "bounds": [
+     -20037508.342789244,
+     -20037508.342789244,
+     20037508.342789244,
+     20037508.342789244
+    ],
+    "items": [
+     {
+      "zoom_level": 0,
+      "matrix_width": 1,
+      "matrix_height": 1,
+      "tile_width": 512,
+      "tile_height": 512,
+      "pixel_x_size": 78271.51696402048,
+      "pixel_y_size": 78271.51696402048
+     },
+     {
+      "zoom_level": 1,
+      "matrix_width": 2,
+      "matrix_height": 2,
+      "tile_width": 512,
+      "tile_height": 512,
+      "pixel_x_size": 39135.75848201024,
+      "pixel_y_size": 39135.75848201024
+     },
+     {
+      "zoom_level": 2,
+      "matrix_width": 4,
+      "matrix_height": 4,
+      "tile_width": 512,
+      "tile_height": 512,
+      "pixel_x_size": 19567.87924100512,
+      "pixel_y_size": 19567.87924100512
+     },
+     {
+      "zoom_level": 3,
+      "matrix_width": 8,
+      "matrix_height": 8,
+      "tile_width": 512,
+      "tile_height": 512,
+      "pixel_x_size": 9783.93962050256,
+      "pixel_y_size": 9783.93962050256
+     }
+    ]
+   },
+   "keyframes": [
+    {
+     "timestamp": "2026-09-07T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609071800"
+    },
+    {
+     "timestamp": "2026-09-07T19:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609071900"
+    },
+    {
+     "timestamp": "2026-09-07T20:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609072000"
+    },
+    {
+     "timestamp": "2026-09-07T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609072100"
+    },
+    {
+     "timestamp": "2026-09-07T22:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609072200"
+    },
+    {
+     "timestamp": "2026-09-07T23:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609072300"
+    },
+    {
+     "timestamp": "2026-09-08T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080000"
+    },
+    {
+     "timestamp": "2026-09-08T01:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080100"
+    },
+    {
+     "timestamp": "2026-09-08T02:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080200"
+    },
+    {
+     "timestamp": "2026-09-08T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080300"
+    },
+    {
+     "timestamp": "2026-09-08T04:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080400"
+    },
+    {
+     "timestamp": "2026-09-08T05:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080500"
+    },
+    {
+     "timestamp": "2026-09-08T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080600"
+    },
+    {
+     "timestamp": "2026-09-08T07:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080700"
+    },
+    {
+     "timestamp": "2026-09-08T08:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080800"
+    },
+    {
+     "timestamp": "2026-09-08T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609080900"
+    },
+    {
+     "timestamp": "2026-09-08T10:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081000"
+    },
+    {
+     "timestamp": "2026-09-08T11:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081100"
+    },
+    {
+     "timestamp": "2026-09-08T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081200"
+    },
+    {
+     "timestamp": "2026-09-08T13:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081300"
+    },
+    {
+     "timestamp": "2026-09-08T14:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081400"
+    },
+    {
+     "timestamp": "2026-09-08T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081500"
+    },
+    {
+     "timestamp": "2026-09-08T16:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081600"
+    },
+    {
+     "timestamp": "2026-09-08T17:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081700"
+    },
+    {
+     "timestamp": "2026-09-08T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081800"
+    },
+    {
+     "timestamp": "2026-09-08T19:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609081900"
+    },
+    {
+     "timestamp": "2026-09-08T20:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609082000"
+    },
+    {
+     "timestamp": "2026-09-08T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609082100"
+    },
+    {
+     "timestamp": "2026-09-08T22:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609082200"
+    },
+    {
+     "timestamp": "2026-09-08T23:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609082300"
+    },
+    {
+     "timestamp": "2026-09-09T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090000"
+    },
+    {
+     "timestamp": "2026-09-09T01:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090100"
+    },
+    {
+     "timestamp": "2026-09-09T02:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090200"
+    },
+    {
+     "timestamp": "2026-09-09T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090300"
+    },
+    {
+     "timestamp": "2026-09-09T04:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090400"
+    },
+    {
+     "timestamp": "2026-09-09T05:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090500"
+    },
+    {
+     "timestamp": "2026-09-09T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090600"
+    },
+    {
+     "timestamp": "2026-09-09T07:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090700"
+    },
+    {
+     "timestamp": "2026-09-09T08:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090800"
+    },
+    {
+     "timestamp": "2026-09-09T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609090900"
+    },
+    {
+     "timestamp": "2026-09-09T10:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091000"
+    },
+    {
+     "timestamp": "2026-09-09T11:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091100"
+    },
+    {
+     "timestamp": "2026-09-09T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091200"
+    },
+    {
+     "timestamp": "2026-09-09T13:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091300"
+    },
+    {
+     "timestamp": "2026-09-09T14:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091400"
+    },
+    {
+     "timestamp": "2026-09-09T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091500"
+    },
+    {
+     "timestamp": "2026-09-09T16:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091600"
+    },
+    {
+     "timestamp": "2026-09-09T17:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091700"
+    },
+    {
+     "timestamp": "2026-09-09T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091800"
+    },
+    {
+     "timestamp": "2026-09-09T19:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609091900"
+    },
+    {
+     "timestamp": "2026-09-09T20:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609092000"
+    },
+    {
+     "timestamp": "2026-09-09T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609092100"
+    },
+    {
+     "timestamp": "2026-09-09T22:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609092200"
+    },
+    {
+     "timestamp": "2026-09-09T23:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609092300"
+    },
+    {
+     "timestamp": "2026-09-10T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100000"
+    },
+    {
+     "timestamp": "2026-09-10T01:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100100"
+    },
+    {
+     "timestamp": "2026-09-10T02:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100200"
+    },
+    {
+     "timestamp": "2026-09-10T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100300"
+    },
+    {
+     "timestamp": "2026-09-10T04:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100400"
+    },
+    {
+     "timestamp": "2026-09-10T05:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100500"
+    },
+    {
+     "timestamp": "2026-09-10T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100600"
+    },
+    {
+     "timestamp": "2026-09-10T07:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100700"
+    },
+    {
+     "timestamp": "2026-09-10T08:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100800"
+    },
+    {
+     "timestamp": "2026-09-10T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609100900"
+    },
+    {
+     "timestamp": "2026-09-10T10:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101000"
+    },
+    {
+     "timestamp": "2026-09-10T11:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101100"
+    },
+    {
+     "timestamp": "2026-09-10T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101200"
+    },
+    {
+     "timestamp": "2026-09-10T13:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101300"
+    },
+    {
+     "timestamp": "2026-09-10T14:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101400"
+    },
+    {
+     "timestamp": "2026-09-10T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101500"
+    },
+    {
+     "timestamp": "2026-09-10T16:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101600"
+    },
+    {
+     "timestamp": "2026-09-10T17:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101700"
+    },
+    {
+     "timestamp": "2026-09-10T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101800"
+    },
+    {
+     "timestamp": "2026-09-10T19:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609101900"
+    },
+    {
+     "timestamp": "2026-09-10T20:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609102000"
+    },
+    {
+     "timestamp": "2026-09-10T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609102100"
+    },
+    {
+     "timestamp": "2026-09-10T22:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609102200"
+    },
+    {
+     "timestamp": "2026-09-10T23:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609102300"
+    },
+    {
+     "timestamp": "2026-09-11T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110000"
+    },
+    {
+     "timestamp": "2026-09-11T01:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110100"
+    },
+    {
+     "timestamp": "2026-09-11T02:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110200"
+    },
+    {
+     "timestamp": "2026-09-11T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110300"
+    },
+    {
+     "timestamp": "2026-09-11T04:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110400"
+    },
+    {
+     "timestamp": "2026-09-11T05:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110500"
+    },
+    {
+     "timestamp": "2026-09-11T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110600"
+    },
+    {
+     "timestamp": "2026-09-11T07:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110700"
+    },
+    {
+     "timestamp": "2026-09-11T08:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110800"
+    },
+    {
+     "timestamp": "2026-09-11T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609110900"
+    },
+    {
+     "timestamp": "2026-09-11T10:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609111000"
+    },
+    {
+     "timestamp": "2026-09-11T11:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609111100"
+    },
+    {
+     "timestamp": "2026-09-11T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609111200"
+    },
+    {
+     "timestamp": "2026-09-11T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609111500"
+    },
+    {
+     "timestamp": "2026-09-11T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609111800"
+    },
+    {
+     "timestamp": "2026-09-11T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609112100"
+    },
+    {
+     "timestamp": "2026-09-12T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609120000"
+    },
+    {
+     "timestamp": "2026-09-12T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609120300"
+    },
+    {
+     "timestamp": "2026-09-12T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609120600"
+    },
+    {
+     "timestamp": "2026-09-12T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609120900"
+    },
+    {
+     "timestamp": "2026-09-12T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609121200"
+    },
+    {
+     "timestamp": "2026-09-12T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609121500"
+    },
+    {
+     "timestamp": "2026-09-12T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609121800"
+    },
+    {
+     "timestamp": "2026-09-12T21:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609122100"
+    },
+    {
+     "timestamp": "2026-09-13T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609130000"
+    },
+    {
+     "timestamp": "2026-09-13T03:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609130300"
+    },
+    {
+     "timestamp": "2026-09-13T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609130600"
+    },
+    {
+     "timestamp": "2026-09-13T09:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609130900"
+    },
+    {
+     "timestamp": "2026-09-13T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609131200"
+    },
+    {
+     "timestamp": "2026-09-13T15:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609131500"
+    },
+    {
+     "timestamp": "2026-09-13T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609131800"
+    },
+    {
+     "timestamp": "2026-09-14T00:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609140000"
+    },
+    {
+     "timestamp": "2026-09-14T06:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609140600"
+    },
+    {
+     "timestamp": "2026-09-14T12:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609141200"
+    },
+    {
+     "timestamp": "2026-09-14T18:00:00Z",
+     "id": "https://signature.bmkg.go.id/api21/tile_req/ecmwf/wind/1000/202609071800/202609141800"
+    }
+   ],
+   "tile_format": "png",
+   "spatial_ref_sys": {
+    "auth_name": "EPSG",
+    "auth_srid": "3857",
+    "wkt": "PROJCS[\"WGS 84 / Pseudo-Mercator\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Mercator_1SP\"],PARAMETER[\"central_meridian\",0],PARAMETER[\"scale_factor\",1],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs\"],AUTHORITY[\"EPSG\",\"3857\"]]"
+   },
+   "metadata": {
+    "minzoom": 3,
+    "maxzoom": 3,
+    "scale": 2,
+    "weather_variable": {
+     "name": "Wind",
+     "description": "Wind at 10 m above ground [m/s]",
+     "attribution": null,
+     "variable_id": "wind-10m:gfs",
+     "decoding": {
+      "channels": "RG",
+      "min": -50,
+      "max": 50
+     },
+     "unit": "ms",
+     "release_timestamp": "2023-11-29T00:00:00+00:00"
+    },
+    "title": "weather_gfs_B_2023112900_000",
+    "bounds": [
+     -180,
+     -85.05110000000002,
+     180,
+     85.05110000000002
+    ],
+    "center": [
+     0,
+     8.602278626792913e-14,
+     1
+    ]
+   }
+  }
+ ]
+}

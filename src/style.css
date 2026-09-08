@@ -945,7 +945,7 @@ html.dark[class*="theme-"] .side-advisor-drawer {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  border-radius: 16px !important;
+  border-radius: 4px !important;
   padding: 0 !important;
 }
 .premium-eq-popup .leaflet-popup-content {
@@ -998,7 +998,7 @@ html.dark[class*="theme-"] .side-advisor-drawer {
 .skeleton-card {
   position: relative;
   overflow: hidden;
-  border-radius: 1.5rem;
+  border-radius: 4px;
   background: rgba(255,255,255,0.6);
   border: 1px solid rgba(148, 163, 184, 0.12);
   backdrop-filter: blur(12px);
@@ -1028,5 +1028,5 @@ html.dark[class*="theme-"] .side-advisor-drawer {
 }
 
 .sk-block {
-  border-radius: 0.75rem;
+  border-radius: 4px;
 }

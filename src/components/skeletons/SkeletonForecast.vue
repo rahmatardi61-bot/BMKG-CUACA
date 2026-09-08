@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between mb-5">
       <div class="sk-bar skeleton-shimmer h-4 w-32"></div>
       <div class="flex gap-2">
-        <div v-for="i in 3" :key="i" class="sk-bar skeleton-shimmer h-6 w-14 rounded-lg"></div>
+        <div v-for="i in 3" :key="i" class="sk-bar skeleton-shimmer h-6 w-14 rounded-[4px]"></div>
       </div>
     </div>
 
@@ -17,13 +17,13 @@
       <div
         v-for="i in 8"
         :key="i"
-        class="flex-shrink-0 sk-block skeleton-shimmer w-14 h-24 rounded-2xl"
+        class="flex-shrink-0 sk-block skeleton-shimmer w-14 h-24 rounded-[4px]"
         :style="{ animationDelay: `${(i - 1) * 80}ms` }"
       ></div>
     </div>
 
     <!-- Graph placeholder -->
-    <div class="sk-block skeleton-shimmer h-20 w-full rounded-2xl mt-4"></div>
+    <div class="sk-block skeleton-shimmer h-20 w-full rounded-[4px] mt-4"></div>
 
     <!-- Bottom legend dots -->
     <div class="flex items-center gap-3 mt-3">

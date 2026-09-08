@@ -150,9 +150,9 @@ onUnmounted(() => {
   <div class="relative w-full">
 
     <!-- Carousel card with backdrop -->
-    <div class="relative bg-white/85 dark:bg-brand-navy-900/80 border border-slate-100/50 dark:border-brand-navy-700/20 no-blur rounded-3xl p-5 shadow-sm overflow-hidden">
+    <div class="relative bg-white/85 dark:bg-brand-navy-900/80 border border-slate-100/50 dark:border-brand-navy-700/20 no-blur rounded-[4px] p-5 shadow-sm overflow-hidden">
       <!-- Soft gradient wash (no filter:blur — replaced with CSS gradient) -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl" aria-hidden="true">
+      <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-[4px]" aria-hidden="true">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(96,165,250,0.15)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.08)_0%,transparent_60%)]"></div>
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.12)_0%,transparent_60%)] dark:bg-[radial-gradient(ellipse_at_bottom_right,rgba(52,211,153,0.06)_0%,transparent_60%)]"></div>
       </div>
@@ -186,11 +186,11 @@ onUnmounted(() => {
           <Transition name="fade-scale">
             <div 
               v-if="showHint"
-              class="absolute right-0 mt-3 w-72 sm:w-85 rounded-2xl p-5 z-30 text-left
+              class="absolute right-0 mt-3 w-72 sm:w-85 rounded-[4px] p-5 z-30 text-left
                 bg-slate-900/70 dark:bg-slate-950/60 border border-white/10 dark:border-slate-800/60 backdrop-blur-xl text-slate-300 shadow-[0_25px_60px_-15px_rgba(6,182,212,0.25)]"
             >
               <!-- Top Glow Line -->
-              <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/60 dark:via-brand-cyan/60 to-transparent rounded-t-2xl"></div>
+              <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400/60 dark:via-brand-cyan/60 to-transparent rounded-t-[4px]"></div>
 
               <!-- Arrow pointing to the button (top-right of popover) -->
               <div class="absolute top-[-6px] right-4 w-3 h-3 bg-slate-900/70 dark:bg-slate-950/60 backdrop-blur-xl rotate-45 border-t border-l border-white/10 dark:border-slate-800/60 z-10"></div>
@@ -284,7 +284,7 @@ onUnmounted(() => {
             v-memo="[activeCarouselCity === landmark.fullName]"
             :id="'landmark-card-' + landmark.name.toLowerCase()"
             @click="selectCityManually(landmark.fullName)"
-            class="gpu-card snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] no-blur relative overflow-hidden group/card shadow-sm"
+            class="gpu-card snap-start flex items-center gap-3 px-3.5 py-2.5 rounded-[4px] border text-left cursor-pointer transition-all duration-300 min-w-[145px] sm:min-w-[155px] select-none active:scale-[0.97] no-blur relative overflow-hidden group/card shadow-sm"
             :class="[
               activeCarouselCity === landmark.fullName
                 ? {
@@ -324,7 +324,7 @@ onUnmounted(() => {
 
             <!-- Landmark Icon Container with dynamic background theme -->
             <div 
-              class="w-8 h-8 p-1.5 rounded-xl shrink-0 transition-transform duration-300 group-hover/card:scale-110 flex items-center justify-center"
+              class="w-8 h-8 p-1.5 rounded-[4px] shrink-0 transition-transform duration-300 group-hover/card:scale-110 flex items-center justify-center"
               :class="[
                 activeCarouselCity === landmark.fullName
                   ? {

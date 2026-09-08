@@ -687,15 +687,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative w-full rounded-3xl overflow-hidden border border-slate-200/80 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/90 dark:bg-brand-navy-900/60 shadow-xl font-sans select-none transition-all duration-300">
+  <div class="relative w-full rounded-[4px] overflow-hidden border border-slate-200/80 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/90 dark:bg-brand-navy-900/60 shadow-xl font-sans select-none transition-all duration-300">
     <!-- Top Glow Border Line -->
-    <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent rounded-t-2xl"></div>
+    <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent rounded-t-[4px]"></div>
 
     <!-- ── Header (Matching PRAKIRAAN PERJAM Card) ─────────────────────── -->
     <div class="p-4 sm:p-5 flex items-center justify-between gap-3 border-b border-slate-200/60 dark:border-brand-navy-800/30 relative z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
       <!-- Left: Title & BMKG Badge -->
       <div class="flex items-center gap-2.5">
-        <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 text-blue-600 dark:text-cyan-400 border border-blue-500/10 shrink-0">
+        <div class="p-2 rounded-[4px] bg-gradient-to-br from-blue-500/15 to-indigo-500/10 text-blue-600 dark:text-cyan-400 border border-blue-500/10 shrink-0">
           <Compass class="w-5 h-5" />
         </div>
         <div>
@@ -714,16 +714,16 @@ onUnmounted(() => {
       <!-- Leaflet map -->
       <div id="windy-leaflet-map" class="absolute inset-0 z-10 bg-slate-900"></div>
       <!-- Left Master Viewport Dock: Single Stacked Vertical Rail (Zoom, Layers, & Toggles) -->
-      <div class="absolute left-3 top-3 z-30 flex flex-col p-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xl gap-1 select-none">
+      <div class="absolute left-3 top-3 z-30 flex flex-col p-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-[4px] shadow-2xl gap-1 select-none">
         
         <!-- Group 1: Zoom & Navigation -->
         <div class="flex flex-col gap-1 items-center">
           <!-- Zoom In -->
           <div class="relative group flex items-center justify-center">
-            <button @click="zoomIn" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer">
+            <button @click="zoomIn" class="w-8 h-8 rounded-[4px] flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer">
               <Plus class="w-4 h-4" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Perbesar (Zoom In)</span>
             </div>
@@ -731,10 +731,10 @@ onUnmounted(() => {
 
           <!-- Zoom Out -->
           <div class="relative group flex items-center justify-center">
-            <button @click="zoomOut" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer">
+            <button @click="zoomOut" class="w-8 h-8 rounded-[4px] flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer">
               <Minus class="w-4 h-4" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Perkecil (Zoom Out)</span>
             </div>
@@ -743,10 +743,10 @@ onUnmounted(() => {
           <!-- Lokasi Saya -->
           <div class="relative group flex items-center justify-center">
             <button @click="goToUserLocation"
-              class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-200 cursor-pointer">
+              class="w-8 h-8 rounded-[4px] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-200 cursor-pointer">
               <Navigation class="w-4 h-4 text-blue-500 dark:text-cyan-400 group-hover:text-white" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Lokasi Saya</span>
             </div>
@@ -764,7 +764,7 @@ onUnmounted(() => {
             class="relative group flex items-center justify-center"
           >
             <button 
-              class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer relative"
+              class="w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-200 cursor-pointer relative"
               :class="activeLayerId === layer.id
                 ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 scale-[1.03]'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'"
@@ -778,7 +778,7 @@ onUnmounted(() => {
             </button>
 
             <!-- Floating Tooltip (Pops to the right) -->
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>{{ layer.name }}</span>
             </div>
@@ -792,11 +792,11 @@ onUnmounted(() => {
           <!-- Animasi -->
           <div class="relative group flex items-center justify-center">
             <button @click="showParticles = !showParticles; scheduleRedraw()"
-              class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer"
+              class="w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-200 cursor-pointer"
               :class="showParticles ? 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-cyan-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'">
               <RotateCw class="w-4 h-4" :class="showParticles ? 'animate-spin' : ''" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Animasi Vektor</span>
             </div>
@@ -805,11 +805,11 @@ onUnmounted(() => {
           <!-- Label Kota -->
           <div class="relative group flex items-center justify-center">
             <button @click="showCityLabels = !showCityLabels"
-              class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer"
+              class="w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-200 cursor-pointer"
               :class="showCityLabels ? 'bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'">
               <component :is="showCityLabels ? Eye : EyeOff" class="w-4 h-4" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Label Kota</span>
             </div>
@@ -818,11 +818,11 @@ onUnmounted(() => {
           <!-- Isobar -->
           <div class="relative group flex items-center justify-center">
             <button @click="showPressureIsolines = !showPressureIsolines; scheduleRedraw()"
-              class="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer"
+              class="w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-200 cursor-pointer"
               :class="showPressureIsolines ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'">
               <Compass class="w-4 h-4" />
             </button>
-            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
+            <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-[4px] bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 text-white text-[10.5px] font-bold shadow-2xl pointer-events-none opacity-0 invisible -translate-x-1 group-hover:opacity-100 group-hover:visible group-hover:translate-x-0 transition-all duration-200 whitespace-nowrap z-50 flex items-center">
               <div class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-l border-slate-700/80 rotate-45"></div>
               <span>Garis Isobar</span>
             </div>
@@ -832,7 +832,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Bottom Viewport Horizontal Altitude Pill Bar (Satu Baris Kanan Kiri di Bawah) -->
-      <div class="absolute bottom-3 left-16 right-3 z-30 flex items-center justify-between gap-2 p-1.5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-xl overflow-x-auto no-scrollbar select-none">
+      <div class="absolute bottom-3 left-16 right-3 z-30 flex items-center justify-between gap-2 p-1.5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-[4px] shadow-xl overflow-x-auto no-scrollbar select-none">
         <div class="flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black tracking-wider uppercase text-slate-700 dark:text-slate-200 shrink-0">
           <Compass class="w-3.5 h-3.5 text-blue-500 dark:text-cyan-400" />
           <span>Altitude</span>
@@ -840,7 +840,7 @@ onUnmounted(() => {
         <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           <button v-for="alt in altitudes" :key="alt"
             @click="activeAltitude = alt; scheduleRedraw()"
-            class="px-2.5 py-1 text-[10px] font-extrabold rounded-xl transition-all duration-200 text-center whitespace-nowrap shrink-0 cursor-pointer"
+            class="px-2.5 py-1 text-[10px] font-extrabold rounded-[4px] transition-all duration-200 text-center whitespace-nowrap shrink-0 cursor-pointer"
             :class="activeAltitude === alt
               ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-[1.03]'
               : 'bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60'">
@@ -851,7 +851,7 @@ onUnmounted(() => {
 
       <!-- Popup Inspection Card BMKG -->
       <transition enter-active-class="transition duration-200" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100">
-        <div v-if="inspected" class="absolute left-1/2 -translate-x-1/2 top-4 z-40 w-80 bg-slate-900/95 backdrop-blur-xl border border-slate-700/90 rounded-2xl shadow-2xl p-3.5 text-white">
+        <div v-if="inspected" class="absolute left-1/2 -translate-x-1/2 top-4 z-40 w-80 bg-slate-900/95 backdrop-blur-xl border border-slate-700/90 rounded-[4px] shadow-2xl p-3.5 text-white">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-1.5">
               <div class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></div>
@@ -860,12 +860,12 @@ onUnmounted(() => {
             <button @click="inspected = null" class="text-slate-400 hover:text-white font-bold text-xs p-1 rounded hover:bg-slate-800 transition-colors">✕</button>
           </div>
           <div class="grid grid-cols-2 gap-2.5 mt-2.5">
-            <div class="rounded-xl bg-slate-800/70 p-2.5 border border-slate-700/80 shadow-md flex flex-col justify-between">
+            <div class="rounded-[4px] bg-slate-800/70 p-2.5 border border-slate-700/80 shadow-md flex flex-col justify-between">
               <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Temperatur</div>
               <div class="font-black text-amber-400 text-lg my-0.5 leading-none">{{ inspected.temp }}°C</div>
               <div class="text-[11px] text-slate-200 font-medium">{{ inspected.status }}</div>
             </div>
-            <div class="rounded-xl bg-slate-800/70 p-2.5 border border-slate-700/80 shadow-md flex flex-col justify-between">
+            <div class="rounded-[4px] bg-slate-800/70 p-2.5 border border-slate-700/80 shadow-md flex flex-col justify-between">
               <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Vektor Angin</div>
               <div class="font-bold text-xs text-white my-0.5">{{ inspected.wind }}</div>
               <div class="text-[11px] text-cyan-400 font-bold flex items-center gap-1">
@@ -895,7 +895,7 @@ onUnmounted(() => {
 
         <!-- ── Weather Forecast Model Selector ── -->
         <div class="flex items-center gap-1 shrink-0 justify-end">
-          <div class="flex items-center bg-slate-200/70 dark:bg-slate-800/90 border border-slate-300/80 dark:border-slate-700/60 rounded-xl p-1 gap-1">
+          <div class="flex items-center bg-slate-200/70 dark:bg-slate-800/90 border border-slate-300/80 dark:border-slate-700/60 rounded-[4px] p-1 gap-1">
             <button v-for="m in forecastModels" :key="m.id"
               @click="activeModel = m.id; scheduleRedraw()"
               class="px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer flex items-center gap-1"

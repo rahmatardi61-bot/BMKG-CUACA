@@ -366,6 +366,9 @@ const selectCity = (city: string) => {
   if (!weatherDataMap[targetCity]) {
     generateMockWeatherForCity(targetCity);
   }
+  if (!cities.value.includes(targetCity)) {
+    cities.value.push(targetCity);
+  }
   selectedCity.value = targetCity;
 };
 
@@ -571,7 +574,7 @@ onMounted(() => {
     <Transition name="slide-fade">
       <div 
         v-if="toastMessage"
-        class="fixed top-6 left-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-2xl shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
+        class="fixed top-6 left-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-[4px] shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
       >
         <!-- Warning Icon -->
         <div class="p-1 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">

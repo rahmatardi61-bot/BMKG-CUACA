@@ -59,10 +59,10 @@ const getBgIconClass = (type: string) => {
       <div 
         v-for="item in statuses" 
         :key="item.type"
-        class="bg-white/90 dark:bg-brand-navy-900/90 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 shadow-sm hover:shadow-md transition-[box-shadow] duration-300 flex items-start gap-3 no-blur"
+        class="bg-white/90 dark:bg-brand-navy-900/90 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-4 shadow-sm hover:shadow-md transition-[box-shadow] duration-300 flex items-start gap-3 no-blur"
       >
         <!-- Vehicle Category Icon -->
-        <div class="p-2 rounded-xl shrink-0 transition-transform duration-300" :class="getBgIconClass(item.type)">
+        <div class="p-2 rounded-[4px] shrink-0 transition-transform duration-300" :class="getBgIconClass(item.type)">
           <component :is="getTypeIcon(item.type)" class="w-5 h-5" />
         </div>
 

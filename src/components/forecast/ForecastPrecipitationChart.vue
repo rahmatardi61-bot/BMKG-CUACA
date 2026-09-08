@@ -267,7 +267,7 @@ const tooltipTop = computed(() => {
         v-for="group in precipDayGroups"
         :key="group.date"
         @click="precipSelectedDate = group.date"
-        class="flex-shrink-0 w-[108px] rounded-2xl p-3 cursor-pointer transition-all duration-200 border select-none"
+        class="flex-shrink-0 w-[108px] rounded-[4px] p-3 cursor-pointer transition-all duration-200 border select-none"
         :class="precipSelectedDate === group.date
           ? 'bg-blue-500/15 dark:bg-brand-cyan/10 border-blue-400/60 dark:border-brand-cyan/40 shadow-md shadow-blue-500/10'
           : 'bg-slate-50/60 dark:bg-brand-navy-800/30 border-slate-100/60 dark:border-brand-navy-700/30 hover:bg-blue-50/40 dark:hover:bg-brand-navy-800/60'"
@@ -291,15 +291,6 @@ const tooltipTop = computed(() => {
           <span class="text-[10px] font-bold"
             :class="precipSelectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-500 dark:text-slate-400'"
           >{{ group.maxProb }}%</span>
-        </div>
-        <div class="mt-2 flex gap-0.5 items-end h-5">
-          <div
-            v-for="(v, si) in group.spark"
-            :key="si"
-            class="flex-1 rounded-sm transition-all duration-300"
-            :class="precipSelectedDate === group.date ? 'bg-blue-400/70 dark:bg-brand-cyan/60' : 'bg-slate-300/60 dark:bg-slate-600/50'"
-            :style="{ height: Math.max(2, (v / 100) * 20) + 'px' }"
-          />
         </div>
       </div>
     </div>
@@ -376,7 +367,7 @@ const tooltipTop = computed(() => {
               top: tooltipTop + 'px',
             }"
           >
-            <div class="relative px-3 py-2.5 rounded-xl shadow-lg border text-left min-w-[180px]
+            <div class="relative px-3 py-2.5 rounded-[4px] shadow-lg border text-left min-w-[180px]
               bg-white/95 border-slate-100/80 shadow-slate-200/60
               dark:bg-brand-navy-900/95 dark:border-brand-navy-700/60 dark:shadow-brand-navy-950/80
               backdrop-blur-md"
@@ -389,7 +380,7 @@ const tooltipTop = computed(() => {
                 <span>{{ (precipChartSlots[precipHoveredIdx]?.rate ?? 0).toFixed(2) }} mm/jam</span>
                 <span
                   v-if="precipIntensityLabel(precipChartSlots[precipHoveredIdx]?.rate ?? 0)"
-                  class="text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none"
+                  class="text-[9px] font-bold px-1.5 py-0.5 rounded-[4px] leading-none"
                   :class="precipIntensityLabel(precipChartSlots[precipHoveredIdx]?.rate ?? 0)!.cls"
                 >
                   {{ precipIntensityLabel(precipChartSlots[precipHoveredIdx]?.rate ?? 0)!.text }}

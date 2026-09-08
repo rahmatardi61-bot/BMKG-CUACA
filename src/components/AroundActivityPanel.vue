@@ -446,7 +446,7 @@ const openRoute = (course: GolfCourse) => {
               v-if="activeMobileCourse"
               :key="activeMobileCourse.id"
               @click="emit('select-course', activeMobileCourse)"
-              class="rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-[transform,box-shadow,border-color] duration-300 ease-out transform-gpu"
+              class="rounded-[4px] overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border w-full cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-[transform,box-shadow,border-color] duration-300 ease-out transform-gpu"
               :class="getColor(activeMobileCourse.colorKey).border"
             >
               <!-- Gradient top strip -->
@@ -456,7 +456,7 @@ const openRoute = (course: GolfCourse) => {
                 <!-- Name + Location & Route Button Row -->
                 <div class="flex items-center justify-between gap-2 mb-2.5">
                   <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" :class="getColor(activeMobileCourse.colorKey).icon">
+                    <div class="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0" :class="getColor(activeMobileCourse.colorKey).icon">
                       <component :is="getCategoryIcon(activeMobileCourse.category)" class="w-4 h-4" />
                     </div>
                     <div class="min-w-0 flex-1">
@@ -485,7 +485,7 @@ const openRoute = (course: GolfCourse) => {
                 <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
                 <div class="flex gap-3.5 items-start">
                   <!-- Left column: Premium Image (1x1 square) -->
-                  <div class="w-[90px] h-[90px] shrink-0 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
+                  <div class="w-[90px] h-[90px] shrink-0 rounded-[4px] overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
                     <img 
                       :src="getCourseImage(activeMobileCourse)" 
                       :alt="activeMobileCourse.name" 
@@ -518,7 +518,7 @@ const openRoute = (course: GolfCourse) => {
                     </div>
 
                     <!-- Advisor box from cityAnalysisMap (clamped to 2 lines for perfect mobile display) -->
-                    <div class="rounded-xl p-2 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
+                    <div class="rounded-[4px] p-2 border space-y-0.5" :class="getColor(activeMobileCourse.colorKey).advisorBg">
                       <p class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 leading-none">
                         {{ getAdvisorForCourse(activeMobileCourse).label }}
                       </p>
@@ -584,7 +584,7 @@ const openRoute = (course: GolfCourse) => {
           v-for="course in golfCourses"
           :key="course.id"
           @click="emit('select-course', course)"
-          class="snap-start shrink-0 w-[425px] rounded-2xl overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border cursor-pointer group"
+          class="snap-start shrink-0 w-[425px] rounded-[4px] overflow-hidden shadow-sm bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border cursor-pointer group"
           :class="getColor(course.colorKey).border"
         >
           <!-- Gradient top strip -->
@@ -595,7 +595,7 @@ const openRoute = (course: GolfCourse) => {
             <div class="flex items-center justify-between gap-2 mb-2.5">
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <div
-                  class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  class="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
                   :class="getColor(course.colorKey).icon"
                 >
                   <component :is="getCategoryIcon(course.category)" class="w-4 h-4" />
@@ -626,7 +626,7 @@ const openRoute = (course: GolfCourse) => {
             <!-- Two Column Content Layout (Left: Premium Image, Right: Specs & Advisor) -->
             <div class="flex gap-3.5 items-start">
               <!-- Left column: Premium Image (1x1 square) -->
-              <div class="w-[95px] h-[95px] shrink-0 rounded-xl overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
+              <div class="w-[95px] h-[95px] shrink-0 rounded-[4px] overflow-hidden border border-slate-200/50 dark:border-slate-800/40 relative aspect-square">
                 <img 
                   :src="getCourseImage(course)" 
                   :alt="course.name" 
@@ -660,7 +660,7 @@ const openRoute = (course: GolfCourse) => {
   
                 <!-- Advisor box from cityAnalysisMap -->
                 <div
-                  class="rounded-xl p-2.5 border space-y-0.5"
+                  class="rounded-[4px] p-2.5 border space-y-0.5"
                   :class="getColor(course.colorKey).advisorBg"
                 >
                   <p class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 leading-none">

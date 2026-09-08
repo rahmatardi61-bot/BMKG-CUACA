@@ -10,7 +10,9 @@ import {
   Cloud,
   CloudRain,
   CloudLightning,
-  MessageSquare
+  MessageSquare,
+  Calendar,
+  X
 } from 'lucide-vue-next';
 import type { WeatherData } from '../types/weather';
 import { getCityTheme } from '../data/cityThemes';
@@ -38,6 +40,43 @@ const emit = defineEmits<{
 const currentTime = ref(new Date());
 let clockIntervalId: ReturnType<typeof setInterval> | null = null;
 
+// Interactive Day Forecast Tooltip State
+const activeTooltipDate = ref<string | null>(null);
+
+const toggleDayTooltip = (dateStr: string, event?: Event) => {
+  if (event) event.stopPropagation();
+  activeTooltipDate.value = activeTooltipDate.value === dateStr ? null : dateStr;
+};
+
+const handleGlobalClick = () => {
+  if (activeTooltipDate.value) {
+    activeTooltipDate.value = null;
+  }
+};
+
+const getWeatherDescription = (status: string, precipitation: number, tempMax: number): string => {
+  const s = (status || '').toLowerCase();
+  if (s.includes('petir') || s.includes('badai') || s.includes('thunder')) {
+    return 'Potensi hujan lebat disertai kilat/petir dan angin kencang sesaat. Hindari tempat terbuka dan pohon rindang.';
+  }
+  if (s.includes('hujan lebat') || precipitation >= 70) {
+    return 'Peluang hujan berintensitas lebat cukup tinggi. Siapkan payung atau jas hujan serta waspadai genangan jalan.';
+  }
+  if (s.includes('hujan') || s.includes('gerimis') || precipitation >= 40) {
+    return 'Prakiraan hujan intensitas ringan hingga sedang turun berkala. Sangat dianjurkan membawa perlengkapan hujan.';
+  }
+  if (s.includes('cerah berawan') || s.includes('sebagian berawan')) {
+    return 'Kondisi cuaca didominasi cerah berawan dengan angin sejuk. Sangat ideal dan nyaman untuk aktivitas luar ruangan.';
+  }
+  if (s.includes('cerah')) {
+    return `Cuaca cerah terik dengan suhu puncak ${tempMax}°C. Disarankan menggunakan tabir surya dan menjaga hidrasi.`;
+  }
+  if (s.includes('berawan tebal') || s.includes('mendung')) {
+    return 'Langit cenderung tertutup awan tebal dengan udara sejuk. Peluang gerimis lokal di beberapa titik.';
+  }
+  return 'Kondisi cuaca diprakirakan cukup stabil dan kondusif untuk mendukung kegiatan harian Anda.';
+};
+
 onMounted(() => {
   const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000;
   const alignTimer = setTimeout(() => {
@@ -47,10 +86,12 @@ onMounted(() => {
     }, 60000);
   }, msUntilNextMinute);
   (clockIntervalId as any) = alignTimer;
+  window.addEventListener('click', handleGlobalClick);
 });
 
 onUnmounted(() => {
   if (clockIntervalId) clearInterval(clockIntervalId);
+  window.removeEventListener('click', handleGlobalClick);
   document.body.classList.remove('drawer-open');
 });
 
@@ -120,7 +161,9 @@ const normalizedWeatherType = computed(() => {
 interface DailyForecastItem {
   date: string;
   dayName: string;
+  dayTitle: string;
   dateShort: string;
+  dateFull: string;
   isToday: boolean;
   tempMin: number;
   tempMax: number;
@@ -128,6 +171,8 @@ interface DailyForecastItem {
   icon: any;
   iconColor: string;
   iconBg: string;
+  mobileIconColor: string;
+  mobileIconBg: string;
   precipitation: number;
   humidity: number;
   windSpeed: number;
@@ -140,48 +185,62 @@ const getForecastWeatherStyle = (status: string) => {
     return {
       icon: CloudLightning,
       colorClass: 'text-amber-300 drop-shadow-[0_0_10px_rgba(252,211,77,0.7)]',
-      bgClass: 'bg-indigo-500/20 border-indigo-400/30'
+      bgClass: 'bg-indigo-500/20 border-indigo-400/30',
+      mobileColorClass: 'text-purple-600 dark:text-purple-400',
+      mobileBgClass: 'bg-purple-50/90 border-purple-200/90 shadow-sm dark:bg-purple-950/30 dark:border-purple-800/40'
     };
   }
   if (s.includes('hujan lebat') || s.includes('heavy-rain')) {
     return {
       icon: CloudRain,
       colorClass: 'text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.7)]',
-      bgClass: 'bg-blue-600/20 border-blue-400/30'
+      bgClass: 'bg-blue-600/20 border-blue-400/30',
+      mobileColorClass: 'text-sky-500 dark:text-sky-400',
+      mobileBgClass: 'bg-sky-50/90 border-sky-300/80 shadow-sm dark:bg-sky-950/30 dark:border-sky-800/40'
     };
   }
   if (s.includes('hujan') || s.includes('rain') || s.includes('gerimis') || s.includes('drizzle')) {
     return {
       icon: CloudRain,
       colorClass: 'text-cyan-300 drop-shadow-[0_0_8px_rgba(103,232,249,0.7)]',
-      bgClass: 'bg-cyan-500/20 border-cyan-400/30'
+      bgClass: 'bg-cyan-500/20 border-cyan-400/30',
+      mobileColorClass: 'text-sky-500 dark:text-sky-400',
+      mobileBgClass: 'bg-sky-50/90 border-sky-300/80 shadow-sm dark:bg-sky-950/30 dark:border-sky-800/40'
     };
   }
   if (s.includes('cerah berawan') || s.includes('sebagian berawan') || s.includes('partly-cloudy')) {
     return {
       icon: CloudSun,
       colorClass: 'text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]',
-      bgClass: 'bg-amber-500/15 border-amber-400/25'
+      bgClass: 'bg-amber-500/15 border-amber-400/25',
+      mobileColorClass: 'text-amber-500 dark:text-amber-400',
+      mobileBgClass: 'bg-amber-50/90 border-amber-300/80 shadow-sm dark:bg-amber-950/30 dark:border-amber-800/40'
     };
   }
   if (s.includes('cerah') || s.includes('sunny')) {
     return {
       icon: Sun,
       colorClass: 'text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.8)]',
-      bgClass: 'bg-amber-500/20 border-amber-400/30'
+      bgClass: 'bg-amber-500/20 border-amber-400/30',
+      mobileColorClass: 'text-amber-500 dark:text-amber-400',
+      mobileBgClass: 'bg-amber-50/90 border-amber-300/80 shadow-sm dark:bg-amber-950/30 dark:border-amber-800/40'
     };
   }
   if (s.includes('berawan tebal') || s.includes('mendung') || s.includes('overcast')) {
     return {
       icon: Cloudy,
       colorClass: 'text-slate-200 drop-shadow-[0_0_8px_rgba(226,232,240,0.5)]',
-      bgClass: 'bg-slate-500/20 border-slate-400/25'
+      bgClass: 'bg-slate-500/20 border-slate-400/25',
+      mobileColorClass: 'text-slate-500 dark:text-slate-300',
+      mobileBgClass: 'bg-slate-50/90 border-slate-300/80 shadow-sm dark:bg-slate-800/40 dark:border-slate-700/50'
     };
   }
   return {
     icon: Cloud,
     colorClass: 'text-sky-100 drop-shadow-[0_0_8px_rgba(224,242,254,0.5)]',
-    bgClass: 'bg-sky-500/15 border-sky-400/20'
+    bgClass: 'bg-sky-500/15 border-sky-400/20',
+    mobileColorClass: 'text-slate-500 dark:text-slate-300',
+    mobileBgClass: 'bg-slate-50/90 border-slate-300/80 shadow-sm dark:bg-slate-800/40 dark:border-slate-700/50'
   };
 };
 
@@ -225,7 +284,9 @@ const sevenDaysForecast = computed<DailyForecastItem[]>(() => {
     return {
       date: dateStr,
       dayName: idx === 0 ? 'HARI INI' : idx === 1 ? 'BESOK' : dayOfWeek.toUpperCase(),
+      dayTitle: idx === 0 ? 'Hari ini' : dayOfWeek,
       dateShort,
+      dateFull: `${d} ${indonesianMonths[m - 1]} ${y}`,
       isToday: idx === 0,
       tempMin: minTemp,
       tempMax: maxTemp,
@@ -233,6 +294,8 @@ const sevenDaysForecast = computed<DailyForecastItem[]>(() => {
       icon: style.icon,
       iconColor: style.colorClass,
       iconBg: style.bgClass,
+      mobileIconColor: style.mobileColorClass,
+      mobileIconBg: style.mobileBgClass,
       precipitation: precip,
       humidity: hum,
       windSpeed: wind,
@@ -392,10 +455,10 @@ const submitReport = () => {
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full h-full flex flex-col">
     <!-- Full Width: Large Hero Weather Card -->
     <div 
-      class="w-full rounded-3xl p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col gap-8 group weather-card-dynamic text-white transition-all duration-300"
+      class="w-full h-full flex-1 rounded-[4px] p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col justify-between gap-8 group weather-card-dynamic text-white transition-all duration-300"
       :class="cityTheme.cardBg"
     >
       <!-- Decorative Glow Overlay -->
@@ -488,10 +551,10 @@ const submitReport = () => {
         <div class="flex flex-col justify-between flex-1">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-black tracking-wider bg-current/10 px-2.5 py-1 rounded-full uppercase">
+              <span class="text-[10px] font-black tracking-wider bg-current/10 px-2.5 py-1 rounded-[8px] uppercase">
                 Kondisi Saat Ini
               </span>
-              <span class="text-[10px] font-black bg-current/10 px-2.5 py-1 rounded-full tracking-wider whitespace-nowrap">
+              <span class="text-[10px] font-black bg-current/10 px-2.5 py-1 rounded-[8px] tracking-wider whitespace-nowrap">
                 {{ formattedTimeAndZone }}
               </span>
             </div>
@@ -519,7 +582,7 @@ const submitReport = () => {
               <!-- Lapor Cuaca Button -->
               <button 
                 @click="openReportModal"
-                class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[12px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
+                class="relative inline-flex items-center gap-2.5 px-3.5 py-2 text-xs tracking-wide rounded-[8px] border font-bold transition-all duration-300 hover:scale-105 active:scale-95 active:duration-75 select-none bg-current/10 hover:bg-current/15 border-current/15 text-current cursor-pointer sm:mb-2"
               >
                 <span class="w-1.5 h-1.5 rounded-full bg-current relative flex shrink-0">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
@@ -532,7 +595,7 @@ const submitReport = () => {
             </div>
 
             <!-- Animated Status Weather Icon Container (Mobile Only: Sejajar Suhu) -->
-            <div class="flex md:hidden p-3 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 shrink-0 self-end sm:self-center">
+            <div class="flex md:hidden p-3 bg-current/10 backdrop-blur-md rounded-[8px] border border-current/15 shrink-0 self-end sm:self-center">
               <component :is="weatherStyling.icon" class="w-12 h-12 animate-bounce" style="animation-duration: 4s;" />
             </div>
           </div>
@@ -541,40 +604,45 @@ const submitReport = () => {
         <!-- Card Right Portion (Status Summary) -->
         <div class="flex flex-col justify-between items-end text-right gap-4 md:gap-6">
           <!-- Animated Status Weather Icon Container (Desktop Only: Kanan Atas) -->
-          <div class="hidden md:flex p-3.5 bg-current/10 backdrop-blur-md rounded-2xl border border-current/15 self-end">
+          <div class="hidden md:flex p-3.5 bg-current/10 backdrop-blur-md rounded-[8px] border border-current/15 self-end">
             <component :is="weatherStyling.icon" class="w-12 h-12 md:w-14 md:h-14 animate-bounce" style="animation-duration: 4s;" />
           </div>
 
           <!-- Temperature status summary -->
           <div class="flex flex-col gap-2 w-full md:w-48 text-left md:text-right">
             <!-- Upper Panel: Status & Feels Like -->
-            <div class="p-3.5 rounded-2xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
+            <div class="p-3.5 rounded-[8px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm">
               <p class="text-xl md:text-2xl font-black tracking-tight leading-tight">{{ weatherData.status }}</p>
               <p class="text-[11px] opacity-90 mt-1 font-semibold">Terasa seperti {{ weatherData.feelLike }}°C</p>
             </div>
             
-            <!-- Lower Panel: Min / Max -->
-            <div class="py-2.5 px-3.5 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
-              <span class="opacity-75 font-bold">Min / Max</span>
-              <span class="font-black">{{ weatherData.tempMin }}° / {{ weatherData.tempMax }}°</span>
+            <!-- Lower Panel: Max / Min -->
+            <div class="py-2.5 px-3.5 rounded-[8px] bg-white/10 dark:bg-black/20 backdrop-blur-md border border-current/10 shadow-sm text-[11px] flex justify-between items-center">
+              <span class="opacity-75 font-bold">Max / Min</span>
+              <span class="font-black">{{ weatherData.tempMax }}° / {{ weatherData.tempMin }}°</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── Bottom Row: Prakiraan Cuaca Sekarang sampai 7 Hari ke Depan ── -->
-      <div class="relative z-10 w-full flex flex-col gap-3.5">
+      <!-- ── Bottom Row: Prakiraan Cuaca Sekarang sampai 7 Hari ke Depan (Desktop Only) ── -->
+      <div class="hidden md:flex relative z-10 w-full flex-col gap-3.5">
 
 
-        <!-- 8 Days Horizontal Scroll on Mobile / Full Grid on Desktop -->
-        <div class="flex md:grid md:grid-cols-8 gap-2 sm:gap-2.5 w-full overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1 px-1 sm:px-2 md:px-3">
+        <!-- 8 Days Full Grid on Desktop -->
+        <div class="grid grid-cols-8 gap-2 sm:gap-2.5 w-full py-1 px-1 sm:px-2 md:px-3">
           <div
-            v-for="day in sevenDaysForecast"
+            v-for="(day, idx) in sevenDaysForecast"
             :key="day.date"
-            class="group/day relative rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 backdrop-blur-xl border select-none cursor-pointer snap-start shrink-0 w-[96px] sm:w-[104px] md:w-auto md:shrink"
-            :class="day.isToday 
-              ? 'bg-white/20 dark:bg-white/15 border-white/40 shadow-lg ring-1 ring-white/30 scale-[1.02] z-10' 
-              : 'bg-white/[0.08] hover:bg-white/[0.16] dark:bg-black/25 dark:hover:bg-black/40 border-white/10 hover:border-white/25 hover:scale-[1.02] shadow-sm hover:shadow-md'"
+            @click="toggleDayTooltip(day.date, $event)"
+            class="group/day relative rounded-[8px] p-2.5 sm:p-3 flex flex-col items-center justify-between text-center transition-all duration-300 backdrop-blur-xl border select-none cursor-pointer snap-start shrink-0 w-[96px] sm:w-[104px] md:w-auto md:shrink"
+            :class="[
+              activeTooltipDate === day.date
+                ? 'bg-white/25 dark:bg-white/20 border-white/60 shadow-2xl ring-2 ring-blue-400 dark:ring-brand-cyan scale-[1.04] z-30'
+                : (day.isToday 
+                  ? 'bg-white/20 dark:bg-white/15 border-white/40 shadow-lg ring-1 ring-white/30 scale-[1.02] z-10' 
+                  : 'bg-white/[0.08] hover:bg-white/[0.16] dark:bg-black/25 dark:hover:bg-black/40 border-white/10 hover:border-white/25 hover:scale-[1.02] shadow-sm hover:shadow-md')
+            ]"
           >
             <!-- Day & Date Vertical Stack -->
             <div class="w-full flex flex-col items-center gap-0.5">
@@ -590,7 +658,7 @@ const submitReport = () => {
             </div>
 
             <!-- Weather Icon Container -->
-            <div class="my-2 p-1.5 sm:p-2 rounded-xl transition-all duration-300 shadow-sm border flex items-center justify-center group-hover/day:scale-110" :class="day.iconBg">
+            <div class="my-2 p-1.5 sm:p-2 rounded-[8px] transition-all duration-300 shadow-sm border flex items-center justify-center group-hover/day:scale-110" :class="day.iconBg">
               <component :is="day.icon" class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300" :class="day.iconColor" />
             </div>
 
@@ -602,7 +670,7 @@ const submitReport = () => {
 
             <!-- Precipitation badge -->
             <div 
-              class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide transition-colors"
+              class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-[8px] text-[9px] font-bold tracking-wide transition-colors"
               :class="day.precipitation > 20 
                 ? 'bg-cyan-400/20 text-cyan-200 border border-cyan-400/30' 
                 : 'bg-white/10 text-white/70 border border-white/10'"
@@ -610,7 +678,175 @@ const submitReport = () => {
               <Droplets class="w-2.5 h-2.5 shrink-0" />
               <span>{{ day.precipitation }}%</span>
             </div>
+
+            <!-- Interactive Informative Tooltip Popover (Desktop) -->
+            <Transition name="tooltip-pop">
+              <div
+                v-if="activeTooltipDate === day.date"
+                @click.stop
+                class="absolute bottom-full mb-3.5 z-50 w-72 p-3.5 rounded-[8px] backdrop-blur-2xl bg-slate-900/95 dark:bg-brand-navy-950/95 border border-white/20 dark:border-brand-navy-700/80 shadow-[0_12px_32px_rgba(0,0,0,0.5)] text-left text-white pointer-events-auto cursor-default"
+                :class="idx === 0 ? 'left-0' : idx === 1 ? 'left-0 sm:-left-6' : idx >= 6 ? 'right-0' : 'left-1/2 -translate-x-1/2'"
+              >
+                <!-- Tooltip Header -->
+                <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
+                  <div class="flex flex-col">
+                    <span class="text-[11px] font-black tracking-wider uppercase text-blue-400 dark:text-brand-cyan leading-tight">
+                      {{ day.dayTitle }}, {{ day.dateFull }}
+                    </span>
+                    <span class="text-xs font-bold text-white/95 mt-0.5 leading-tight">
+                      {{ day.status }}
+                    </span>
+                  </div>
+                  <button 
+                    @click.stop="activeTooltipDate = null" 
+                    class="p-1 rounded hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <!-- Descriptive Narrative -->
+                <p class="text-[11px] text-white/80 leading-relaxed mb-3">
+                  {{ getWeatherDescription(day.status, day.precipitation, day.tempMax) }}
+                </p>
+
+                <!-- Key Parameters Grid -->
+                <div class="grid grid-cols-3 gap-1.5 pt-1">
+                  <!-- Suhu Range -->
+                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                    <span class="text-[9px] text-white/60 font-medium leading-none">Suhu</span>
+                    <span class="text-[11px] font-black text-white mt-1">{{ day.tempMax }}° / {{ day.tempMin }}°</span>
+                  </div>
+                  <!-- Peluang Hujan -->
+                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                    <span class="text-[9px] text-white/60 font-medium leading-none">Hujan</span>
+                    <span class="text-[11px] font-black text-cyan-300 mt-1">{{ day.precipitation }}%</span>
+                  </div>
+                  <!-- Angin -->
+                  <div class="p-1.5 rounded-[6px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
+                    <span class="text-[9px] text-white/60 font-medium leading-none">Angin</span>
+                    <span class="text-[11px] font-black text-white mt-1">{{ day.windSpeed }} km/j</span>
+                  </div>
+                </div>
+
+                <!-- Bottom Arrow -->
+                <div
+                  class="absolute bottom-0 translate-y-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900/95 dark:border-t-brand-navy-950/95"
+                  :class="idx === 0 ? 'left-6' : idx === 1 ? 'left-10' : idx >= 6 ? 'right-6' : 'left-1/2 -translate-x-1/2'"
+                ></div>
+              </div>
+            </Transition>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mobile Standalone Card: Prakiraan Cuaca Harian (Soft White Dominan) ── -->
+    <div 
+      class="block md:hidden mt-4 relative w-full rounded-2xl p-4 sm:p-5 overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 transition-all duration-300 bg-gradient-to-b from-white via-white to-blue-50/25 dark:from-slate-900 dark:via-slate-900 dark:to-slate-850"
+    >
+      <!-- Header Card -->
+      <div class="pb-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 relative z-10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 border border-blue-100/80 dark:border-blue-800/40 flex items-center justify-center shadow-xs">
+            <Calendar class="w-4 h-4" />
+          </div>
+          <div>
+            <h4 class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">
+              Prakiraan 7 Hari
+            </h4>
+            <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-tight">
+              Termasuk hari ini • {{ weatherData.city.split(',')[0] }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- List Rows (sesuai screenshot referensi) -->
+      <div class="divide-y divide-slate-100/90 dark:divide-slate-800/70 px-0.5 py-1 relative z-10">
+        <div
+          v-for="day in sevenDaysForecast"
+          :key="day.date"
+          @click="toggleDayTooltip(day.date, $event)"
+          class="flex flex-col py-3 px-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer rounded-lg"
+        >
+          <!-- Main Row -->
+          <div class="flex items-center justify-between w-full">
+            <!-- Col 1: Day & Date -->
+            <div class="flex flex-col w-[92px] shrink-0 text-left">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                {{ day.dayTitle }}
+              </span>
+              <span class="text-[10.5px] font-normal text-slate-400 dark:text-slate-500 mt-0.5 leading-tight">
+                {{ day.dateFull }}
+              </span>
+            </div>
+
+            <!-- Col 2: Weather Icon with Soft Pastel Backdrop Box -->
+            <div class="flex items-center justify-center shrink-0">
+              <div 
+                class="w-8 h-8 rounded-[10px] p-1.5 transition-all duration-200 border flex items-center justify-center shadow-xs" 
+                :class="day.mobileIconBg"
+              >
+                <component 
+                  :is="day.icon" 
+                  class="w-4.5 h-4.5 stroke-[2.2] transition-transform duration-200" 
+                  :class="day.mobileIconColor" 
+                />
+              </div>
+            </div>
+
+            <!-- Col 3: Precipitation with bullet • -->
+            <div class="flex items-center justify-center w-14 shrink-0">
+              <div v-if="day.precipitation > 0" class="flex items-center gap-1 text-xs font-semibold text-blue-500 dark:text-blue-400">
+                <span class="text-sm font-black leading-none">•</span>
+                <span>{{ day.precipitation }}%</span>
+              </div>
+            </div>
+
+            <!-- Col 4: T (Max) · R (Min) -->
+            <div class="flex items-center justify-end text-right shrink-0">
+              <span class="text-xs font-medium text-slate-400 dark:text-slate-500 mr-1">T</span>
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ day.tempMax }}°</span>
+              <span class="mx-1.5 text-slate-300 dark:text-slate-600 font-bold">·</span>
+              <span class="text-xs font-medium text-slate-400 dark:text-slate-500 mr-1">R</span>
+              <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ day.tempMin }}°</span>
+            </div>
+          </div>
+
+          <!-- Informative & Descriptive Tooltip Panel for Mobile -->
+          <Transition name="tooltip-pop">
+            <div 
+              v-if="activeTooltipDate === day.date"
+              @click.stop
+              class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-left text-xs text-slate-700 dark:text-slate-200 shadow-sm"
+            >
+              <div class="flex items-center justify-between mb-1.5 font-bold text-slate-800 dark:text-slate-100">
+                <div class="flex items-center gap-1.5">
+                  <component :is="day.icon" class="w-4 h-4" :class="day.mobileIconColor" />
+                  <span>{{ day.status }}</span>
+                </div>
+                <span class="text-blue-600 dark:text-blue-400 font-bold">{{ day.tempMax }}° / {{ day.tempMin }}°</span>
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mb-2.5">
+                {{ getWeatherDescription(day.status, day.precipitation, day.tempMax) }}
+              </p>
+              <div class="grid grid-cols-3 gap-1.5 text-[10px] text-center pt-2 border-t border-slate-200/70 dark:border-slate-700/70">
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                  <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Peluang Hujan</div>
+                  <div class="font-bold text-blue-600 dark:text-blue-400">{{ day.precipitation }}%</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                  <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Kelembapan</div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">{{ day.humidity }}%</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60 shadow-xs">
+                  <div class="text-slate-400 dark:text-slate-500 font-medium text-[9px]">Kec. Angin</div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">{{ day.windSpeed }} km/j</div>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
     </div>
@@ -792,5 +1028,15 @@ const submitReport = () => {
 .dark .snow-flake {
   background: #ffffff;
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+.tooltip-pop-enter-active,
+.tooltip-pop-leave-active {
+  transition: opacity 0.18s ease, margin-bottom 0.18s ease;
+}
+.tooltip-pop-enter-from,
+.tooltip-pop-leave-to {
+  opacity: 0;
+  margin-bottom: -4px;
 }
 </style>

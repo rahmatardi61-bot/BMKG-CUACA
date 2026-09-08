@@ -59,7 +59,7 @@ onUnmounted(() => {
     <!-- Futuristic Shimmer Skeleton Card -->
     <div 
       v-else 
-      class="w-full rounded-2xl p-6 border border-slate-100/60 dark:border-brand-navy-800/40 bg-white/70 dark:bg-brand-navy-900/60 shadow-sm backdrop-blur-md flex flex-col justify-between overflow-hidden relative"
+      class="w-full rounded-[4px] p-6 border border-slate-100/60 dark:border-brand-navy-800/40 bg-white/70 dark:bg-brand-navy-900/60 shadow-sm backdrop-blur-md flex flex-col justify-between overflow-hidden relative"
       :style="{ height: minHeight }"
     >
       <!-- Top Glowing Shimmer Line -->
@@ -68,7 +68,7 @@ onUnmounted(() => {
       <!-- Header Skeleton -->
       <div class="flex items-center justify-between gap-4 mb-6 z-10">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-slate-200/70 dark:bg-brand-navy-800/80 animate-pulse flex items-center justify-center">
+          <div class="w-8 h-8 rounded-[4px] bg-slate-200/70 dark:bg-brand-navy-800/80 animate-pulse flex items-center justify-center">
             <span class="w-3 h-3 rounded-full bg-blue-500/40 dark:bg-brand-cyan/40 animate-ping"></span>
           </div>
           <div class="space-y-1.5">

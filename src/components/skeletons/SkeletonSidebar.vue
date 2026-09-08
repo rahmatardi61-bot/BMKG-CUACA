@@ -11,11 +11,11 @@
 
       <!-- Tab buttons -->
       <div class="flex gap-2">
-        <div v-for="i in 3" :key="i" class="h-8 flex-1 sk-block skeleton-shimmer rounded-xl" :style="{ animationDelay: `${i * 80}ms` }"></div>
+        <div v-for="i in 3" :key="i" class="h-8 flex-1 sk-block skeleton-shimmer rounded-[4px]" :style="{ animationDelay: `${i * 80}ms` }"></div>
       </div>
 
       <!-- Large content area -->
-      <div class="sk-block skeleton-shimmer h-44 w-full rounded-2xl"></div>
+      <div class="sk-block skeleton-shimmer h-44 w-full rounded-[4px]"></div>
 
       <!-- Text lines -->
       <div class="space-y-2">
@@ -35,7 +35,7 @@
       <!-- Transport rows -->
       <div
         v-for="i in 3" :key="i"
-        class="sk-block skeleton-shimmer h-14 w-full rounded-2xl"
+        class="sk-block skeleton-shimmer h-14 w-full rounded-[4px]"
         :style="{ animationDelay: `${(i - 1) * 100}ms` }"
       ></div>
     </div>

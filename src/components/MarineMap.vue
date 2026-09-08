@@ -606,7 +606,7 @@ watch(isDark, () => {
 </script>
 
 <template>
-  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-6 shadow-sm backdrop-blur-md">
+  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-6 shadow-sm backdrop-blur-md">
     <!-- Header Area -->
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>
@@ -626,7 +626,7 @@ watch(isDark, () => {
     </div>
 
     <!-- Map Container Box -->
-    <div class="relative w-full rounded-2xl overflow-hidden border shadow-inner h-[450px] md:h-[550px] bg-white dark:bg-slate-950 border-slate-200/50 dark:border-brand-navy-800" style="contain: layout paint;">
+    <div class="relative w-full rounded-[4px] overflow-hidden border shadow-inner h-[450px] md:h-[550px] bg-white dark:bg-slate-950 border-slate-200/50 dark:border-brand-navy-800" style="contain: layout paint;">
     
     <!-- Top-left Meteorological coordinate indicator -->
     <div class="absolute left-6 top-6 z-30 pointer-events-none font-mono text-[9px] text-slate-500 dark:text-slate-600 uppercase tracking-widest hidden md:block">
@@ -654,7 +654,7 @@ watch(isDark, () => {
         :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
       >
         <div
-          class="rounded-2xl border shadow-2xl"
+          class="rounded-[4px] border shadow-2xl"
           style="background:rgba(8,15,30,0.97);border-color:rgba(6,182,212,0.4);padding:10px 14px;box-shadow:0 10px 35px rgba(0,0,0,0.7),0 0 20px rgba(6,182,212,0.15);"
           v-html="tooltipHtml"
         />
@@ -694,7 +694,7 @@ watch(isDark, () => {
         v-if="isLoadingMapData"
         class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
       >
-        <div class="flex flex-col items-center gap-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-xl">
+        <div class="flex flex-col items-center gap-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-6 py-4 rounded-[4px] border border-slate-200/60 dark:border-slate-700/50 shadow-xl">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 animate-spin text-blue-500 dark:text-brand-cyan" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -711,7 +711,7 @@ watch(isDark, () => {
     <!-- LEFT CORNER: ZOOM CONTROLS + LOCATE -->
     <div class="absolute left-4 top-4 flex flex-col gap-1.5 z-30">
       <!-- Zoom group pill -->
-      <div class="flex flex-col bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md border border-slate-200/60 dark:border-brand-navy-800 rounded-2xl shadow-xl overflow-hidden">
+      <div class="flex flex-col bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md border border-slate-200/60 dark:border-brand-navy-800 rounded-[4px] shadow-xl overflow-hidden">
         <button
           @click="zoomIn"
           class="w-9 h-9 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-brand-navy-800 hover:text-blue-600 dark:hover:text-brand-cyan transition-all duration-150 cursor-pointer"
@@ -733,7 +733,7 @@ watch(isDark, () => {
       <button
         @click="locateMe"
         :disabled="isLocating"
-        class="w-9 h-9 rounded-2xl flex items-center justify-center border shadow-xl select-none outline-none transition-all duration-200 cursor-pointer"
+        class="w-9 h-9 rounded-[4px] flex items-center justify-center border shadow-xl select-none outline-none transition-all duration-200 cursor-pointer"
         :class="isLocating
           ? 'bg-blue-500/20 border-blue-500/40 text-blue-500 dark:bg-blue-500/15 dark:border-blue-500/30 dark:text-blue-400 cursor-wait'
           : 'bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md text-slate-600 border-slate-200/60 dark:border-brand-navy-800 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan active:scale-95'"
@@ -781,7 +781,7 @@ watch(isDark, () => {
         leave-from-class="opacity-100 scale-100 translate-y-0"
         leave-to-class="opacity-0 scale-95 -translate-y-2"
       >
-        <div v-if="isLayerPanelOpen" class="w-56 bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 dark:border-brand-navy-800 text-left select-none shadow-2xl origin-top-right">
+        <div v-if="isLayerPanelOpen" class="w-56 bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md p-4 rounded-[4px] border border-slate-200/60 dark:border-brand-navy-800 text-left select-none shadow-2xl origin-top-right">
 
           <!-- Mode Section -->
           <div class="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-2 leading-none">Mode Tampilan</div>
@@ -789,7 +789,7 @@ watch(isDark, () => {
             <!-- Perairan -->
             <button
               @click="activeMode = 'perairan'"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-[11px] font-extrabold transition-all duration-200 text-left cursor-pointer"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-[4px] border text-[11px] font-extrabold transition-all duration-200 text-left cursor-pointer"
               :class="activeMode === 'perairan' ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-brand-cyan dark:border-brand-cyan/40 dark:bg-brand-cyan/5' : 'border-slate-200/60 bg-white/60 text-slate-700 dark:border-brand-navy-800/80 dark:bg-brand-navy-900/40 dark:text-slate-300'"
             >
               <div class="flex items-center gap-2">
@@ -804,7 +804,7 @@ watch(isDark, () => {
             <!-- Pelabuhan -->
             <button
               @click="activeMode = 'pelabuhan'"
-              class="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-[11px] font-extrabold transition-all duration-200 text-left cursor-pointer"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-[4px] border text-[11px] font-extrabold transition-all duration-200 text-left cursor-pointer"
               :class="activeMode === 'pelabuhan' ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-brand-cyan dark:border-brand-cyan/40 dark:bg-brand-cyan/5' : 'border-slate-200/60 bg-white/60 text-slate-700 dark:border-brand-navy-800/80 dark:bg-brand-navy-900/40 dark:text-slate-300'"
             >
               <div class="flex items-center gap-2">
@@ -824,7 +824,7 @@ watch(isDark, () => {
               <!-- Gelombang -->
               <button
                 @click="activeLayer = 'gelombang'"
-                class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
+                class="w-full flex items-center justify-between px-3 py-1.5 rounded-[4px] border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
                 :class="activeLayer === 'gelombang' ? 'border-blue-500 bg-blue-500/5 text-blue-600 dark:text-brand-cyan dark:border-brand-cyan/40' : 'border-slate-200/40 bg-white/40 text-slate-655 dark:border-brand-navy-800/40 dark:bg-brand-navy-900/20 dark:text-slate-400'"
               >
                 <div class="flex items-center gap-2">
@@ -839,7 +839,7 @@ watch(isDark, () => {
               <!-- Cuaca -->
               <button
                 @click="activeLayer = 'cuaca'"
-                class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
+                class="w-full flex items-center justify-between px-3 py-1.5 rounded-[4px] border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
                 :class="activeLayer === 'cuaca' ? 'border-blue-500 bg-blue-500/5 text-blue-600 dark:text-brand-cyan dark:border-brand-cyan/40' : 'border-slate-200/40 bg-white/40 text-slate-655 dark:border-brand-navy-800/40 dark:bg-brand-navy-900/20 dark:text-slate-400'"
               >
                 <div class="flex items-center gap-2">
@@ -854,7 +854,7 @@ watch(isDark, () => {
               <!-- Kec. Angin -->
               <button
                 @click="activeLayer = 'angin'"
-                class="w-full flex items-center justify-between px-3 py-1.5 rounded-xl border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
+                class="w-full flex items-center justify-between px-3 py-1.5 rounded-[4px] border text-[10.5px] font-bold transition-all duration-200 text-left cursor-pointer"
                 :class="activeLayer === 'angin' ? 'border-blue-500 bg-blue-500/5 text-blue-650 dark:text-brand-cyan dark:border-brand-cyan/40' : 'border-slate-200/40 bg-white/40 text-slate-655 dark:border-brand-navy-800/40 dark:bg-brand-navy-900/20 dark:text-slate-400'"
               >
                 <div class="flex items-center gap-2">
@@ -874,7 +874,7 @@ watch(isDark, () => {
       <!-- Toggle Button -->
       <button
         @click="isLayerPanelOpen = !isLayerPanelOpen"
-        class="flex items-center gap-2 px-3 py-2 rounded-2xl border shadow-xl bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md border-slate-200/60 dark:border-brand-navy-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-brand-cyan hover:bg-blue-50 dark:hover:bg-brand-navy-800 transition-all duration-200 select-none cursor-pointer text-[10.5px] font-bold"
+        class="flex items-center gap-2 px-3 py-2 rounded-[4px] border shadow-xl bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md border-slate-200/60 dark:border-brand-navy-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-brand-cyan hover:bg-blue-50 dark:hover:bg-brand-navy-800 transition-all duration-200 select-none cursor-pointer text-[10.5px] font-bold"
         :title="isLayerPanelOpen ? 'Sembunyikan Panel' : 'Tampilkan Panel'"
       >
         <!-- Layers icon -->
@@ -892,7 +892,7 @@ watch(isDark, () => {
     </div>
 
     <!-- FLOATING COMPONENT: LEGEND PANEL (Bottom Left Overlay) -->
-    <div class="hidden md:block absolute left-4 bottom-4 z-25 w-52 bg-white/95 dark:bg-brand-navy-950/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/60 dark:border-brand-navy-800 shadow-xl text-[9px] font-sans leading-relaxed select-none">
+    <div class="hidden md:block absolute left-4 bottom-4 z-25 w-52 bg-white/95 dark:bg-brand-navy-950/95 backdrop-blur-md p-3.5 rounded-[4px] border border-slate-200/60 dark:border-brand-navy-800 shadow-xl text-[9px] font-sans leading-relaxed select-none">
       <div class="font-black text-slate-800 dark:text-white uppercase tracking-wider mb-2 text-[10px]">Tinggi Gelombang</div>
       
       <div class="space-y-1">
@@ -984,7 +984,7 @@ watch(isDark, () => {
     </div>
 
     <!-- FLOATING COMPONENT: TIMELINE CONTROLLER SLIDER (Bottom Center Overlay) -->
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 w-[280px] md:w-80 bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-200/50 dark:border-brand-navy-800 shadow-xl flex items-center justify-between gap-3 text-slate-800 dark:text-white select-none">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-25 w-[280px] md:w-80 bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-md px-4 py-2.5 rounded-[4px] border border-slate-200/50 dark:border-brand-navy-800 shadow-xl flex items-center justify-between gap-3 text-slate-800 dark:text-white select-none">
       <button 
         @click="hoursAhead > 0 ? hoursAhead-- : null" 
         :disabled="hoursAhead === 0"
@@ -1025,7 +1025,7 @@ watch(isDark, () => {
     <div ref="mobileLayerRef" class="md:hidden absolute right-3 top-3 z-30">
       <button 
         @click="isMobileLayerOpen = !isMobileLayerOpen"
-        class="w-9 h-9 rounded-xl flex items-center justify-center border shadow-lg bg-white/90 text-slate-800 border-slate-200/50 hover:bg-slate-50 hover:scale-105 active:scale-95 dark:bg-brand-navy-900/90 dark:border-brand-navy-800 dark:text-white dark:hover:bg-brand-navy-800 select-none outline-none transition-all duration-200 cursor-pointer"
+        class="w-9 h-9 rounded-[4px] flex items-center justify-center border shadow-lg bg-white/90 text-slate-800 border-slate-200/50 hover:bg-slate-50 hover:scale-105 active:scale-95 dark:bg-brand-navy-900/90 dark:border-brand-navy-800 dark:text-white dark:hover:bg-brand-navy-800 select-none outline-none transition-all duration-200 cursor-pointer"
       >
         <Layers class="w-4.5 h-4.5 text-blue-600 dark:text-brand-cyan" />
       </button>
@@ -1040,7 +1040,7 @@ watch(isDark, () => {
       >
         <div 
           v-if="isMobileLayerOpen"
-          class="absolute right-0 mt-2 w-48 glass-panel-light dark:glass-panel-dark p-4 rounded-3xl border border-slate-200/60 dark:border-brand-navy-800 text-left shadow-2xl z-50
+          class="absolute right-0 mt-2 w-48 glass-panel-light dark:glass-panel-dark p-4 rounded-[4px] border border-slate-200/60 dark:border-brand-navy-800 text-left shadow-2xl z-50
             bg-white/95 border-slate-100 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
         >
           <div class="flex items-center gap-2 border-b border-slate-200/40 dark:border-brand-navy-800/80 pb-2 mb-3">
@@ -1049,10 +1049,10 @@ watch(isDark, () => {
           </div>
 
           <!-- Mode Selector -->
-          <div class="flex rounded-xl overflow-hidden bg-slate-100 dark:bg-brand-navy-950 p-0.5 border border-slate-200/30 dark:border-brand-navy-800/40 text-[10px] font-black">
+          <div class="flex rounded-[4px] overflow-hidden bg-slate-100 dark:bg-brand-navy-950 p-0.5 border border-slate-200/30 dark:border-brand-navy-800/40 text-[10px] font-black">
             <button 
               @click="activeMode = 'perairan'"
-              class="flex-1 py-1.5 px-2 rounded-lg transition-all text-center uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer"
+              class="flex-1 py-1.5 px-2 rounded-[4px] transition-all text-center uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer"
               :class="activeMode === 'perairan' ? 'bg-blue-600 text-white dark:bg-brand-cyan dark:text-brand-navy-950 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-850 dark:hover:text-white'"
             >
               Perairan

@@ -131,7 +131,7 @@ const airQualitySummary = computed(() => {
 <template>
   <div class="space-y-4">
     <!-- Index Kenyamanan Card (Futuristic & Compact) -->
-    <div class="relative w-full rounded-2xl p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
       <!-- Neon Accent Top Line -->
       <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500/0 via-amber-500/60 to-cyan-500/0"></div>
       
@@ -141,7 +141,7 @@ const airQualitySummary = computed(() => {
       <!-- Header & Main Metric Row -->
       <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 shrink-0">
+          <div class="p-1.5 rounded-[4px] bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.2" />
               <circle cx="12" cy="12" r="4" />
@@ -166,7 +166,7 @@ const airQualitySummary = computed(() => {
       </div>
 
       <!-- Main Status Banner Box (Ultra-Compact Sleek Pill/Box) -->
-      <div class="relative z-10 rounded-xl px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="comfortIndex.colorClass">
+      <div class="relative z-10 rounded-[4px] px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="comfortIndex.colorClass">
         <div class="flex items-center gap-2 min-w-0">
           <div v-html="comfortIndex.smileySvg" class="w-5 h-5 shrink-0 overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full"></div>
           <div class="min-w-0 flex items-center gap-1.5 flex-wrap">
@@ -211,7 +211,7 @@ const airQualitySummary = computed(() => {
     </div>
 
     <!-- Card Resume Kualitas Udara (Futuristic & Compact) -->
-    <div class="relative w-full rounded-2xl p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
       <!-- Neon Accent Top Line (Teal/Emerald Glow) -->
       <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/0 via-teal-500/60 to-cyan-500/0"></div>
 
@@ -221,7 +221,7 @@ const airQualitySummary = computed(() => {
       <!-- Header & Main Metric Row -->
       <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="p-1.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shrink-0">
+          <div class="p-1.5 rounded-[4px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
               <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
@@ -246,7 +246,7 @@ const airQualitySummary = computed(() => {
       </div>
 
       <!-- Main Status Banner Box (Ultra-Compact Sleek Pill/Box) -->
-      <div class="relative z-10 rounded-xl px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="airQualitySummary.colorClass">
+      <div class="relative z-10 rounded-[4px] px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="airQualitySummary.colorClass">
         <div class="flex items-center gap-2 min-w-0">
           <div class="w-5 h-5 shrink-0 flex items-center justify-center">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -321,7 +321,7 @@ const airQualitySummary = computed(() => {
         <!-- Card 1: Darat -->
         <div 
           @click="emit('open-land-advisor')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/12 dark:bg-orange-500/18 blur-2xl group-hover:bg-orange-500/30 dark:group-hover:bg-orange-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -384,7 +384,7 @@ const airQualitySummary = computed(() => {
           
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-orange-500/15 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-orange-500/15 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Compass class="w-5 h-5 transition-transform duration-700 ease-out group-hover:rotate-[360deg] group-active:rotate-[360deg]" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">
@@ -424,7 +424,7 @@ const airQualitySummary = computed(() => {
         <!-- Card 2: Pesisir & Laut -->
         <div 
           @click="emit('open-maritime-advisor', 'shipping')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/12 dark:bg-cyan-500/18 blur-2xl group-hover:bg-cyan-500/30 dark:group-hover:bg-cyan-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -484,7 +484,7 @@ const airQualitySummary = computed(() => {
 
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-cyan-500/15 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-cyan-500/15 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Waves class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 group-active:-translate-y-0.5 group-active:scale-110" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-cyan-600 dark:text-brand-cyan">
@@ -524,7 +524,7 @@ const airQualitySummary = computed(() => {
         <!-- Card Baru: Aktivitas Pelayaran -->
         <div 
           @click="emit('open-maritime-advisor', 'shipping')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-500/40 dark:hover:border-blue-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-blue-500/50 dark:active:border-blue-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-blue-500/40 dark:hover:border-blue-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-blue-500/50 dark:active:border-blue-400/50"
         >
           <!-- Ambient Glow -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-blue-500/12 dark:bg-blue-500/18 blur-2xl group-hover:bg-blue-500/30 dark:group-hover:bg-blue-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -545,7 +545,7 @@ const airQualitySummary = computed(() => {
           <!-- Header -->
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-blue-500/15 dark:bg-blue-500/25 text-blue-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+              <div class="w-9 h-9 rounded-[4px] bg-blue-500/15 dark:bg-blue-500/25 text-blue-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                 <Ship class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-blue-600 dark:text-brand-cyan">
@@ -581,7 +581,7 @@ const airQualitySummary = computed(() => {
         <!-- Card 3: Penerbangan -->
         <div 
           @click="emit('open-aviation-advisor', 'commercial')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/12 dark:bg-indigo-500/18 blur-2xl group-hover:bg-indigo-500/30 dark:group-hover:bg-indigo-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -650,7 +650,7 @@ const airQualitySummary = computed(() => {
 
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Plane class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-rotate-12 group-hover:scale-110 group-active:-rotate-12 group-active:scale-110" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">

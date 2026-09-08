@@ -71,7 +71,7 @@ const getMmiWidth = (mmi: string) => {
 <template>
   <div 
     v-if="event"
-    class="relative w-full rounded-3xl p-5 overflow-hidden transition-all duration-500 border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl text-left shadow-lg
+    class="relative w-full rounded-[4px] p-5 overflow-hidden transition-all duration-500 border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl text-left shadow-lg
       bg-white/80 dark:bg-brand-navy-900/60"
     :class="[
       warningConfig.glowShadow ? `shadow-[0_20px_50px_${warningConfig.glowShadow}]` : 'shadow-md'
@@ -88,7 +88,7 @@ const getMmiWidth = (mmi: string) => {
     <!-- Header -->
     <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-brand-navy-800/60 relative z-10">
       <div class="flex items-center gap-2">
-        <div class="p-2 rounded-xl bg-red-500/10 text-red-500 dark:text-red-400">
+        <div class="p-2 rounded-[4px] bg-red-500/10 text-red-500 dark:text-red-400">
           <Activity class="w-4 h-4 animate-pulse" />
         </div>
         <div>
@@ -103,7 +103,7 @@ const getMmiWidth = (mmi: string) => {
       
       <!-- Proximity Badge -->
       <span 
-        class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border transition-all duration-300"
+        class="px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase tracking-wider border transition-all duration-300"
         :class="warningConfig.theme"
       >
         {{ distance }} km dari Anda
@@ -118,7 +118,7 @@ const getMmiWidth = (mmi: string) => {
         
         <!-- Proximity Alert Banner -->
         <div 
-          class="flex gap-2.5 p-3 rounded-2xl border transition-all duration-300"
+          class="flex gap-2.5 p-3 rounded-[4px] border transition-all duration-300"
           :class="warningConfig.theme"
         >
           <div class="relative flex h-2 w-2 mt-1 shrink-0">
@@ -139,7 +139,7 @@ const getMmiWidth = (mmi: string) => {
         <div class="grid grid-cols-3 gap-3">
           
           <!-- Magnitude -->
-          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
             <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Kekuatan
             </span>
@@ -162,7 +162,7 @@ const getMmiWidth = (mmi: string) => {
           </div>
 
           <!-- Depth -->
-          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
             <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Kedalaman
             </span>
@@ -178,7 +178,7 @@ const getMmiWidth = (mmi: string) => {
           </div>
 
           <!-- Tsunami Alert -->
-          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+          <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
             <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Tsunami
             </span>
@@ -204,8 +204,8 @@ const getMmiWidth = (mmi: string) => {
         </div>
 
         <!-- Epicenter Detail -->
-        <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3">
-          <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 dark:text-brand-cyan flex items-center justify-center shrink-0">
+        <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-[4px] p-3">
+          <div class="w-8 h-8 rounded-[4px] bg-blue-500/10 text-blue-500 dark:text-brand-cyan flex items-center justify-center shrink-0">
             <MapPin class="w-4.5 h-4.5" />
           </div>
           <div class="min-w-0 flex-1">
@@ -232,7 +232,7 @@ const getMmiWidth = (mmi: string) => {
       <div class="flex flex-col justify-between gap-4">
         
         <!-- MMI Felt Areas -->
-        <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-2xl p-3 flex-1 flex flex-col">
+        <div class="bg-slate-50/50 dark:bg-brand-navy-950/40 border border-slate-100/50 dark:border-brand-navy-800/20 rounded-[4px] p-3 flex-1 flex flex-col">
           <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2.5">
             Wilayah Dirasakan (Skala MMI)
           </span>
@@ -261,7 +261,7 @@ const getMmiWidth = (mmi: string) => {
           <button 
             type="button"
             @click="showSafety = !showSafety"
-            class="w-full h-9 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-navy-800/60 dark:hover:bg-brand-navy-850 border border-slate-800 dark:border-brand-navy-800/40 shadow-sm flex items-center justify-between px-3.5 transition-all cursor-pointer text-xs font-black tracking-wide"
+            class="w-full h-9 rounded-[4px] bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-navy-800/60 dark:hover:bg-brand-navy-850 border border-slate-800 dark:border-brand-navy-800/40 shadow-sm flex items-center justify-between px-3.5 transition-all cursor-pointer text-xs font-black tracking-wide"
           >
             <span class="flex items-center gap-1.5">
               <BookOpen class="w-3.5 h-3.5 text-brand-cyan" />
@@ -273,7 +273,7 @@ const getMmiWidth = (mmi: string) => {
           <!-- Safety Expandable Content -->
           <div 
             v-if="showSafety" 
-            class="absolute bottom-full left-0 right-0 mb-2 bg-[#0f172a]/95 border border-slate-800/60 backdrop-blur-md text-slate-300 rounded-2xl p-4 text-[9.5px] font-normal leading-relaxed shadow-2xl z-20 flex flex-col gap-2.5 animate-fade-in"
+            class="absolute bottom-full left-0 right-0 mb-2 bg-[#0f172a]/95 border border-slate-800/60 backdrop-blur-md text-slate-300 rounded-[4px] p-4 text-[9.5px] font-normal leading-relaxed shadow-2xl z-20 flex flex-col gap-2.5 animate-fade-in"
           >
             <h6 class="text-[10px] font-black text-cyan-400 dark:text-brand-cyan border-b border-slate-800 pb-1 leading-none uppercase">
               Petunjuk Siaga Gempa Bumi

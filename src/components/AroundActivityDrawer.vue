@@ -181,7 +181,7 @@ onUnmounted(() => {
         <Transition name="drawer-slide" appear>
           <div
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-[4px] flex flex-col overflow-hidden text-left mt-auto md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
           >
             <!-- Drag handle -->
             <div class="py-3 flex items-center justify-center shrink-0">
@@ -230,8 +230,8 @@ onUnmounted(() => {
               </div>
 
               <!-- Comfort Index Card -->
-              <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-50/60 to-indigo-50/40 dark:from-brand-navy-900/40 dark:to-brand-navy-800/20 border border-blue-100/40 dark:border-brand-navy-700/20 shadow-sm flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-white dark:bg-brand-navy-950 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-800/40 shrink-0">
+              <div class="p-4 rounded-[4px] bg-gradient-to-br from-blue-50/60 to-indigo-50/40 dark:from-brand-navy-900/40 dark:to-brand-navy-800/20 border border-blue-100/40 dark:border-brand-navy-700/20 shadow-sm flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-[4px] bg-white dark:bg-brand-navy-950 flex items-center justify-center text-2xl shadow-sm border border-slate-100 dark:border-slate-800/40 shrink-0">
                   {{ activity.comfortEmoji }}
                 </div>
                 <div class="text-left">
@@ -244,7 +244,7 @@ onUnmounted(() => {
               </div>
 
               <!-- Weather Recommendations Text Card -->
-              <div class="p-4 rounded-2xl border text-[11px] font-bold leading-relaxed shadow-sm bg-gradient-to-br from-amber-500/[0.03] to-orange-500/[0.03] border-amber-500/10 text-amber-800 dark:text-amber-300 dark:border-amber-500/20">
+              <div class="p-4 rounded-[4px] border text-[11px] font-bold leading-relaxed shadow-sm bg-gradient-to-br from-amber-500/[0.03] to-orange-500/[0.03] border-amber-500/10 text-amber-800 dark:text-amber-300 dark:border-amber-500/20">
                 <div class="flex gap-2.5">
                   <AlertTriangle class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <span>
@@ -267,7 +267,7 @@ onUnmounted(() => {
                 <div
                   v-for="hour in activity.hourly"
                   :key="hour.time"
-                  class="p-3.5 rounded-2xl border bg-slate-50/50 dark:bg-brand-navy-900/40 border-slate-100/60 dark:border-brand-navy-800/50 text-left relative flex flex-col justify-between min-h-[92px]"
+                  class="p-3.5 rounded-[4px] border bg-slate-50/50 dark:bg-brand-navy-900/40 border-slate-100/60 dark:border-brand-navy-800/50 text-left relative flex flex-col justify-between min-h-[92px]"
                 >
                   <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black text-slate-400 dark:text-slate-500">{{ hour.time }}</span>

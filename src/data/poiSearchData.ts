@@ -1,9 +1,9 @@
-export type POICategory = 'all' | 'wilayah' | 'kampus' | 'olahraga' | 'kuliner' | 'wisata' | 'transportasi';
+export type POICategory = 'all' | 'wilayah' | 'tempat';
 
 export interface SearchResultItem {
   id: string;
   name: string;
-  category: 'wilayah' | 'kampus' | 'olahraga' | 'kuliner' | 'wisata' | 'transportasi';
+  category: 'wilayah' | 'tempat';
   categoryLabel: string;
   subLocation: string; // e.g. "Kec. Kasihan, Bantul, DI Yogyakarta"
   fullAddress: string; // Used when selected: e.g. "Bangunjiwo, Bantul, DI Yogyakarta"
@@ -12,7 +12,19 @@ export interface SearchResultItem {
   lng?: number;
 }
 
-export const POPULAR_RECOMMENDATIONS: SearchResultItem[] = [
+interface RawSearchResultItem {
+  id: string;
+  name: string;
+  category: string;
+  categoryLabel: string;
+  subLocation: string;
+  fullAddress: string;
+  tag?: string;
+  lat?: number;
+  lng?: number;
+}
+
+const RAW_POPULAR_RECOMMENDATIONS: RawSearchResultItem[] = [
   {
     id: 'rec-1',
     name: 'Bangunjiwo',
@@ -87,8 +99,17 @@ export const POPULAR_RECOMMENDATIONS: SearchResultItem[] = [
   }
 ];
 
-export const LOCAL_POI_DATABASE: SearchResultItem[] = [
-  ...POPULAR_RECOMMENDATIONS,
+export const POPULAR_RECOMMENDATIONS: SearchResultItem[] = RAW_POPULAR_RECOMMENDATIONS.map(item => {
+  const isWilayah = item.category === 'wilayah';
+  return {
+    ...item,
+    category: (isWilayah ? 'wilayah' : 'tempat') as 'wilayah' | 'tempat',
+    categoryLabel: isWilayah ? 'Kelurahan & Desa' : 'Nama Tempat'
+  };
+});
+
+const RAW_LOCAL_POI_DATABASE: RawSearchResultItem[] = [
+  ...RAW_POPULAR_RECOMMENDATIONS,
   // ── KAMPUS & PENDIDIKAN ──
   {
     id: 'k-1',
@@ -579,6 +600,15 @@ export const LOCAL_POI_DATABASE: SearchResultItem[] = [
   }
 ];
 
+export const LOCAL_POI_DATABASE: SearchResultItem[] = RAW_LOCAL_POI_DATABASE.map(item => {
+  const isWilayah = item.category === 'wilayah';
+  return {
+    ...item,
+    category: (isWilayah ? 'wilayah' : 'tempat') as 'wilayah' | 'tempat',
+    categoryLabel: isWilayah ? 'Kelurahan & Desa' : 'Nama Tempat'
+  };
+});
+
 /**
  * Filter local POI database based on search query and category
  */
@@ -605,7 +635,7 @@ export function filterLocalPOIs(query: string, category: POICategory = 'all'): S
 
 /**
  * Perform live geocoder search with OpenStreetMap Nominatim API
- * With classification to categorize Google Maps-like POIs into wilayah, kampus, olahraga, kuliner, wisata, dll.
+ * Categorizes results into 'wilayah' (Kelurahan/Desa/Kecamatan) or 'tempat' (Nama Tempat/Fasilitas/POI)
  */
 export async function searchOnlinePOIs(query: string, category: POICategory = 'all'): Promise<SearchResultItem[]> {
   const cleanQ = query.trim();
@@ -637,34 +667,47 @@ export async function searchOnlinePOIs(query: string, category: POICategory = 'a
       const name = item.name || item.display_name.split(',')[0] || cleanQ;
       const addr = item.address || {};
 
-      // Detect category
-      let cat: SearchResultItem['category'] = 'wilayah';
-      let catLabel = 'Wilayah & Desa';
+      // Detect category: Kelurahan/Desa (wilayah) vs Nama Tempat (tempat)
+      let cat: 'wilayah' | 'tempat' = 'wilayah';
+      let catLabel = 'Kelurahan & Desa';
       let tag = 'Lokasi';
 
-      if (osmClass === 'amenity' && (type.includes('university') || type.includes('college') || type.includes('school'))) {
-        cat = 'kampus';
-        catLabel = 'Kampus & Pendidikan';
-        tag = 'Pendidikan';
-      } else if (osmClass === 'leisure' && (type.includes('stadium') || type.includes('sports_centre') || type.includes('pitch') || type.includes('golf_course'))) {
-        cat = 'olahraga';
-        catLabel = 'Olahraga & Stadion';
-        tag = 'Fasilitas Olahraga';
-      } else if (osmClass === 'amenity' && (type.includes('restaurant') || type.includes('cafe') || type.includes('fast_food') || type.includes('food_court'))) {
-        cat = 'kuliner';
-        catLabel = 'Kuliner & Resto';
-        tag = 'Resto / Kuliner';
-      } else if (osmClass === 'tourism' || type.includes('attraction') || type.includes('theme_park') || type.includes('viewpoint') || type.includes('museum')) {
-        cat = 'wisata';
-        catLabel = 'Wisata & Landmark';
-        tag = 'Tempat Wisata';
-      } else if (osmClass === 'aeroway' || osmClass === 'railway' || type.includes('aerodrome') || type.includes('station') || type.includes('ferry_terminal')) {
-        cat = 'transportasi';
-        catLabel = 'Transportasi & Fasilitas';
-        tag = 'Transportasi';
+      const isPlace = 
+        osmClass === 'amenity' || 
+        osmClass === 'leisure' || 
+        osmClass === 'tourism' || 
+        osmClass === 'aeroway' || 
+        osmClass === 'railway' || 
+        osmClass === 'historic' || 
+        osmClass === 'shop' || 
+        osmClass === 'office' ||
+        osmClass === 'sport' ||
+        type.includes('stadium') ||
+        type.includes('university') ||
+        type.includes('school') ||
+        type.includes('hospital') ||
+        type.includes('hotel') ||
+        type.includes('mall');
+
+      if (isPlace) {
+        cat = 'tempat';
+        catLabel = 'Nama Tempat';
+        if (type.includes('university') || type.includes('college') || type.includes('school')) {
+          tag = 'Pendidikan';
+        } else if (type.includes('stadium') || type.includes('sports') || type.includes('pitch')) {
+          tag = 'Fasilitas Olahraga';
+        } else if (type.includes('restaurant') || type.includes('cafe') || type.includes('food')) {
+          tag = 'Kuliner';
+        } else if (osmClass === 'tourism' || type.includes('attraction') || type.includes('museum')) {
+          tag = 'Tempat Wisata';
+        } else if (osmClass === 'aeroway' || osmClass === 'railway' || type.includes('station') || type.includes('airport')) {
+          tag = 'Transportasi';
+        } else {
+          tag = 'Nama Tempat';
+        }
       } else {
         cat = 'wilayah';
-        catLabel = 'Wilayah & Desa';
+        catLabel = 'Kelurahan & Desa';
         tag = addr.village ? 'Desa' : (addr.suburb ? 'Kelurahan' : (addr.city_district ? 'Kecamatan' : 'Wilayah'));
       }
 

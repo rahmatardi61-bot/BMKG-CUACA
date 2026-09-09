@@ -4,11 +4,7 @@ import {
   Search, 
   X, 
   MapPin, 
-  GraduationCap, 
-  Trophy, 
-  Utensils, 
   Compass, 
-  Plane, 
   Clock, 
   ChevronRight, 
   Sparkles, 
@@ -48,11 +44,8 @@ const isLoadingOnline = ref(false);
 
 // Animated placeholder cues
 const placeholderCues = [
-  'Cari kelurahan, desa, kecamatan...',
-  'Cari kampus (UGM, UI, ITB, Undip)...',
-  'Cari stadion, GOR, lapangan golf...',
-  'Cari resto, kuliner, cafe, hotel...',
-  'Cari tempat wisata, mall, landmark...'
+  'Cari kelurahan/desa...',
+  'Cari nama tempat...'
 ];
 const currentCueIndex = ref(0);
 let cueIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -86,15 +79,11 @@ const currentPlaceholder = computed(() => {
   return props.placeholder || placeholderCues[currentCueIndex.value];
 });
 
-// Category pills
+// Category pills: Hanya Semua, Kelurahan / Desa, dan Nama Tempat
 const categoryTabs: { id: POICategory; label: string; icon: any }[] = [
   { id: 'all', label: 'Semua', icon: Sparkles },
-  { id: 'wilayah', label: 'Wilayah / Desa', icon: MapPin },
-  { id: 'kampus', label: 'Kampus', icon: GraduationCap },
-  { id: 'olahraga', label: 'Olahraga & GOR', icon: Trophy },
-  { id: 'kuliner', label: 'Kuliner & Resto', icon: Utensils },
-  { id: 'wisata', label: 'Wisata & Rekreasi', icon: Compass },
-  { id: 'transportasi', label: 'Fasilitas', icon: Plane }
+  { id: 'wilayah', label: 'Kelurahan / Desa', icon: MapPin },
+  { id: 'tempat', label: 'Nama Tempat', icon: Building2 }
 ];
 
 // Recent Searches (Stored in localStorage)
@@ -234,31 +223,13 @@ const handleSelect = (item: SearchResultItem | string) => {
 
 // Category badge helpers
 const getCategoryIcon = (cat: SearchResultItem['category']) => {
-  switch (cat) {
-    case 'kampus': return GraduationCap;
-    case 'olahraga': return Trophy;
-    case 'kuliner': return Utensils;
-    case 'wisata': return Compass;
-    case 'transportasi': return Plane;
-    default: return MapPin;
-  }
+  return cat === 'tempat' ? Building2 : MapPin;
 };
 
 const getCategoryStyle = (cat: SearchResultItem['category']) => {
-  switch (cat) {
-    case 'kampus': 
-      return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40';
-    case 'olahraga': 
-      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40';
-    case 'kuliner': 
-      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40';
-    case 'wisata': 
-      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/40';
-    case 'transportasi': 
-      return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-200 dark:border-sky-800/40';
-    default: 
-      return 'bg-blue-500/10 text-blue-600 dark:text-brand-cyan border-blue-200 dark:border-blue-800/40';
-  }
+  return cat === 'tempat'
+    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40'
+    : 'bg-blue-500/10 text-blue-600 dark:text-brand-cyan border-blue-200 dark:border-blue-800/40';
 };
 
 // Keyboard navigation
@@ -389,17 +360,17 @@ onUnmounted(() => {
     >
       <div 
         v-if="isDropdownOpen"
-        class="absolute left-0 right-0 top-[calc(100%+8px)] z-50 bg-white/95 dark:bg-brand-navy-950/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-[4px] shadow-2xl overflow-hidden flex flex-col max-h-[480px] w-full min-w-[320px] sm:min-w-[420px] md:min-w-[480px]"
+        class="absolute left-0 right-0 top-[calc(100%+8px)] z-50 bg-white dark:bg-[#070c19] border border-slate-200 dark:border-white/20 rounded-[4px] shadow-[0_25px_60px_rgba(0,0,0,0.6)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-[480px] w-full min-w-[320px] sm:min-w-[420px] md:min-w-[480px]"
         :class="[
           isMobileDrawer ? 'left-0 right-0' : 'md:-left-12 md:-right-12'
         ]"
       >
         <!-- Header: Category Filter Tabs -->
-        <div class="px-3 pt-3 pb-2 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02]">
+        <div class="px-3 pt-3 pb-2 border-b border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326]">
           <div class="flex items-center justify-between gap-2 mb-2 px-1">
             <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
               <Compass class="w-3 h-3 text-blue-500 dark:text-brand-cyan" />
-              Eksplorasi Wilayah &amp; Tempat
+              Kategori Pencarian
             </span>
             <span v-if="isLoadingOnline" class="text-[9px] text-blue-500 dark:text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
               <Loader2 class="w-2.5 h-2.5 animate-spin" />
@@ -417,7 +388,7 @@ onUnmounted(() => {
               :class="[
                 activeCategory === tab.id
                   ? 'bg-blue-500 dark:bg-brand-cyan text-white dark:text-brand-navy-950 border-transparent shadow-sm'
-                  : 'bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                  : 'bg-white dark:bg-[#121c33] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
               ]"
             >
               <component :is="tab.icon" class="w-3 h-3" />
@@ -427,7 +398,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Dropdown Body Scrollable -->
-        <div class="overflow-y-auto max-h-[380px] p-2 space-y-3">
+        <div class="overflow-y-auto max-h-[380px] p-2 space-y-3 bg-white dark:bg-[#070c19]">
           
           <!-- ─── 1. Recent Searches (if query is empty and has recents) ─── -->
           <div v-if="!searchQuery && recentSearches.length > 0" class="px-1.5 pt-1">
@@ -449,7 +420,7 @@ onUnmounted(() => {
                 v-for="item in recentSearches"
                 :key="item"
                 @click="handleSelect(item)"
-                class="group px-2.5 py-1 rounded-[4px] bg-slate-100/70 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-brand-cyan/10 border border-slate-200/60 dark:border-white/10 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-1.5 transition-all cursor-pointer"
+                class="group px-2.5 py-1 rounded-[4px] bg-slate-100 dark:bg-[#0e1933] hover:bg-blue-50 dark:hover:bg-brand-cyan/15 border border-slate-200/80 dark:border-white/10 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
               >
                 <Clock class="w-3 h-3 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-brand-cyan" />
                 <span class="truncate max-w-[180px]">{{ item }}</span>
@@ -484,8 +455,8 @@ onUnmounted(() => {
                 class="w-full p-2.5 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border group"
                 :class="[
                   highlightedIndex === idx
-                    ? 'bg-blue-500/10 dark:bg-brand-cyan/15 border-blue-500/30 dark:border-brand-cyan/40 shadow-sm translate-x-0.5'
-                    : 'bg-white/50 dark:bg-white/[0.02] border-transparent hover:bg-slate-100/60 dark:hover:bg-white/5'
+                    ? 'bg-blue-500/15 dark:bg-brand-cyan/20 border-blue-500/50 dark:border-brand-cyan/60 shadow-sm translate-x-0.5'
+                    : 'bg-slate-50/70 dark:bg-[#0a1122] border-slate-200/60 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#101b36] hover:border-blue-500/30 dark:hover:border-brand-cyan/40'
                 ]"
               >
                 <!-- Category Icon Badge -->
@@ -541,7 +512,7 @@ onUnmounted(() => {
                   Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
                 </p>
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 max-w-[280px] mx-auto">
-                  Coba ketik nama desa, kecamatan, kampus, stadion, atau tekan Enter untuk mencari langsung ke BMKG.
+                  Coba ketik nama kelurahan, desa, atau nama tempat, atau tekan Enter untuk mencari langsung ke BMKG.
                 </p>
               </div>
               <button 
@@ -557,7 +528,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Dropdown Footer / Keyboard Tips -->
-        <div class="px-3 py-2 border-t border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between text-[9px] text-slate-400 dark:text-slate-500">
+        <div class="px-3 py-2 border-t border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] flex items-center justify-between text-[9px] text-slate-400 dark:text-slate-500">
           <div class="flex items-center gap-3">
             <span class="flex items-center gap-1">
               <kbd class="px-1 py-0.5 rounded-[4px] bg-slate-200 dark:bg-white/10 font-mono text-[8px]">↑↓</kbd> Navigasi
@@ -590,11 +561,11 @@ onUnmounted(() => {
       >
         <div 
           v-if="isDropdownOpen"
-          class="fixed inset-0 z-[99999] bg-slate-950/98 dark:bg-brand-navy-950/98 backdrop-blur-3xl flex flex-col text-slate-100 overflow-hidden"
+          class="fixed inset-0 z-[99999] bg-slate-950 dark:bg-[#070c19] flex flex-col text-slate-100 overflow-hidden"
           style="padding-top: max(env(safe-area-inset-top, 0px), 8px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);"
         >
           <!-- Mobile Search Header Bar -->
-          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-white/10 bg-slate-900/60 dark:bg-black/40 shrink-0">
+          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-white/10 bg-slate-900 dark:bg-[#0b1326] shrink-0">
             <!-- Back Button -->
             <button 
               @click="closeSearch"
@@ -637,11 +608,11 @@ onUnmounted(() => {
           </div>
 
           <!-- Mobile Category Tabs (Horizontal Scrollable) -->
-          <div class="px-3 py-2 border-b border-white/10 bg-slate-900/30 dark:bg-black/20 shrink-0">
+          <div class="px-3 py-2 border-b border-white/10 bg-slate-900/80 dark:bg-[#080e1c] shrink-0">
             <div class="flex items-center justify-between gap-2 mb-1.5 px-0.5">
               <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Compass class="w-3 h-3 text-brand-cyan" />
-                Eksplorasi Wilayah &amp; Tempat
+                Kategori Pencarian
               </span>
               <span v-if="isLoadingOnline" class="text-[9px] text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
                 <Loader2 class="w-2.5 h-2.5 animate-spin" />
@@ -689,7 +660,7 @@ onUnmounted(() => {
                   v-for="item in recentSearches"
                   :key="item"
                   @click="handleSelect(item)"
-                  class="group px-3 py-1.5 rounded-[4px] bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer"
+                  class="group px-3 py-1.5 rounded-[4px] bg-slate-900 dark:bg-[#0e1933] hover:bg-slate-800 dark:hover:bg-[#142347] border border-white/10 text-xs font-semibold text-slate-200 hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer shadow-sm"
                 >
                   <Clock class="w-3 h-3 text-slate-400 group-hover:text-brand-cyan" />
                   <span class="truncate max-w-[200px]">{{ item }}</span>
@@ -720,7 +691,7 @@ onUnmounted(() => {
                   v-for="item in displayedResults"
                   :key="item.id"
                   @click="handleSelect(item)"
-                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-white/5 bg-white/[0.03] active:bg-brand-cyan/15 active:border-brand-cyan/40"
+                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-white/10 bg-[#0a1122] active:bg-brand-cyan/20 active:border-brand-cyan/50 shadow-sm"
                 >
                   <!-- Category Icon Badge -->
                   <div 
@@ -770,7 +741,7 @@ onUnmounted(() => {
                     Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
                   </p>
                   <p class="text-[11px] text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
-                    Coba ketik nama desa, kelurahan, kecamatan, kampus, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
+                    Coba ketik nama kelurahan, desa, atau nama tempat, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
                   </p>
                 </div>
                 <button 
@@ -785,7 +756,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Mobile Footer -->
-          <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/70 flex items-center justify-between text-[10px] text-slate-400 shrink-0">
+          <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950 dark:bg-[#0b1326] flex items-center justify-between text-[10px] text-slate-400 shrink-0">
             <span class="text-brand-cyan font-bold flex items-center gap-1.5">
               <Sparkles class="w-3 h-3" />
               BMKG Realtime Maps POI

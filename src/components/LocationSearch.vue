@@ -4,7 +4,6 @@ import {
   Search, 
   X, 
   MapPin, 
-  Compass, 
   Clock, 
   ChevronRight, 
   Sparkles, 
@@ -14,7 +13,6 @@ import {
   ArrowLeft
 } from 'lucide-vue-next';
 import { 
-  POPULAR_RECOMMENDATIONS, 
   filterLocalPOIs, 
   searchOnlinePOIs, 
   type SearchResultItem, 
@@ -35,7 +33,7 @@ const emit = defineEmits<{
 // Search state
 const searchQuery = ref('');
 const isDropdownOpen = ref(false);
-const activeCategory = ref<POICategory>('all');
+const activeCategory = ref<POICategory>('wilayah');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const mobileSearchInputRef = ref<HTMLInputElement | null>(null);
 const searchContainerRef = ref<HTMLElement | null>(null);
@@ -76,12 +74,14 @@ onMounted(() => {
 });
 
 const currentPlaceholder = computed(() => {
-  return props.placeholder || placeholderCues[currentCueIndex.value];
+  if (props.placeholder) return props.placeholder;
+  return activeCategory.value === 'wilayah' 
+    ? 'Cari nama kelurahan atau desa...' 
+    : 'Cari nama tempat, fasilitas, atau landmark...';
 });
 
-// Category pills: Hanya Semua, Kelurahan / Desa, dan Nama Tempat
+// Category pills: Hanya 2 Kategori (Kelurahan / Desa dan Nama Tempat)
 const categoryTabs: { id: POICategory; label: string; icon: any }[] = [
-  { id: 'all', label: 'Semua', icon: Sparkles },
   { id: 'wilayah', label: 'Kelurahan / Desa', icon: MapPin },
   { id: 'tempat', label: 'Nama Tempat', icon: Building2 }
 ];
@@ -139,9 +139,6 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const displayedResults = computed(() => {
   const query = searchQuery.value.trim();
   if (!query) {
-    if (activeCategory.value === 'all') {
-      return POPULAR_RECOMMENDATIONS;
-    }
     return filterLocalPOIs('', activeCategory.value).slice(0, 8);
   }
 
@@ -365,33 +362,25 @@ onUnmounted(() => {
           isMobileDrawer ? 'left-0 right-0' : 'md:-left-12 md:-right-12'
         ]"
       >
-        <!-- Header: Category Filter Tabs -->
-        <div class="px-3 pt-3 pb-2 border-b border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326]">
-          <div class="flex items-center justify-between gap-2 mb-2 px-1">
-            <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Compass class="w-3 h-3 text-blue-500 dark:text-brand-cyan" />
-              Kategori Pencarian
-            </span>
-            <span v-if="isLoadingOnline" class="text-[9px] text-blue-500 dark:text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
-              <Loader2 class="w-2.5 h-2.5 animate-spin" />
-              Mencari Maps...
-            </span>
-          </div>
-
-          <!-- Category Chips Horizontal Scroll -->
-          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <!-- Header: Minimalist Category Filter Tabs -->
+        <div class="p-2 border-b border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-[#091022]">
+          <div class="grid grid-cols-2 gap-1 p-1 bg-slate-200/50 dark:bg-white/[0.04] rounded-[4px] border border-slate-200/60 dark:border-white/5">
             <button
               v-for="tab in categoryTabs"
               :key="tab.id"
               @click="activeCategory = tab.id"
-              class="px-2.5 py-1 rounded-[4px] text-[10px] font-bold tracking-tight shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border"
+              class="py-1.5 px-3 rounded-[3px] text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none"
               :class="[
                 activeCategory === tab.id
-                  ? 'bg-blue-500 dark:bg-brand-cyan text-white dark:text-brand-navy-950 border-transparent shadow-sm'
-                  : 'bg-white dark:bg-[#121c33] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                  ? 'bg-white dark:bg-[#121e38] text-blue-600 dark:text-brand-cyan shadow-sm border border-slate-200/80 dark:border-brand-cyan/25 font-bold'
+                  : 'bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               ]"
             >
-              <component :is="tab.icon" class="w-3 h-3" />
+              <component 
+                :is="tab.icon" 
+                class="w-3.5 h-3.5 shrink-0 transition-colors" 
+                :class="activeCategory === tab.id ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'" 
+              />
               <span>{{ tab.label }}</span>
             </button>
           </div>
@@ -438,7 +427,7 @@ onUnmounted(() => {
               <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                 <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-500" />
                 <Building2 v-else class="w-3 h-3 text-blue-500 dark:text-brand-cyan" />
-                {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : 'Rekomendasi Tempat & Wilayah' }}
+                {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : (activeCategory === 'wilayah' ? 'Rekomendasi Kelurahan & Desa' : 'Rekomendasi Tempat Populer') }}
               </span>
               <span v-if="searchQuery" class="text-[9px] text-slate-400 dark:text-slate-500">
                 Pilih untuk cuaca realtime
@@ -607,32 +596,25 @@ onUnmounted(() => {
             </button>
           </div>
 
-          <!-- Mobile Category Tabs (Horizontal Scrollable) -->
-          <div class="px-3 py-2 border-b border-white/10 bg-slate-900/80 dark:bg-[#080e1c] shrink-0">
-            <div class="flex items-center justify-between gap-2 mb-1.5 px-0.5">
-              <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Compass class="w-3 h-3 text-brand-cyan" />
-                Kategori Pencarian
-              </span>
-              <span v-if="isLoadingOnline" class="text-[9px] text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
-                <Loader2 class="w-2.5 h-2.5 animate-spin" />
-                Mencari...
-              </span>
-            </div>
-
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <!-- Mobile Minimalist Category Filter Tabs -->
+          <div class="p-2.5 border-b border-white/10 bg-slate-900/60 dark:bg-[#080e1c] shrink-0">
+            <div class="grid grid-cols-2 gap-1 p-1 bg-white/[0.04] rounded-[4px] border border-white/10">
               <button
                 v-for="tab in categoryTabs"
                 :key="tab.id"
                 @click="activeCategory = tab.id"
-                class="px-3 py-1 rounded-[4px] text-[11px] font-bold tracking-tight shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border"
+                class="py-2 px-3 rounded-[3px] text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
                 :class="[
                   activeCategory === tab.id
-                    ? 'bg-brand-cyan text-brand-navy-950 border-transparent shadow-sm'
-                    : 'bg-white/5 text-slate-300 border-white/10 hover:border-white/20'
+                    ? 'bg-white/15 text-brand-cyan shadow-sm border border-brand-cyan/30 font-bold'
+                    : 'bg-transparent text-slate-400 hover:text-slate-200'
                 ]"
               >
-                <component :is="tab.icon" class="w-3.5 h-3.5" />
+                <component 
+                  :is="tab.icon" 
+                  class="w-3.5 h-3.5 shrink-0" 
+                  :class="activeCategory === tab.id ? 'text-brand-cyan' : 'text-slate-500'" 
+                />
                 <span>{{ tab.label }}</span>
               </button>
             </div>
@@ -678,7 +660,7 @@ onUnmounted(() => {
                 <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-400" />
                   <Building2 v-else class="w-3 h-3 text-brand-cyan" />
-                  {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : 'Rekomendasi Tempat & Wilayah' }}
+                  {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : (activeCategory === 'wilayah' ? 'Rekomendasi Kelurahan & Desa' : 'Rekomendasi Tempat Populer') }}
                 </span>
                 <span v-if="searchQuery" class="text-[9.5px] text-slate-400">
                   Pilih lokasi

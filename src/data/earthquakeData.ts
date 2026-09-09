@@ -15,6 +15,11 @@ export interface EarthquakeEvent {
   tsunamiPotential: boolean;
   tsunamiStatus?: string;
   feltMmi: { area: string; mmi: string }[];
+  shakemap?: string;
+  lintang?: string;
+  bujur?: string;
+  potensi?: string;
+  dirasakan?: string;
 }
 
 export const cityCoordsMap: Record<string, CityCoords> = {
@@ -29,7 +34,41 @@ export const cityCoordsMap: Record<string, CityCoords> = {
   'Pekanbaru': { lat: 0.5071, lng: 101.4478 },
   'Denpasar': { lat: -8.6705, lng: 115.2126 },
   'Yogyakarta': { lat: -7.7956, lng: 110.3695 },
-  'Bantul': { lat: -7.8895, lng: 110.3283 }
+  'Bantul': { lat: -7.8895, lng: 110.3283 },
+  'Padang': { lat: -0.9471, lng: 100.4172 },
+  'Banda Aceh': { lat: 5.5483, lng: 95.3238 },
+  'Bandar Lampung': { lat: -5.4500, lng: 105.2667 },
+  'Jambi': { lat: -1.6101, lng: 103.6131 },
+  'Bengkulu': { lat: -3.8004, lng: 102.2655 },
+  'Pangkalpinang': { lat: -2.1316, lng: 106.1169 },
+  'Tanjung Pinang': { lat: 0.9167, lng: 104.4500 },
+  'Pontianak': { lat: -0.0263, lng: 109.3425 },
+  'Banjarmasin': { lat: -3.3194, lng: 114.5908 },
+  'Balikpapan': { lat: -1.2379, lng: 116.8289 },
+  'Samarinda': { lat: -0.5022, lng: 117.1536 },
+  'Palangkaraya': { lat: -2.2161, lng: 113.9139 },
+  'Tarakan': { lat: 3.3270, lng: 117.5965 },
+  'Manado': { lat: 1.4748, lng: 124.8428 },
+  'Palu': { lat: -0.9003, lng: 119.8779 },
+  'Kendari': { lat: -3.9985, lng: 122.5126 },
+  'Gorontalo': { lat: 0.5435, lng: 123.0568 },
+  'Mamuju': { lat: -2.6770, lng: 118.8890 },
+  'Mataram': { lat: -8.5833, lng: 116.1167 },
+  'Kupang': { lat: -10.1772, lng: 123.6070 },
+  'Ambon': { lat: -3.6954, lng: 128.1814 },
+  'Ternate': { lat: 0.7906, lng: 127.3842 },
+  'Jayapura': { lat: -2.5916, lng: 140.6690 },
+  'Manokwari': { lat: -0.8615, lng: 134.0620 },
+  'Sorong': { lat: -0.8761, lng: 131.2558 },
+  'Malang': { lat: -7.9666, lng: 112.6326 },
+  'Surakarta': { lat: -7.5755, lng: 110.8243 },
+  'Solo': { lat: -7.5755, lng: 110.8243 },
+  'Bogor': { lat: -6.5971, lng: 106.7986 },
+  'Bekasi': { lat: -6.2383, lng: 106.9756 },
+  'Tangerang': { lat: -6.1783, lng: 106.6319 },
+  'Depok': { lat: -6.4025, lng: 106.7942 },
+  'Cirebon': { lat: -6.7320, lng: 108.5523 },
+  'Serang': { lat: -6.1104, lng: 106.1640 }
 };
 
 export const earthquakeEvents: EarthquakeEvent[] = [
@@ -118,15 +157,24 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
 }
 
 export function getCityCoordinates(cityName: string, userLat?: number | null, userLng?: number | null): CityCoords {
-  if (userLat && userLng) {
+  const nameLower = (cityName || '').toLowerCase().trim();
+  
+  // Only use GPS userLat/userLng if user explicitly chose "Lokasi Saya" / GPS mode or cityName is empty
+  const isGpsMode = nameLower.includes('lokasi') || nameLower.includes('saya') || nameLower.includes('current') || !nameLower;
+  if (isGpsMode && userLat && userLng) {
     return { lat: userLat, lng: userLng };
   }
   
-  const nameLower = cityName.toLowerCase();
+  // Search in cityCoordsMap by matching name
   for (const [key, coords] of Object.entries(cityCoordsMap)) {
-    if (nameLower.includes(key.toLowerCase())) {
+    if (nameLower.includes(key.toLowerCase()) || key.toLowerCase().includes(nameLower)) {
       return coords;
     }
+  }
+  
+  // Fallback to userLat/userLng if city wasn't matched in coords map
+  if (userLat && userLng) {
+    return { lat: userLat, lng: userLng };
   }
   
   return cityCoordsMap['DKI Jakarta'];
@@ -268,6 +316,51 @@ export function parseFeltMmi(dirasakanStr: string): { area: string; mmi: string 
   });
 }
 
+export async function fetchLatestAutogempa(): Promise<EarthquakeEvent | null> {
+  try {
+    const response = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json', {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+    const data = await response.json();
+    const g = data?.Infogempa?.gempa;
+    if (!g) return null;
+
+    const coords = g.Coordinates ? g.Coordinates.split(',') : [0, 0];
+    const lat = parseFloat(coords[0]);
+    const lng = parseFloat(coords[1]);
+    const magnitude = parseFloat(g.Magnitude) || 5.0;
+    const depth = parseInt(g.Kedalaman ? g.Kedalaman.replace(/[^0-9]/g, '') : '10') || 10;
+    const shakemapUrl = g.Shakemap ? `https://data.bmkg.go.id/DataMKG/TEWS/${g.Shakemap}` : '';
+
+    return {
+      id: `auto-eq-${g.DateTime || Date.now()}`,
+      time: g.Jam || '00:00 WIB',
+      date: g.Tanggal || 'Hari ini',
+      magnitude: magnitude,
+      depth: depth,
+      lat: lat,
+      lng: lng,
+      epicenter: g.Wilayah || 'Pusat Gempa',
+      tsunamiPotential: (g.Potensi || '').toLowerCase().includes('berpotensi tsunami'),
+      tsunamiStatus: g.Potensi || 'Tidak berpotensi tsunami',
+      feltMmi: parseFeltMmi(g.Dirasakan || ''),
+      shakemap: shakemapUrl,
+      lintang: g.Lintang || `${Math.abs(lat).toFixed(2).replace('.', ',')} LS`,
+      bujur: g.Bujur || `${Math.abs(lng).toFixed(2).replace('.', ',')} BT`,
+      potensi: g.Potensi || 'Hati-hati terhadap gempabumi susulan yang mungkin terjadi',
+      dirasakan: g.Dirasakan || ''
+    };
+  } catch (error) {
+    console.warn("Failed to fetch autogempa from BMKG:", error);
+    return null;
+  }
+}
+
 export async function fetchRealtimeEarthquakes(): Promise<EarthquakeEvent[]> {
   try {
     const response = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json', {
@@ -290,6 +383,7 @@ export async function fetchRealtimeEarthquakes(): Promise<EarthquakeEvent[]> {
       const lng = parseFloat(coords[1]);
       const magnitude = parseFloat(g.Magnitude) || 5.0;
       const depth = parseInt(g.Kedalaman ? g.Kedalaman.replace(/[^0-9]/g, '') : '10') || 10;
+      const shakemapUrl = g.Shakemap ? `https://data.bmkg.go.id/DataMKG/TEWS/${g.Shakemap}` : '';
       
       return {
         id: `real-eq-${index}-${g.DateTime}`,
@@ -302,7 +396,12 @@ export async function fetchRealtimeEarthquakes(): Promise<EarthquakeEvent[]> {
         epicenter: g.Wilayah || 'Pusat Gempa',
         tsunamiPotential: false,
         tsunamiStatus: 'Tidak berpotensi tsunami',
-        feltMmi: parseFeltMmi(g.Dirasakan || '')
+        feltMmi: parseFeltMmi(g.Dirasakan || ''),
+        shakemap: shakemapUrl,
+        lintang: g.Lintang || `${Math.abs(lat).toFixed(2).replace('.', ',')} LS`,
+        bujur: g.Bujur || `${Math.abs(lng).toFixed(2).replace('.', ',')} BT`,
+        potensi: g.Potensi || 'Hati-hati terhadap gempabumi susulan yang mungkin terjadi',
+        dirasakan: g.Dirasakan || ''
       };
     });
   } catch (error) {

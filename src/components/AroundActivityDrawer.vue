@@ -39,8 +39,8 @@ const mapEl = ref<HTMLElement | null>(null);
 const updateMapTheme = () => {
   if (!map) return;
   const isDarkMode = document.documentElement.classList.contains('dark');
-  const lightUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-  const darkUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png';
+  const lightUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const darkUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
   const selectedUrl = isDarkMode ? darkUrl : lightUrl;
 
   if (tileLayer) {
@@ -49,7 +49,8 @@ const updateMapTheme = () => {
 
   tileLayer = L.tileLayer(selectedUrl, {
     maxZoom: 18,
-    minZoom: 5
+    minZoom: 5,
+    attribution: ''
   }).addTo(map);
 };
 

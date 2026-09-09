@@ -5,7 +5,17 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchMarineSectors, fetchMarinePorts } from '../data/indonesiaMapData';
 import type { IndonesiaMarineSector, MarinePort } from '../data/indonesiaMapData';
+import { getCityCoordinates } from '../data/earthquakeData';
 
+const props = withDefaults(defineProps<{
+  selectedCity?: string;
+  userLat?: number | null;
+  userLng?: number | null;
+}>(), {
+  selectedCity: 'Jakarta',
+  userLat: null,
+  userLng: null
+});
 
 // Async-loaded map data
 let indonesiaMarineSectors: IndonesiaMarineSector[] = [];
@@ -153,6 +163,45 @@ const isLocating = ref(false);
 const locationError = ref('');
 let userLocationMarker: L.Marker | null = null;
 
+const centerMapOnCity = (cityName?: string, userLat?: number | null, userLng?: number | null, animate = false) => {
+  if (!map) return;
+  const coords = getCityCoordinates(cityName || 'DKI Jakarta', userLat, userLng);
+  
+  if (animate) {
+    map.flyTo([coords.lat, coords.lng], 6.5, { animate: true, duration: 1.2 });
+  } else {
+    map.setView([coords.lat, coords.lng], 6.5);
+  }
+
+  if (userLocationMarker) {
+    userLocationMarker.remove();
+    userLocationMarker = null;
+  }
+
+  const shortName = (cityName || 'Lokasi Anda').split(',')[0].trim();
+  const pulsingIcon = L.divIcon({
+    className: 'custom-city-anchor',
+    html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;pointer-events:none;transform:translate(-50%, -50%);">
+      <div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;inset:0;background:rgba(59,130,246,0.35);border-radius:50%;animation:pulse-ring 1.6s cubic-bezier(0.215,0.61,0.355,1) infinite;"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:#3b82f6;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(59,130,246,0.5),0 2px 8px rgba(0,0,0,0.4);"></div>
+      </div>
+      <div style="margin-top:2px;padding:2px 6px;border-radius:4px;background:rgba(15,23,42,0.92);color:#fff;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(255,255,255,0.2);box-shadow:0 2px 6px rgba(0,0,0,0.4);letter-spacing:0.02em;">
+        ${shortName}
+      </div>
+    </div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0]
+  });
+
+  userLocationMarker = L.marker([coords.lat, coords.lng], {
+    icon: pulsingIcon,
+    pane: 'labelsPane',
+    interactive: false,
+    zIndexOffset: 9999
+  }).addTo(map);
+};
+
 const locateMe = () => {
   if (!map || isLocating.value) return;
   if (!navigator.geolocation) {
@@ -166,17 +215,7 @@ const locateMe = () => {
     (position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      if (userLocationMarker) { userLocationMarker.remove(); userLocationMarker = null; }
-      const pulsingIcon = L.divIcon({
-        className: '',
-        html: `<div style="position:relative;width:24px;height:24px;">
-          <div style="position:absolute;inset:0;background:rgba(59,130,246,0.25);border-radius:50%;animation:pulse-ring 1.6s cubic-bezier(0.215,0.61,0.355,1) infinite;"></div>
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:#3b82f6;border:2.5px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(59,130,246,0.5),0 2px 8px rgba(0,0,0,0.3);"></div>
-        </div>`,
-        iconSize: [24, 24], iconAnchor: [12, 12],
-      });
-      userLocationMarker = L.marker([lat, lng], { icon: pulsingIcon, pane: 'markerPane', interactive: false, zIndexOffset: 9999 }).addTo(map!);
-      map!.flyTo([lat, lng], 6.5, { animate: true, duration: 1.2 });
+      centerMapOnCity('Lokasi Saya', lat, lng, true);
       isLocating.value = false;
     },
     (err) => {
@@ -293,10 +332,16 @@ const updateTileLayers = () => {
   if (!map) return;
   if (baseTileLayer)   map.removeLayer(baseTileLayer);
   if (labelsTileLayer) map.removeLayer(labelsTileLayer);
-  const base  = isDark.value ? 'dark_nolabels'     : 'light_nolabels';
-  const label = isDark.value ? 'dark_only_labels'  : 'light_only_labels';
-  baseTileLayer   = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${base}/{z}/{x}/{y}{r}.png`,  { maxZoom: 8, updateWhenZooming: false, updateWhenIdle: true }).addTo(map);
-  labelsTileLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/${label}/{z}/{x}/{y}{r}.png`, { maxZoom: 8, pane: 'tileLabelsPane', updateWhenZooming: false, updateWhenIdle: true }).addTo(map);
+  
+  const baseUrl = isDark.value
+    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+    : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+  const labelUrl = isDark.value
+    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'
+    : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+
+  baseTileLayer   = L.tileLayer(baseUrl,  { maxZoom: 16, updateWhenZooming: false, updateWhenIdle: true, attribution: '' }).addTo(map);
+  labelsTileLayer = L.tileLayer(labelUrl, { maxZoom: 16, pane: 'tileLabelsPane', updateWhenZooming: false, updateWhenIdle: true, attribution: '' }).addTo(map);
 };
 
 // Timeline play/pause
@@ -504,6 +549,7 @@ onMounted(() => {
     sharedCanvasRenderer = L.canvas({ padding: 0.1 });
     canvasLandRenderer   = L.canvas({ padding: 0.1, pane: 'landPane' });
 
+    const initialCoords = getCityCoordinates(props.selectedCity, props.userLat, props.userLng);
     map = L.map(mapContainerId, {
       zoomControl: false, attributionControl: false,
       minZoom: 4.5, maxZoom: 7.5, preferCanvas: true,
@@ -511,7 +557,7 @@ onMounted(() => {
       doubleClickZoom: false, inertia: false, bounceAtZoomLimits: false,
       zoomSnap: 0.5, zoomDelta: 0.5,
       zoomAnimation: true, markerZoomAnimation: false,
-    }).setView([-7.6, 110.0], 6.5);
+    }).setView([initialCoords.lat, initialCoords.lng], 6.5);
 
     // Custom label canvas (single element replaces 375 L.Marker DOM nodes)
     const labelsPane = map.createPane('labelsPane');
@@ -549,6 +595,7 @@ onMounted(() => {
     map.on('resize',   () => { resizeLabelCanvas(); drawLabels(); });
 
     updateTileLayers();
+    centerMapOnCity(props.selectedCity, props.userLat, props.userLng, false);
 
     const loadData = async () => {
       try {
@@ -603,6 +650,13 @@ watch(hoursAhead, () => { renderLayers(); });
 watch(isDark, () => {
   if (map) { updateTileLayers(); updateGeoJsonStyle(); renderLayers(); }
 });
+
+watch(
+  () => [props.selectedCity, props.userLat, props.userLng] as const,
+  ([newCity, newLat, newLng]) => {
+    centerMapOnCity(newCity, newLat, newLng, true);
+  }
+);
 </script>
 
 <template>

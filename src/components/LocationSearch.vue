@@ -550,38 +550,38 @@ onUnmounted(() => {
       >
         <div 
           v-if="isDropdownOpen"
-          class="fixed inset-0 z-[99999] bg-slate-950 dark:bg-[#070c19] flex flex-col text-slate-100 overflow-hidden"
+          class="fixed inset-0 z-[99999] bg-white dark:bg-[#070c19] flex flex-col text-slate-800 dark:text-slate-100 overflow-hidden"
           style="padding-top: max(env(safe-area-inset-top, 0px), 8px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);"
         >
           <!-- Mobile Search Header Bar -->
-          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-white/10 bg-slate-900 dark:bg-[#0b1326] shrink-0">
+          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] shrink-0">
             <!-- Back Button -->
             <button 
               @click="closeSearch"
-              class="w-9 h-9 rounded-[4px] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+              class="w-9 h-9 rounded-[4px] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
               title="Kembali"
             >
               <ArrowLeft class="w-5 h-5" />
             </button>
 
             <!-- Search Input Box -->
-            <div class="flex-1 flex items-center bg-white/10 dark:bg-white/5 border border-white/15 focus-within:border-brand-cyan rounded-[4px] px-3 py-2 gap-2 transition-all">
-              <Loader2 v-if="isLoadingOnline" class="w-4 h-4 animate-spin text-brand-cyan shrink-0" />
-              <Search v-else class="w-4 h-4 text-slate-400 shrink-0" />
+            <div class="flex-1 flex items-center bg-white dark:bg-white/5 border border-slate-300 dark:border-white/15 focus-within:border-blue-500 dark:focus-within:border-brand-cyan focus-within:ring-2 focus-within:ring-blue-500/20 dark:focus-within:ring-brand-cyan/20 rounded-[4px] px-3 py-2 gap-2 transition-all shadow-xs">
+              <Loader2 v-if="isLoadingOnline" class="w-4 h-4 animate-spin text-blue-600 dark:text-brand-cyan shrink-0" />
+              <Search v-else class="w-4 h-4 text-slate-400 dark:text-slate-400 shrink-0" />
               <input 
                 ref="mobileSearchInputRef"
                 v-model="searchQuery"
                 type="text"
                 :placeholder="currentPlaceholder"
                 @keydown="handleKeydown"
-                class="w-full bg-transparent border-none outline-none text-[16px] text-white placeholder-slate-400 placeholder:text-xs"
+                class="w-full bg-transparent border-none outline-none text-[16px] text-slate-900 dark:text-white placeholder-slate-400 placeholder:text-xs"
                 autocomplete="off"
                 spellcheck="false"
               />
               <button 
                 v-if="searchQuery"
                 @click="clearQuery"
-                class="p-1 rounded-[4px] text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                class="p-1 rounded-[4px] text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X class="w-4 h-4" />
               </button>
@@ -590,15 +590,15 @@ onUnmounted(() => {
             <!-- Batal Button -->
             <button 
               @click="closeSearch"
-              class="text-xs font-bold text-slate-300 hover:text-white px-2 py-1.5 shrink-0 cursor-pointer"
+              class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-2 py-1.5 shrink-0 cursor-pointer"
             >
               Batal
             </button>
           </div>
 
           <!-- Mobile Minimalist Category Filter Tabs -->
-          <div class="p-2.5 border-b border-white/10 bg-slate-900/60 dark:bg-[#080e1c] shrink-0">
-            <div class="grid grid-cols-2 gap-1 p-1 bg-white/[0.04] rounded-[4px] border border-white/10">
+          <div class="p-2.5 border-b border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-[#080e1c] shrink-0">
+            <div class="grid grid-cols-2 gap-1 p-1 bg-white dark:bg-white/[0.04] rounded-[4px] border border-slate-200 dark:border-white/10 shadow-xs">
               <button
                 v-for="tab in categoryTabs"
                 :key="tab.id"
@@ -606,14 +606,14 @@ onUnmounted(() => {
                 class="py-2 px-3 rounded-[3px] text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
                 :class="[
                   activeCategory === tab.id
-                    ? 'bg-white/15 text-brand-cyan shadow-sm border border-brand-cyan/30 font-bold'
-                    : 'bg-transparent text-slate-400 hover:text-slate-200'
+                    ? 'bg-blue-600 dark:bg-white/15 text-white dark:text-brand-cyan shadow-sm border border-blue-600 dark:border-brand-cyan/30 font-bold'
+                    : 'bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 ]"
               >
                 <component 
                   :is="tab.icon" 
                   class="w-3.5 h-3.5 shrink-0" 
-                  :class="activeCategory === tab.id ? 'text-brand-cyan' : 'text-slate-500'" 
+                  :class="activeCategory === tab.id ? 'text-white dark:text-brand-cyan' : 'text-slate-500'" 
                 />
                 <span>{{ tab.label }}</span>
               </button>
@@ -625,13 +625,13 @@ onUnmounted(() => {
             <!-- Recent Searches -->
             <div v-if="!searchQuery && recentSearches.length > 0" class="px-0.5">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Clock class="w-3 h-3 text-slate-400" />
                   Pencarian Terakhir
                 </span>
                 <button 
                   @click="clearAllRecent"
-                  class="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                 >
                   Hapus Semua
                 </button>
@@ -642,13 +642,13 @@ onUnmounted(() => {
                   v-for="item in recentSearches"
                   :key="item"
                   @click="handleSelect(item)"
-                  class="group px-3 py-1.5 rounded-[4px] bg-slate-900 dark:bg-[#0e1933] hover:bg-slate-800 dark:hover:bg-[#142347] border border-white/10 text-xs font-semibold text-slate-200 hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                  class="group px-3 py-1.5 rounded-[4px] bg-slate-100 dark:bg-[#0e1933] hover:bg-slate-200 dark:hover:bg-[#142347] border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer shadow-xs"
                 >
-                  <Clock class="w-3 h-3 text-slate-400 group-hover:text-brand-cyan" />
+                  <Clock class="w-3 h-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-brand-cyan" />
                   <span class="truncate max-w-[200px]">{{ item }}</span>
                   <X 
                     @click.stop="removeRecentSearch(item, $event)" 
-                    class="w-3 h-3 text-slate-400 hover:text-rose-400 transition-colors" 
+                    class="w-3 h-3 text-slate-400 hover:text-rose-500 transition-colors" 
                   />
                 </button>
               </div>
@@ -657,12 +657,12 @@ onUnmounted(() => {
             <!-- Results List -->
             <div>
               <div class="px-0.5 py-1 flex items-center justify-between">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-400" />
-                  <Building2 v-else class="w-3 h-3 text-brand-cyan" />
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-500" />
+                  <Building2 v-else class="w-3 h-3 text-blue-600 dark:text-brand-cyan" />
                   {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : (activeCategory === 'wilayah' ? 'Rekomendasi Kelurahan & Desa' : 'Rekomendasi Tempat Populer') }}
                 </span>
-                <span v-if="searchQuery" class="text-[9.5px] text-slate-400">
+                <span v-if="searchQuery" class="text-[9.5px] text-slate-500 dark:text-slate-400">
                   Pilih lokasi
                 </span>
               </div>
@@ -673,11 +673,11 @@ onUnmounted(() => {
                   v-for="item in displayedResults"
                   :key="item.id"
                   @click="handleSelect(item)"
-                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-white/10 bg-[#0a1122] active:bg-brand-cyan/20 active:border-brand-cyan/50 shadow-sm"
+                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-[#0a1122] hover:bg-slate-100 dark:hover:bg-[#101b36] active:bg-blue-50 dark:active:bg-brand-cyan/20 active:border-blue-300 dark:active:border-brand-cyan/50 shadow-xs"
                 >
                   <!-- Category Icon Badge -->
                   <div 
-                    class="w-8 h-8 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 shadow-sm"
+                    class="w-8 h-8 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 shadow-xs"
                     :class="getCategoryStyle(item.category)"
                   >
                     <component :is="getCategoryIcon(item.category)" class="w-4 h-4" />
@@ -686,7 +686,7 @@ onUnmounted(() => {
                   <!-- Text info: Full name & Sublocation -->
                   <div class="flex-1 min-w-0 flex flex-col gap-1">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-xs font-black text-white leading-snug">
+                      <span class="text-xs font-black text-slate-900 dark:text-white leading-snug">
                         {{ item.name }}
                       </span>
                       <span 
@@ -698,13 +698,13 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <p class="text-[11px] text-slate-400 font-medium leading-tight">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-tight">
                       {{ item.subLocation }}
                     </p>
                   </div>
 
                   <!-- Right Action Indicator -->
-                  <div class="shrink-0 flex items-center text-slate-500 mt-1">
+                  <div class="shrink-0 flex items-center text-slate-400 dark:text-slate-500 mt-1">
                     <ChevronRight class="w-4 h-4" />
                   </div>
                 </button>
@@ -715,20 +715,20 @@ onUnmounted(() => {
                 v-if="displayedResults.length === 0 && !isLoadingOnline"
                 class="py-10 px-4 text-center flex flex-col items-center justify-center gap-2.5"
               >
-                <div class="w-11 h-11 rounded-[4px] bg-white/5 flex items-center justify-center text-slate-400">
+                <div class="w-11 h-11 rounded-[4px] bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
                   <Search class="w-5 h-5" />
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-200">
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-200">
                     Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
                   </p>
-                  <p class="text-[11px] text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
                     Coba ketik nama kelurahan, desa, atau nama tempat, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
                   </p>
                 </div>
                 <button 
                   @click="handleSelect(searchQuery)"
-                  class="mt-2 px-3.5 py-2 rounded-[4px] bg-brand-cyan text-brand-navy-950 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md"
+                  class="mt-2 px-3.5 py-2 rounded-[4px] bg-blue-600 dark:bg-brand-cyan text-white dark:text-brand-navy-950 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md"
                 >
                   <span>Pakai "{{ searchQuery }}" Langsung</span>
                   <CornerDownLeft class="w-3.5 h-3.5" />
@@ -738,8 +738,8 @@ onUnmounted(() => {
           </div>
 
           <!-- Mobile Footer -->
-          <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950 dark:bg-[#0b1326] flex items-center justify-between text-[10px] text-slate-400 shrink-0">
-            <span class="text-brand-cyan font-bold flex items-center gap-1.5">
+          <div class="px-4 py-2.5 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 shrink-0">
+            <span class="text-blue-600 dark:text-brand-cyan font-bold flex items-center gap-1.5">
               <Sparkles class="w-3 h-3" />
               BMKG Realtime Maps POI
             </span>

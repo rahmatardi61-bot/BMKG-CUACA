@@ -57,7 +57,10 @@ const currentHourStr = computed(() => {
 });
 
 // ISO date of today 'YYYY-MM-DD'
-const todayIso = computed(() => weatherNow.value.toISOString().slice(0, 10));
+const todayIso = computed(() => {
+  const d = weatherNow.value;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+});
 
 // ── Generate realistic hourly data from a LocationData condition ─────────────
 // Active location for weather table (destination when selected, else start)
@@ -1989,7 +1992,7 @@ onUnmounted(() => {
         <Transition name="drawer-slide" appear>
           <div 
             v-if="isOpen"
-            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
+            class="relative z-45 w-[calc(100%-24px)] mx-3 mb-3 md:w-[420px] md:ml-6 md:my-6 bg-white dark:bg-[#182232] border border-slate-200/60 dark:border-slate-800/40 shadow-2xl rounded-[4px] flex flex-col overflow-hidden text-left mt-auto select-none transition-[max-height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:h-[calc(100vh-48px)] md:max-h-[calc(100vh-48px)] land-route-drawer"
             :class="sheetExpanded ? 'max-h-[88vh]' : 'max-h-[56vh]'"
           >
             <!-- Drag Handle / Bar at the top of the sheet -->
@@ -2170,7 +2173,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Custom Alerts Box -->
-                <div v-if="alertDetails" class="relative overflow-hidden p-3.5 rounded-2xl border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
+                <div v-if="alertDetails" class="relative overflow-hidden p-3.5 rounded-[4px] border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
                   <div class="flex gap-2.5">
                     <component :is="alertDetails.icon" class="w-4 h-4 shrink-0 mt-0.5 animate-pulse" :class="alertDetails.iconColor" />
                     <span class="flex-grow text-left">
@@ -2191,7 +2194,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Weather Timeline Grid — Reactive 10-day + Scrollable Hourly -->
-                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl overflow-hidden">
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-[4px] overflow-hidden">
                   <!-- Day Selector Strip -->
                   <div class="flex gap-1.5 overflow-x-auto no-scrollbar px-3 pt-3 pb-2">
                     <button
@@ -2469,7 +2472,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Custom Alerts Box -->
-                <div v-if="alertDetails && destinationLocation" class="relative overflow-hidden p-3.5 rounded-2xl border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
+                <div v-if="alertDetails && destinationLocation" class="relative overflow-hidden p-3.5 rounded-[4px] border text-[10.5px] font-semibold leading-relaxed shadow-sm transition-all duration-300 bg-gradient-to-br" :class="[alertDetails.borderColor, alertDetails.bgColor, alertDetails.textColor]">
                   <div class="flex gap-2.5">
                     <component :is="alertDetails.icon" class="w-4 h-4 shrink-0 mt-0.5 animate-pulse" :class="alertDetails.iconColor" />
                     <span class="flex-grow text-left">
@@ -2481,7 +2484,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Weather Timeline Grid — Reactive 10-day + Scrollable Hourly -->
-                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-2xl overflow-hidden">
+                <div class="bg-slate-50 dark:bg-[#1e293b]/75 border border-slate-200/60 dark:border-slate-800/40 rounded-[4px] overflow-hidden">
                   <!-- Day Selector Strip -->
                   <div class="flex gap-1.5 overflow-x-auto no-scrollbar px-3 pt-3 pb-2">
                     <button
@@ -2598,7 +2601,7 @@ onUnmounted(() => {
                    ================================================================= -->
               <div v-else-if="currentStep === 'directions' && destinationLocation" class="space-y-3.5">
                 <!-- Directions Mode Header — Premium Card -->
-                <div class="relative rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-700/30 bg-gradient-to-br from-[#1e3a5f] via-[#1a3050] to-[#0f2035]">
+                <div class="relative rounded-[4px] overflow-hidden border border-slate-200/60 dark:border-slate-700/30 bg-gradient-to-br from-[#1e3a5f] via-[#1a3050] to-[#0f2035]">
                   <!-- Decorative glow blobs -->
                   <div class="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-blue-500/20 blur-xl pointer-events-none"></div>
                   <div class="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-cyan-400/10 blur-lg pointer-events-none"></div>
@@ -2734,7 +2737,7 @@ onUnmounted(() => {
                   <!-- 1. DESTINATION OVERVIEW CARD -->
                   <div
                     v-if="directionsCheckpoints.length > 0"
-                    class="rounded-2xl overflow-hidden border"
+                    class="rounded-[4px] overflow-hidden border"
                     :class="directionsCheckpoints[0].condition === 'badai'
                       ? 'border-red-400/30 dark:border-red-500/20'
                       : directionsCheckpoints[0].condition === 'hujan'
@@ -2874,7 +2877,7 @@ onUnmounted(() => {
                   <div
                     v-for="(cp, idx) in directionsCheckpoints.slice(1)"
                     :key="cp.id"
-                    class="rounded-2xl overflow-hidden border text-left transition-all duration-200"
+                    class="rounded-[4px] overflow-hidden border text-left transition-all duration-200"
                     :class="cp.condition === 'badai'
                       ? 'border-red-300/30 dark:border-red-500/15 bg-red-50/30 dark:bg-red-950/10'
                       : cp.condition === 'hujan'

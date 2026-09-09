@@ -1,0 +1,158 @@
+[
+  {
+    "id": "port-belawan",
+    "name": "Pelabuhan Belawan",
+    "coordinate": [
+      3.78,
+      98.69
+    ],
+    "weather": "Hujan Ringan",
+    "windSpeed": "12 - 16 Knot",
+    "waveHeight": "0.5 - 1.0m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-batam",
+    "name": "Pelabuhan Batam Center",
+    "coordinate": [
+      1.12,
+      104.05
+    ],
+    "weather": "Cerah Berawan",
+    "windSpeed": "8 - 12 Knot",
+    "waveHeight": "0.3 - 0.6m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-priok",
+    "name": "Pelabuhan Tanjung Priok",
+    "coordinate": [
+      -6.1,
+      106.88
+    ],
+    "weather": "Cerah Berawan",
+    "windSpeed": "10 - 14 Knot",
+    "waveHeight": "0.4 - 0.8m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-ciwandan",
+    "name": "Pelabuhan Ciwandan (Banten)",
+    "coordinate": [
+      -5.98,
+      106.03
+    ],
+    "weather": "Berawan",
+    "windSpeed": "10 - 14 Knot",
+    "waveHeight": "0.5 - 0.9m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-sadeng",
+    "name": "Pelabuhan Sadeng",
+    "coordinate": [
+      -8.19,
+      110.8
+    ],
+    "weather": "Hujan Lebat",
+    "windSpeed": "22 - 28 Knot",
+    "waveHeight": "2.5 - 3.5m",
+    "status": "Bahaya"
+  },
+  {
+    "id": "port-glagah",
+    "name": "Pelabuhan Glagah",
+    "coordinate": [
+      -7.92,
+      110.07
+    ],
+    "weather": "Hujan Lebat",
+    "windSpeed": "24 - 30 Knot",
+    "waveHeight": "2.5 - 4.0m",
+    "status": "Bahaya"
+  },
+  {
+    "id": "port-perak",
+    "name": "Pelabuhan Tanjung Perak",
+    "coordinate": [
+      -7.2,
+      112.73
+    ],
+    "weather": "Berawan",
+    "windSpeed": "8 - 12 Knot",
+    "waveHeight": "0.3 - 0.6m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-makassar",
+    "name": "Pelabuhan Makassar",
+    "coordinate": [
+      -5.13,
+      119.41
+    ],
+    "weather": "Hujan Petir",
+    "windSpeed": "18 - 25 Knot",
+    "waveHeight": "1.25 - 2.0m",
+    "status": "Waspada"
+  },
+  {
+    "id": "port-balikpapan",
+    "name": "Pelabuhan Balikpapan",
+    "coordinate": [
+      -1.27,
+      116.83
+    ],
+    "weather": "Berawan",
+    "windSpeed": "10 - 15 Knot",
+    "waveHeight": "0.5 - 1.0m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-benoa",
+    "name": "Pelabuhan Benoa (Bali)",
+    "coordinate": [
+      -8.74,
+      115.21
+    ],
+    "weather": "Hujan Ringan",
+    "windSpeed": "15 - 20 Knot",
+    "waveHeight": "1.5 - 2.5m",
+    "status": "Waspada"
+  },
+  {
+    "id": "port-kupang",
+    "name": "Pelabuhan Tenau Kupang",
+    "coordinate": [
+      -10.16,
+      123.58
+    ],
+    "weather": "Cerah",
+    "windSpeed": "12 - 18 Knot",
+    "waveHeight": "1.0 - 1.75m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-ambon",
+    "name": "Pelabuhan Yos Sudarso Ambon",
+    "coordinate": [
+      -3.68,
+      128.18
+    ],
+    "weather": "Berawan",
+    "windSpeed": "10 - 16 Knot",
+    "waveHeight": "0.8 - 1.5m",
+    "status": "Aman"
+  },
+  {
+    "id": "port-sorong",
+    "name": "Pelabuhan Sorong",
+    "coordinate": [
+      -0.88,
+      131.27
+    ],
+    "weather": "Hujan Ringan",
+    "windSpeed": "8 - 14 Knot",
+    "waveHeight": "0.5 - 1.0m",
+    "status": "Aman"
+  }
+]

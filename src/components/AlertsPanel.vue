@@ -155,7 +155,7 @@ const transitionName = computed(() =>
               v-if="currentAlert"
               :key="currentIndex"
               type="button"
-              class="w-full bg-white/80 dark:bg-brand-navy-900/70 rounded-2xl shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer w-full"
+              class="w-full bg-white/80 dark:bg-brand-navy-900/70 rounded-[4px] shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer w-full"
               :class="[
                 getSeverityStyle(currentAlert.severity).borderClass,
                 showMobileDetail ? getSeverityStyle(currentAlert.severity).activeRing : ''
@@ -203,7 +203,7 @@ const transitionName = computed(() =>
       <Transition name="float-drop">
         <div
           v-if="showMobileDetail && currentAlert"
-          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100/60 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
+          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-[4px] shadow-xl border border-slate-100/60 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
         >
           <div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
             <div class="flex items-start gap-2.5">
@@ -227,7 +227,7 @@ const transitionName = computed(() =>
           </div>
           <div class="mx-4 border-t border-slate-100 dark:border-brand-navy-700/40"></div>
           <div class="px-4 py-3.5">
-            <div class="rounded-xl p-3.5 border text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed" :class="getSeverityStyle(currentAlert.severity).detailBg">
+            <div class="rounded-[4px] p-3.5 border text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed" :class="getSeverityStyle(currentAlert.severity).detailBg">
               {{ currentAlert.description }}
             </div>
             <div class="flex items-center gap-1.5 mt-2.5 text-[10px] text-slate-400 dark:text-slate-500">
@@ -247,7 +247,7 @@ const transitionName = computed(() =>
         v-for="(alert, index) in alerts"
         :key="alert.id"
         type="button"
-        class="flex-1 min-w-0 bg-white/80 dark:bg-brand-navy-900/70 rounded-r-2xl rounded-l-[5px] shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer"
+        class="flex-1 min-w-0 bg-white/80 dark:bg-brand-navy-900/70 rounded-[4px] shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200 overflow-hidden border-l-4 border border-slate-100/60 dark:border-brand-navy-700/20 backdrop-blur-md text-left cursor-pointer"
         :class="[
           getSeverityStyle(alert.severity).borderClass,
           openDesktopIndex === index ? getSeverityStyle(alert.severity).activeRing : ''
@@ -279,7 +279,7 @@ const transitionName = computed(() =>
       <Transition name="float-drop">
         <div
           v-if="openDesktopIndex !== null && alerts[openDesktopIndex]"
-          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-2xl shadow-xl border border-slate-100 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
+          class="absolute top-[calc(100%+8px)] left-0 right-0 z-50 bg-white dark:bg-brand-navy-900 rounded-[4px] shadow-xl border border-slate-100 dark:border-brand-navy-700/40 overflow-hidden desktop-floating-panel"
         >
           <div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
             <div class="flex items-start gap-2.5">
@@ -303,7 +303,7 @@ const transitionName = computed(() =>
           </div>
           <div class="mx-4 border-t border-slate-100 dark:border-brand-navy-700/40"></div>
           <div class="px-4 py-3.5">
-            <div class="rounded-xl p-3.5 border text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed" :class="getSeverityStyle(alerts[openDesktopIndex].severity).detailBg">
+            <div class="rounded-[4px] p-3.5 border text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed" :class="getSeverityStyle(alerts[openDesktopIndex].severity).detailBg">
               {{ alerts[openDesktopIndex].description }}
             </div>
             <div class="flex items-center gap-1.5 mt-2.5 text-[10px] text-slate-400 dark:text-slate-500">

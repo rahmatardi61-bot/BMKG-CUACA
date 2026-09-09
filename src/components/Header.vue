@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { Search, Sun, Moon, Bell, User, X, LogOut, Settings, Sparkles } from 'lucide-vue-next';
+import { Sun, Moon, Bell, User, X, LogOut, Settings, Sparkles } from 'lucide-vue-next';
+import LocationSearch from './LocationSearch.vue';
 
 const props = withDefaults(defineProps<{
   themeMode: 'light' | 'dark' | 'auto';
@@ -20,6 +21,10 @@ const emit = defineEmits<{
   (e: 'logout'): void;
   (e: 'change-tab', tab: string): void;
 }>();
+
+const handleSelectLocation = (location: string) => {
+  emit('select-city', location);
+};
 
 const showProfileDropdown = ref(false);
 const activeTab = ref(props.activeTab);
@@ -88,7 +93,7 @@ onUnmounted(() => {
     border border-white/60 dark:border-white/[0.08]
     shadow-[0_12px_40px_rgba(0,0,0,0.03),0_1px_3px_rgba(0,0,0,0.01),0_1px_1px_rgba(255,255,255,0.85)_inset]
     dark:shadow-[0_20px_50px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,0.08)_inset]
-    rounded-full h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative mb-6 md:mb-8">
+    rounded-[4px] h-14 md:h-16 px-[18px] flex items-center justify-between gap-4 relative mb-6 md:mb-8">
       
       <!-- Left: Logo & Title -->
       <div 
@@ -110,33 +115,18 @@ onUnmounted(() => {
       </div>
 
       <!-- Center: Search bar (Desktop - centered & elevated) -->
-      <div class="hidden lg:block relative w-80 xl:w-96 transition-all duration-300 mx-auto group">
-        <div class="relative flex items-center bg-slate-100/50 dark:bg-brand-navy-900/50 border border-slate-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 transition-all duration-300 focus-within:bg-white dark:focus-within:bg-brand-navy-900 focus-within:border-blue-500 dark:focus-within:border-brand-cyan/50 focus-within:ring-2 focus-within:ring-blue-500/10 dark:focus-within:ring-brand-cyan/15 focus-within:shadow-sm">
-          <Search class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-          <input 
-            id="search-input-desktop"
-            type="text" 
-            placeholder="Cari kelurahan/desa..." 
-            class="w-full bg-transparent border-none outline-none text-base lg:text-xs placeholder:text-xs text-slate-700 dark:text-slate-150 placeholder-slate-400 dark:placeholder-slate-500 pl-2 pr-2.5 py-1"
-          />
-          <!-- Elegant search button -->
-          <button class="bg-blue-500 hover:bg-blue-600 dark:bg-brand-cyan dark:hover:bg-brand-cyan/90 text-white dark:text-brand-navy-950 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 duration-200 shadow-sm shrink-0 cursor-pointer">
-            Cari
-          </button>
-        </div>
+      <div class="hidden lg:block relative w-80 xl:w-96 transition-all duration-300 mx-auto">
+        <LocationSearch 
+          @select-location="handleSelectLocation" 
+        />
       </div>
       
       <!-- Center: Search bar (Mobile/Tablet only - centered and flexible width) -->
       <div class="flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-8 lg:hidden relative transition-all duration-300">
-        <input 
-          id="search-input-mobile"
-          type="text" 
-          placeholder="Cari kelurahan/desa..." 
-          class="w-full pl-9 pr-4 py-2 text-base placeholder:text-xs rounded-full border outline-none transition-all
-            bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
-            dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
+        <LocationSearch 
+          :is-mobile="true"
+          @select-location="handleSelectLocation" 
         />
-        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
       </div>
 
       <!-- Right: Search, Actions (Desktop Search visible only on lg+) -->
@@ -144,7 +134,7 @@ onUnmounted(() => {
 
 
         <!-- Notification Icon -->
-        <button v-if="isLoggedIn" id="notification-button" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-brand-navy-800 text-slate-500 dark:text-slate-300 relative transition-all active:scale-95 active:duration-75">
+        <button v-if="isLoggedIn" id="notification-button" class="p-1.5 rounded-[4px] hover:bg-slate-100 dark:hover:bg-brand-navy-800 text-slate-500 dark:text-slate-300 relative transition-all active:scale-95 active:duration-75">
           <Bell class="w-4 h-4" />
           <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 border border-white dark:border-brand-navy-950"></span>
         </button>
@@ -154,7 +144,7 @@ onUnmounted(() => {
           <button 
             id="theme-toggle-button"
             @click="emit('toggle-theme')" 
-            class="p-1.5 sm:px-3 sm:py-1.5 rounded-full border transition-all duration-300 flex items-center gap-1.5 active:scale-95 active:duration-75 cursor-pointer"
+            class="p-1.5 sm:px-3 sm:py-1.5 rounded-[4px] border transition-all duration-300 flex items-center gap-1.5 active:scale-95 active:duration-75 cursor-pointer"
             :class="[
               themeMode === 'light' ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 hover:bg-amber-500/20' : '',
               themeMode === 'dark' ? 'bg-brand-navy-900 border-brand-navy-700 hover:bg-brand-navy-800 text-brand-cyan' : '',
@@ -172,7 +162,7 @@ onUnmounted(() => {
 
           <!-- Premium Tooltip -->
           <div class="absolute left-1/2 -translate-x-1/2 top-full mt-2.5 z-[100] pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
-            <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+            <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-[4px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
               <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
               <span>Ubah Tema (Terang / Gelap / Otomatis)</span>
             </div>
@@ -180,12 +170,12 @@ onUnmounted(() => {
         </div>
 
         <!-- User Profile (Clickable Login Trigger / Profile Dropdown) -->
-        <div ref="profileDropdownContainer" class="relative">
+        <div ref="profileDropdownContainer" class="relative hidden">
           <div class="relative group">
             <button 
               id="user-profile-button"
               @click="handleUserClick" 
-              class="w-7 h-7 rounded-full flex items-center justify-center shadow-sm shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none border"
+              class="w-7 h-7 rounded-[4px] flex items-center justify-center shadow-sm shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-all outline-none border"
               :class="[
                 isLoggedIn 
                   ? 'bg-blue-600 border-blue-500 text-white font-extrabold text-[10px] tracking-tight dark:bg-brand-cyan dark:border-brand-cyan/60 dark:text-brand-navy-950'
@@ -198,7 +188,7 @@ onUnmounted(() => {
 
             <!-- Premium Tooltip -->
             <div class="absolute right-0 top-full mt-2.5 z-[100] pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
-              <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
+              <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-[4px] shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
                 <div class="absolute -top-1 right-2.5 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-t border-l border-slate-800 dark:border-slate-800/60 rotate-45"></div>
                 <span>{{ isLoggedIn ? 'Kelola Akun (' + userProfile?.name + ')' : 'Masuk ke Portal' }}</span>
               </div>
@@ -208,7 +198,7 @@ onUnmounted(() => {
           <!-- Profile Dropdown Menu -->
           <div 
             v-if="showProfileDropdown" 
-            class="absolute right-0 mt-2 w-48 rounded-xl shadow-lg border overflow-hidden py-1.5 z-50 animate-fade-in
+            class="absolute right-0 mt-2 w-48 rounded-[4px] shadow-lg border overflow-hidden py-1.5 z-50 animate-fade-in
               bg-white/95 border-slate-100 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
           >
             <!-- If Logged In -->
@@ -288,7 +278,7 @@ onUnmounted(() => {
               <button 
                 id="nav-drawer-close-button"
                 @click="isNavDrawerOpen = false"
-                class="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-300/30 dark:border-white/10 transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer"
+                class="p-1.5 rounded-[4px] bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-300/30 dark:border-white/10 transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
@@ -296,15 +286,11 @@ onUnmounted(() => {
 
             <!-- Search bar in Drawer (visible on mobile only since hidden xl:block) -->
             <div class="mt-5 relative block xl:hidden">
-              <input 
-                id="search-input-drawer"
-                type="text" 
-                placeholder="Cari kelurahan/desa..." 
-                class="w-full pl-9 pr-4 py-2 text-base placeholder:text-xs rounded-full border outline-none transition-all
-                  bg-slate-100/60 border-transparent text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:shadow-sm
-                  dark:bg-brand-navy-900/60 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-brand-navy-900 dark:focus:border-brand-cyan/40"
+              <LocationSearch 
+                :is-mobile-drawer="true"
+                @select-location="handleSelectLocation"
+                @close-drawer="isNavDrawerOpen = false" 
               />
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             </div>
 
             <!-- Drawer Navigation Links -->
@@ -315,7 +301,7 @@ onUnmounted(() => {
                 :id="'nav-tab-drawer-' + tab.toLowerCase().replace(/ /g, '-')"
                 href="#" 
                 @click.prevent="handleTabClick(tab); isNavDrawerOpen = false"
-                class="px-4 py-3 text-xs tracking-wide rounded-xl transition-all duration-200 flex items-center gap-3 font-bold cursor-pointer"
+                class="px-4 py-3 text-xs tracking-wide rounded-[4px] transition-all duration-200 flex items-center gap-3 font-bold cursor-pointer"
                 :class="activeTab === tab 
                   ? 'bg-blue-50/90 text-blue-600 dark:bg-brand-cyan/10 dark:text-brand-cyan border-l-4 border-blue-600 dark:border-brand-cyan' 
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-brand-navy-900/40 hover:text-slate-800 dark:hover:text-white'"

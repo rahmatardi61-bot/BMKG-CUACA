@@ -72,7 +72,7 @@ function setComment(e: Event) {
           <div class="mb-4 pr-8 text-left shrink-0">
             <!-- Title & Icon Row -->
             <div class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/30">
-              <div class="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10 dark:from-blue-400/20 dark:to-indigo-400/10 flex items-center justify-center border border-blue-500/25 dark:border-blue-400/25 shrink-0 shadow-sm">
+              <div class="p-2.5 rounded-[4px] bg-gradient-to-br from-blue-500/20 to-indigo-500/10 dark:from-blue-400/20 dark:to-indigo-400/10 flex items-center justify-center border border-blue-500/25 dark:border-blue-400/25 shrink-0 shadow-sm">
                 <component :is="weatherIcon" class="w-5 h-5 text-blue-600 dark:text-brand-cyan" />
               </div>
               <div class="text-left min-w-0 flex-grow">

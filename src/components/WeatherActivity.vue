@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { WeatherData, CityAnalysis } from '../types/weather';
-import { getSectorsDataForCity } from '../data/maritimeAdvisorData';
 import { computed } from 'vue';
+import { getComfortIndex } from '../data/weatherHelpers';
 import { 
   Compass, 
   Waves, 
@@ -11,7 +11,9 @@ import {
   Wind, 
   Navigation, 
   Eye, 
-  Droplets 
+  Droplets,
+  Ship,
+  Anchor
 } from 'lucide-vue-next';
 
 const props = defineProps<{
@@ -33,35 +35,7 @@ const emit = defineEmits<{
   (e: 'open-land-advisor'): void;
 }>();
 
-// Map city to nearest airport short name
-const nearestAirportName = computed(() => {
-  const lc = props.selectedCity.toLowerCase();
-  if (lc.includes('jakarta') || lc.includes('gambir') || lc.includes('dki')) return 'SOEKARNO-HATTA';
-  if (lc.includes('surabaya') || lc.includes('gubeng')) return 'JUANDA';
-  if (lc.includes('bandung') || lc.includes('braga')) return 'HUSEIN';
-  if (lc.includes('medan') || lc.includes('sikambing')) return 'KUALANAMU';
-  if (lc.includes('semarang') || lc.includes('pandanaran')) return 'AHMAD YANI';
-  if (lc.includes('makassar') || lc.includes('mariso')) return 'SULTAN HASANUDDIN';
-  if (lc.includes('palembang') || lc.includes('ilir barat')) return 'SMB II';
-  if (lc.includes('batam') || lc.includes('belian')) return 'HANG NADIM';
-  if (lc.includes('pekanbaru') || lc.includes('tampan')) return 'SULTAN SYARIF';
-  if (lc.includes('denpasar') || lc.includes('bali') || lc.includes('kuta')) return 'NGURAH RAI';
-  if (lc.includes('yogyakarta') || lc.includes('jogja')) return 'YIA / ADISUTJIPTO';
-  if (lc.includes('balikpapan')) return 'SEPINGGAN';
-  if (lc.includes('banjarmasin')) return 'SYAMSUDDIN NOOR';
-  if (lc.includes('pontianak')) return 'SUPADIO';
-  if (lc.includes('manado')) return 'SAM RATULANGI';
-  if (lc.includes('jayapura')) return 'SENTANI';
-  if (lc.includes('lombok')) return 'ZAINUDDIN ABDUL';
-  // fallback: use city name
-  return props.selectedCity.split(',')[0].trim().toUpperCase();
-});
 
-// Shipping sector (Aktivitas Pelayaran) for the selected city
-const shippingSector = computed(() => {
-  const sectors = getSectorsDataForCity(props.selectedCity);
-  return sectors.find(s => s.id === 'shipping') || sectors[0];
-});
 
 function lockHeight(el: Element) {
   const wrapper = (el as HTMLElement).parentElement;
@@ -71,12 +45,268 @@ function unlockHeight(el: Element) {
   const wrapper = (el as HTMLElement).parentElement;
   if (wrapper) wrapper.style.height = '';
 }
+
+const comfortIndex = computed(() => getComfortIndex(props.weatherData.temp));
+
+const shippingDesc = computed(() => {
+  const windKts = Math.round(props.weatherData.windSpeed * 0.539957);
+  const waveEst = +(0.3 + (props.weatherData.windSpeed * 0.04)).toFixed(1);
+  
+  if (waveEst > 2.0 || windKts > 20) {
+    return `Tinggi gelombang diperkirakan mencapai ${waveEst}m dengan angin ${windKts} knot. Kapal nelayan & tongkang diimbau meningkatkan kewaspadaan navigasi.`;
+  }
+  if (waveEst > 1.25 || windKts > 15) {
+    return `Kondisi perairan bergelombang sedang (${waveEst}m) & angin ${windKts} knot. Navigasi alur pelayaran utama dan kapal Ro-Ro terpantau tetap aman terendali.`;
+  }
+  return `Tinggi gelombang tenang (${waveEst}m) & kecepatan angin ${windKts} knot. Kondisi sangat kondusif untuk alur masuk pelabuhan, pelayaran ferry, serta logistik maritim.`;
+});
+
+const airQualitySummary = computed(() => {
+  const temp = props.weatherData?.temp ?? 28;
+  const citySeed = (props.selectedCity || 'Jakarta').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const basePm25 = temp > 31 ? 42 : temp > 27 ? 28 : 16;
+  const pm25 = Math.round(Math.max(8, basePm25 + (citySeed % 14)));
+  const pm10 = Math.round(pm25 * 0.4 + 10 + (citySeed % 6));
+  
+  let aqi = 0;
+  if (pm25 <= 12) {
+    aqi = Math.round((pm25 / 12) * 50);
+  } else if (pm25 <= 35.4) {
+    aqi = Math.round(50 + ((pm25 - 12) / (35.4 - 12)) * 50);
+  } else if (pm25 <= 55.4) {
+    aqi = Math.round(100 + ((pm25 - 35.4) / (55.4 - 35.4)) * 50);
+  } else if (pm25 <= 150.4) {
+    aqi = Math.round(150 + ((pm25 - 55.4) / (150.4 - 55.4)) * 50);
+  } else {
+    aqi = Math.round(200 + ((pm25 - 150.4) / 100) * 100);
+  }
+
+  let status = 'Baik';
+  let colorClass = 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20';
+  let pillClass = 'bg-emerald-500 text-white';
+  let progressColor = 'bg-emerald-500';
+  let desc = 'Kondisi udara bersih dan segar, sangat ideal untuk aktivitas fisik luar ruangan.';
+  let recommendation = 'Aman untuk semua aktivitas luar ruangan tanpa masker.';
+
+  if (aqi > 150) {
+    status = 'Tidak Sehat';
+    colorClass = 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20';
+    pillClass = 'bg-red-500 text-white';
+    progressColor = 'bg-red-500';
+    desc = 'Kadar polusi tinggi. Hindari aktivitas luar ruangan berdurasi panjang.';
+    recommendation = 'Gunakan masker berfiltrasi tinggi jika beraktivitas di luar.';
+  } else if (aqi > 100) {
+    status = 'Kurang Sehat';
+    colorClass = 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20';
+    pillClass = 'bg-orange-500 text-white';
+    progressColor = 'bg-orange-500';
+    desc = 'Kelompok rentan dapat merasakan dampak. Batasi aktivitas luar berlebih.';
+    recommendation = 'Disarankan memakai masker bagi kelompok sensitif / lansia.';
+  } else if (aqi > 50) {
+    status = 'Sedang';
+    colorClass = 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
+    pillClass = 'bg-amber-500 text-white';
+    progressColor = 'bg-amber-500';
+    desc = 'Kualitas udara dapat diterima untuk sebagian besar aktivitas luar ruangan.';
+    recommendation = 'Aman beraktivitas, pantau sensitivitas terhadap debu jalan.';
+  }
+
+  const meterPercent = Math.min(100, Math.round((aqi / 200) * 100));
+
+  return {
+    aqi,
+    pm25,
+    pm10,
+    status,
+    colorClass,
+    pillClass,
+    progressColor,
+    desc,
+    recommendation,
+    meterPercent
+  };
+});
 </script>
 
 <template>
   <div class="space-y-4">
+    <!-- Index Kenyamanan Card (Futuristic & Compact) -->
+    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+      <!-- Neon Accent Top Line -->
+      <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500/0 via-amber-500/60 to-cyan-500/0"></div>
+      
+      <!-- Subtle Cyber Ambient Glow -->
+      <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-500"></div>
+
+      <!-- Header & Main Metric Row -->
+      <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="p-1.5 rounded-[4px] bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.2" />
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M17.66 6.34l-1.41 1.41M7.76 16.24l-1.41 1.41M6.34 6.34l1.41 1.41M16.24 16.24l1.41 1.41" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-black tracking-wider text-slate-800 dark:text-white uppercase leading-none truncate">
+              Indeks Kenyamanan
+            </h4>
+            <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+              Analisis Paparan Panas
+            </p>
+          </div>
+        </div>
+
+        <!-- Telemetry Live Badge -->
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/80 dark:bg-brand-navy-950/80 border border-slate-200/50 dark:border-brand-navy-800 text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider shrink-0">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span>Live</span>
+        </span>
+      </div>
+
+      <!-- Main Status Banner Box (Ultra-Compact Sleek Pill/Box) -->
+      <div class="relative z-10 rounded-[4px] px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="comfortIndex.colorClass">
+        <div class="flex items-center gap-2 min-w-0">
+          <div v-html="comfortIndex.smileySvg" class="w-5 h-5 shrink-0 overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full"></div>
+          <div class="min-w-0 flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10.5px] font-black leading-none truncate">{{ comfortIndex.quality }}</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 text-[8px] font-black rounded tracking-wider uppercase leading-none" :class="comfortIndex.pillClass">
+              {{ comfortIndex.status }}
+            </span>
+          </div>
+        </div>
+        <span class="text-[10px] font-extrabold tracking-tight opacity-80 shrink-0 whitespace-nowrap">{{ comfortIndex.tempText }}</span>
+      </div>
+
+      <!-- Sub-description text -->
+      <p class="relative z-10 text-[10.5px] leading-snug text-slate-500 dark:text-slate-400 font-medium mb-2.5">
+        {{ comfortIndex.desc }}
+      </p>
+
+      <!-- Actionable Advice Compact Grid -->
+      <div class="relative z-10 space-y-1.5 pt-2 border-t border-slate-100 dark:border-brand-navy-800/50">
+        <div class="flex items-center gap-2.5 text-[10.5px] text-slate-600 dark:text-slate-300 font-medium">
+          <div class="p-1 rounded-lg bg-slate-100 dark:bg-brand-navy-950/80 shrink-0" :class="comfortIndex.iconColor">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="4" r="1" />
+              <path d="m9 20 2-4.5-1-2.5-1 3.5" />
+              <path d="m15 20-2-6.5 2-2.5-1-2.5-2 1" />
+            </svg>
+          </div>
+          <span class="truncate">{{ comfortIndex.recommendation1 }}</span>
+        </div>
+
+        <div class="flex items-center gap-2.5 text-[10.5px] text-slate-600 dark:text-slate-300 font-medium">
+          <div class="p-1 rounded-lg bg-slate-100 dark:bg-brand-navy-950/80 shrink-0" :class="comfortIndex.iconColor">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="3" width="16" height="18" rx="1" stroke-width="1.5" />
+              <line x1="12" y1="3" x2="12" y2="21" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+            </svg>
+          </div>
+          <span class="truncate">{{ comfortIndex.recommendation2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Resume Kualitas Udara (Futuristic & Compact) -->
+    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+      <!-- Neon Accent Top Line (Teal/Emerald Glow) -->
+      <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/0 via-teal-500/60 to-cyan-500/0"></div>
+
+      <!-- Subtle Cyber Ambient Glow -->
+      <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-teal-500/10 dark:bg-teal-500/15 blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-500"></div>
+
+      <!-- Header & Main Metric Row -->
+      <div class="relative z-10 flex items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="p-1.5 rounded-[4px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+              <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+              <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h4 class="text-xs font-black tracking-wider text-slate-800 dark:text-white uppercase leading-none truncate">
+              Kualitas Udara (AQI)
+            </h4>
+            <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+              Indeks Standar Pencemar Udara
+            </p>
+          </div>
+        </div>
+
+        <!-- Telemetry Live Badge -->
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/80 dark:bg-brand-navy-950/80 border border-slate-200/50 dark:border-brand-navy-800 text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider shrink-0">
+          <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+          <span>ISPU LIVE</span>
+        </span>
+      </div>
+
+      <!-- Main Status Banner Box (Ultra-Compact Sleek Pill/Box) -->
+      <div class="relative z-10 rounded-[4px] px-2.5 py-1.5 mb-2 flex items-center justify-between gap-2 border transition-all" :class="airQualitySummary.colorClass">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-5 h-5 shrink-0 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+            </svg>
+          </div>
+          <div class="min-w-0 flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10.5px] font-black leading-none truncate">AQI {{ airQualitySummary.aqi }}</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 text-[8px] font-black rounded tracking-wider uppercase leading-none" :class="airQualitySummary.pillClass">
+              {{ airQualitySummary.status }}
+            </span>
+          </div>
+        </div>
+        <span class="text-[10px] font-extrabold tracking-tight opacity-80 shrink-0 whitespace-nowrap">PM2.5: {{ airQualitySummary.pm25 }} µg/m³</span>
+      </div>
+
+      <!-- Compact Linear Progress Gauge -->
+      <div class="relative z-10 mb-2.5">
+        <div class="w-full h-1.5 rounded-full bg-slate-200/70 dark:bg-brand-navy-950/80 overflow-hidden">
+          <div 
+            class="h-full rounded-full transition-all duration-700 ease-out" 
+            :class="airQualitySummary.progressColor"
+            :style="{ width: `${airQualitySummary.meterPercent}%` }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Sub-description text -->
+      <p class="relative z-10 text-[10.5px] leading-snug text-slate-500 dark:text-slate-400 font-medium mb-2.5">
+        {{ airQualitySummary.desc }}
+      </p>
+
+      <!-- Actionable Advice & Particulate Telemetry -->
+      <div class="relative z-10 pt-2 border-t border-slate-100 dark:border-brand-navy-800/50 space-y-1.5">
+        <!-- Telemetry micro badges -->
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-100/70 dark:bg-brand-navy-950/60 border border-slate-200/40 dark:border-brand-navy-800/40">
+            <span class="text-slate-400 dark:text-slate-500 font-semibold">PM10</span>
+            <span class="font-extrabold text-slate-700 dark:text-slate-200">{{ airQualitySummary.pm10 }} µg/m³</span>
+          </div>
+          <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-100/70 dark:bg-brand-navy-950/60 border border-slate-200/40 dark:border-brand-navy-800/40">
+            <span class="text-slate-400 dark:text-slate-500 font-semibold">Skala</span>
+            <span class="font-extrabold text-slate-700 dark:text-slate-200">0 - 300</span>
+          </div>
+        </div>
+
+        <!-- Recommendation item -->
+        <div class="flex items-center gap-2 text-[10.5px] text-slate-600 dark:text-slate-300 font-medium pt-0.5">
+          <div class="p-1 rounded-lg bg-slate-100 dark:bg-brand-navy-950/80 shrink-0 text-teal-600 dark:text-teal-400">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <span class="truncate">{{ airQualitySummary.recommendation }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Title Section -->
-    <div class="flex items-center gap-2 mb-2">
+    <div class="flex items-center gap-2 mb-2 pt-2">
       <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Panduan Aktivitas & Analisis Cuaca</h3>
     </div>
 
@@ -91,7 +321,7 @@ function unlockHeight(el: Element) {
         <!-- Card 1: Darat -->
         <div 
           @click="emit('open-land-advisor')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-orange-500/12 dark:bg-orange-500/18 blur-2xl group-hover:bg-orange-500/30 dark:group-hover:bg-orange-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -154,7 +384,7 @@ function unlockHeight(el: Element) {
           
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-orange-500/15 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-orange-500/15 dark:bg-orange-500/25 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Compass class="w-5 h-5 transition-transform duration-700 ease-out group-hover:rotate-[360deg] group-active:rotate-[360deg]" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">
@@ -162,11 +392,7 @@ function unlockHeight(el: Element) {
               </h4>
             </div>
             
-            <!-- Futuristic City Badge -->
-            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/8 dark:bg-orange-500/12 border border-orange-500/20 dark:border-orange-500/25 text-[9px] font-black uppercase tracking-wider text-orange-600/80 dark:text-orange-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-orange-500/15 group-hover:border-orange-500/35">
-              <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
-              <span>{{ currentCityShortName }}</span>
-            </div>
+
           </div>
           
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
@@ -198,7 +424,7 @@ function unlockHeight(el: Element) {
         <!-- Card 2: Pesisir & Laut -->
         <div 
           @click="emit('open-maritime-advisor', 'shipping')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-cyan-500/12 dark:bg-cyan-500/18 blur-2xl group-hover:bg-cyan-500/30 dark:group-hover:bg-cyan-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -258,7 +484,7 @@ function unlockHeight(el: Element) {
 
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-cyan-500/15 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-cyan-500/15 dark:bg-cyan-500/25 text-cyan-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Waves class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 group-active:-translate-y-0.5 group-active:scale-110" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-cyan-600 dark:text-brand-cyan">
@@ -266,11 +492,7 @@ function unlockHeight(el: Element) {
               </h4>
             </div>
             
-            <!-- Futuristic City Badge -->
-            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/8 dark:bg-cyan-500/12 border border-cyan-500/20 dark:border-cyan-500/25 text-[9px] font-black uppercase tracking-wider text-cyan-600/80 dark:text-cyan-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-cyan-500/15 group-hover:border-cyan-500/35">
-              <span class="inline-flex items-center justify-center w-3.5 h-3.5 shrink-0 opacity-90" v-html="currentCityLandmarkSvg"></span>
-              <span>{{ currentCityShortName }}</span>
-            </div>
+
           </div>
           
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
@@ -299,83 +521,54 @@ function unlockHeight(el: Element) {
           </div>
         </div>
 
-        <!-- Card 3: Pelayaran (Aktivitas Pelayaran) -->
+        <!-- Card Baru: Aktivitas Pelayaran -->
         <div 
           @click="emit('open-maritime-advisor', 'shipping')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-teal-500/40 dark:hover:border-teal-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-teal-500/50 dark:active:border-teal-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-blue-500/40 dark:hover:border-blue-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-blue-500/50 dark:active:border-blue-400/50"
         >
-          <!-- Colored Ambient Glow Overlay -->
-          <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-teal-500/12 dark:bg-teal-500/18 blur-2xl group-hover:bg-teal-500/30 dark:group-hover:bg-teal-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
+          <!-- Ambient Glow -->
+          <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-blue-500/12 dark:bg-blue-500/18 blur-2xl group-hover:bg-blue-500/30 dark:group-hover:bg-blue-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
 
-          <!-- ⛵ Shipping Illustration: Container ship + route + waves -->
+          <!-- Ship Illustration BG -->
           <div class="card-illustration absolute bottom-0 left-0 right-0 h-full pointer-events-none select-none opacity-80 group-hover:opacity-100 transition-opacity duration-500 ease-in-out z-0">
             <svg viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
-              <defs>
-                <linearGradient id="shipGradA" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#14b8a6" stop-opacity="0"/>
-                  <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.3"/>
-                </linearGradient>
-              </defs>
-              <rect x="0" y="0" width="320" height="80" fill="url(#shipGradA)"/>
-              <!-- Sea base -->
-              <rect x="0" y="60" width="320" height="20" fill="#0f766e" opacity="0.5"/>
-              <!-- Wave back -->
-              <path d="M0 58 Q20 48 40 55 Q60 62 80 54 Q100 46 120 55 Q140 64 160 54 Q180 44 200 55 Q220 65 240 55 Q260 45 280 55 Q300 65 320 58 L320 80 L0 80Z" fill="#0d9488" opacity="0.45"/>
-              <!-- Wave front -->
-              <path d="M0 66 Q16 58 32 64 Q48 70 64 63 Q80 56 96 63 Q112 70 128 63 Q144 56 160 64 Q176 72 192 64 Q208 56 224 64 Q240 72 256 64 Q272 56 288 64 Q304 72 320 66 L320 80 L0 80Z" fill="#14b8a6" opacity="0.55"/>
-              <!-- Container ship -->
-              <path d="M52 62 L40 68 L140 68 L128 62Z" fill="#334155" opacity="0.8"/>
-              <rect x="62" y="52" width="18" height="10" fill="#475569" opacity="0.8" rx="1"/>
-              <rect x="84" y="46" width="10" height="16" fill="#64748b" opacity="0.75" rx="1"/>
-              <!-- Containers -->
-              <rect x="68" y="61" width="9" height="4" fill="#f43f5e" opacity="0.55" rx="0.3"/>
-              <rect x="78" y="61" width="9" height="4" fill="#3b82f6" opacity="0.55" rx="0.3"/>
-              <rect x="88" y="61" width="9" height="4" fill="#22c55e" opacity="0.55" rx="0.3"/>
-              <rect x="98" y="61" width="9" height="4" fill="#f59e0b" opacity="0.55" rx="0.3"/>
-              <!-- Route line dashed -->
-              <path d="M30 74 Q 80 68 140 73 Q 200 78 260 71 Q 290 68 320 72" stroke="#5eead4" stroke-width="0.8" stroke-dasharray="8 6" opacity="0.6"/>
-              <!-- Destination marker -->
-              <circle cx="285" cy="53" r="7" fill="#fbbf24" opacity="0.25"/>
-              <circle cx="285" cy="53" r="3" fill="#fbbf24" opacity="0.8"/>
-              <!-- Seagulls -->
-              <path d="M210 30 Q215 25 220 30" stroke="#99f6e4" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.7"/>
-              <path d="M230 22 Q234 18 238 22" stroke="#99f6e4" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.6"/>
+              <rect x="0" y="60" width="320" height="20" fill="#1e3a8a" opacity="0.3"/>
+              <path d="M0 65 Q20 58 40 64 Q60 70 80 64 Q100 58 120 64 Q140 70 160 64 Q180 58 200 64 Q220 70 240 64 Q260 58 280 64 Q300 70 320 65 L320 80 L0 80Z" fill="#3b82f6" opacity="0.4"/>
+              <!-- Cargo Ship Icon -->
+              <path d="M60 62 L48 70 L130 70 L118 62Z" fill="#334155" opacity="0.7"/>
+              <rect x="70" y="52" width="18" height="10" fill="#475569" opacity="0.7"/>
+              <rect x="90" y="47" width="10" height="15" fill="#64748b" opacity="0.7"/>
+              <line x1="99" y1="36" x2="99" y2="47" stroke="#94a3b8" stroke-width="1.5"/>
             </svg>
           </div>
 
+          <!-- Header -->
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-teal-500/15 dark:bg-teal-500/25 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
-                <Ship class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 group-active:-translate-y-0.5 group-active:scale-110" />
+              <div class="w-9 h-9 rounded-[4px] bg-blue-500/15 dark:bg-blue-500/25 text-blue-600 dark:text-brand-cyan flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                <Ship class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-110" />
               </div>
-              <h4 class="text-[11px] font-black uppercase tracking-widest text-teal-600 dark:text-teal-400">
+              <h4 class="text-[11px] font-black uppercase tracking-widest text-blue-600 dark:text-brand-cyan">
                 Aktivitas Pelayaran
               </h4>
             </div>
             
-            <!-- Port Badge -->
-            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/8 dark:bg-teal-500/12 border border-teal-500/20 dark:border-teal-500/25 text-[9px] font-black uppercase tracking-wider text-teal-600/80 dark:text-teal-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-teal-500/15 group-hover:border-teal-500/35 max-w-[55%] truncate">
-              <Ship class="w-3 h-3 shrink-0" />
-              <span class="truncate">{{ shippingSector.title }}</span>
-            </div>
+
           </div>
           
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">
-            {{ shippingSector.description }}
+            {{ shippingDesc }}
           </p>
 
-          <!-- Card Footer Stats Row -->
+          <!-- Card Footer -->
           <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-200 dark:border-brand-navy-700/40 text-[11px] font-bold text-slate-800 dark:text-slate-100 z-10">
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
-                <Waves class="w-3.5 h-3.5 text-teal-500 shrink-0" />
-                <span>{{ shippingSector.riskScore }}</span>
-              </div>
-              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white/40 border-slate-200/30 dark:bg-white/5 dark:border-white/5 backdrop-blur-md shadow-sm">
-                <span class="text-[10px] font-black uppercase tracking-wider" :class="shippingSector.riskColor">{{ shippingSector.riskLevel }}</span>
+                <Anchor class="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <span>Alur Pelabuhan Safe</span>
               </div>
             </div>
-            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:text-teal-750 dark:hover:text-teal-300 hover:underline transition-colors font-black cursor-pointer">
+            <span @click.stop="emit('open-maritime-advisor', 'shipping')" class="inline-flex items-center gap-0.5 text-[10px] uppercase tracking-wider text-blue-600 dark:text-brand-cyan hover:text-blue-750 dark:hover:text-cyan-300 hover:underline transition-colors font-black cursor-pointer">
               Selengkapnya
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"></line>
@@ -385,10 +578,10 @@ function unlockHeight(el: Element) {
           </div>
         </div>
 
-        <!-- Card 4: Penerbangan -->
+        <!-- Card 3: Penerbangan -->
         <div 
           @click="emit('open-aviation-advisor', 'commercial')"
-          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
+          class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
         >
           <!-- Colored Ambient Glow Overlay -->
           <div class="perf-layer glow-orb absolute -right-6 -top-6 w-40 h-40 rounded-full bg-indigo-500/12 dark:bg-indigo-500/18 blur-2xl group-hover:bg-indigo-500/30 dark:group-hover:bg-indigo-500/35 group-hover:scale-125 transition-all duration-700 ease-in-out pointer-events-none"></div>
@@ -457,7 +650,7 @@ function unlockHeight(el: Element) {
 
           <div class="flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
+              <div class="w-9 h-9 rounded-[4px] bg-indigo-500/15 dark:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 group-active:scale-105 transition-transform duration-350">
                 <Plane class="w-5 h-5 transition-transform duration-500 ease-out group-hover:-rotate-12 group-hover:scale-110 group-active:-rotate-12 group-active:scale-110" />
               </div>
               <h4 class="text-[11px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
@@ -465,11 +658,7 @@ function unlockHeight(el: Element) {
               </h4>
             </div>
             
-            <!-- Nearest Airport Badge -->
-            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/8 dark:bg-indigo-500/12 border border-indigo-500/20 dark:border-indigo-500/25 text-[9px] font-black uppercase tracking-wider text-indigo-600/80 dark:text-indigo-400/80 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-indigo-500/15 group-hover:border-indigo-500/35">
-              <Plane class="w-3 h-3 shrink-0" />
-              <span>{{ nearestAirportName }}</span>
-            </div>
+
           </div>
           
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-normal flex-grow z-10">

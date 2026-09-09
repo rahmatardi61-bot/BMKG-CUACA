@@ -27,7 +27,8 @@ const canScrollLeft = ref(false);
 const canScrollRight = ref(true);
 
 const todayIso = computed(() => {
-  return props.currentTime.toISOString().slice(0, 10);
+  const d = props.currentTime;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 });
 
 // Watch selected date to notify parent container for header date updates
@@ -399,42 +400,33 @@ onUnmounted(() => {
         v-for="group in aqiDayGroups"
         :key="group.date"
         @click="selectedDate = group.date"
-        class="flex-shrink-0 w-[108px] rounded-2xl p-3 cursor-pointer transition-all duration-200 border select-none text-left flex items-stretch justify-between gap-1"
+        class="flex-shrink-0 w-[108px] rounded-[4px] p-3 cursor-pointer transition-all duration-200 border select-none text-left"
         :class="selectedDate === group.date
           ? 'bg-blue-500/15 dark:bg-brand-cyan/10 border-blue-400/60 dark:border-brand-cyan/40 shadow-md shadow-blue-500/10'
           : 'bg-slate-50/60 dark:bg-brand-navy-800/30 border-slate-100/60 dark:border-brand-navy-700/30 hover:bg-blue-50/40 dark:hover:bg-brand-navy-800/60'"
       >
-        <div class="flex-grow">
-          <div class="text-[9px] font-black uppercase tracking-wider mb-0.5"
-            :class="selectedDate === group.date ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'"
-          >
-            {{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}
-          </div>
-          <div class="text-sm font-black mb-1"
-            :class="selectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-700 dark:text-slate-200'"
-          >
-            {{ new Date(group.date).getDate() }}
-          </div>
-          <div class="flex flex-col gap-0.5 mt-1">
+        <div class="text-[9px] font-black uppercase tracking-wider mb-0.5"
+          :class="selectedDate === group.date ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'"
+        >
+          {{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}
+        </div>
+        <div class="text-sm font-black mb-1"
+          :class="selectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-700 dark:text-slate-200'"
+        >
+          {{ new Date(group.date).getDate() }}
+        </div>
+        <div class="flex flex-col gap-0.5 mt-1">
+          <div class="flex items-baseline gap-1">
             <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-none">
               {{ group.avgAqi }}
             </span>
-            <span class="text-[9.5px] font-bold mt-1 leading-tight text-slate-500 dark:text-slate-400">
-              {{ group.category.text }}
+            <span class="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight leading-none">
+              AQI
             </span>
           </div>
-        </div>
-        <div class="flex-shrink-0 w-2.5 flex items-center justify-center">
-          <div class="w-1.5 h-16 rounded-full bg-slate-200/50 dark:bg-brand-navy-800/40 relative overflow-hidden">
-            <div
-              class="absolute w-full rounded-full"
-              :class="group.category.progressClass"
-              :style="{
-                bottom: '0px',
-                height: Math.min(100, Math.max(15, (group.avgAqi / 300) * 100)) + '%'
-              }"
-            />
-          </div>
+          <span class="text-[9.5px] font-bold mt-1 leading-tight text-slate-500 dark:text-slate-400">
+            {{ group.category.text }}
+          </span>
         </div>
       </div>
     </div>
@@ -446,7 +438,7 @@ onUnmounted(() => {
         <!-- Indeks Kualitas Udara (AQI) tab -->
         <button
           @click="activePollutant = 'AQI'"
-          class="flex-shrink-0 px-3.5 py-2.5 text-[9.5px] font-black rounded-xl transition-all duration-150 uppercase tracking-wider border cursor-pointer text-left w-full flex items-center justify-between"
+          class="flex-shrink-0 px-3.5 py-2.5 text-[9.5px] font-black rounded-[4px] transition-all duration-150 uppercase tracking-wider border cursor-pointer text-left w-full flex items-center justify-between"
           :class="activePollutant === 'AQI'
             ? 'bg-blue-500/15 dark:bg-brand-cyan/10 border-blue-400/60 dark:border-brand-cyan/40 text-blue-600 dark:text-brand-cyan shadow-sm shadow-blue-500/5'
             : 'bg-slate-100/60 dark:bg-brand-navy-900/60 border-transparent hover:bg-slate-200/50 dark:hover:bg-brand-navy-800/50 text-slate-600 dark:text-slate-300'"
@@ -461,7 +453,7 @@ onUnmounted(() => {
             v-for="p in ['O₃', 'PM 2.5', 'PM 10', 'NO₂', 'CO', 'SO₂']"
             :key="p"
             @click="activePollutant = p as any"
-            class="flex-shrink-0 px-2 py-2.5 text-[9.5px] font-black rounded-xl transition-all duration-150 uppercase tracking-wider border cursor-pointer text-center flex items-center justify-center"
+            class="flex-shrink-0 px-2 py-2.5 text-[9.5px] font-black rounded-[4px] transition-all duration-150 uppercase tracking-wider border cursor-pointer text-center flex items-center justify-center"
             :class="activePollutant === p
               ? 'bg-blue-500/15 dark:bg-brand-cyan/10 border-blue-400/60 dark:border-brand-cyan/40 text-blue-600 dark:text-brand-cyan shadow-sm shadow-blue-500/5'
               : 'bg-slate-100/60 dark:bg-brand-navy-900/60 border-transparent hover:bg-slate-200/50 dark:hover:bg-brand-navy-800/50 text-slate-600 dark:text-slate-300'"
@@ -478,7 +470,7 @@ onUnmounted(() => {
           <button
             v-if="canScrollLeft"
             @click="scrollLeftBtn"
-            class="absolute left-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-xl bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
+            class="absolute left-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-[4px] bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
           >
             <ChevronLeft class="w-4 h-4" />
           </button>
@@ -487,7 +479,7 @@ onUnmounted(() => {
           <button
             v-if="canScrollRight"
             @click="scrollRightBtn"
-            class="absolute right-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-xl bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
+            class="absolute right-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-[4px] bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
           >
             <ChevronRight class="w-4 h-4" />
           </button>
@@ -509,7 +501,7 @@ onUnmounted(() => {
                 top: (tooltipTop + 38) + 'px',
               }"
             >
-              <div class="relative px-3 py-2.5 rounded-xl shadow-lg border text-left min-w-[180px]
+              <div class="relative px-3 py-2.5 rounded-[4px] shadow-lg border text-left min-w-[180px]
                 bg-white/95 border-slate-100/80 shadow-slate-200/60
                 dark:bg-brand-navy-900/95 dark:border-brand-navy-700/60 dark:shadow-brand-navy-950/80
                 backdrop-blur-md"
@@ -733,39 +725,39 @@ onUnmounted(() => {
     <div class="flex items-center justify-between flex-wrap gap-3 mt-3 pt-3 border-t border-slate-100/40 dark:border-brand-navy-800/30 text-[9px] font-bold text-slate-400 dark:text-slate-500 select-none">
       <div v-if="activePollutant === 'AQI'" class="flex items-center flex-wrap gap-x-4 gap-y-1">
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#10b981] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#10b981] block"></span>
           <span>Baik</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#eab308] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#eab308] block"></span>
           <span>Sedang</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#f97316] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#f97316] block"></span>
           <span class="whitespace-nowrap">Kurang Sehat</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#ef4444] block"></span>
           <span>Tidak Sehat</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#a855f7] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#a855f7] block"></span>
           <span class="whitespace-nowrap">Sangat Tidak Sehat</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#881337] block"></span>
+          <span class="w-2.5 h-2.5 rounded-[2px] bg-[#881337] block"></span>
           <span>Berbahaya</span>
         </div>
       </div>
       <div v-else class="flex items-center gap-1.5">
-        <span class="w-2.5 h-2.5 rounded-full block animate-fade-in" :style="{ backgroundColor: getPollutantColor(activePollutant) }"></span>
+        <span class="w-2.5 h-2.5 rounded-[2px] block animate-fade-in" :style="{ backgroundColor: getPollutantColor(activePollutant) }"></span>
         <span class="text-slate-700 dark:text-slate-300 font-bold text-[10px] animate-fade-in">{{ activePollutant }}</span>
       </div>
       <div class="text-[8.5px] font-semibold text-slate-400">Unit: ppb / µg/m³ (mikrogram per meter kubik)</div>
     </div>
 
     <!-- Detailed Conditions Card (Moved below Legend Footer) -->
-    <div class="mt-4 bg-slate-50/50 dark:bg-brand-navy-800/20 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-4 flex flex-col gap-4">
+    <div class="mt-4 bg-slate-50/50 dark:bg-brand-navy-800/20 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-4 flex flex-col gap-4">
       <!-- Description Section -->
       <div>
         <div class="flex items-center gap-1.5 mb-2">
@@ -783,27 +775,27 @@ onUnmounted(() => {
           Polutan Utama saat ini: PM2.5 {{ chartSlots[0]?.values.pm25 ?? 68 }} µg/m³
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-[10px] text-slate-600 dark:text-slate-300">
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">O₃</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5">{{ chartSlots[0]?.values.o3 ?? 24 }} ppb</div>
           </div>
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">PM 2.5</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5 text-blue-600 dark:text-brand-cyan">{{ chartSlots[0]?.values.pm25 ?? 67.9 }} µg/m³</div>
           </div>
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">PM 10</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5">{{ chartSlots[0]?.values.pm10 ?? 19.5 }} µg/m³</div>
           </div>
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">NO₂</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5">{{ chartSlots[0]?.values.no2 ?? 9 }} ppb</div>
           </div>
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">CO</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5">{{ chartSlots[0]?.values.co ?? 831 }} ppb</div>
           </div>
-          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-xl p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
+          <div class="bg-white/50 dark:bg-brand-navy-900/30 border border-slate-100/30 dark:border-brand-navy-700/10 rounded-[4px] p-2 select-none transition-colors hover:bg-white/80 dark:hover:bg-brand-navy-900/50">
             <div class="font-bold text-[8.5px] text-slate-400 dark:text-slate-500">SO₂</div>
             <div class="font-black text-slate-700 dark:text-slate-200 mt-0.5">{{ chartSlots[0]?.values.so2 ?? 7 }} ppb</div>
           </div>

@@ -75,7 +75,7 @@ const handleLogin = () => {
       v-if="showCloseButton"
       id="login-close-button"
       @click="emit('close')"
-      class="absolute top-6 right-6 p-2.5 rounded-full transition-all duration-300 z-50 cursor-pointer
+      class="absolute top-6 right-6 p-2.5 rounded-[4px] transition-all duration-300 z-50 cursor-pointer
         bg-white/80 border border-slate-200/60 text-slate-500 hover:bg-slate-100 hover:text-slate-800 hover:scale-105 active:scale-95
         dark:bg-brand-navy-900/60 dark:border-brand-navy-800 dark:text-slate-400 dark:hover:bg-brand-navy-800 dark:hover:text-white"
       title="Kembali ke Beranda"
@@ -84,7 +84,7 @@ const handleLogin = () => {
     </button>
 
     <!-- Main Container: Split screen Card -->
-    <div class="w-full max-w-4xl min-h-[550px] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row transition-all duration-300 border backdrop-blur-md
+    <div class="w-full max-w-4xl min-h-[550px] rounded-[4px] overflow-hidden shadow-2xl flex flex-col md:flex-row transition-all duration-300 border backdrop-blur-md
       bg-white/80 border-slate-200/50
       dark:bg-brand-navy-900/40 dark:border-brand-navy-800/40">
       
@@ -125,7 +125,7 @@ const handleLogin = () => {
         <!-- Center: Dynamic Taglines & Visual Elements -->
         <div class="z-10 my-8 space-y-5">
           <div class="space-y-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-white/10 dark:bg-brand-cyan/10 text-blue-200 dark:text-brand-cyan">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] text-[9px] font-bold uppercase tracking-wider bg-white/10 dark:bg-brand-cyan/10 text-blue-200 dark:text-brand-cyan">
               <Shield class="w-3 h-3" />
               Sistem Akses Internal
             </span>

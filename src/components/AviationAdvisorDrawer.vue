@@ -136,7 +136,7 @@ const getPulseClass = (status: string) => {
             <!-- Title & Icon Row -->
             <div class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/30">
               <template v-if="activeAdvisorSector">
-                <div class="p-2.5 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-blue-500/10 dark:from-indigo-400/20 dark:to-blue-400/10 flex items-center justify-center border border-indigo-500/25 dark:border-indigo-400/25 shrink-0 shadow-sm">
+                <div class="p-2.5 rounded-[4px] bg-gradient-to-br from-indigo-500/20 to-blue-500/10 dark:from-indigo-400/20 dark:to-blue-400/10 flex items-center justify-center border border-indigo-500/25 dark:border-indigo-400/25 shrink-0 shadow-sm">
                   <component :is="getSectorIcon(activeAdvisorSector.id)" class="w-5 h-5" :class="activeAdvisorSector.textColor" />
                 </div>
                 <div class="text-left min-w-0 flex-grow">
@@ -147,7 +147,7 @@ const getPulseClass = (status: string) => {
                 </div>
               </template>
               <template v-else-if="localSectors.length > 0">
-                <div class="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 dark:from-amber-400/20 dark:to-orange-400/10 flex items-center justify-center border border-amber-500/25 dark:border-amber-400/25 shrink-0 shadow-sm">
+                <div class="p-2.5 rounded-[4px] bg-gradient-to-br from-amber-500/20 to-orange-500/10 dark:from-amber-400/20 dark:to-orange-400/10 flex items-center justify-center border border-amber-500/25 dark:border-amber-400/25 shrink-0 shadow-sm">
                   <Sparkles class="w-5 h-5 text-amber-500" />
                 </div>
                 <div class="text-left min-w-0 flex-grow">
@@ -200,7 +200,7 @@ const getPulseClass = (status: string) => {
 
               <!-- ── RISK BANNER ── -->
               <div
-                class="relative rounded-2xl overflow-hidden border p-4"
+                class="relative rounded-[4px] overflow-hidden border p-4"
                 :class="activeAdvisorSector!.riskLevel === 'Rendah'
                   ? 'bg-gradient-to-br from-emerald-50 to-teal-50/30 border-emerald-200/60 dark:from-emerald-950/30 dark:to-teal-950/20 dark:border-emerald-800/30'
                   : activeAdvisorSector!.riskLevel === 'Sedang'

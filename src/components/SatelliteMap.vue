@@ -261,7 +261,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-2xl p-6 shadow-sm backdrop-blur-md">
+  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-6 shadow-sm backdrop-blur-md">
     <!-- Header Area -->
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>
@@ -276,7 +276,7 @@ onUnmounted(() => {
       <div ref="dropdownRef" class="relative z-50 shrink-0">
         <button
           @click="toggleDropdown"
-          class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer select-none
+          class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-[4px] border transition-all cursor-pointer select-none
             bg-slate-100/60 border-transparent hover:bg-slate-200/50 text-slate-700
             dark:bg-brand-navy-900/60 dark:hover:bg-brand-navy-800/50 dark:text-slate-200"
         >
@@ -299,7 +299,7 @@ onUnmounted(() => {
         >
           <div
             v-if="isDropdownOpen"
-            class="absolute right-0 mt-2 w-48 rounded-xl shadow-lg border overflow-hidden py-1.5 z-50
+            class="absolute right-0 mt-2 w-48 rounded-[4px] shadow-lg border overflow-hidden py-1.5 z-50
               bg-white/95 border-slate-100 backdrop-blur-md
               dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
           >
@@ -322,7 +322,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Map container -->
-    <div class="relative w-full h-[280px] rounded-2xl overflow-hidden bg-slate-900 select-none shadow-inner border border-transparent">
+    <div class="relative w-full h-[280px] rounded-[4px] overflow-hidden bg-slate-900 select-none shadow-inner border border-transparent">
       <!-- Radar grid mesh overlay -->
       <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
       
@@ -363,7 +363,7 @@ onUnmounted(() => {
           ></span>
           
           <span 
-            class="absolute top-4.5 px-2.5 py-0.5 backdrop-blur-sm rounded-full text-[10px] font-semibold whitespace-nowrap shadow-md"
+            class="absolute top-4.5 px-2.5 py-0.5 backdrop-blur-sm rounded-[4px] text-[10px] font-semibold whitespace-nowrap shadow-md"
             :class="isSelectedCity(city.name) ? 'bg-yellow-400 text-slate-900 border border-yellow-200' : 'bg-slate-900/90 border border-slate-700/40 text-white'"
           >
             {{ city.name }}
@@ -371,7 +371,7 @@ onUnmounted(() => {
 
           <div 
             v-if="activeTooltipCity === city.name" 
-            class="absolute bottom-9 left-1/2 -translate-x-1/2 w-36 rounded-xl p-3.5 z-30 shadow-2xl border text-white backdrop-blur-md animate-fade-in pointer-events-none"
+            class="absolute bottom-9 left-1/2 -translate-x-1/2 w-36 rounded-[4px] p-3.5 z-30 shadow-2xl border text-white backdrop-blur-md animate-fade-in pointer-events-none"
             :class="isSelectedCity(city.name) ? 'bg-yellow-950/90 border-yellow-600/40' : 'bg-slate-950/90 border-slate-800/40'"
           >
             <h5 class="text-xs font-bold tracking-wider border-b pb-1.5 mb-2 flex items-center justify-between"
@@ -398,7 +398,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Floating Metadata Corner Badge (bottom-left) -->
-      <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-xl p-2.5 text-white font-medium flex items-center gap-2 max-w-[170px] pointer-events-none z-20">
+      <div class="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-[4px] p-2.5 text-white font-medium flex items-center gap-2 max-w-[170px] pointer-events-none z-20">
         <Activity class="w-3.5 h-3.5 text-brand-cyan animate-pulse shrink-0" />
         <div class="min-w-0">
           <p class="text-[8px] text-slate-400 font-bold tracking-widest uppercase leading-none">Satelit Aktif</p>
@@ -408,7 +408,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Live / Playback badge (top-right) -->
-      <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-full px-2.5 py-1 text-white font-medium flex items-center gap-1.5 pointer-events-none text-[8px] z-20">
+      <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-[4px] px-2.5 py-1 text-white font-medium flex items-center gap-1.5 pointer-events-none text-[8px] z-20">
         <span 
           class="w-1.5 h-1.5 rounded-full"
           :class="selectedTimeIndex === 5 ? 'bg-emerald-500 animate-ping' : 'bg-amber-500'"
@@ -419,7 +419,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Floating Timeline Controller (bottom-right) -->
-      <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-xl p-1.5 text-white flex items-center gap-2 z-20 shadow-lg">
+      <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-[4px] p-1.5 text-white flex items-center gap-2 z-20 shadow-lg">
         <div class="relative group flex-shrink-0">
           <button 
             @click="togglePlay"

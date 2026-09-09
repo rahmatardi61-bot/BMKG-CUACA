@@ -31,12 +31,12 @@ const submitFeedback = () => {
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 dark:bg-brand-cyan/3 blur-[160px] pointer-events-none -z-10"></div>
 
     <!-- Main Frosted Glass Card -->
-    <div class="max-w-xl w-full text-center space-y-8 relative z-10 px-6 sm:px-10 py-12 rounded-[2.5rem] border backdrop-blur-2xl shadow-2xl transition-all duration-500
+    <div class="max-w-xl w-full text-center space-y-8 relative z-10 px-6 sm:px-10 py-12 rounded-[4px] border backdrop-blur-2xl shadow-2xl transition-all duration-500
       bg-white/50 border-white/60 shadow-slate-100/40
       dark:bg-brand-navy-900/20 dark:border-brand-navy-800/40 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
       
       <!-- Status Badge -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest shadow-sm
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] border text-[10px] font-black uppercase tracking-widest shadow-sm
         bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400">
         <span class="relative flex h-2 w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
@@ -83,7 +83,7 @@ const submitFeedback = () => {
       <!-- Telemetry Dashboard Metrics Grid -->
       <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto text-left">
         <!-- Stat 1: Status -->
-        <div class="p-3.5 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
+        <div class="p-3.5 rounded-[4px] border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
           <div class="flex items-center gap-1.5 text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
             <Activity class="w-3 h-3 text-blue-500 dark:text-brand-cyan shrink-0" />
             <span>Status</span>
@@ -91,7 +91,7 @@ const submitFeedback = () => {
           <p class="text-[11px] font-black text-slate-800 dark:text-white mt-2 leading-none">Sinkronisasi</p>
         </div>
         <!-- Stat 2: Database -->
-        <div class="p-3.5 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
+        <div class="p-3.5 rounded-[4px] border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
           <div class="flex items-center gap-1.5 text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
             <Layers class="w-3 h-3 text-cyan-500 dark:text-brand-cyan shrink-0" />
             <span>Proses</span>
@@ -99,7 +99,7 @@ const submitFeedback = () => {
           <p class="text-[11px] font-black text-slate-800 dark:text-white mt-2 leading-none">Fase Migrasi</p>
         </div>
         <!-- Stat 3: Latency -->
-        <div class="p-3.5 rounded-2xl border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
+        <div class="p-3.5 rounded-[4px] border bg-white/40 dark:bg-brand-navy-900/10 border-slate-200/50 dark:border-brand-navy-900/60 shadow-2xs">
           <div class="flex items-center gap-1.5 text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
             <Wifi class="w-3 h-3 text-emerald-500 shrink-0" />
             <span>Jaringan</span>
@@ -109,13 +109,13 @@ const submitFeedback = () => {
       </div>
 
       <!-- Animated Progress Bar -->
-      <div class="max-w-sm mx-auto p-4 rounded-2xl border bg-slate-50/40 border-slate-200/50 dark:bg-brand-navy-900/10 dark:border-brand-navy-900/60 space-y-2">
+      <div class="max-w-sm mx-auto p-4 rounded-[4px] border bg-slate-50/40 border-slate-200/50 dark:bg-brand-navy-900/10 dark:border-brand-navy-900/60 space-y-2">
         <div class="flex items-center justify-between text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
           <span>Persentase Pengembangan</span>
           <span class="text-blue-600 dark:text-brand-cyan font-black">85% Selesai</span>
         </div>
-        <div class="w-full h-2 bg-slate-200 dark:bg-brand-navy-950 rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-brand-cyan dark:to-blue-500 rounded-full w-[85%] relative">
+        <div class="w-full h-2 bg-slate-200 dark:bg-brand-navy-950 rounded-[4px] overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-brand-cyan dark:to-blue-500 rounded-[4px] w-[85%] relative">
             <!-- Animated progress bar overlay pattern -->
             <div class="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.15)_50%,rgba(255,255,255,0.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-bar-stripes_1s_linear_infinite]"></div>
           </div>
@@ -169,7 +169,7 @@ const submitFeedback = () => {
               </button>
             </form>
           </div>
-          <div v-else class="p-4 rounded-2xl border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 animate-fade-in text-left">
+          <div v-else class="p-4 rounded-[4px] border flex items-center gap-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 animate-fade-in text-left">
             <CheckCircle2 class="w-5 h-5 shrink-0" />
             <div>
               <p class="text-xs font-bold leading-none">Terima Kasih!</p>

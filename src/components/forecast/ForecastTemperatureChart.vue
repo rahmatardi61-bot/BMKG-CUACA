@@ -46,7 +46,8 @@ const canScrollRight = ref(true);
 
 // Today ISO date YYYY-MM-DD
 const todayIso = computed(() => {
-  return props.currentTime.toISOString().slice(0, 10);
+  const d = props.currentTime;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 });
 
 // Watch selected date to notify parent container for header date updates
@@ -76,22 +77,6 @@ const getGustVal = (slot: any) => {
   const gustFactor = 1.35 + 0.25 * Math.sin(h * 0.4);
   return Math.round(baseSpeed * gustFactor + 2);
 };
-
-const absoluteMaxWind = computed(() => {
-  const vals = tempDayGroups.value.map(g => g.maxVal);
-  return Math.max(...vals, 30);
-});
-
-const getWindBarBottom = (min: number) => {
-  const scale = absoluteMaxWind.value;
-  return (min / scale) * 100;
-};
-
-const getWindBarHeight = (min: number, max: number) => {
-  const scale = absoluteMaxWind.value;
-  return Math.max(15, ((max - min) / scale) * 100);
-};
-
 // Group forecast slots by calendar date
 const tempDayGroups = computed(() => {
   const map = new Map<string, HourlyForecast[]>();
@@ -313,7 +298,7 @@ const getIconColor = (iconName: string, isHovered: boolean) => {
 };
 
 const getIconGlassStyle = (iconName: string, isHovered: boolean) => {
-  const base = 'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 backdrop-blur-[6px] border shadow-[0_2px_8px_rgba(0,0,0,0.03),_inset_0_1px_0_rgba(255,255,255,0.2)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),_inset_0_1px_0_rgba(255,255,255,0.05)]';
+  const base = 'w-8 h-8 rounded-[4px] flex items-center justify-center transition-all duration-300 backdrop-blur-[6px] border shadow-[0_2px_8px_rgba(0,0,0,0.03),_inset_0_1px_0_rgba(255,255,255,0.2)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2),_inset_0_1px_0_rgba(255,255,255,0.05)]';
   
   if (isHovered) {
     switch (iconName) {
@@ -479,7 +464,7 @@ onUnmounted(() => {
         v-for="group in tempDayGroups"
         :key="group.date"
         @click="selectedDate = group.date"
-        class="flex-shrink-0 w-[108px] rounded-2xl p-3 cursor-pointer transition-all duration-200 border select-none text-left"
+        class="flex-shrink-0 w-[108px] rounded-[4px] p-3 cursor-pointer transition-all duration-200 border select-none text-left"
         :class="selectedDate === group.date
           ? 'bg-blue-500/15 dark:bg-brand-cyan/10 border-blue-400/60 dark:border-brand-cyan/40 shadow-md shadow-blue-500/10'
           : 'bg-slate-50/60 dark:bg-brand-navy-800/30 border-slate-100/60 dark:border-brand-navy-700/30 hover:bg-blue-50/40 dark:hover:bg-brand-navy-800/60'"
@@ -510,55 +495,29 @@ onUnmounted(() => {
               :class="selectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-500 dark:text-slate-400'"
             >{{ group.maxProb }}%</span>
           </div>
-          <div class="mt-2 flex gap-0.5 items-end h-5">
-            <div
-              v-for="(v, si) in group.spark"
-              :key="si"
-              class="flex-1 rounded-sm transition-all duration-300"
-              :class="selectedDate === group.date ? 'bg-blue-400/70 dark:bg-brand-cyan/60' : 'bg-slate-300/60 dark:bg-slate-600/50'"
-              :style="{ 
-                height: activeTab === 'Kelembapan' 
-                  ? Math.max(2, (v / 100) * 20) + 'px' 
-                  : Math.max(2, ((v - 10) / 30) * 20) + 'px'
-              }"
-            />
-          </div>
         </div>
         <!-- If wind (Angin) tab -->
-        <div v-else class="flex items-stretch justify-between h-full gap-1 w-full text-left">
-          <div class="flex-grow">
-            <div class="text-[9px] font-black uppercase tracking-wider mb-0.5"
-              :class="selectedDate === group.date ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'"
-            >
-              {{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}
-            </div>
-            <div class="text-sm font-black mb-1"
-              :class="selectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-700 dark:text-slate-200'"
-            >
-              {{ new Date(group.date).getDate() }}
-            </div>
-            <div class="flex flex-col gap-0.5 mt-1">
-              <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-none">
-                {{ group.maxVal }} <span class="text-[8px] font-semibold text-slate-400 dark:text-slate-500">km/j</span>
-              </span>
-              <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none">
-                {{ group.minVal }} <span class="text-[8px] font-medium">km/j</span>
-              </span>
-              <span class="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 mt-1.5 leading-none whitespace-nowrap">
-                Hembusan: {{ Math.round(group.maxVal * 1.5 + 2) }}
-              </span>
-            </div>
+        <div v-else class="w-full text-left">
+          <div class="text-[9px] font-black uppercase tracking-wider mb-0.5"
+            :class="selectedDate === group.date ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'"
+          >
+            {{ new Date(group.date).toLocaleDateString('id-ID', { weekday: 'short' }) }}
           </div>
-          <div class="flex-shrink-0 w-2.5 flex items-center justify-center">
-            <div class="w-1.5 h-16 rounded-full bg-slate-200/50 dark:bg-brand-navy-800/40 relative overflow-hidden">
-              <div
-                class="absolute w-full rounded-full bg-blue-500 dark:bg-brand-cyan"
-                :style="{
-                  bottom: getWindBarBottom(group.minVal) + '%',
-                  height: getWindBarHeight(group.minVal, group.maxVal) + '%'
-                }"
-              />
-            </div>
+          <div class="text-sm font-black mb-1"
+            :class="selectedDate === group.date ? 'text-blue-600 dark:text-brand-cyan' : 'text-slate-700 dark:text-slate-200'"
+          >
+            {{ new Date(group.date).getDate() }}
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1">
+            <span class="text-xs font-black text-slate-800 dark:text-slate-100 leading-none">
+              {{ group.maxVal }} <span class="text-[8px] font-semibold text-slate-400 dark:text-slate-500">km/j</span>
+            </span>
+            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-none">
+              {{ group.minVal }} <span class="text-[8px] font-medium">km/j</span>
+            </span>
+            <span class="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 mt-1.5 leading-none whitespace-nowrap">
+              Hembusan: {{ Math.round(group.maxVal * 1.5 + 2) }}
+            </span>
           </div>
         </div>
       </div>
@@ -591,7 +550,7 @@ onUnmounted(() => {
       <button
         v-if="canScrollLeft"
         @click="scrollLeftBtn"
-        class="absolute left-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-xl bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
+        class="absolute left-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-[4px] bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
       >
         <ChevronLeft class="w-4 h-4" />
       </button>
@@ -600,7 +559,7 @@ onUnmounted(() => {
       <button
         v-if="canScrollRight"
         @click="scrollRightBtn"
-        class="absolute right-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-xl bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
+        class="absolute right-1 top-1/2 -translate-y-1/2 z-40 p-2 rounded-[4px] bg-white/90 dark:bg-brand-navy-900/90 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-brand-navy-700/40 shadow-md hover:scale-105 active:scale-95 transition-transform duration-150 focus:outline-none cursor-pointer"
       >
         <ChevronRight class="w-4 h-4" />
       </button>
@@ -644,7 +603,7 @@ onUnmounted(() => {
               }"
               style="will-change: transform;"
             >
-              <div class="relative px-3 py-2.5 rounded-xl shadow-lg border text-left min-w-[180px]
+              <div class="relative px-3 py-2.5 rounded-[4px] shadow-lg border text-left min-w-[180px]
                 bg-white/95 border-slate-100/80 shadow-slate-200/60
                 dark:bg-brand-navy-900/95 dark:border-brand-navy-700/60 dark:shadow-brand-navy-950/80
                 backdrop-blur-md"

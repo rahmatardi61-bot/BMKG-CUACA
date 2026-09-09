@@ -198,8 +198,8 @@ watch(
 const updateMapTheme = () => {
   if (!leafletMap) return;
   const isDarkMode = document.documentElement.classList.contains('dark');
-  const lightUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-  const darkUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png';
+  const lightUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const darkUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
   const selectedUrl = isDarkMode ? darkUrl : lightUrl;
 
   if (tileLayer) {
@@ -207,7 +207,8 @@ const updateMapTheme = () => {
   }
 
   tileLayer = L.tileLayer(selectedUrl, {
-    maxZoom: 18
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors &copy; ESRI'
   }).addTo(leafletMap);
 };
 
@@ -507,11 +508,11 @@ const getMmiWidth = (mmi: string) => {
 
 <template>
   <div 
-    class="relative w-full rounded-3xl p-5 overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl text-left bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50"
+    class="relative w-full rounded-[4px] p-5 overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl text-left bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50"
   >
     <!-- Top Glow Border Line -->
     <div 
-      class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent rounded-t-2xl"
+      class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent rounded-t-[4px]"
       :class="{
         'via-red-500/50 dark:via-red-500/40': seismicInfo.status === 'Tinggi',
         'via-amber-500/50 dark:via-amber-500/40': seismicInfo.status === 'Sedang',
@@ -530,7 +531,7 @@ const getMmiWidth = (mmi: string) => {
     <!-- Header -->
     <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-brand-navy-800/60 relative z-20">
       <div class="flex items-center gap-2">
-        <div class="p-2 rounded-xl bg-red-500/10 text-red-500 dark:text-red-400">
+        <div class="p-2 rounded-[4px] bg-red-500/10 text-red-500 dark:text-red-400">
           <Activity class="w-4 h-4" />
         </div>
         <div>
@@ -555,7 +556,7 @@ const getMmiWidth = (mmi: string) => {
           <button
             type="button"
             @click="openMapModal"
-            class="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 border border-cyan-400/30 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer shadow-md shadow-cyan-500/30 hover:shadow-cyan-500/50"
+            class="w-8 h-8 rounded-[4px] bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 border border-cyan-400/30 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer shadow-md shadow-cyan-500/30 hover:shadow-cyan-500/50"
           >
             <Globe class="w-4 h-4" />
           </button>
@@ -569,7 +570,7 @@ const getMmiWidth = (mmi: string) => {
     <!-- Gempa Terakhir Nasional Banner -->
     <div 
       v-if="latestGlobalEvent"
-      class="bg-slate-50/70 dark:bg-brand-navy-950/30 border border-slate-100 dark:border-brand-navy-800/30 hover:border-red-500/20 dark:hover:border-red-500/30 rounded-2xl p-3.5 mb-4 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-brand-navy-850/30 transition-all duration-300 relative z-10 group active:scale-[0.99]"
+      class="bg-slate-50/70 dark:bg-brand-navy-950/30 border border-slate-100 dark:border-brand-navy-800/30 hover:border-red-500/20 dark:hover:border-red-500/30 rounded-[4px] p-3.5 mb-4 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-brand-navy-850/30 transition-all duration-300 relative z-10 group active:scale-[0.99]"
       @click="openDetailModal(latestGlobalEvent)"
     >
       <div class="flex items-center justify-between mb-2">
@@ -586,7 +587,7 @@ const getMmiWidth = (mmi: string) => {
       
       <div class="flex items-center gap-3">
         <!-- magnitude badge -->
-        <div class="w-10 h-10 rounded-2xl flex flex-col items-center justify-center shrink-0 border bg-red-500/5 border-red-500/25 text-red-500 dark:text-red-400">
+        <div class="w-10 h-10 rounded-[4px] flex flex-col items-center justify-center shrink-0 border bg-red-500/5 border-red-500/25 text-red-500 dark:text-red-400">
           <span class="text-[7.5px] font-black leading-none uppercase tracking-wider">Mag</span>
           <span class="text-xs font-black tracking-tight mt-0.5">{{ latestGlobalEvent.magnitude.toFixed(1) }}</span>
         </div>
@@ -606,7 +607,7 @@ const getMmiWidth = (mmi: string) => {
 
     <!-- Hazard Zone Description Banner -->
     <div 
-      class="flex gap-2.5 p-3.5 rounded-2xl border mb-5 transition-all duration-300 relative z-10"
+      class="flex gap-2.5 p-3.5 rounded-[4px] border mb-5 transition-all duration-300 relative z-10"
       :class="getHazardBadgeClass(seismicInfo.status)"
     >
       <div class="relative flex h-2.5 w-2.5 mt-1 shrink-0">
@@ -647,11 +648,11 @@ const getMmiWidth = (mmi: string) => {
         <!-- Skeleton rows mimicking earthquake list items -->
         <div
           v-for="i in 3" :key="i"
-          class="flex items-center gap-3 py-2.5 px-2 rounded-2xl"
+          class="flex items-center gap-3 py-2.5 px-2 rounded-[4px]"
           :style="{ animationDelay: `${(i - 1) * 150}ms` }"
         >
           <!-- Dot / icon placeholder -->
-          <div class="sk-block skeleton-shimmer w-9 h-9 rounded-xl shrink-0" :style="{ animationDelay: `${(i - 1) * 150}ms` }"></div>
+          <div class="sk-block skeleton-shimmer w-9 h-9 rounded-[4px] shrink-0" :style="{ animationDelay: `${(i - 1) * 150}ms` }"></div>
           <!-- Text lines -->
           <div class="flex-1 space-y-2">
             <div class="sk-bar skeleton-shimmer h-2.5" :class="i === 1 ? 'w-3/4' : i === 2 ? 'w-2/3' : 'w-1/2'" :style="{ animationDelay: `${(i - 1) * 150 + 60}ms` }"></div>
@@ -672,7 +673,7 @@ const getMmiWidth = (mmi: string) => {
           :key="eq.id"
           type="button"
           @click="openDetailModal(eq)"
-          class="eq-list-item relative w-full flex items-center gap-3 py-2.5 px-2 rounded-2xl text-left cursor-pointer group active:scale-[0.99] transition-all duration-300"
+          class="eq-list-item relative w-full flex items-center gap-3 py-2.5 px-2 rounded-[4px] text-left cursor-pointer group active:scale-[0.99] transition-all duration-300"
           :class="[
             'hover:bg-slate-50/80 dark:hover:bg-brand-navy-800/30',
             idx === 0 ? 'eq-item-1' : idx === 1 ? 'eq-item-2' : 'eq-item-3'
@@ -692,7 +693,7 @@ const getMmiWidth = (mmi: string) => {
 
           <!-- Magnitude badge with glow -->
           <div 
-            class="relative w-10 h-10 rounded-2xl flex flex-col items-center justify-center shrink-0 border transition-all duration-300 group-hover:scale-110 z-10"
+            class="relative w-10 h-10 rounded-[4px] flex flex-col items-center justify-center shrink-0 border transition-all duration-300 group-hover:scale-110 z-10"
             :class="[
               eq.magnitude >= 6 
                 ? 'bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)] group-hover:shadow-[0_0_20px_rgba(239,68,68,0.35)]' 
@@ -706,7 +707,7 @@ const getMmiWidth = (mmi: string) => {
             <!-- Pulse ring for high magnitude -->
             <span 
               v-if="eq.magnitude >= 5" 
-              class="absolute inset-0 rounded-2xl animate-ping opacity-20"
+              class="absolute inset-0 rounded-[4px] animate-ping opacity-20"
               :class="eq.magnitude >= 6 ? 'bg-red-500' : 'bg-amber-500'"
             ></span>
             <span class="text-[7px] font-black leading-none uppercase tracking-wider">Mag</span>
@@ -788,7 +789,7 @@ const getMmiWidth = (mmi: string) => {
                 v-if="isMapModalOpen"
                 :class="[
                   isDrawerMinimized ? 'h-[88px] max-h-[88px]' : 'h-[75vh] max-h-[75vh]',
-                  'w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/10 dark:border-brand-navy-850/50 shadow-2xl rounded-3xl flex flex-col overflow-hidden text-left pointer-events-auto md:h-full md:max-h-[calc(100vh-140px)] animate-fade-in transition-all duration-300'
+                  'w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/10 dark:border-brand-navy-850/50 shadow-2xl rounded-[4px] flex flex-col overflow-hidden text-left pointer-events-auto md:h-full md:max-h-[calc(100vh-140px)] animate-fade-in transition-all duration-300'
                 ]"
               >
                 <!-- Drag Handle / Visual top line -->
@@ -808,7 +809,7 @@ const getMmiWidth = (mmi: string) => {
                   ]"
                 >
                   <div class="flex items-center gap-2">
-                    <div class="p-2 rounded-xl bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/10">
+                    <div class="p-2 rounded-[4px] bg-gradient-to-br from-cyan-500/15 to-blue-500/10 text-cyan-500 dark:text-cyan-400 border border-cyan-500/10">
                       <Globe class="w-4.5 h-4.5" />
                     </div>
                     <div>
@@ -847,7 +848,7 @@ const getMmiWidth = (mmi: string) => {
                       :key="eq.id"
                       type="button"
                       @click="flyToEpicenter(eq)"
-                      class="map-eq-item relative w-full flex items-center gap-3 py-2.5 px-2 rounded-2xl text-left cursor-pointer group active:scale-[0.99] transition-all duration-200 hover:bg-slate-50/80 dark:hover:bg-brand-navy-800/30"
+                      class="map-eq-item relative w-full flex items-center gap-3 py-2.5 px-2 rounded-[4px] text-left cursor-pointer group active:scale-[0.99] transition-all duration-200 hover:bg-slate-50/80 dark:hover:bg-brand-navy-800/30"
                       :style="{ animationDelay: `${idx * 60}ms` }"
                     >
                       <!-- Left accent bar -->
@@ -863,7 +864,7 @@ const getMmiWidth = (mmi: string) => {
 
                       <!-- Magnitude badge with glow -->
                       <div 
-                        class="relative w-10 h-10 rounded-2xl flex flex-col items-center justify-center shrink-0 border transition-all duration-300 group-hover:scale-110 z-10"
+                        class="relative w-10 h-10 rounded-[4px] flex flex-col items-center justify-center shrink-0 border transition-all duration-300 group-hover:scale-110 z-10"
                         :class="[
                           eq.magnitude >= 6 
                             ? 'bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.15)] group-hover:shadow-[0_0_18px_rgba(239,68,68,0.30)]' 
@@ -877,7 +878,7 @@ const getMmiWidth = (mmi: string) => {
                         <!-- Pulse ring for M≥5 -->
                         <span 
                           v-if="eq.magnitude >= 5" 
-                          class="absolute inset-0 rounded-2xl animate-ping opacity-15"
+                          class="absolute inset-0 rounded-[4px] animate-ping opacity-15"
                           :class="eq.magnitude >= 6 ? 'bg-red-500' : 'bg-amber-500'"
                         ></span>
                         <span class="text-[7px] font-black leading-none uppercase tracking-wider">Mag</span>
@@ -927,7 +928,7 @@ const getMmiWidth = (mmi: string) => {
             <Transition name="fade-scale" appear>
               <div 
                 v-if="isMapModalOpen"
-                class="w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/20 dark:border-brand-navy-850/50 shadow-xl rounded-2xl p-3.5 text-slate-800 dark:text-slate-100 transition-all duration-300 pointer-events-auto shrink-0"
+                class="w-full bg-white/90 dark:bg-brand-navy-950/90 backdrop-blur-xl border border-white/20 dark:border-brand-navy-850/50 shadow-xl rounded-[4px] p-3.5 text-slate-800 dark:text-slate-100 transition-all duration-300 pointer-events-auto shrink-0"
                 :class="[isDrawerMinimized ? 'hidden md:block' : 'block']"
               >
                 <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-2.5">
@@ -935,19 +936,19 @@ const getMmiWidth = (mmi: string) => {
                 </span>
                 <div class="grid grid-cols-3 gap-2">
                   <!-- Kuat -->
-                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-b from-red-500/10 to-red-500/5 border border-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.08)]">
+                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-[4px] bg-gradient-to-b from-red-500/10 to-red-500/5 border border-red-500/20 shadow-[0_0_12px_rgba(239,68,68,0.08)]">
                     <div class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
                     <span class="text-[8.5px] font-black text-red-600 dark:text-red-400 leading-none">M ≥ 6.0</span>
                     <span class="text-[7px] font-bold text-red-400/70 dark:text-red-500/60 leading-none uppercase tracking-wide">Kuat</span>
                   </div>
                   <!-- Sedang -->
-                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-b from-amber-500/10 to-amber-500/5 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.08)]">
+                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-[4px] bg-gradient-to-b from-amber-500/10 to-amber-500/5 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.08)]">
                     <div class="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
                     <span class="text-[8.5px] font-black text-amber-600 dark:text-amber-400 leading-none">M ≥ 5.0</span>
                     <span class="text-[7px] font-bold text-amber-400/70 dark:text-amber-500/60 leading-none uppercase tracking-wide">Sedang</span>
                   </div>
                   <!-- Kecil -->
-                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl bg-gradient-to-b from-sky-500/10 to-sky-500/5 border border-sky-500/20 shadow-[0_0_12px_rgba(14,165,233,0.08)]">
+                  <div class="flex flex-col items-center gap-1.5 px-2 py-2 rounded-[4px] bg-gradient-to-b from-sky-500/10 to-sky-500/5 border border-sky-500/20 shadow-[0_0_12px_rgba(14,165,233,0.08)]">
                     <div class="w-3 h-3 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"></div>
                     <span class="text-[8.5px] font-black text-sky-600 dark:text-sky-400 leading-none">M &lt; 5.0</span>
                     <span class="text-[7px] font-bold text-sky-400/70 dark:text-sky-500/60 leading-none uppercase tracking-wide">Kecil</span>
@@ -997,7 +998,7 @@ const getMmiWidth = (mmi: string) => {
               <!-- Title & Icon Row -->
               <div class="flex items-center gap-3.5 pb-3.5 border-b border-slate-100 dark:border-brand-navy-900/30">
                 <div 
-                  class="p-2.5 rounded-2xl flex items-center justify-center border shrink-0 shadow-sm"
+                  class="p-2.5 rounded-[4px] flex items-center justify-center border shrink-0 shadow-sm"
                   :class="selectedEvent.magnitude >= 6 
                     ? 'bg-gradient-to-br from-red-500/20 to-orange-500/10 dark:from-red-400/20 dark:to-orange-400/10 border-red-500/25 dark:border-red-400/25 text-red-500' 
                     : 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10 dark:from-amber-400/20 dark:to-yellow-400/10 border-amber-500/25 dark:border-amber-400/25 text-amber-500'"
@@ -1021,7 +1022,7 @@ const getMmiWidth = (mmi: string) => {
               <!-- 3-Column stats -->
               <div class="grid grid-cols-3 gap-3">
                 <!-- Magnitude -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Kekuatan</span>
                   <div class="my-1.5 flex items-center justify-center relative w-12 h-12">
                     <div 
@@ -1039,7 +1040,7 @@ const getMmiWidth = (mmi: string) => {
                 </div>
 
                 <!-- Depth -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Kedalaman</span>
                   <div class="my-1.5 flex flex-col items-center gap-0.5 justify-center h-12">
                     <Compass class="w-5 h-5 text-indigo-400 dark:text-brand-cyan" />
@@ -1051,7 +1052,7 @@ const getMmiWidth = (mmi: string) => {
                 </div>
 
                 <!-- Tsunami -->
-                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col items-center text-center justify-between">
+                <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-[4px] p-3 flex flex-col items-center text-center justify-between">
                   <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Tsunami</span>
                   <div class="my-1.5 flex flex-col items-center gap-0.5 justify-center h-12">
                     <ShieldCheck v-if="!selectedEvent.tsunamiPotential" class="w-5 h-5 text-emerald-500" />
@@ -1070,8 +1071,8 @@ const getMmiWidth = (mmi: string) => {
               </div>
 
               <!-- Epicenter and Coordinates Info -->
-              <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3">
-                <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 dark:text-brand-cyan flex items-center justify-center shrink-0">
+              <div class="flex items-center gap-3 bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-[4px] p-3">
+                <div class="w-8 h-8 rounded-[4px] bg-blue-500/10 text-blue-500 dark:text-brand-cyan flex items-center justify-center shrink-0">
                   <MapPin class="w-4.5 h-4.5" />
                 </div>
                 <div class="min-w-0 flex-1">
@@ -1086,7 +1087,7 @@ const getMmiWidth = (mmi: string) => {
               </div>
 
               <!-- MMI felt list -->
-              <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-2xl p-3 flex flex-col">
+              <div class="bg-slate-50/50 dark:bg-brand-navy-900/40 border border-slate-100/50 dark:border-brand-navy-850/20 rounded-[4px] p-3 flex flex-col">
                 <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2.5">
                   Daftar Wilayah Dirasakan (Skala MMI)
                 </span>
@@ -1110,7 +1111,7 @@ const getMmiWidth = (mmi: string) => {
                 <button 
                   type="button"
                   @click="showSafety = !showSafety"
-                  class="w-full h-9 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-navy-800/60 dark:hover:bg-brand-navy-850 border border-slate-800 dark:border-brand-navy-800/40 shadow-sm flex items-center justify-between px-3.5 transition-all cursor-pointer text-xs font-black tracking-wide"
+                  class="w-full h-9 rounded-[4px] bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-navy-800/60 dark:hover:bg-brand-navy-850 border border-slate-800 dark:border-brand-navy-800/40 shadow-sm flex items-center justify-between px-3.5 transition-all cursor-pointer text-xs font-black tracking-wide"
                 >
                   <span class="flex items-center gap-1.5">
                     <BookOpen class="w-3.5 h-3.5 text-brand-cyan" />
@@ -1122,7 +1123,7 @@ const getMmiWidth = (mmi: string) => {
                 <!-- Expanded safety guides -->
                 <div 
                   v-if="showSafety" 
-                  class="absolute bottom-full left-0 right-0 mb-2 bg-[#0f172a]/95 border border-slate-800/60 backdrop-blur-md text-slate-300 rounded-2xl p-4 text-[9.5px] font-normal leading-relaxed shadow-2xl z-20 flex flex-col gap-2.5 animate-fade-in"
+                  class="absolute bottom-full left-0 right-0 mb-2 bg-[#0f172a]/95 border border-slate-800/60 backdrop-blur-md text-slate-300 rounded-[4px] p-4 text-[9.5px] font-normal leading-relaxed shadow-2xl z-20 flex flex-col gap-2.5 animate-fade-in"
                 >
                   <h6 class="text-[10px] font-black text-cyan-400 dark:text-brand-cyan border-b border-slate-800 pb-1 leading-none uppercase">
                     Petunjuk Siaga Gempa Bumi
@@ -1151,7 +1152,7 @@ const getMmiWidth = (mmi: string) => {
               <p class="text-[8.5px] font-black uppercase tracking-widest text-slate-450 dark:text-slate-400 block mb-2 leading-none">
                 Peta Lokasi Episentrum
               </p>
-              <div class="h-[180px] w-full rounded-2xl overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/40 relative shadow-inner">
+              <div class="h-[180px] w-full rounded-[4px] overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/40 relative shadow-inner">
                 <div ref="detailMapEl" class="w-full h-full z-10 bg-slate-800"></div>
               </div>
             </div>

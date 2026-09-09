@@ -31,7 +31,7 @@ import {
 
 
 // Theme Mode state: 'light' | 'dark' | 'auto'
-const themeMode = ref<'light' | 'dark' | 'auto'>('auto');
+const themeMode = ref<'light' | 'dark' | 'auto'>('dark');
 
 // Real-time ticking time state for local clock theme checking
 const localClockTime = ref(new Date());
@@ -130,17 +130,17 @@ const calculateAutoThemeState = () => {
   }
 };
 
-// Cycle: 'light' -> 'dark' -> 'auto'
+// Cycle: 'dark' -> 'light' -> 'auto'
 const toggleTheme = () => {
   const root = document.documentElement;
   root.classList.add('no-transitions');
 
-  if (themeMode.value === 'light') {
-    themeMode.value = 'dark';
-  } else if (themeMode.value === 'dark') {
+  if (themeMode.value === 'dark') {
+    themeMode.value = 'light';
+  } else if (themeMode.value === 'light') {
     themeMode.value = 'auto';
   } else {
-    themeMode.value = 'light';
+    themeMode.value = 'dark';
   }
 
   applyTheme();
@@ -165,11 +165,12 @@ const applyTheme = () => {
 
   if (themeMode.value === 'dark') {
     root.classList.add('dark');
-    themeColor = '#0b0f19';
+    themeColor = '#070c19';
     isDarkTheme = true;
-    localStorage.setItem('bmkg-theme', 'dark');
+    localStorage.setItem('bmkg-theme-v2', 'dark');
   } else if (themeMode.value === 'light') {
-    localStorage.setItem('bmkg-theme', 'light');
+    themeColor = '#eef5ff';
+    localStorage.setItem('bmkg-theme-v2', 'light');
   } else {
     // Mode 'auto': dynamically decide light/dark + sub-theme
     const autoTheme = calculateAutoThemeState();
@@ -184,13 +185,18 @@ const applyTheme = () => {
       case 'theme-morning': themeColor = '#fdf2f8'; break;
       case 'theme-day':     themeColor = '#f0f9ff'; break;
       case 'theme-evening': themeColor = '#fff1f2'; break;
-      case 'theme-night':   themeColor = '#0f172a'; break;
-      case 'theme-rainy':   themeColor = '#f8fafc'; break;
-      case 'theme-stormy':  themeColor = '#090514'; break;
-      case 'theme-cloudy':  themeColor = '#f8fafc'; break;
+      case 'theme-night':   themeColor = '#070c19'; break;
+      case 'theme-rainy':   themeColor = isDarkTheme ? '#070c19' : '#f8fafc'; break;
+      case 'theme-stormy':  themeColor = '#070c19'; break;
+      case 'theme-cloudy':  themeColor = isDarkTheme ? '#070c19' : '#f8fafc'; break;
     }
-    localStorage.setItem('bmkg-theme', 'auto');
+    localStorage.setItem('bmkg-theme-v2', 'auto');
   }
+
+  // Enforce root & body background color & color-scheme to eliminate white bars on iOS Safari
+  root.style.backgroundColor = themeColor;
+  root.style.colorScheme = isDarkTheme ? 'dark' : 'light';
+  document.body.style.backgroundColor = themeColor;
 
   // ─── Update Smartphone / Mobile Browser Status Bar Theme ───
   try {
@@ -209,6 +215,14 @@ const applyTheme = () => {
       document.head.appendChild(appleStatusBar);
     }
     appleStatusBar.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+
+    let metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+    if (!metaColorScheme) {
+      metaColorScheme = document.createElement('meta');
+      metaColorScheme.setAttribute('name', 'color-scheme');
+      document.head.appendChild(metaColorScheme);
+    }
+    metaColorScheme.setAttribute('content', isDarkTheme ? 'dark' : 'light');
   } catch (e) {
     console.error("Failed to update status bar meta tags:", e);
   }
@@ -366,6 +380,9 @@ const selectCity = (city: string) => {
   if (!weatherDataMap[targetCity]) {
     generateMockWeatherForCity(targetCity);
   }
+  if (!cities.value.includes(targetCity)) {
+    cities.value.push(targetCity);
+  }
   selectedCity.value = targetCity;
 };
 
@@ -407,12 +424,14 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
-  // Load preferences from local storage or default to 'auto'
-  const storedTheme = localStorage.getItem('bmkg-theme');
+  // Load preferences from local storage or default to 'dark'
+  const storedTheme = localStorage.getItem('bmkg-theme-v2');
   if (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') {
     themeMode.value = storedTheme as 'light' | 'dark' | 'auto';
   } else {
-    themeMode.value = 'auto';
+    themeMode.value = 'dark'; // Default: dark mode
+    localStorage.setItem('bmkg-theme-v2', 'dark');
+    localStorage.removeItem('bmkg-theme');
   }
   applyTheme();
 
@@ -510,7 +529,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100 w-full">
+  <div 
+    class="min-h-screen flex flex-col bg-transparent text-slate-800 dark:text-slate-100 w-full"
+    style="padding-top: max(env(safe-area-inset-top, 0px), 0px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);"
+  >
     <template v-if="!showLogin">
       <!-- Main Header -->
       <Header 
@@ -571,7 +593,7 @@ onMounted(() => {
     <Transition name="slide-fade">
       <div 
         v-if="toastMessage"
-        class="fixed top-6 left-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-2xl shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
+        class="fixed top-6 left-6 z-[100] max-w-sm w-full bg-white/95 dark:bg-brand-navy-900/95 border-l-4 border-amber-500 dark:border-amber-400 rounded-[4px] shadow-xl p-4 backdrop-blur-md flex items-start gap-3 animate-slide-in text-slate-800 dark:text-white"
       >
         <!-- Warning Icon -->
         <div class="p-1 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">

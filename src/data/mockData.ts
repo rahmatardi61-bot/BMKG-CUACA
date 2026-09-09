@@ -1,41 +1,60 @@
 import type { WeatherData, HourlyForecast, TransportStatus, WarningAlert, NewsArticle, CityAnalysis } from '../types/weather';
 
+interface DayVariant {
+  tempDelta: number;
+  precipMult: number;
+  status?: string;
+  iconDay?: string;
+  iconNight?: string;
+}
+
 // ── Helper: build a 10-day hourly array from a single-day base ──────────────
-// startDate: today's Date object (local)
-// base24: the 24-hour slice for "today"
-// Each subsequent day gets slight temperature & precipitation variation
 function build7DayForecast(base24: Omit<HourlyForecast, 'date'>[], startDate: Date): HourlyForecast[] {
   const result: HourlyForecast[] = [];
 
-  // Daily variation deltas: [tempOffset, precipMultiplier] — 10 days
-  const dayVariants: [number, number][] = [
-    [ 0, 1.00],  // Day 0 = today (base)
-    [-1, 1.10],  // Day 1
-    [ 1, 0.90],  // Day 2
-    [ 2, 0.80],  // Day 3
-    [-2, 1.20],  // Day 4
-    [ 1, 1.05],  // Day 5
-    [ 0, 0.95],  // Day 6
-    [-1, 1.15],  // Day 7
-    [ 2, 0.85],  // Day 8
-    [ 1, 1.00],  // Day 9
+  // Varied realistic 10-day Indonesian tropical weather progression
+  const dayVariants: DayVariant[] = [
+    { tempDelta: 0, precipMult: 1.0 }, // Day 0 = Hari Ini (base condition)
+    { tempDelta: -2, precipMult: 2.2, status: 'Hujan Ringan', iconDay: 'CloudRain', iconNight: 'CloudRain' }, // Day 1
+    { tempDelta: 0, precipMult: 1.3, status: 'Berawan', iconDay: 'Cloud', iconNight: 'Cloud' }, // Day 2
+    { tempDelta: 2, precipMult: 0.4, status: 'Cerah', iconDay: 'Sun', iconNight: 'Moon' }, // Day 3
+    { tempDelta: -3, precipMult: 3.2, status: 'Hujan Petir', iconDay: 'CloudLightning', iconNight: 'CloudLightning' }, // Day 4
+    { tempDelta: 1, precipMult: 0.8, status: 'Cerah Berawan', iconDay: 'CloudSun', iconNight: 'CloudMoon' }, // Day 5
+    { tempDelta: -1, precipMult: 1.7, status: 'Berawan Tebal', iconDay: 'Cloudy', iconNight: 'Cloudy' }, // Day 6
+    { tempDelta: -2, precipMult: 2.5, status: 'Hujan Sedang', iconDay: 'CloudRain', iconNight: 'CloudRain' }, // Day 7
+    { tempDelta: 2, precipMult: 0.5, status: 'Cerah', iconDay: 'Sun', iconNight: 'Moon' }, // Day 8
+    { tempDelta: 0, precipMult: 1.0, status: 'Cerah Berawan', iconDay: 'CloudSun', iconNight: 'CloudMoon' }, // Day 9
   ];
 
   for (let d = 0; d < 10; d++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + d);
-    const isoDate = date.toISOString().slice(0, 10); // YYYY-MM-DD
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const dayNum = String(date.getDate()).padStart(2, '0');
+    const isoDate = `${y}-${m}-${dayNum}`; // YYYY-MM-DD local timezone
 
-    const [tempDelta, precipMult] = dayVariants[d];
+    const variant = dayVariants[d];
 
     for (const slot of base24) {
+      const isNight = slot.time >= '19:00' || slot.time <= '05:00';
+      let slotStatus = slot.status;
+      let slotIcon = slot.icon;
+      if (d > 0 && variant.status) {
+        slotStatus = variant.status;
+        slotIcon = (isNight ? variant.iconNight : variant.iconDay) || variant.iconDay!;
+      }
+
       const precip = slot.precipitation !== undefined
-        ? Math.min(100, Math.max(0, Math.round(slot.precipitation * precipMult)))
+        ? Math.min(100, Math.max(5, Math.round(slot.precipitation * variant.precipMult)))
         : undefined;
+
       result.push({
         ...slot,
         date: isoDate,
-        temp: slot.temp + tempDelta,
+        temp: slot.temp + variant.tempDelta,
+        status: slotStatus,
+        icon: slotIcon,
         precipitation: precip,
       });
     }

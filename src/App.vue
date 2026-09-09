@@ -28,8 +28,6 @@ import {
   generateMockWeatherForCity
 } from './data/mockData';
 
-
-
 // Theme Mode state: 'light' | 'dark' | 'auto'
 const themeMode = ref<'light' | 'dark' | 'auto'>('dark');
 
@@ -44,9 +42,17 @@ const activeTab = ref('Beranda');
 
 // Reactive list of cities for navigation tabs
 const cities = ref(['Mencari lokasi...', ...citiesList.slice(1)]);
+// ── API BMKG live (fallback: mock di bawah) ───────────────────────────────────
+import { useBmkgWeather, CITY_COORDS } from './composables/useBmkgWeather';
+const bmkgWeather = useBmkgWeather();
+const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, amandemenCount } = bmkgWeather;
+
 
 // Computed current weather metrics based on selected city
 const activeWeatherData = computed(() => {
+  if (liveWeather.value && liveWeather.value.city === selectedCity.value) {
+    return { ...liveWeather.value, city: selectedCity.value };
+  }
   const baseData = weatherDataMap[selectedCity.value] || weatherDataMap['DKI Jakarta'];
   return {
     ...baseData,
@@ -56,6 +62,9 @@ const activeWeatherData = computed(() => {
 
 // Computed hourly forecasts based on selected city
 const activeHourlyForecasts = computed(() => {
+  if (liveHourly.value.length && liveWeather.value?.city === selectedCity.value) {
+    return liveHourly.value;
+  }
   return hourlyForecastsMap[selectedCity.value] || hourlyForecastsMap['DKI Jakarta'];
 });
 
@@ -64,8 +73,17 @@ const activeTransportStatuses = computed(() => {
   return transportStatusesMap[selectedCity.value] || transportStatusesMap['DKI Jakarta'];
 });
 
+// Berita live (WP BMKG + video) — fallback ke artikel mock
+const activeArticles = computed(() => {
+  return liveNews.value.length ? liveNews.value : newsArticles;
+});
+
 // Computed per-city warning alerts
 const activeWarningAlerts = computed(() => {
+  // Data live dari API BMKG menang; alert siklon ikut masuk di sini
+  if (liveWeather.value?.city === selectedCity.value && liveAlerts.value.length) {
+    return liveAlerts.value;
+  }
   // Only suppress alerts when user has real GPS location (mock data has no real alerts)
   if (isGeolocated.value && selectedCity.value === cities.value[0]) {
     return [];
@@ -250,6 +268,32 @@ const showToast = (text: string, type: 'warning' | 'info' = 'info') => {
   }, 7000);
 };
 
+
+
+const isGpsCity = (city: string) => isGeolocated.value && city === cities.value[0];
+const coordsForCity = (city: string) =>
+  isGpsCity(city) && userLat.value != null && userLng.value != null
+    ? { lat: userLat.value, lon: userLng.value }
+    : CITY_COORDS[city] ?? (userLat.value != null && userLng.value != null
+        ? { lat: userLat.value, lon: userLng.value }
+        : CITY_COORDS['DKI Jakarta']);
+
+// fetch live saat kota berubah / GPS selesai
+watch([selectedCity, isGeolocated], ([city]) => {
+  if (!city || city === 'Mencari lokasi...') return;
+  void bmkgWeather.loadCity(city, coordsForCity(city));
+}, { immediate: true });
+
+// berita WP + video sekali di mount
+void bmkgWeather.loadNews();
+
+// info amandemen prakiraan bila ada
+watch(amandemenCount, (n) => {
+  if (n > 0) showToast(`Amandemen prakiraan tersedia (${n} revisi) untuk lokasi Anda.`, 'info');
+});
+
+
+
 const detectRealtimeLocation = () => {
   if (!navigator.geolocation) {
     console.warn("Geolocation tidak didukung oleh browser Anda.");
@@ -273,6 +317,18 @@ const detectRealtimeLocation = () => {
       userLat.value = lat;
       userLng.value = lon;
       
+      // Pilihan 1: resolve alamat via API BMKG (adm/coord, lewat proxy)
+      const bmkgAddress = await bmkgWeather.resolveAddress(lat, lon).catch(() => null);
+      if (bmkgAddress) {
+        generateMockWeatherForCity(bmkgAddress); // layer fallback tetap terisi
+        cities.value[0] = bmkgAddress;
+        selectedCity.value = bmkgAddress;
+        isGeolocated.value = true;
+        isLocating.value = false;
+        return;
+      }
+
+      // Pilihan 2 (fallback): Nominatim OSM
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
@@ -557,13 +613,14 @@ onMounted(() => {
         :forecasts="activeHourlyForecasts"
         :transport-statuses="activeTransportStatuses"
         :alerts="activeWarningAlerts"
-        :articles="newsArticles"
+        :articles="activeArticles"
         :cities="cities"
         :selected-city="selectedCity"
         :is-locating="isLocating"
         :is-geolocated="isGeolocated"
         :user-lat="userLat"
         :user-lng="userLng"
+        :additional-info="liveAdditional ?? undefined"
         @select-city="selectCity"
         @delete-city="deleteCity"
         @detect-location="detectRealtimeLocation"

@@ -52,7 +52,7 @@ import {
   ChevronDown,
   Search
 } from 'lucide-vue-next';
-import { getAdditionalWeatherData } from '../data/weatherHelpers';
+import { getAdditionalWeatherData, type AdditionalWeatherInfo } from '../data/weatherHelpers';
 
 const props = defineProps<{
   weatherData: WeatherData;
@@ -66,6 +66,7 @@ const props = defineProps<{
   isGeolocated?: boolean;
   userLat?: number | null;
   userLng?: number | null;
+  additionalInfo?: AdditionalWeatherInfo;
 }>();
 
 const emit = defineEmits<{
@@ -78,8 +79,9 @@ const currentAnalysis = computed(() => {
   return cityAnalysisMap[props.selectedCity] || cityAnalysisMap['Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta'];
 });
 
+// additionalInfo: bisa dioverride dari App.vue dengan data live API BMKG (useBmkgWeather)
 const additionalInfo = computed(() => {
-  return getAdditionalWeatherData(props.selectedCity);
+  return props.additionalInfo || getAdditionalWeatherData(props.selectedCity);
 });
 
 // ── Slide transition direction logic ──

@@ -107,10 +107,21 @@ ROWS = [
 STATUS_COLOR = {"TERIMPLEMENTASI": "C6EFCE", "SEBAGIAN": "FFF2CC", "BELUM": "FFC7CE", "BEDA-SUMBER": "FFEB9C", "REDESIGN-ONLY": "BDD7EE"}
 STATUS_COLOR_FONT = {"TERIMPLEMENTASI": "006100", "SEBAGIAN": "7F6000", "BELUM": "9C0006", "BEDA-SUMBER": "9C6500", "REDESIGN-ONLY": "1F4E79"}
 
-HEADERS = ["No", "Family", "Endpoint", "Method", "Params", "Auth",
+HEADERS = ["No", "Family", "Endpoint", "Method", "Params", "Auth", "Akses (dev)",
            "Dipakai di Original (baseline)", "Komponen Redesign", "Status Redesign",
            "Sumber Pengganti (Redesign)", "Catatan / Response Shape"]
-WIDTHS = [5, 20, 52, 10, 24, 16, 44, 40, 16, 38, 60]
+WIDTHS = [5, 20, 46, 10, 22, 16, 13, 44, 40, 16, 38, 60]
+
+def akses_dev(row):
+    """PROXY = wajib lewat proxy di dev (cek Referer/Origin/public-token) — DIRECT = browser bisa langsung."""
+    fam, auth, ep = row[0], row[4], row[1]
+    if fam.startswith('R. Redesign'):
+        return 'DIRECT'
+    if 'x-public-token' in str(auth) or 'Referer' in str(auth):
+        return 'PROXY'
+    if 'blog' in ep or 'wp-json' in ep:
+        return 'PROXY'
+    return 'DIRECT'
 
 wb = Workbook()
 ws = wb.active
@@ -127,16 +138,20 @@ for c, (h, w) in enumerate(zip(HEADERS, WIDTHS), 1):
 
 for i, row in enumerate(ROWS, start=2):
     status = row[7]
-    values = (i - 1,) + row
+    akses = akses_dev(row)
+    values = (i - 1,) + row[:5] + (akses,) + row[5:]
     for c, v in enumerate(values, 1):
         cell = ws.cell(row=i, column=c, value=v)
         cell.alignment = wrap
-        if c == 9:  # status
+        if c == 7:  # akses dev
+            cell.fill = PatternFill("solid", fgColor=("DDEBF7" if akses.startswith('PROXY') else "E2EFDA"))
+            cell.font = Font(color=("1F4E79" if akses.startswith('PROXY') else "006100"), bold=True)
+        if c == 10:  # status
             cell.fill = PatternFill("solid", fgColor=STATUS_COLOR[status])
             cell.font = Font(color=STATUS_COLOR_FONT[status], bold=True)
 
 ws.freeze_panes = "A2"
-ws.auto_filter.ref = f"A1:K{len(ROWS) + 1}"
+ws.auto_filter.ref = f"A1:L{len(ROWS) + 1}"
 
 # Sheet ringkasan
 ws2 = wb.create_sheet("Ringkasan")

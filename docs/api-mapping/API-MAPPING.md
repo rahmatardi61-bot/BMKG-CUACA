@@ -41,6 +41,32 @@ Catatan auth singkat (detail: `../scrapping_cuaca-bmkg-go-id/api_client_auth.md`
 | `/api/v1/*` | `X-API-KEY` (JWT statis, ada di baseline `__NUXT_DATA__`) |
 | `/api/public/*` | `x-public-token` (JWT 30 menit, ambil fresh dari HTML homepage) |
 
+## ⚠️ Endpoint yang WAJIB lewat proxy (kondisi dev saat ini)
+
+Untuk tim dev: request dari **browser langsung** ke endpoint di bawah ini **pasti ditolak**
+server BMKG (403), karena server memeriksa `Referer`/`Origin` — dua header yang **tidak bisa
+diatur dari JavaScript** (forbidden/otomatis oleh browser). Makanya di dev, request ini
+dilewatkan proxy Vite (`vite.config.ts`) yang meng-inject header-nya di sisi server.
+Di network tab devtools, request tetap tampil dengan **path identik upstream** (`/api/df/...`,
+`/api/public/...`) — hanya host-nya localhost.
+
+| Prefix | Endpoint di project | Header di-inject proxy | Alasan |
+|---|---|---|---|
+| `/api/df` | `forecast/coord`, `adm/coord`, `amandemen/coord` | `Referer` + `Origin` | server cek Referer harus cuaca.bmkg.go.id |
+| `/api/public` | `weather/warning`, `weather/weekly-temperature`, `weather/video-latest`, `weather/warning/cyclone`, `banners` | `x-public-token` (auto-refresh 30 m) | server cek Origin harus cuaca.bmkg.go.id |
+| `/api/v1/public` | `maritim/nearest-location` | `x-public-token` + `X-API-KEY` | idem |
+| `/api/v1/user` | `subscribe-type` (belum dipakai) | `x-public-token` + `X-API-KEY` | idem |
+| `/blog` | WP REST berita | `Referer` | konsistensi + tanpa CORS terjamin |
+
+**DIRECT (tanpa proxy — browser bisa panggil langsung, URL penuh tampil di devtools):**
+`/api/presentwx/coord`, `/api/v1/sunset/json`, `/api/v1/tcwc/cyclone/all`, dan seluruh
+endpoint `/api/v1/*` lainnya yang auth-nya hanya `X-API-KEY` (maps metadata, sus/modelrun,
+tourism.json, maritim/route, water-area, impact list), plus service eksternal (spartan,
+bmkg-sus, circlegeo) dan redesign-only (Nominatim/Overpass/OSRM/TEWS).
+
+Kolom **"Akses (dev)"** di `api-mapping.xlsx` dan kolom **"Akses di Dev"** di
+`catatan-dev-team.xlsx` (sheet Web) sudah menandai ini per baris.
+
 ## Tabel mapping lengkap
 
 ### C. DF Forecast (Referer/Origin)

@@ -5,6 +5,12 @@ Sample: `baseline/api_probes/` (probe Node) & `baseline/<route>/` (capture brows
 
 Header auth per family lihat README.md. UA wajib full browser string.
 
+> **Akses di redesign (dev)**: family dengan auth `Referer+Origin` (`/api/df/*`) dan
+> `x-public-token` (`/api/public/*`, `/api/v1/public/*`, `/api/v1/user/*`) **wajib lewat
+> proxy** (Vite dev / `api/bmkg/[...path].ts` di prod) — browser tidak bisa mengirim header
+> tersebut. Family `Terbuka` / `X-API-KEY` bisa **direct** dari browser (`ACAO: *`).
+> Daftar per endpoint: kolom "Akses (dev)" di `../api-mapping/api-mapping.xlsx`.
+
 ## A. ISDP API — `https://cuaca.bmkg.go.id/api/v1/*` (auth: `X-API-KEY`)
 
 | Endpoint | Method | Params | Response shape | Dipakai di |

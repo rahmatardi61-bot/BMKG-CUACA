@@ -6,6 +6,8 @@
 >
 > Versi tabel: `api-mapping.xlsx` (regenerate: `python3 generate_xlsx.py`).
 > Baseline di-capture: 8 Sep 2026.
+> **Update 9 Sep**: integrasi fase 1–5 selesai → status kini: 8 TERIMPLEMENTASI,
+> 2 SEBAGIAN, 10 BELUM, 8 BEDA-SUMBER, 4 REDESIGN-ONLY (lihat `TEAM-NOTES.md`).
 
 ## Ringkasan
 

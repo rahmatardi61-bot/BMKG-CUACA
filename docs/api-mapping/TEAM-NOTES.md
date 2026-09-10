@@ -57,30 +57,30 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
 Jalankan `npm run dev`, buka `http://localhost:5173`. Checklist:
 
 ### A. Data live
-- [ ] **A1** Network tab: `GET /api/bmkg/api/df/v1/forecast/coord?lat=-6.2...` → **200** & response JSON valid
-- [ ] **A2** Network tab: `GET /api/bmkg/api/public/weather/warning...` → **200** (bukan 401 — artinya token ter-inject)
-- [ ] **A3** Network tab: `GET https://cuaca.bmkg.go.id/api/presentwx/coord...` → **200** (direct, tanpa proxy)
-- [ ] **A4** Kartu "Kondisi Saat Ini" menampilkan data **live** — bandingkan dengan https://cuaca.bmkg.go.id/ (suhu & kondisi & "terasa seperti" harus cocok/dalam toleransi)
-- [ ] **A5** Prakiraan 7 hari + tab Per Jam + Suhu Mingguan render dari data live (angka berbeda dari mock, ikut jam WIB)
-- [ ] **A6** % kelembapan di card per jam menempel pada data (bukan angka mock lama)
-- [ ] **A7** Ikon siang/malam berubah sesuai jam (setelah 18:00 → Moon variant)
+- [x] **A1** Network tab: `GET /api/bmkg/api/df/v1/forecast/coord?lat=-6.2...` → **200** & response JSON valid
+- [x] **A2** Network tab: `GET /api/bmkg/api/public/weather/warning...` → **200** (bukan 401 — artinya token ter-inject)
+- [x] **A3** Network tab: `GET https://cuaca.bmkg.go.id/api/presentwx/coord...` → **200** (direct, tanpa proxy)
+- [x] **A4** Kartu "Kondisi Saat Ini" menampilkan data **live** — bandingkan dengan https://cuaca.bmkg.go.id/ (suhu & kondisi & "terasa seperti" harus cocok/dalam toleransi)
+- [x] **A5** Prakiraan 7 hari + tab Per Jam + Suhu Mingguan render dari data live (angka berbeda dari mock, ikut jam WIB)
+- [x] **A6** % kelembapan di card per jam menempel pada data (bukan angka mock lama)
+- [x] **A7** Ikon siang/malam berubah sesuai jam (setelah 18:00 → Moon variant)
 
 ### B. Interaksi lokasi
-- [ ] **B1** Klik tab kota lain (Surabaya/Denpasar) → suhu & kondisi berubah (data live per kota)
-- [ ] **B2** Klik "Cari Lokasi Saya" + izinkan GPS → alamat ter-resolve via **BMKG** (Network: `api/df/v1/adm/coord` 200, Nominatim tidak terpanggil)
-- [ ] **B3** Blokir izin lokasi → fallback DKI Jakarta + toast peringatan muncul
-- [ ] **B4** (Opsional) Mock lokasi browser ke koordinat non-kota (mis. titik sawah) → nama desa/kec. dari BMKG tampil
+- [x] **B1** Klik tab kota lain (Surabaya/Denpasar) → suhu & kondisi berubah (data live per kota)
+- [x] **B2** Klik "Cari Lokasi Saya" + izinkan GPS → alamat ter-resolve via **BMKG** (Network: `api/df/v1/adm/coord` 200, Nominatim tidak terpanggil)
+- [x] **B3** Blokir izin lokasi → fallback DKI Jakarta + toast peringatan muncul
+- [x] **B4** (Opsional) Mock lokasi browser ke koordinat non-kota (mis. titik sawah) → nama desa/kec. dari BMKG tampil
 
 ### C. Peringatan & berita
-- [ ] **C1** `AlertsPanel` menampilkan konten (saat ini mock, karena baseline observation warning kosong untuk Jakarta)
-- [ ] **C2** Berita: kalau `blog/wp-json` 200 → artikel live + video BMKG (thumbnail YouTube); kalau 502 → artikel mock (jangan error putih)
-- [ ] **C3** Toast "Amandemen prakiraan tersedia" hanya muncul bila API mengembalikan revisi (jarang — biasanya tidak tampil; itu normal)
+- [x] **C1** `AlertsPanel` menampilkan konten (saat ini mock, karena baseline observation warning kosong untuk Jakarta)
+- [x] **C2** Berita: kalau `blog/wp-json` 200 → artikel live + video BMKG (thumbnail YouTube); kalau 502 → artikel mock (jangan error putih)
+- [x] **C3** Toast "Amandemen prakiraan tersedia" hanya muncul bila API mengembalikan revisi (jarang — biasanya tidak tampil; itu normal)
 
 ### D. Ketahanan
-- [ ] **D1** DevTools → Network → Offline, refresh: halaman tetap render penuh (mock fallback), console error tertangani rapi
-- [ ] **D2** Throttle "Slow 3G": skeleton muncul, lalu data live menggantikan — tidak ada flash putih
-- [ ] **D3** Tidak ada error CORS di console untuk semua family
-- [ ] **D4** Dark mode default + toggle gelap/terang/auto tetap berfungsi
+- [x] **D1** DevTools → Network → Offline, refresh: halaman tetap render penuh (mock fallback), console error tertangani rapi
+- [x] **D2** Throttle "Slow 3G": skeleton muncul, lalu data live menggantikan — tidak ada flash putih
+- [x] **D3** Tidak ada error CORS di console untuk semua family
+- [x] **D4** Dark mode default + toggle gelap/terang/auto tetap berfungsi
 
 ### E. Deploy (opsional, saat mau up ke Vercel)
 - [ ] **E1** Push → deploy otomatis → buka domain → `GET /api/bmkg/api/df/v1/forecast/coord...` **200** via Vercel function (bukan 4xx/5xx — kalau 5xx, kemungkinan CF blok IP Vercel; laporkan, ada opsi cadangan)

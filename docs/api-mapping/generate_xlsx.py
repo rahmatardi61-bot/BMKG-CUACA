@@ -11,19 +11,19 @@ ROWS = [
     ("C. DF Forecast", "/api/df/v1/forecast/coord", "GET", "lat, lon", "Referer+Origin",
      "Dashboard: cuaca saat ini, prakiraan 10 hari, tab Ringkasan/Per Jam; /perbandingan",
      "CurrentWeather.vue, ForecastPanel.vue, ForecastTemperatureChart.vue, ForecastPrecipitationChart.vue, ForecastAirQualityChart.vue",
-     "BELUM", "src/data/mockData.ts (weatherDataMap, hourlyForecastsMap, generateMockWeatherForCity)",
+     "TERIMPLEMENTASI", "src/data/mockData.ts (weatherDataMap, hourlyForecastsMap, generateMockWeatherForCity)",
      "Respons: lokasi adm1-adm4 + cuaca per jam & 3-jam hingga +9 hari (t, tcc, tp, weather, wd, ws, hu, vs, image icon). Endpoint paling kritis untuk diimplementasikan."),
     ("C. DF Forecast", "/api/df/v1/adm/coord", "GET", "lat, lon", "Referer+Origin",
      "Resolve lokasi admin (desa/kec/kotkab/prov) dari koordinat",
-     "App.vue (geolocation handler)", "BEDA-SUMBER", "Nominatim reverse geocoding (openstreetmap.org)",
+     "App.vue (geolocation handler)", "TERIMPLEMENTASI", "Nominatim reverse geocoding (openstreetmap.org)",
      "Struktur respons original: adm1..adm4 + provinsi/kotkab/kecamatan/desa + timezone. Nominatim butuh mapping manual field-nya."),
     ("C. DF Forecast", "/api/df/v1/amandemen/coord", "GET", "lat, lon", "Referer+Origin",
-     "Amandemen prakiraan (revisi data)", "-", "BELUM", "-", "Fitur belum ada sama sekali di redesign."),
+     "Amandemen prakiraan (revisi data)", "-", "SEBAGIAN", "-", "Fitur belum ada sama sekali di redesign."),
     ("D. Present Weather", "/api/presentwx/coord", "GET", "lat, lon", "Terbuka",
-     "Kartu 'Cuaca Saat Ini' (observasi aktual)", "CurrentWeather.vue", "BELUM",
+     "Kartu 'Cuaca Saat Ini' (observasi aktual)", "CurrentWeather.vue", "TERIMPLEMENTASI",
      "src/data/mockData.ts (weatherDataMap)", "Respons: {status, data:{lokasi, cuaca}}."),
     ("B. Public API", "/api/public/weather/warning", "GET", "lat, long", "x-public-token",
-     "Panel peringatan cuaca wilayah (today/tomorrow)", "AlertsPanel.vue", "BELUM",
+     "Panel peringatan cuaca wilayah (today/tomorrow)", "AlertsPanel.vue", "TERIMPLEMENTASI",
      "src/data/mockData.ts (warningAlertsMap)", "Respons: {data:{today:{...},tomorrow:{...}}}."),
     ("B. Public API", "/api/public/weather/warning/cyclone", "GET", "lat, long", "x-public-token",
      "Status siklon lokal", "-", "BELUM", "-", "Fitur belum ada."),
@@ -31,7 +31,7 @@ ROWS = [
      "Grafik 'Suhu Mingguan'", "ForecastTemperatureChart.vue", "BELUM", "src/data/mockData.ts",
      "Respons: {data:{daily:[{date,temperature}],weekly:[...]}}."),
     ("B. Public API", "/api/public/weather/video-latest", "GET", "hashtag=infobmkgpws", "x-public-token",
-     "Video Instagram terbaru BMKG", "NewsSection.vue", "BELUM", "src/data/mockData.ts (newsArticles)",
+     "Video Instagram terbaru BMKG", "NewsSection.vue", "TERIMPLEMENTASI", "src/data/mockData.ts (newsArticles)",
      "Respons: array {title, videoUrl, ...}."),
     ("B. Public API", "/api/public/banners", "GET", "-", "x-public-token",
      "Banner promo di dashboard", "-", "BELUM", "-", "Respons: {data:[{banner}]}. Fitur belum ada."),
@@ -40,12 +40,12 @@ ROWS = [
      "Tema statis lokal", "Bebas auth; nilai setting.background bisa dipakai untuk dinamisasi tema."),
     ("A. ISDP v1", "/api/v1/sunset/json", "GET", "lat, lng", "X-API-KEY",
      "Info matahari & bulan (30+ field: sunrise, golden_hour, moon_phase, dll)",
-     "CurrentWeather.vue (sunrise/sunset untuk day/night)", "BELUM", "Data statis/mock",
+     "CurrentWeather.vue (sunrise/sunset untuk day/night)", "TERIMPLEMENTASI", "Data statis/mock",
      "Bisa replace dengan perhitungan lokal (mis. SunCalc) ATAU langsung endpoint ini."),
     ("A. ISDP v1", "/api/v1/tcwc/cyclone/all", "GET", "-", "X-API-KEY",
-     "Sirkulasi siklon TCWC Jakarta", "-", "BELUM", "-", "Respons: {status, data:{cyclone_info:[...]}}."),
+     "Sirkulasi siklon TCWC Jakarta", "-", "TERIMPLEMENTASI", "-", "Respons: {status, data:{cyclone_info:[...]}}."),
     ("A. ISDP v1", "/api/v1/public/maritim/nearest-location", "GET", "lat, long", "x-public-token",
-     "Wilayah laut terdekat (drawer maritim)", "WaveRadarMap.vue / MaritimeAdvisorDrawer.vue", "BELUM",
+     "Wilayah laut terdekat (drawer maritim)", "WaveRadarMap.vue / MaritimeAdvisorDrawer.vue", "SEBAGIAN",
      "-", "Respons: {data:{code:'F.09', name:'Teluk Jakarta', wilpel, geometry:Polygon}}."),
     ("A. ISDP v1", "/api/v1/maritim/route", "GET", "-", "X-API-KEY",
      "Rute pelayaran maritim", "TransportWeather.vue", "BEDA-SUMBER", "OSRM (router.project-osrm.org)",
@@ -87,7 +87,7 @@ ROWS = [
      "Boundary administratif peta", "SatelliteMap.vue", "BEDA-SUMBER", "CartoCDN basemap",
      "-"),
     ("E. Eksternal Original", "cuaca.bmkg.go.id/blog/wp-json/wp/v2/", "GET", "wp standard", "Terbuka",
-     "Konten /berita, /berita/infografis, /berita/video (SSR)", "NewsSection.vue", "BELUM",
+     "Konten /berita, /berita/infografis, /berita/video (SSR)", "NewsSection.vue", "TERIMPLEMENTASI",
      "src/data/mockData.ts (newsArticles)", "WP REST API standar — mudah diintegrasikan."),
     ("R. Redesign-Only", "data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json", "GET", "-", "Terbuka",
      "TIDAK ADA di original (cuaca.bmkg.go.id tidak menampilkan gempa)", "EarthquakeActivity.vue, EarthquakeHistory.vue",
@@ -103,8 +103,8 @@ ROWS = [
      "Routing transportasi darat."),
 ]
 
-STATUS_COLOR = {"BELUM": "FFC7CE", "BEDA-SUMBER": "FFEB9C", "REDESIGN-ONLY": "BDD7EE"}
-STATUS_COLOR_FONT = {"BELUM": "9C0006", "BEDA-SUMBER": "9C6500", "REDESIGN-ONLY": "1F4E79"}
+STATUS_COLOR = {"TERIMPLEMENTASI": "C6EFCE", "SEBAGIAN": "FFF2CC", "BELUM": "FFC7CE", "BEDA-SUMBER": "FFEB9C", "REDESIGN-ONLY": "BDD7EE"}
+STATUS_COLOR_FONT = {"TERIMPLEMENTASI": "006100", "SEBAGIAN": "7F6000", "BELUM": "9C0006", "BEDA-SUMBER": "9C6500", "REDESIGN-ONLY": "1F4E79"}
 
 HEADERS = ["No", "Family", "Endpoint", "Method", "Params", "Auth",
            "Dipakai di Original (baseline)", "Komponen Redesign", "Status Redesign",
@@ -145,11 +145,13 @@ ws2.append([])
 ws2.append(["Status", "Jumlah", "Arti"])
 ws2["A4"].font = ws2["B4"].font = ws2["C4"].font = Font(bold=True)
 meaning = {
+    "TERIMPLEMENTASI": "Sudah memanggil API asli & dipakai di UI (fallback mock saat gagal)",
+    "SEBAGIAN": "Sudah ter-fetch dari API, tapi UI penuh/badge menyusul",
     "BELUM": "Endpoint original belum diimplementasikan (data masih mock / fitur belum ada)",
     "BEDA-SUMBER": "Fitur ada di redesign tapi mengambil data dari sumber berbeda (OSM/OSRM/inderaja/Carto/statik)",
     "REDESIGN-ONLY": "Sumber yang hanya dipakai redesign (tidak dipakai original)",
 }
-for s in ["BELUM", "BEDA-SUMBER", "REDESIGN-ONLY"]:
+for s in ["TERIMPLEMENTASI", "SEBAGIAN", "BELUM", "BEDA-SUMBER", "REDESIGN-ONLY"]:
     ws2.append([s, sum(1 for r in ROWS if r[7] == s), meaning[s]])
     ws2.cell(row=ws2.max_row, column=1).fill = PatternFill("solid", fgColor=STATUS_COLOR[s])
 ws2.append([])

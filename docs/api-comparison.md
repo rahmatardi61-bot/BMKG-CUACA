@@ -154,4 +154,4 @@ Kolom **"Akses (dev)"** di `bmkg-api-mapping.xlsx` (sheet API Mapping) dan kolom
 - Untuk mulai integrasi: ambil dari **prioritas** di atas; sample response & shape ada di
   `scrapping_cuaca-bmkg-go-id/baseline/api_probes/` (per kota) dan `baseline/<route>/`.
 - Untuk audit: buka `bmkg-api-mapping.xlsx` (sheet API Mapping) (filter kolom Status/Family).
-- Update mapping: edit `generate_xlsx.py` (data satu sumber) → edit manual di file xlsx.
+- Update mapping: edit manual di `bmkg-api-mapping.xlsx` (xlsx satu file, main di sheet).

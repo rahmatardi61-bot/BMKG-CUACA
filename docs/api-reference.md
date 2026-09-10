@@ -14,7 +14,7 @@ UA wajib full browser string.
 > `x-public-token` (`/api/public/*`, `/api/v1/public/*`, `/api/v1/user/*`) **wajib lewat
 > proxy** (Vite dev / `api/bmkg/[...path].ts` di prod) — browser tidak bisa mengirim header
 > tersebut. Family `Terbuka` / `X-API-KEY` bisa **direct** dari browser (`ACAO: *`).
-> Daftar per endpoint: kolom "Akses (dev)" di `../api-mapping/api-mapping.xlsx`.
+> Daftar per endpoint: kolom "Akses (dev)" di `bmkg-api-mapping.xlsx`.
 
 ## A. ISDP API — `https://cuaca.bmkg.go.id/api/v1/*` (auth: `X-API-KEY`)
 

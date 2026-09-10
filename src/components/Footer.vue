@@ -25,11 +25,11 @@ import {
             Layanan Cuaca
           </h4>
           <ul class="space-y-2 text-[11px] font-semibold">
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Publik</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Penerbangan</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Maritim</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Karhutla</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Citra Radar</a></li>
+            <li><a href="https://www.bmkg.go.id/cuaca/prakiraan-cuaca-indonesia.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Publik</a></li>
+            <li><a href="https://aviation.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Penerbangan</a></li>
+            <li><a href="https://maritim.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Maritim</a></li>
+            <li><a href="https://www.bmkg.go.id/cuaca/kebakaran-hutan.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Cuaca Karhutla</a></li>
+            <li><a href="https://www.bmkg.go.id/cuaca/citra-radar.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Citra Radar</a></li>
           </ul>
         </div>
 
@@ -39,11 +39,11 @@ import {
             Eksplorasi
           </h4>
           <ul class="space-y-2 text-[11px] font-semibold">
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Gempabumi Real-time</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Tsunami Early Warning</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Kualitas Udara PM2.5</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Analisis Perubahan Iklim</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Geofisika Potensial</a></li>
+            <li><a href="https://www.bmkg.go.id/gempabumi/gempabumi-terkini.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Gempabumi Real-time</a></li>
+            <li><a href="https://inatews.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Tsunami Early Warning</a></li>
+            <li><a href="https://www.bmkg.go.id/kualitas-udara/informasi-partikulat-pm25.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Kualitas Udara PM2.5</a></li>
+            <li><a href="https://klimat.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Analisis Perubahan Iklim</a></li>
+            <li><a href="https://www.bmkg.go.id/geofisika/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Geofisika Potensial</a></li>
           </ul>
         </div>
 
@@ -53,11 +53,11 @@ import {
             MAPS & Digital
           </h4>
           <ul class="space-y-2 text-[11px] font-semibold">
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Sistem SIG Cuaca</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Digital Weather for Traffic</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Aplikasi Info BMKG</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">API Data Terbuka</a></li>
-            <li><a href="#" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">E-Library BMKG</a></li>
+            <li><a href="https://signature.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Sistem SIG Cuaca</a></li>
+            <li><a href="https://www.bmkg.go.id/cuaca/cuaca-jalur-darat.bmkg" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Digital Weather for Traffic</a></li>
+            <li><a href="https://www.bmkg.go.id/profil/?p=aplikasi-mobile" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">Aplikasi Info BMKG</a></li>
+            <li><a href="https://data.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">API Data Terbuka</a></li>
+            <li><a href="https://perpustakaan.bmkg.go.id/" target="_blank" rel="noopener noreferrer" class="hover:text-blue-500 dark:hover:text-brand-cyan transition-colors">E-Library BMKG</a></li>
           </ul>
         </div>
 
@@ -123,16 +123,16 @@ import {
 
         <!-- Social Media Links -->
         <div class="flex items-center gap-3 justify-center lg:justify-end">
-          <a href="#" class="p-2 rounded-full border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Facebook BMKG">
+          <a href="https://www.facebook.com/infoBMKG/" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full border border-slate-200 hover:bg-blue-50 hover:text-blue-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Facebook BMKG">
             <Facebook class="w-4 h-4" />
           </a>
-          <a href="#" class="p-2 rounded-full border border-slate-200 hover:bg-sky-50 hover:text-sky-500 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Twitter BMKG">
+          <a href="https://twitter.com/infoBMKG" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full border border-slate-200 hover:bg-sky-50 hover:text-sky-500 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Twitter BMKG">
             <Twitter class="w-4 h-4" />
           </a>
-          <a href="#" class="p-2 rounded-full border border-slate-200 hover:bg-pink-50 hover:text-pink-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Instagram BMKG">
+          <a href="https://www.instagram.com/infobmkg/" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full border border-slate-200 hover:bg-pink-50 hover:text-pink-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Instagram BMKG">
             <Instagram class="w-4 h-4" />
           </a>
-          <a href="#" class="p-2 rounded-full border border-slate-200 hover:bg-red-50 hover:text-red-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Youtube BMKG">
+          <a href="https://www.youtube.com/@infoBMKG" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full border border-slate-200 hover:bg-red-50 hover:text-red-600 dark:border-brand-navy-850 dark:hover:bg-brand-navy-800 dark:hover:text-brand-cyan transition-colors" title="Youtube BMKG">
             <Youtube class="w-4 h-4" />
           </a>
         </div>

@@ -622,24 +622,18 @@ html.dark.theme-cloudy {
 }
 
 /* Apply variables to Header, Footer, Cards and Tab buttons */
-html[class*="theme-"] header,
-html[class*="theme-"] footer,
-html[class*="theme-"] .weather-metric-card,
-html[class*="theme-"] .bg-white\/90,
-html[class*="theme-"] .bg-white\/85,
-html[class*="theme-"] .bg-white\/80,
-html[class*="theme-"] .bg-white\/95,
-html[class*="theme-"] .bg-white\/75,
-html[class*="theme-"] .bg-white\/70,
-html[class*="theme-"] .bg-white\/50,
-html[class*="theme-"] .bg-slate-100\/50,
-html[class*="theme-"] .bg-slate-100\/60,
-html[class*="theme-"] .bg-slate-100,
-html[class*="theme-"] .bg-slate-50\/80,
-html[class*="theme-"] .bg-slate-50\/90,
-html[class*="theme-"] .bg-slate-50\/60,
-html[class*="theme-"] button.bg-white,
-html[class*="theme-"] .cta-card {
+html:not(.dark)[class*="theme-"] header,
+html:not(.dark)[class*="theme-"] footer,
+html:not(.dark)[class*="theme-"] .weather-metric-card,
+html:not(.dark)[class*="theme-"] .bg-white\/90,
+html:not(.dark)[class*="theme-"] .bg-white\/85,
+html:not(.dark)[class*="theme-"] .bg-white\/80,
+html:not(.dark)[class*="theme-"] .bg-white\/95,
+html:not(.dark)[class*="theme-"] .bg-white\/75,
+html:not(.dark)[class*="theme-"] .bg-white\/70,
+html:not(.dark)[class*="theme-"] .bg-white\/50,
+html:not(.dark)[class*="theme-"] button.bg-white,
+html:not(.dark)[class*="theme-"] .cta-card {
   background: var(--soft-theme-bg) !important;
   border-color: var(--soft-theme-border) !important;
   transition-property: border-color, box-shadow, transform, opacity !important;
@@ -654,9 +648,6 @@ html.dark[class*="theme-"] .bg-white\/80,
 html.dark[class*="theme-"] .bg-white\/95,
 html.dark[class*="theme-"] .bg-white\/75,
 html.dark[class*="theme-"] .bg-white\/50,
-html.dark[class*="theme-"] .bg-slate-100\/50,
-html.dark[class*="theme-"] .bg-slate-100\/60,
-html.dark[class*="theme-"] .bg-slate-50\/60,
 html.dark[class*="theme-"] .cta-card,
 html.dark[class*="theme-"] .dark\:bg-brand-navy-950\/75,
 html.dark[class*="theme-"] .dark\:bg-brand-navy-950,
@@ -673,11 +664,11 @@ html.dark[class*="theme-"] .dark\:bg-brand-navy-900\/50 {
 }
 
 /* Dynamic Theme Borders Only */
-html[class*="theme-"] .border-slate-100\/60,
-html[class*="theme-"] .border-slate-200\/60,
-html[class*="theme-"] .border-slate-200\/40,
-html[class*="theme-"] .border-slate-200,
-html[class*="theme-"] .border-slate-100 {
+html:not(.dark)[class*="theme-"] .border-slate-100\/60,
+html:not(.dark)[class*="theme-"] .border-slate-200\/60,
+html:not(.dark)[class*="theme-"] .border-slate-200\/40,
+html:not(.dark)[class*="theme-"] .border-slate-200,
+html:not(.dark)[class*="theme-"] .border-slate-100 {
   border-color: var(--soft-theme-border) !important;
 }
 
@@ -692,39 +683,39 @@ html.dark[class*="theme-"] .dark\:border-brand-navy-700\/30 {
 
 
 /* Eye-catching warning alerts colors in automatic theme only (more specific to override soft gradients) */
-html[class*="theme-"] .border-l-red-500.bg-white\/80,
-html[class*="theme-"] .border-l-red-500.bg-white\/90,
-html[class*="theme-"] .border-l-red-500 {
+html:not(.dark)[class*="theme-"] .border-l-red-500.bg-white\/80,
+html:not(.dark)[class*="theme-"] .border-l-red-500.bg-white\/90,
+html:not(.dark)[class*="theme-"] .border-l-red-500 {
   background: rgba(239, 68, 68, 0.08) !important;
   border-color: rgba(239, 68, 68, 0.2) rgba(239, 68, 68, 0.2) rgba(239, 68, 68, 0.2) #ef4444 !important;
 }
-html[class*="theme-"] .border-l-red-500.bg-white\/80:hover,
-html[class*="theme-"] .border-l-red-500.bg-white\/90:hover,
-html[class*="theme-"] .border-l-red-500:hover {
+html:not(.dark)[class*="theme-"] .border-l-red-500.bg-white\/80:hover,
+html:not(.dark)[class*="theme-"] .border-l-red-500.bg-white\/90:hover,
+html:not(.dark)[class*="theme-"] .border-l-red-500:hover {
   background: rgba(239, 68, 68, 0.12) !important;
 }
 
-html[class*="theme-"] .border-l-orange-500.bg-white\/80,
-html[class*="theme-"] .border-l-orange-500.bg-white\/90,
-html[class*="theme-"] .border-l-orange-500 {
+html:not(.dark)[class*="theme-"] .border-l-orange-500.bg-white\/80,
+html:not(.dark)[class*="theme-"] .border-l-orange-500.bg-white\/90,
+html:not(.dark)[class*="theme-"] .border-l-orange-500 {
   background: rgba(249, 115, 22, 0.08) !important;
   border-color: rgba(249, 115, 22, 0.2) rgba(249, 115, 22, 0.2) rgba(249, 115, 22, 0.2) #f97316 !important;
 }
-html[class*="theme-"] .border-l-orange-500.bg-white\/80:hover,
-html[class*="theme-"] .border-l-orange-500.bg-white\/90:hover,
-html[class*="theme-"] .border-l-orange-500:hover {
+html:not(.dark)[class*="theme-"] .border-l-orange-500.bg-white\/80:hover,
+html:not(.dark)[class*="theme-"] .border-l-orange-500.bg-white\/90:hover,
+html:not(.dark)[class*="theme-"] .border-l-orange-500:hover {
   background: rgba(249, 115, 22, 0.12) !important;
 }
 
-html[class*="theme-"] .border-l-amber-500.bg-white\/80,
-html[class*="theme-"] .border-l-amber-500.bg-white\/90,
-html[class*="theme-"] .border-l-amber-500 {
+html:not(.dark)[class*="theme-"] .border-l-amber-500.bg-white\/80,
+html:not(.dark)[class*="theme-"] .border-l-amber-500.bg-white\/90,
+html:not(.dark)[class*="theme-"] .border-l-amber-500 {
   background: rgba(245, 158, 11, 0.08) !important;
   border-color: rgba(245, 158, 11, 0.2) rgba(245, 158, 11, 0.2) rgba(245, 158, 11, 0.2) #f59e0b !important;
 }
-html[class*="theme-"] .border-l-amber-500.bg-white\/80:hover,
-html[class*="theme-"] .border-l-amber-500.bg-white\/90:hover,
-html[class*="theme-"] .border-l-amber-500:hover {
+html:not(.dark)[class*="theme-"] .border-l-amber-500.bg-white\/80:hover,
+html:not(.dark)[class*="theme-"] .border-l-amber-500.bg-white\/90:hover,
+html:not(.dark)[class*="theme-"] .border-l-amber-500:hover {
   background: rgba(245, 158, 11, 0.12) !important;
 }
 
@@ -1037,4 +1028,25 @@ html.dark[class*="theme-"] .side-advisor-drawer {
 
 .sk-block {
   border-radius: 4px;
+}
+
+/* Earthquake Parameter and Mitigation Cards (Crisp High-Contrast in Light & Dark Modes) */
+.eq-param-card {
+  background-color: rgba(248, 250, 252, 0.95);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.dark .eq-param-card {
+  background-color: #0c1427 !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+.eq-mitigation-box {
+  background-color: rgba(248, 250, 252, 0.9);
+  border-color: rgba(226, 232, 240, 0.8);
+}
+
+.dark .eq-mitigation-box {
+  background-color: #0b1222 !important;
+  border-color: rgba(51, 65, 85, 0.7) !important;
 }

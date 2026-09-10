@@ -476,7 +476,11 @@ onUnmounted(() => {
           title="Memuat Peta Maritim INAWAVES" 
           subtitle="Memuat data perairan & pelabuhan Indonesia"
         >
-          <MarineMap />
+          <MarineMap 
+            :selected-city="selectedCity"
+            :user-lat="userLat"
+            :user-lng="userLng"
+          />
         </LazyCardLoader>
 
         <!-- Interactive BMKG Weather Radar Map (Hidden)

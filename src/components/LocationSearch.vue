@@ -4,11 +4,6 @@ import {
   Search, 
   X, 
   MapPin, 
-  GraduationCap, 
-  Trophy, 
-  Utensils, 
-  Compass, 
-  Plane, 
   Clock, 
   ChevronRight, 
   Sparkles, 
@@ -18,7 +13,6 @@ import {
   ArrowLeft
 } from 'lucide-vue-next';
 import { 
-  POPULAR_RECOMMENDATIONS, 
   filterLocalPOIs, 
   searchOnlinePOIs, 
   type SearchResultItem, 
@@ -39,7 +33,7 @@ const emit = defineEmits<{
 // Search state
 const searchQuery = ref('');
 const isDropdownOpen = ref(false);
-const activeCategory = ref<POICategory>('all');
+const activeCategory = ref<POICategory>('wilayah');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const mobileSearchInputRef = ref<HTMLInputElement | null>(null);
 const searchContainerRef = ref<HTMLElement | null>(null);
@@ -48,11 +42,8 @@ const isLoadingOnline = ref(false);
 
 // Animated placeholder cues
 const placeholderCues = [
-  'Cari kelurahan, desa, kecamatan...',
-  'Cari kampus (UGM, UI, ITB, Undip)...',
-  'Cari stadion, GOR, lapangan golf...',
-  'Cari resto, kuliner, cafe, hotel...',
-  'Cari tempat wisata, mall, landmark...'
+  'Cari kelurahan/desa...',
+  'Cari nama tempat...'
 ];
 const currentCueIndex = ref(0);
 let cueIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -83,18 +74,16 @@ onMounted(() => {
 });
 
 const currentPlaceholder = computed(() => {
-  return props.placeholder || placeholderCues[currentCueIndex.value];
+  if (props.placeholder) return props.placeholder;
+  return activeCategory.value === 'wilayah' 
+    ? 'Cari nama kelurahan atau desa...' 
+    : 'Cari nama tempat, fasilitas, atau landmark...';
 });
 
-// Category pills
+// Category pills: Hanya 2 Kategori (Kelurahan / Desa dan Nama Tempat)
 const categoryTabs: { id: POICategory; label: string; icon: any }[] = [
-  { id: 'all', label: 'Semua', icon: Sparkles },
-  { id: 'wilayah', label: 'Wilayah / Desa', icon: MapPin },
-  { id: 'kampus', label: 'Kampus', icon: GraduationCap },
-  { id: 'olahraga', label: 'Olahraga & GOR', icon: Trophy },
-  { id: 'kuliner', label: 'Kuliner & Resto', icon: Utensils },
-  { id: 'wisata', label: 'Wisata & Rekreasi', icon: Compass },
-  { id: 'transportasi', label: 'Fasilitas', icon: Plane }
+  { id: 'wilayah', label: 'Kelurahan / Desa', icon: MapPin },
+  { id: 'tempat', label: 'Nama Tempat', icon: Building2 }
 ];
 
 // Recent Searches (Stored in localStorage)
@@ -150,9 +139,6 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const displayedResults = computed(() => {
   const query = searchQuery.value.trim();
   if (!query) {
-    if (activeCategory.value === 'all') {
-      return POPULAR_RECOMMENDATIONS;
-    }
     return filterLocalPOIs('', activeCategory.value).slice(0, 8);
   }
 
@@ -234,31 +220,13 @@ const handleSelect = (item: SearchResultItem | string) => {
 
 // Category badge helpers
 const getCategoryIcon = (cat: SearchResultItem['category']) => {
-  switch (cat) {
-    case 'kampus': return GraduationCap;
-    case 'olahraga': return Trophy;
-    case 'kuliner': return Utensils;
-    case 'wisata': return Compass;
-    case 'transportasi': return Plane;
-    default: return MapPin;
-  }
+  return cat === 'tempat' ? Building2 : MapPin;
 };
 
 const getCategoryStyle = (cat: SearchResultItem['category']) => {
-  switch (cat) {
-    case 'kampus': 
-      return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40';
-    case 'olahraga': 
-      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40';
-    case 'kuliner': 
-      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40';
-    case 'wisata': 
-      return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/40';
-    case 'transportasi': 
-      return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-200 dark:border-sky-800/40';
-    default: 
-      return 'bg-blue-500/10 text-blue-600 dark:text-brand-cyan border-blue-200 dark:border-blue-800/40';
-  }
+  return cat === 'tempat'
+    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40'
+    : 'bg-blue-500/10 text-blue-600 dark:text-brand-cyan border-blue-200 dark:border-blue-800/40';
 };
 
 // Keyboard navigation
@@ -389,45 +357,37 @@ onUnmounted(() => {
     >
       <div 
         v-if="isDropdownOpen"
-        class="absolute left-0 right-0 top-[calc(100%+8px)] z-50 bg-white/95 dark:bg-brand-navy-950/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/10 rounded-[4px] shadow-2xl overflow-hidden flex flex-col max-h-[480px] w-full min-w-[320px] sm:min-w-[420px] md:min-w-[480px]"
+        class="absolute left-0 right-0 top-[calc(100%+8px)] z-50 bg-white dark:bg-[#070c19] border border-slate-200 dark:border-white/20 rounded-[4px] shadow-[0_25px_60px_rgba(0,0,0,0.6)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.95)] ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-[480px] w-full min-w-[320px] sm:min-w-[420px] md:min-w-[480px]"
         :class="[
           isMobileDrawer ? 'left-0 right-0' : 'md:-left-12 md:-right-12'
         ]"
       >
-        <!-- Header: Category Filter Tabs -->
-        <div class="px-3 pt-3 pb-2 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02]">
-          <div class="flex items-center justify-between gap-2 mb-2 px-1">
-            <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Compass class="w-3 h-3 text-blue-500 dark:text-brand-cyan" />
-              Eksplorasi Wilayah &amp; Tempat
-            </span>
-            <span v-if="isLoadingOnline" class="text-[9px] text-blue-500 dark:text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
-              <Loader2 class="w-2.5 h-2.5 animate-spin" />
-              Mencari Maps...
-            </span>
-          </div>
-
-          <!-- Category Chips Horizontal Scroll -->
-          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <!-- Header: Minimalist Category Filter Tabs -->
+        <div class="p-2 border-b border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-[#091022]">
+          <div class="grid grid-cols-2 gap-1 p-1 bg-slate-200/50 dark:bg-white/[0.04] rounded-[4px] border border-slate-200/60 dark:border-white/5">
             <button
               v-for="tab in categoryTabs"
               :key="tab.id"
               @click="activeCategory = tab.id"
-              class="px-2.5 py-1 rounded-[4px] text-[10px] font-bold tracking-tight shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border"
+              class="py-1.5 px-3 rounded-[3px] text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none"
               :class="[
                 activeCategory === tab.id
-                  ? 'bg-blue-500 dark:bg-brand-cyan text-white dark:text-brand-navy-950 border-transparent shadow-sm'
-                  : 'bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                  ? 'bg-white dark:bg-[#121e38] text-blue-600 dark:text-brand-cyan shadow-sm border border-slate-200/80 dark:border-brand-cyan/25 font-bold'
+                  : 'bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               ]"
             >
-              <component :is="tab.icon" class="w-3 h-3" />
+              <component 
+                :is="tab.icon" 
+                class="w-3.5 h-3.5 shrink-0 transition-colors" 
+                :class="activeCategory === tab.id ? 'text-blue-500 dark:text-brand-cyan' : 'text-slate-400 dark:text-slate-500'" 
+              />
               <span>{{ tab.label }}</span>
             </button>
           </div>
         </div>
 
         <!-- Dropdown Body Scrollable -->
-        <div class="overflow-y-auto max-h-[380px] p-2 space-y-3">
+        <div class="overflow-y-auto max-h-[380px] p-2 space-y-3 bg-white dark:bg-[#070c19]">
           
           <!-- ─── 1. Recent Searches (if query is empty and has recents) ─── -->
           <div v-if="!searchQuery && recentSearches.length > 0" class="px-1.5 pt-1">
@@ -449,7 +409,7 @@ onUnmounted(() => {
                 v-for="item in recentSearches"
                 :key="item"
                 @click="handleSelect(item)"
-                class="group px-2.5 py-1 rounded-[4px] bg-slate-100/70 hover:bg-blue-50 dark:bg-white/5 dark:hover:bg-brand-cyan/10 border border-slate-200/60 dark:border-white/10 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-1.5 transition-all cursor-pointer"
+                class="group px-2.5 py-1 rounded-[4px] bg-slate-100 dark:bg-[#0e1933] hover:bg-blue-50 dark:hover:bg-brand-cyan/15 border border-slate-200/80 dark:border-white/10 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
               >
                 <Clock class="w-3 h-3 text-slate-400 group-hover:text-blue-500 dark:group-hover:text-brand-cyan" />
                 <span class="truncate max-w-[180px]">{{ item }}</span>
@@ -467,7 +427,7 @@ onUnmounted(() => {
               <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                 <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-500" />
                 <Building2 v-else class="w-3 h-3 text-blue-500 dark:text-brand-cyan" />
-                {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : 'Rekomendasi Tempat & Wilayah' }}
+                {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : (activeCategory === 'wilayah' ? 'Rekomendasi Kelurahan & Desa' : 'Rekomendasi Tempat Populer') }}
               </span>
               <span v-if="searchQuery" class="text-[9px] text-slate-400 dark:text-slate-500">
                 Pilih untuk cuaca realtime
@@ -484,8 +444,8 @@ onUnmounted(() => {
                 class="w-full p-2.5 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border group"
                 :class="[
                   highlightedIndex === idx
-                    ? 'bg-blue-500/10 dark:bg-brand-cyan/15 border-blue-500/30 dark:border-brand-cyan/40 shadow-sm translate-x-0.5'
-                    : 'bg-white/50 dark:bg-white/[0.02] border-transparent hover:bg-slate-100/60 dark:hover:bg-white/5'
+                    ? 'bg-blue-500/15 dark:bg-brand-cyan/20 border-blue-500/50 dark:border-brand-cyan/60 shadow-sm translate-x-0.5'
+                    : 'bg-slate-50/70 dark:bg-[#0a1122] border-slate-200/60 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#101b36] hover:border-blue-500/30 dark:hover:border-brand-cyan/40'
                 ]"
               >
                 <!-- Category Icon Badge -->
@@ -541,7 +501,7 @@ onUnmounted(() => {
                   Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
                 </p>
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 max-w-[280px] mx-auto">
-                  Coba ketik nama desa, kecamatan, kampus, stadion, atau tekan Enter untuk mencari langsung ke BMKG.
+                  Coba ketik nama kelurahan, desa, atau nama tempat, atau tekan Enter untuk mencari langsung ke BMKG.
                 </p>
               </div>
               <button 
@@ -557,7 +517,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Dropdown Footer / Keyboard Tips -->
-        <div class="px-3 py-2 border-t border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between text-[9px] text-slate-400 dark:text-slate-500">
+        <div class="px-3 py-2 border-t border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] flex items-center justify-between text-[9px] text-slate-400 dark:text-slate-500">
           <div class="flex items-center gap-3">
             <span class="flex items-center gap-1">
               <kbd class="px-1 py-0.5 rounded-[4px] bg-slate-200 dark:bg-white/10 font-mono text-[8px]">↑↓</kbd> Navigasi
@@ -590,38 +550,38 @@ onUnmounted(() => {
       >
         <div 
           v-if="isDropdownOpen"
-          class="fixed inset-0 z-[99999] bg-slate-950/98 dark:bg-brand-navy-950/98 backdrop-blur-3xl flex flex-col text-slate-100 overflow-hidden"
+          class="fixed inset-0 z-[99999] bg-white dark:bg-[#070c19] flex flex-col text-slate-800 dark:text-slate-100 overflow-hidden"
           style="padding-top: max(env(safe-area-inset-top, 0px), 8px); padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);"
         >
           <!-- Mobile Search Header Bar -->
-          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-white/10 bg-slate-900/60 dark:bg-black/40 shrink-0">
+          <div class="px-3 py-2.5 flex items-center gap-2 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] shrink-0">
             <!-- Back Button -->
             <button 
               @click="closeSearch"
-              class="w-9 h-9 rounded-[4px] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+              class="w-9 h-9 rounded-[4px] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
               title="Kembali"
             >
               <ArrowLeft class="w-5 h-5" />
             </button>
 
             <!-- Search Input Box -->
-            <div class="flex-1 flex items-center bg-white/10 dark:bg-white/5 border border-white/15 focus-within:border-brand-cyan rounded-[4px] px-3 py-2 gap-2 transition-all">
-              <Loader2 v-if="isLoadingOnline" class="w-4 h-4 animate-spin text-brand-cyan shrink-0" />
-              <Search v-else class="w-4 h-4 text-slate-400 shrink-0" />
+            <div class="flex-1 flex items-center bg-white dark:bg-white/5 border border-slate-300 dark:border-white/15 focus-within:border-blue-500 dark:focus-within:border-brand-cyan focus-within:ring-2 focus-within:ring-blue-500/20 dark:focus-within:ring-brand-cyan/20 rounded-[4px] px-3 py-2 gap-2 transition-all shadow-xs">
+              <Loader2 v-if="isLoadingOnline" class="w-4 h-4 animate-spin text-blue-600 dark:text-brand-cyan shrink-0" />
+              <Search v-else class="w-4 h-4 text-slate-400 dark:text-slate-400 shrink-0" />
               <input 
                 ref="mobileSearchInputRef"
                 v-model="searchQuery"
                 type="text"
                 :placeholder="currentPlaceholder"
                 @keydown="handleKeydown"
-                class="w-full bg-transparent border-none outline-none text-[16px] text-white placeholder-slate-400 placeholder:text-xs"
+                class="w-full bg-transparent border-none outline-none text-[16px] text-slate-900 dark:text-white placeholder-slate-400 placeholder:text-xs"
                 autocomplete="off"
                 spellcheck="false"
               />
               <button 
                 v-if="searchQuery"
                 @click="clearQuery"
-                class="p-1 rounded-[4px] text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                class="p-1 rounded-[4px] text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X class="w-4 h-4" />
               </button>
@@ -630,38 +590,31 @@ onUnmounted(() => {
             <!-- Batal Button -->
             <button 
               @click="closeSearch"
-              class="text-xs font-bold text-slate-300 hover:text-white px-2 py-1.5 shrink-0 cursor-pointer"
+              class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-2 py-1.5 shrink-0 cursor-pointer"
             >
               Batal
             </button>
           </div>
 
-          <!-- Mobile Category Tabs (Horizontal Scrollable) -->
-          <div class="px-3 py-2 border-b border-white/10 bg-slate-900/30 dark:bg-black/20 shrink-0">
-            <div class="flex items-center justify-between gap-2 mb-1.5 px-0.5">
-              <span class="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Compass class="w-3 h-3 text-brand-cyan" />
-                Eksplorasi Wilayah &amp; Tempat
-              </span>
-              <span v-if="isLoadingOnline" class="text-[9px] text-brand-cyan flex items-center gap-1 font-bold animate-pulse">
-                <Loader2 class="w-2.5 h-2.5 animate-spin" />
-                Mencari...
-              </span>
-            </div>
-
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <!-- Mobile Minimalist Category Filter Tabs -->
+          <div class="p-2.5 border-b border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-[#080e1c] shrink-0">
+            <div class="grid grid-cols-2 gap-1 p-1 bg-white dark:bg-white/[0.04] rounded-[4px] border border-slate-200 dark:border-white/10 shadow-xs">
               <button
                 v-for="tab in categoryTabs"
                 :key="tab.id"
                 @click="activeCategory = tab.id"
-                class="px-3 py-1 rounded-[4px] text-[11px] font-bold tracking-tight shrink-0 transition-all flex items-center gap-1.5 cursor-pointer border"
+                class="py-2 px-3 rounded-[3px] text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer select-none"
                 :class="[
                   activeCategory === tab.id
-                    ? 'bg-brand-cyan text-brand-navy-950 border-transparent shadow-sm'
-                    : 'bg-white/5 text-slate-300 border-white/10 hover:border-white/20'
+                    ? 'bg-blue-600 dark:bg-white/15 text-white dark:text-brand-cyan shadow-sm border border-blue-600 dark:border-brand-cyan/30 font-bold'
+                    : 'bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 ]"
               >
-                <component :is="tab.icon" class="w-3.5 h-3.5" />
+                <component 
+                  :is="tab.icon" 
+                  class="w-3.5 h-3.5 shrink-0" 
+                  :class="activeCategory === tab.id ? 'text-white dark:text-brand-cyan' : 'text-slate-500'" 
+                />
                 <span>{{ tab.label }}</span>
               </button>
             </div>
@@ -672,13 +625,13 @@ onUnmounted(() => {
             <!-- Recent Searches -->
             <div v-if="!searchQuery && recentSearches.length > 0" class="px-0.5">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Clock class="w-3 h-3 text-slate-400" />
                   Pencarian Terakhir
                 </span>
                 <button 
                   @click="clearAllRecent"
-                  class="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                  class="text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                 >
                   Hapus Semua
                 </button>
@@ -689,13 +642,13 @@ onUnmounted(() => {
                   v-for="item in recentSearches"
                   :key="item"
                   @click="handleSelect(item)"
-                  class="group px-3 py-1.5 rounded-[4px] bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer"
+                  class="group px-3 py-1.5 rounded-[4px] bg-slate-100 dark:bg-[#0e1933] hover:bg-slate-200 dark:hover:bg-[#142347] border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-brand-cyan flex items-center gap-2 transition-all cursor-pointer shadow-xs"
                 >
-                  <Clock class="w-3 h-3 text-slate-400 group-hover:text-brand-cyan" />
+                  <Clock class="w-3 h-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-brand-cyan" />
                   <span class="truncate max-w-[200px]">{{ item }}</span>
                   <X 
                     @click.stop="removeRecentSearch(item, $event)" 
-                    class="w-3 h-3 text-slate-400 hover:text-rose-400 transition-colors" 
+                    class="w-3 h-3 text-slate-400 hover:text-rose-500 transition-colors" 
                   />
                 </button>
               </div>
@@ -704,12 +657,12 @@ onUnmounted(() => {
             <!-- Results List -->
             <div>
               <div class="px-0.5 py-1 flex items-center justify-between">
-                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-400" />
-                  <Building2 v-else class="w-3 h-3 text-brand-cyan" />
-                  {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : 'Rekomendasi Tempat & Wilayah' }}
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Sparkles v-if="!searchQuery" class="w-3 h-3 text-amber-500" />
+                  <Building2 v-else class="w-3 h-3 text-blue-600 dark:text-brand-cyan" />
+                  {{ searchQuery ? `Hasil Pencarian (${displayedResults.length})` : (activeCategory === 'wilayah' ? 'Rekomendasi Kelurahan & Desa' : 'Rekomendasi Tempat Populer') }}
                 </span>
-                <span v-if="searchQuery" class="text-[9.5px] text-slate-400">
+                <span v-if="searchQuery" class="text-[9.5px] text-slate-500 dark:text-slate-400">
                   Pilih lokasi
                 </span>
               </div>
@@ -720,11 +673,11 @@ onUnmounted(() => {
                   v-for="item in displayedResults"
                   :key="item.id"
                   @click="handleSelect(item)"
-                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-white/5 bg-white/[0.03] active:bg-brand-cyan/15 active:border-brand-cyan/40"
+                  class="w-full p-3 rounded-[4px] text-left flex items-start gap-3 transition-all cursor-pointer border border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-[#0a1122] hover:bg-slate-100 dark:hover:bg-[#101b36] active:bg-blue-50 dark:active:bg-brand-cyan/20 active:border-blue-300 dark:active:border-brand-cyan/50 shadow-xs"
                 >
                   <!-- Category Icon Badge -->
                   <div 
-                    class="w-8 h-8 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 shadow-sm"
+                    class="w-8 h-8 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 shadow-xs"
                     :class="getCategoryStyle(item.category)"
                   >
                     <component :is="getCategoryIcon(item.category)" class="w-4 h-4" />
@@ -733,7 +686,7 @@ onUnmounted(() => {
                   <!-- Text info: Full name & Sublocation -->
                   <div class="flex-1 min-w-0 flex flex-col gap-1">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-xs font-black text-white leading-snug">
+                      <span class="text-xs font-black text-slate-900 dark:text-white leading-snug">
                         {{ item.name }}
                       </span>
                       <span 
@@ -745,13 +698,13 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <p class="text-[11px] text-slate-400 font-medium leading-tight">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-tight">
                       {{ item.subLocation }}
                     </p>
                   </div>
 
                   <!-- Right Action Indicator -->
-                  <div class="shrink-0 flex items-center text-slate-500 mt-1">
+                  <div class="shrink-0 flex items-center text-slate-400 dark:text-slate-500 mt-1">
                     <ChevronRight class="w-4 h-4" />
                   </div>
                 </button>
@@ -762,20 +715,20 @@ onUnmounted(() => {
                 v-if="displayedResults.length === 0 && !isLoadingOnline"
                 class="py-10 px-4 text-center flex flex-col items-center justify-center gap-2.5"
               >
-                <div class="w-11 h-11 rounded-[4px] bg-white/5 flex items-center justify-center text-slate-400">
+                <div class="w-11 h-11 rounded-[4px] bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
                   <Search class="w-5 h-5" />
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-200">
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-200">
                     Tidak ditemukan tempat dengan kata kunci "{{ searchQuery }}"
                   </p>
-                  <p class="text-[11px] text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
-                    Coba ketik nama desa, kelurahan, kecamatan, kampus, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-[280px] mx-auto leading-relaxed">
+                    Coba ketik nama kelurahan, desa, atau nama tempat, atau tekan tombol di bawah untuk mencari langsung ke BMKG.
                   </p>
                 </div>
                 <button 
                   @click="handleSelect(searchQuery)"
-                  class="mt-2 px-3.5 py-2 rounded-[4px] bg-brand-cyan text-brand-navy-950 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md"
+                  class="mt-2 px-3.5 py-2 rounded-[4px] bg-blue-600 dark:bg-brand-cyan text-white dark:text-brand-navy-950 text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-md"
                 >
                   <span>Pakai "{{ searchQuery }}" Langsung</span>
                   <CornerDownLeft class="w-3.5 h-3.5" />
@@ -785,8 +738,8 @@ onUnmounted(() => {
           </div>
 
           <!-- Mobile Footer -->
-          <div class="px-4 py-2.5 border-t border-white/10 bg-slate-950/70 flex items-center justify-between text-[10px] text-slate-400 shrink-0">
-            <span class="text-brand-cyan font-bold flex items-center gap-1.5">
+          <div class="px-4 py-2.5 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0b1326] flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 shrink-0">
+            <span class="text-blue-600 dark:text-brand-cyan font-bold flex items-center gap-1.5">
               <Sparkles class="w-3 h-3" />
               BMKG Realtime Maps POI
             </span>

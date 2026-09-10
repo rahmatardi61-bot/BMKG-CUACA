@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate api-mapping.xlsx — komparasi API baseline (cuaca.bmkg.go.id) vs project redesign.
 Data satu sumber: ROWS di bawah. Re-run: python3 generate_xlsx.py"""
+import os
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -164,6 +165,6 @@ ws2.column_dimensions["C"].width = 80
 for r in range(5, ws2.max_row + 1):
     ws2.cell(row=r, column=3).alignment = wrap
 
-wb.save("api-mapping.xlsx")
+wb.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'api-mapping.xlsx'))
 print(f"OK: api-mapping.xlsx ({len(ROWS)} baris)")
 print({s: sum(1 for r in ROWS if r[7] == s) for s in STATUS_COLOR})

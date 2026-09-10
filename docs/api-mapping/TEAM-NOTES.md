@@ -51,14 +51,16 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
   artikel mock. Periksa ulang saat sudah normal.
 - `x-public-token` expire ±30 menit — proxy dev & function prod auto-refresh dengan cache 25 menit.
 - Endpoint `/api/public/*` menolak `Origin` asing (403) — makanya wajib proxy, bukan CORS biasa.
+- **Proxy dev tanpa alias**: path request = persis path upstream (`/api/df/...`, `/api/public/...`, `/api/v1/public/...`, `/blog/...`) sehingga devtools langsung terbaca; host asli hanya bisa tampil untuk endpoint direct (`presentwx`, `api/v1/*`) karena browser dilarang set header `Referer` kustom — itu batasan browser, bukan pilihan desain.
+- **Deploy nanti**: set `VITE_BMKG_PROXY=/api/bmkg` di env Vercel agar request lewat `api/bmkg/[...path].ts` (function sudah siap).
 
 ## 4. Smoke test manual (dev browser)
 
 Jalankan `npm run dev`, buka `http://localhost:5173`. Checklist:
 
 ### A. Data live
-- [x] **A1** Network tab: `GET /api/bmkg/api/df/v1/forecast/coord?lat=-6.2...` → **200** & response JSON valid
-- [x] **A2** Network tab: `GET /api/bmkg/api/public/weather/warning...` → **200** (bukan 401 — artinya token ter-inject)
+- [x] **A1** Network tab: `GET /api/df/v1/forecast/coord?lat=-6.2...` (path identik upstream, via proxy dev) → **200** & response JSON valid
+- [x] **A2** Network tab: `GET /api/public/weather/warning...` → **200** (bukan 401 — artinya token ter-inject)
 - [x] **A3** Network tab: `GET https://cuaca.bmkg.go.id/api/presentwx/coord...` → **200** (direct, tanpa proxy)
 - [x] **A4** Kartu "Kondisi Saat Ini" menampilkan data **live** — bandingkan dengan https://cuaca.bmkg.go.id/ (suhu & kondisi & "terasa seperti" harus cocok/dalam toleransi)
 - [x] **A5** Prakiraan 7 hari + tab Per Jam + Suhu Mingguan render dari data live (angka berbeda dari mock, ikut jam WIB)

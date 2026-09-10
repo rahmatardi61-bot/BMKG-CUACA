@@ -25,25 +25,27 @@ async function getPubTok(): Promise<string> {
 }
 getPubTok(); // warm saat dev server start
 
-const bmkgProxy = {
-  '/api/bmkg': {
-    target: BMKG_UPSTREAM,
-    changeOrigin: true,
-    rewrite: (p: string) => p.replace(/^\/api\/bmkg/, ''),
-    headers: { Referer: BMKG_UPSTREAM + '/', Origin: BMKG_UPSTREAM },
-    configure(proxy: any) {
-      proxy.on('proxyReq', (proxyReq: any, req: any) => {
-        proxyReq.setHeader('User-Agent', UA);
-        const url = req.url || '';
-        if (url.includes('/api/v1/')) proxyReq.setHeader('X-API-KEY', BMKG_API_KEY);
-        if (url.includes('/api/public/') || url.includes('/v1/public/') || url.includes('/v1/user/')) {
-          const tok = pubTok.value;
-          if (tok) proxyReq.setHeader('x-public-token', tok);
-        }
-      });
-    },
+// path proxy = PERSIS path upstream (tanpa alias) — devtools menampilkan /api/df/... seperti API aslinya.
+// Header khusus (Referer/Origin/X-API-KEY/x-public-token) di-inject di sini, transparan bagi client.
+const PROXY_ENTRIES: Array<[string, { pubtok?: boolean }]> = [
+  ['/api/df', {}],
+  ['/api/public', { pubtok: true }],
+  ['/api/v1/public', { pubtok: true }],
+  ['/api/v1/user', { pubtok: true }],
+  ['/blog', {}],
+];
+const bmkgProxy = Object.fromEntries(PROXY_ENTRIES.map(([prefix, flags]) => [prefix, {
+  target: BMKG_UPSTREAM,
+  changeOrigin: true,
+  headers: { Referer: BMKG_UPSTREAM + '/', Origin: BMKG_UPSTREAM },
+  configure(proxy: any) {
+    proxy.on('proxyReq', (proxyReq: any, req: any) => {
+      proxyReq.setHeader('User-Agent', UA);
+      if (req.url && req.url.includes('/api/v1/')) proxyReq.setHeader('X-API-KEY', BMKG_API_KEY);
+      if (flags.pubtok && pubTok.value) proxyReq.setHeader('x-public-token', pubTok.value);
+    });
   },
-};
+}]));
 
 // https://vite.dev/config/
 export default defineConfig({

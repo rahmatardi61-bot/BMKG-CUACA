@@ -39,13 +39,15 @@ Action cache, (b) endpoint yang direct-OK saja (presentwx + v1), sisanya tetap m
 **Prinsip: satu seam, dua mode, fallback mock.**
 
 ```
-Browser (app)                     Proxy/Server                        BMKG
-─────────────                     ────────────                        ────
-/api-bmkg/df/v1/forecast/coord ──▶ Vite dev proxy  ──(Referer inject)──▶ /api/df/v1/forecast/coord
-                              ──▶ api/bmkg/[...path].ts (Vercel fn) ──▶ (strip Origin)
-                              ──▶ (token auto-fetch + cache 30m utk /api/public/*)
-/api-bmkg/v1/...  ── (atau direct ke cuaca.bmkg.go.id, X-API-KEY dari client) ──▶ /api/v1/...
-/api-bmkg/presentwx/... ── direct (terbuka)
+Browser (app)                  Proxy/Server                     BMKG
+─────────────                  ────────────                     ────
+/api/df/v1/forecast/coord  ──▶ Vite dev proxy (path identik ──(Referer inject)──▶ /api/df/v1/forecast/coord
+                               upstream, tanpa alias)
+                           ──▶ api/bmkg/[...path].ts (prod,    ──▶ (strip Origin)
+                               via VITE_BMKG_PROXY=/api/bmkg)
+                           ──▶ (token auto-fetch + cache 30m utk /api/public/*)
+/api/v1/...  ── direct ke https://cuaca.bmkg.go.id (X-API-KEY dari client) ──▶ /api/v1/...
+/api/presentwx/... ── direct (terbuka)
 ```
 
 - **Client gak pegang auth sama sekali**: path relatif `/api-bmkg/*`, tanpa header khusus.

@@ -4,7 +4,9 @@
 // - /api/presentwx/* + /api/v1/* terbuka CORS (ACAO *) → direct, tapi tetap bisa lewat proxy
 // - /blog/wp-json/* → lewat proxy (tanpa CORS)
 
-const PROXY = import.meta.env.VITE_BMKG_PROXY || '/api/bmkg';
+// dev: '' → path persis seperti upstream (/api/df/...) biar devtools mudah dibaca.
+// prod (Vercel): set VITE_BMKG_PROXY=/api/bmkg → lewat api/bmkg/[...path].ts
+const PROXY = import.meta.env.VITE_BMKG_PROXY || '';
 export const BMKG_BASE = 'https://cuaca.bmkg.go.id';
 
 /** Static client key (dari __NUXT_DATA__ baseline — publik milik situs BMKG) */

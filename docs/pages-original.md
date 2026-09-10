@@ -1,7 +1,7 @@
-# PAGES — cuaca.bmkg.go.id
+# Pages Original — cuaca.bmkg.go.id
 
 Semua route publik (diekstrak dari route table bundle Nuxt + verifikasi Playwright).
-Teks UI lengkap per route: `baseline/text/*.txt`. Screenshot: `screenshots/*.png`.
+Teks UI lengkap per route: `scrapping_cuaca-bmkg-go-id/baseline/text/*.txt`. Screenshot: `scrapping_cuaca-bmkg-go-id/screenshots/*.png`.
 
 ## Route map
 

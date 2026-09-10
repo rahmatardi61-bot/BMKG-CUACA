@@ -1,9 +1,14 @@
-# ENDPOINTS — cuaca.bmkg.go.id
+# API Reference — cuaca.bmkg.go.id (scraped) + BMKG Open Data (resmi)
+
+> Referensi teknis semua endpoint. Komparasi status/pemakaian: `api-comparison.md`.
+> Data sample: `scrapping_cuaca-bmkg-go-id/baseline/`.
+
+# Bagian 1 — API internal cuaca.bmkg.go.id (hasil scraping)
 
 Semua endpoint yang terdeteksi dari network capture (Playwright) + probe langsung.
 Sample: `baseline/api_probes/` (probe Node) & `baseline/<route>/` (capture browser).
 
-Header auth per family lihat README.md. UA wajib full browser string.
+UA wajib full browser string.
 
 > **Akses di redesign (dev)**: family dengan auth `Referer+Origin` (`/api/df/*`) dan
 > `x-public-token` (`/api/public/*`, `/api/v1/public/*`, `/api/v1/user/*`) **wajib lewat
@@ -87,3 +92,103 @@ Error: koordinat `999` / kosong → `403 {status:403, message:"Forbidden"}` (buk
 ## Icon assets
 
 `https://api-apps.bmkg.go.id/storage/icon/cuaca/{cerah,cerah-berawan,berawan,...}-{am,pm}.svg` — suffix `am`/`pm` untuk siang/malam.
+
+
+---
+
+## Lampiran: Auth client (dari __NUXT_DATA__ & bundle)
+
+## Runtime config (`window.__NUXT__.config`, di HTML tiap render)
+
+```js
+{
+  public: {
+    baseURL: "https://cuaca.bmkg.go.id/api/v1/",
+    publicBaseURL: "https://cuaca.bmkg.go.id/api/",
+    dfBaseURL: "https://cuaca.bmkg.go.id/api/df",
+    presentwxBaseURL: "https://cuaca.bmkg.go.id/api/presentwx",
+    defaultURL: "https://weather.bmkg.go.id/api/",
+    postBlog: "https://cuaca.bmkg.go.id/blog/wp-json/wp/v2/",
+    defaultLang: "id",
+  },
+  app: { buildId: "d2971517-78e2-4b58-b44e-499af6df6213" },
+}
+```
+
+## SSR state (`__NUXT_DATA__`)
+
+- `$spublicToken` → `{token: "<JWT type=public_access>", expiresAt: <epoch ms>}` — JWT **short-lived ~30 menit** (`iat`→`exp` 1800s), di-issue server saat render. Dikirim sebagai header **`x-public-token`** untuk `/api/public/*`.
+- `$sapiKey` → JWT statis (payload `{id: "1c5adee1...", iat: 1701583379}` = Des 2023). Dikirim sebagai header **`X-API-KEY`** untuk `/api/v1/*`.
+
+## Interceptor (dari bundle `RhJE6rBC.js` / `CSY6jMQr.js`)
+
+```js
+// axios instance v1 (timeout 9e6 ms)
+r.interceptors.request.use(e => { e.headers["X-API-KEY"] = useState("apiKey").value; ... });
+// axios instance devtools (timeout 1e4 ms)
+m.interceptors.request.use(o => {
+  o.headers.Authorization = "Bearer " + publicToken.value;
+  o.headers["X-API-KEY"] = apiKeyStore.value; ...
+});
+```
+
+## Cara ambil publicToken fresh (untuk probe/diff)
+
+```bash
+curl -s -A "<UA browser lengkap>" https://cuaca.bmkg.go.id/ \
+  | python3 -c "import sys,re; h=sys.stdin.read(); s=h[h.find('publicToken'):]; print(re.search(r'eyJ[\w-]+\.[\w-]+\.[\w-]+',s).group(0))"
+```
+
+## Matriks header per family
+
+| URL family | Header wajib | Tanpa header → |
+|---|---|---|
+| `/api/v1/*` | `X-API-KEY` | 401 "API KEY not provided!!" |
+| `/api/public/*`, `/api/v1/public/*` | `x-public-token` (fresh!) | 401 "Public access token not provided" |
+| `/api/df/v1/*` | `Referer` + `Origin` situs | 403 Forbidden |
+| `/api/presentwx/*` | — | terbuka |
+| `/api/v1/setting/find-code`, `/api/public/banners`, `spartan.bmkg.go.id/map/modelrun`, `maps/{warning,maritim}/metadata/tiles` | — | terbuka |
+| `/api/v1/developer/*` | login dev | 401 |
+
+
+---
+
+# Bagian 3 — BMKG Open Data (RESMI — data.bmkg.go.id)
+
+> Ditemukan 10 Sep 2026. **Terdokumentasi resmi, tanpa auth, CORS `*` (direct dari browser),
+> limit 60 req/menit/IP, WAJIB atribusi "BMKG" di UI.** Ringkasan tabel: `bmkg-api-mapping.xlsx`
+> sheet **Official Open Data**.
+
+## Prakiraan cuaca per desa (ADM4)
+
+```
+GET https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah_tingkat_IV}
+contoh: https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=31.71.03.1001
+```
+
+- Coverage: **3 hari, per 3 jam (8x/hari)**, pemutakhiran 2x sehari
+- Params: `adm4` = kode wilayah Kemendagri No. 100.1.1-6117/2022 → **persis field `adm4`** yang
+  dikembalikan `adm/coord` internal (sambungan natural: GPS → adm/coord → adm4 → official API)
+- Field per item: `t` (°C), `hu` (%), `weather_desc`/`_en`, `ws` (km/jam), `wd`, `tcc` (%),
+  `tp` (mm), `vs_text`, `analysis_date`, `image` — **hampir identik** respons internal
+  `forecast/coord` → adapter existing dapat dipakai ulang
+- Contoh kode resmi: `github.com/infoBMKG/data-cuaca`
+- Implikasi: kandidat jalur DIRECT untuk 3-harian hourly; internal `df/forecast/coord` tetap
+  berguna untuk 7–10 hari (official belum menyediakan)
+
+## Gempabumi (sudah dipakai redesign — ternyata bagian resmi program ini)
+
+- `data.bmkg.go.id/DataMKG/TEWS/autogempa.json` (M5.0+)
+- `data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json`
+- `data.bmkg.go.id/DataMKG/TEWS/tsunamiterkini.json` (belum dipakai)
+- Format JSON/XML/JPG, update per kejadian, limit 60 req/menit/IP
+
+## Peringatan dini cuaca (Nowcast) — RSS/CAP
+
+```
+GET https://www.bmkg.go.id/alerts/nowcast/id          (RSS feed, per provinsi)
+GET https://www.bmkg.go.id/alerts/nowcast/id/{kode_detail_cap}_alert.xml  (CAP, s/d kecamatan)
+```
+
+- Kandidat pengganti RESMI `/api/public/weather/warning` (internal, wajib proxy) — butuh
+  adapter RSS/CAP baru

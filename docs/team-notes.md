@@ -1,7 +1,7 @@
 # Team Notes — Keputusan Penyesuaian UI & Smoke Test
 
 > Bahan diskusi tim untuk hasil integrasi API BMKG ke redesign.
-> Pasangan dokumen: `IMPLEMENTATION-PLAN.md` & `API-MAPPING.md`.
+> Pasangan dokumen: `api-comparison.md` & `API-MAPPING.md`.
 
 ## Status implementasi (8–9 Sep 2026)
 

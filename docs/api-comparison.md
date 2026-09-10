@@ -1,13 +1,16 @@
-# API Mapping — Baseline (cuaca.bmkg.go.id) vs Project Redesign (bmkg_cuaca)
+# API Comparison — Original vs Redesign vs Official Open Data
 
-> Komparasi API antara **baseline scraping** (`../scrapping_cuaca-bmkg-go-id/`, dianggap
+> Satu-satunya dokumen komparasi API. Riwayat arsitektur & plan implementasi:
+> lihat git history (commit `242c9ee`) — dipangkas agar dokumen tetap ramping.
+
+> Komparasi API antara **baseline scraping** (`scrapping_cuaca-bmkg-go-id/`, dianggap
 > source original) dan **project redesign** (`src/`). Fokus: endpoint mana yang **belum
 > diimplementasikan** di redesign, mana yang diimplementasikan dengan **sumber berbeda**.
 >
-> Versi tabel: `api-mapping.xlsx` (regenerate: `python3 generate_xlsx.py`).
+> Versi tabel: `bmkg-api-mapping.xlsx` (sheet API Mapping) (regenerate: edit manual di file xlsx).
 > Baseline di-capture: 8 Sep 2026.
 > **Update 9 Sep**: integrasi fase 1–5 selesai → status kini: 8 TERIMPLEMENTASI,
-> 2 SEBAGIAN, 10 BELUM, 8 BEDA-SUMBER, 4 REDESIGN-ONLY (lihat `TEAM-NOTES.md`).
+> 2 SEBAGIAN, 10 BELUM, 8 BEDA-SUMBER, 4 REDESIGN-ONLY (lihat `team-notes.md`).
 
 ## Ringkasan
 
@@ -32,7 +35,7 @@ backlog integrasi.
 5. **`/api/df/v1/adm/coord`** — replace Nominatim untuk resolve admin area (sudah ada
    geolocation handler di `App.vue`, tinggal ganti sumber + fallback Nominatim).
 
-Catatan auth singkat (detail: `../scrapping_cuaca-bmkg-go-id/api_client_auth.md`):
+Catatan auth singkat (detail: `scrapping_cuaca-bmkg-go-id/api_client_auth.md`):
 
 | Family | Header wajib |
 |---|---|
@@ -40,6 +43,21 @@ Catatan auth singkat (detail: `../scrapping_cuaca-bmkg-go-id/api_client_auth.md`
 | `/api/presentwx/*` | — |
 | `/api/v1/*` | `X-API-KEY` (JWT statis, ada di baseline `__NUXT_DATA__`) |
 | `/api/public/*` | `x-public-token` (JWT 30 menit, ambil fresh dari HTML homepage) |
+
+
+## Status implementasi (10 Sep 2026)
+
+| Fase | Isi | Status |
+|---|---|---|
+| 0 | Proxy dev (path identik upstream) + Vercel function + service client | ✅ |
+| 1 | `forecast/coord` + `presentwx/coord` → dashboard live | ✅ |
+| 2 | `warning` + `sunset/json` (+ `weekly-temperature` fetch-ready*) | ✅ |
+| 3 | `adm/coord` (BMKG primary, Nominatim fallback) + `amandemen` toast + `video-latest` + `cyclone` | ✅ |
+| 4 | `nearest-location` fetch-ready*; layer peta live** | ✅ |
+| 5 | Berita WP REST + video → `NewsSection` | ✅ |
+
+`*` data ter-fetch, slot UI menyusul. `**` layer peta masih CartoCDN.
+Smoke test A–D lulus (10 Sep); E (deploy Vercel) ditunda.
 
 ## ⚠️ Endpoint yang WAJIB lewat proxy (kondisi dev saat ini)
 
@@ -64,7 +82,7 @@ endpoint `/api/v1/*` lainnya yang auth-nya hanya `X-API-KEY` (maps metadata, sus
 tourism.json, maritim/route, water-area, impact list), plus service eksternal (spartan,
 bmkg-sus, circlegeo) dan redesign-only (Nominatim/Overpass/OSRM/TEWS).
 
-Kolom **"Akses (dev)"** di `api-mapping.xlsx` dan kolom **"Akses di Dev"** di
+Kolom **"Akses (dev)"** di `bmkg-api-mapping.xlsx` (sheet API Mapping) dan kolom **"Akses di Dev"** di
 `catatan-dev-team.xlsx` (sheet Web) sudah menandai ini per baris.
 
 ## Tabel mapping lengkap
@@ -134,6 +152,6 @@ Kolom **"Akses (dev)"** di `api-mapping.xlsx` dan kolom **"Akses di Dev"** di
 ## Cara memakai dokumen ini
 
 - Untuk mulai integrasi: ambil dari **prioritas** di atas; sample response & shape ada di
-  `../scrapping_cuaca-bmkg-go-id/baseline/api_probes/` (per kota) dan `baseline/<route>/`.
-- Untuk audit: buka `api-mapping.xlsx` (filter kolom Status/Family).
-- Update mapping: edit `generate_xlsx.py` (data satu sumber) → `python3 generate_xlsx.py`.
+  `scrapping_cuaca-bmkg-go-id/baseline/api_probes/` (per kota) dan `baseline/<route>/`.
+- Untuk audit: buka `bmkg-api-mapping.xlsx` (sheet API Mapping) (filter kolom Status/Family).
+- Update mapping: edit `generate_xlsx.py` (data satu sumber) → edit manual di file xlsx.

@@ -46,6 +46,12 @@ const cities = ref(['Mencari lokasi...', ...citiesList.slice(1)]);
 import { useBmkgWeather, CITY_COORDS } from './composables/useBmkgWeather';
 const bmkgWeather = useBmkgWeather();
 const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, amandemenCount } = bmkgWeather;
+const isDev = import.meta.env.DEV;
+// 'live' = data BMKG asli; 'mock' = fallback mockData.ts; 'loading' = sedang fetch
+const dataSource = computed(() => {
+  if (bmkgWeather.status.value === 'loading') return 'loading';
+  return liveWeather.value ? 'live' : 'mock';
+});
 
 
 // Computed current weather metrics based on selected city
@@ -645,6 +651,24 @@ onMounted(() => {
         @login-success="handleLoginSuccess"
       />
     </template>
+
+    <!-- Data source badge (dev-only): pemisah visual LIVE vs MOCK -->
+    <div
+      v-if="isDev"
+      class="fixed bottom-3 right-3 z-[100] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md border"
+      :class="dataSource === 'live'
+        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+        : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'"
+      :title="dataSource === 'live' ? 'Data cuaca live dari API BMKG (cuaca.bmkg.go.id)' : 'Data contoh dari mockData.ts (API gagal / belum termuat)'"
+    >
+      <span class="relative flex h-2 w-2">
+        <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
+          :class="dataSource === 'live' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full"
+          :class="dataSource === 'live' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+      </span>
+      {{ dataSource === 'live' ? 'LIVE • BMKG API' : dataSource === 'loading' ? 'MEMUAT…' : 'DEMO • MOCK' }}
+    </div>
 
     <!-- Elegant Dismissible Toast Notification -->
     <Transition name="slide-fade">

@@ -53,6 +53,11 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
 - Endpoint `/api/public/*` menolak `Origin` asing (403) — makanya wajib proxy, bukan CORS biasa.
 - **Proxy dev tanpa alias**: path request = persis path upstream (`/api/df/...`, `/api/public/...`, `/api/v1/public/...`, `/blog/...`) sehingga devtools langsung terbaca; host asli hanya bisa tampil untuk endpoint direct (`presentwx`, `api/v1/*`) karena browser dilarang set header `Referer` kustom — itu batasan browser, bukan pilihan desain.
 - **Deploy nanti**: set `VITE_BMKG_PROXY=/api/bmkg` di env Vercel agar request lewat `api/bmkg/[...path].ts` (function sudah siap).
+- **Pemisahan LIVE vs MOCK**:
+  - Data mock TIDAK PERNAH lewat network (import langsung dari `mockData.ts`) → apapun yang muncul di network tab adalah API BMKG asli.
+  - Request `localhost:5173/api/df/...` di devtools = **data live BMKG via proxy** (bukan mock); endpoint direct (`presentwx`, `v1/*`) tampil dengan host asli.
+  - Badge dev-only di kanan-bawah layar: 🟢 `LIVE • BMKG API` / 🟡 `DEMO • MOCK` / memuat — state dari `bmkgWeather.status`.
+  - Console (dev): tiap fetch proxy di-log sebagai `[BMKG API] https://cuaca.bmkg.go.id/...` (URL aslinya).
 
 ## 4. Smoke test manual (dev browser)
 

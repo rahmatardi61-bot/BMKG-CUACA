@@ -16,6 +16,10 @@ export const BMKG_API_KEY =
 const TIMEOUT_MS = 10000;
 
 async function request(url: string, headers: Record<string, string> = {}): Promise<Response> {
+  // dev-only: permudah membaca — request via proxy localhost dicetak sebagai URL upstream aslinya
+  if (import.meta.env.DEV && url.startsWith('/')) {
+    console.info(`[BMKG API] ${BMKG_BASE}${url}`);
+  }
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {

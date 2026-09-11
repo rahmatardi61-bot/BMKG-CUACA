@@ -45,6 +45,11 @@ const cities = ref(['Mencari lokasi...', ...citiesList.slice(1)]);
 // ── API BMKG live (fallback: mock di bawah) ───────────────────────────────────
 import { useBmkgWeather, CITY_COORDS } from './composables/useBmkgWeather';
 import { initDwtWindStations } from './utils/gfsWindGrid';
+import {
+  dwtWeatherAt, dwtKeretaAt, getPerairanByCode, currentSlot,
+  kodeToStatus, parseWaveRange,
+} from './services/bmkg/openData';
+import type { TransportStatus } from './types/weather';
 const bmkgWeather = useBmkgWeather();
 const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, amandemenCount } = bmkgWeather;
 const isDev = import.meta.env.DEV;
@@ -75,8 +80,79 @@ const activeHourlyForecasts = computed(() => {
   return hourlyForecastsMap[selectedCity.value] || hourlyForecastsMap['DKI Jakarta'];
 });
 
-// Computed per-city transport statuses
+// ── Transport statuses LIVE (DWT cuaca jalan/kereta + maritim perairan) ─────
+// Penerbangan: PAUSED (menunggu API partner) → tidak dibuat live.
+const STATUS_CLASS: Record<string, string> = {
+  Aman: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30',
+  Waspada: 'bg-amber-500/10 text-amber-600 border border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30',
+  Awas: 'bg-red-500/10 text-red-500 border border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30',
+};
+const liveTransport = ref<TransportStatus[] | null>(null);
+const maritimLive = ref<TransportStatus extends never ? never : { waveDesc: string; waveCat: string; warningDesc: string; wilpel: string } | null>(null);
+
+async function refreshTransportStatuses(): Promise<void> {
+  try {
+    const city = selectedCity.value;
+    const c = coordsForCity(city);
+    const jobs: Promise<void>[] = [];
+
+    // Jalan raya: cuaca kecamatan DWT terdekat
+    jobs.push(dwtWeatherAt(c.lat, c.lon).then(dwt => {
+      if (!dwt) return;
+      const st = kodeToStatus(dwt.kodeCuaca);
+      const desc = dwt.temp >= 33
+        ? `Cuaca ${dwt.kecamatan} ${dwt.humidity > 85 ? 'lembap' : 'panas'} ${dwt.temp}°C — kurangi aktivitas fisik berat di siang hari.`
+        : `Cuaca kecamatan ${dwt.kecamatan} (${dwt.wilayah.split(' - ')[0]}) ${dwt.temp}°C, kelembapan ${dwt.humidity}%. Arus utama terpantau ${st === 'Aman' ? 'normal' : 'perlu kewaspadaan'}.`;
+      upsertLive({ type: 'road', title: 'Jalan Raya', status: st, statusClass: STATUS_CLASS[st], description: desc });
+    }));
+
+    // Kereta: stasiun DWT kereta terdekat (hanya ada di Jawa)
+    jobs.push(dwtKeretaAt(c.lat, c.lon).then(k => {
+      if (!k) return;
+      const st = kodeToStatus(k.kodeCuaca);
+      upsertLive({ type: 'rail', title: 'Kereta', status: st, statusClass: STATUS_CLASS[st],
+        description: `Koridor stasiun terdekat (${k.kecamatan}) ${k.temp}°C, ${k.humidity}%. Rel ${st === 'Aman' ? 'kering dan normal' : 'perlu kewaspadaan cuaca'}.` });
+    }));
+
+    // Maritim: doc perairan kode terdekat (dari maritim/nearest-location v1)
+    const code = bmkgWeather.maritimNearest.value?.code;
+    const wilpel = bmkgWeather.maritimNearest.value?.wilpel ?? '';
+    if (code) jobs.push(getPerairanByCode(code).then(doc => {
+      if (!doc) return;
+      const slot = currentSlot(doc);
+      if (!slot) return;
+      const wave = parseWaveRange(slot.wave_desc);
+      const cat = (slot.wave_cat || '').toLowerCase();
+      const warn = slot.warning_desc && slot.warning_desc !== 'NIL';
+      const st = warn ? 'Awas' : (cat.includes('sedang') || cat.includes('tinggi')) ? 'Waspada' : 'Aman';
+      const wdesc = wave ? `Gelombang ${wave.min}–${wave.max} m` : (slot.wave_desc || 'Gelombang terpantau');
+      maritimLive.value = { waveDesc: slot.wave_desc ?? '', waveCat: slot.wave_cat ?? '', warningDesc: slot.warning_desc ?? '', wilpel };
+      upsertLive({ type: 'maritime', title: 'Maritim', status: st, statusClass: STATUS_CLASS[st],
+        description: `${wdesc} — ${slot.weather_desc ?? 'cuaca perairan terpantau'}.${warn ? ` PERINGATAN: ${slot.warning_desc}.` : ' Aktivitas pelayaran lokal ' + (st === 'Aman' ? 'kondusif.' : 'ikuti arahan aparat.')}` });
+    }));
+
+    await Promise.all(jobs);
+  } catch {
+    /* biarkan fallback mock */
+  }
+
+  function upsertLive(item: TransportStatus): void {
+    const list = liveTransport.value ? [...liveTransport.value] : [];
+    const i = list.findIndex(x => x.type === item.type);
+    if (i >= 0) list[i] = item; else list.push(item);
+    liveTransport.value = list;
+  }
+}
+
+watch([selectedCity, () => bmkgWeather.status.value], () => {
+  liveTransport.value = null;
+  maritimLive.value = null;
+  void refreshTransportStatuses();
+});
+
+// Computed per-city transport statuses (live menang, fallback mock)
 const activeTransportStatuses = computed(() => {
+  if (liveTransport.value?.length) return liveTransport.value;
   return transportStatusesMap[selectedCity.value] || transportStatusesMap['DKI Jakarta'];
 });
 
@@ -621,6 +697,7 @@ onMounted(() => {
         :weather-data="activeWeatherData"
         :forecasts="activeHourlyForecasts"
         :transport-statuses="activeTransportStatuses"
+        :maritim-live="maritimLive"
         :alerts="activeWarningAlerts"
         :articles="activeArticles"
         :cities="cities"

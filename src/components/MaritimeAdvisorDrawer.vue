@@ -14,16 +14,44 @@ import {
   Users 
 } from 'lucide-vue-next';
 import { getSectorsDataForCity, type SectorAdvisor } from '../data/maritimeAdvisorData';
+import { WAVE_CAT_MID } from '../services/bmkg/openData';
 
 const props = defineProps<{
   isOpen: boolean;
   initialSectorId?: 'shipping' | 'fishery' | 'oilgas' | 'tourism' | 'public';
   selectedCity: string;
+  maritimLive?: { waveDesc: string; waveCat: string; warningDesc: string; wilpel: string } | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
+
+// Replicate sectors locally to allow checklist mutation (toggling SOP checklist)
+// Patch data maritim LIVE (public_api perairan) ke sector shipping/fishery:
+// parameter 'Tinggi Gelombang' + narasi risiko mengikuti wave_cat/warning resmi.
+function applyLiveMaritim(sectors: SectorAdvisor[]): void {
+  const live = props.maritimLive;
+  if (!live?.waveDesc) return;
+  const cat = (live.waveCat || '').toLowerCase();
+  const mid = Object.entries(WAVE_CAT_MID).find(([k]) => cat.includes(k))?.[1] ?? 1;
+  const paramStatus = live.warningDesc !== 'NIL' && live.warningDesc ? 'bahaya'
+    : mid >= 3 ? 'siaga' : mid >= 1.2 ? 'waspada' : 'aman';
+  const risk = live.warningDesc && live.warningDesc !== 'NIL' ? 'Bahaya'
+    : mid >= 3 ? 'Tinggi' : mid >= 1.2 ? 'Sedang' : 'Rendah';
+  for (const s of sectors) {
+    if (s.id !== 'shipping' && s.id !== 'fishery') continue;
+    const p = s.parameters.find(x => /gelombang/i.test(x.label));
+    if (p) { p.value = live.waveDesc; p.status = paramStatus as never; }
+    s.riskLevel = risk as never;
+    if (s.advisories.length) {
+      s.advisories[0] = { status: risk === 'Rendah' ? 'info' : risk === 'Bahaya' ? 'danger' : 'warning',
+        text: live.warningDesc && live.warningDesc !== 'NIL'
+          ? `${live.warningDesc} — wilayah ${live.wilpel || s.name}.`
+          : `Kategori gelombang ${live.waveCat} (${live.waveDesc}) di ${live.wilpel || s.name} per rilis terakhir BMKG.` };
+    }
+  }
+}
 
 // Replicate sectors locally to allow checklist mutation (toggling SOP checkbox)
 const localSectors = ref<SectorAdvisor[]>([]);
@@ -35,7 +63,9 @@ watch(
   ([isOpenVal]) => {
     if (isOpenVal) {
       document.body.classList.add('drawer-open');
-      localSectors.value = JSON.parse(JSON.stringify(getSectorsDataForCity(props.selectedCity)));
+      const sectors: SectorAdvisor[] = JSON.parse(JSON.stringify(getSectorsDataForCity(props.selectedCity)));
+      applyLiveMaritim(sectors);
+      localSectors.value = sectors;
       const targetId = props.initialSectorId || 'shipping';
       const found = localSectors.value.find(s => s.id === targetId) || localSectors.value[0];
       if (found) activeAdvisorSector.value = found;

@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { fetchMarineSectors, fetchMarinePorts } from '../data/indonesiaMapData';
 import type { IndonesiaMarineSector, MarinePort } from '../data/indonesiaMapData';
 import { getCityCoordinates } from '../data/earthquakeData';
+import { getWilayahPerairanGeo } from '../services/bmkg/openData';
 
 const props = withDefaults(defineProps<{
   selectedCity?: string;
@@ -547,6 +548,20 @@ onMounted(() => {
 
   nextTick(() => {
     sharedCanvasRenderer = L.canvas({ padding: 0.1 });
+
+    // Overlay polygon WILAYAH PERAIRAN (geojson resmi maritim, CORS *) — klik: nama + kode
+    void getWilayahPerairanGeo().then((geo) => {
+      if (!geo || !map) return;
+      L.geoJSON(geo as never, {
+        style: { color: '#22d3ee', weight: 0.7, opacity: 0.5, fillColor: '#22d3ee', fillOpacity: 0.05 },
+        onEachFeature: (f, l) => {
+          const p = (f.properties ?? {}) as Record<string, unknown>;
+          const label = String(p.name ?? p.nama ?? p.code ?? p.kode ?? 'Wilayah Perairan');
+          const code = String(p.code ?? p.kode ?? '');
+          l.bindPopup(`<b>${label}</b>${code ? ` (${code})` : ''}`);
+        },
+      }).addTo(map);
+    });
     canvasLandRenderer   = L.canvas({ padding: 0.1, pane: 'landPane' });
 
     const initialCoords = getCityCoordinates(props.selectedCity, props.userLat, props.userLng);

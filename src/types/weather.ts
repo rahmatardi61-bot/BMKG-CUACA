@@ -24,7 +24,7 @@ export interface HourlyForecast {
 }
 
 export interface TransportStatus {
-  type: 'road' | 'air' | 'maritime';
+  type: 'road' | 'air' | 'maritime' | 'rail';
   title: string;
   status: 'Aman' | 'Waspada' | 'Awas';
   statusClass: string;

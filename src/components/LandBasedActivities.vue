@@ -34,6 +34,9 @@ import {
   routesCoordinates,
 } from '../data/landBasedActivitiesData';
 import { hourlyForecastsMap } from '../data/mockData';
+import { bmkg } from '../services/bmkg/api';
+import { forecastToHourly } from '../services/bmkg/adapters';
+import type { HourlyForecast } from '../types/weather';
 import { getCityCoordinates } from '../data/earthquakeData';
 
 const props = defineProps<{
@@ -70,11 +73,31 @@ const activeWeatherLocation = computed(() => {
   return startLocation.value;
 });
 
-// Forecasts: map location region to closest main city from mockData, then adjust weather parameters to match location condition
+// Forecast LIVE (df/forecast/coord internal) per titik lokasi aktif — fallback: peta kota mock
+const liveRouteForecast = ref<HourlyForecast[]>([]);
+const liveRouteKey = ref('');
+watch(activeWeatherLocation, async (loc) => {
+  if (!loc || typeof loc.lat !== 'number') return;
+  const key = `${loc.lat.toFixed(2)},${loc.lng.toFixed(2)}`;
+  if (key === liveRouteKey.value) return;
+  liveRouteKey.value = key;
+  try {
+    const res = await bmkg.forecast(loc.lat, loc.lng);
+    const hourly = forecastToHourly(res);
+    if (hourly.length) liveRouteForecast.value = hourly;
+  } catch {
+    /* fallback mock di bawah */
+  }
+}, { immediate: true });
+
+// Forecasts: LIVE per koordinat menang; fallback map lokasi → kota regional mockData
 const cityForecasts = computed(() => {
   const loc = activeWeatherLocation.value;
   if (!loc) {
     return hourlyForecastsMap[props.selectedCity] || hourlyForecastsMap['DKI Jakarta'] || [];
+  }
+  if (liveRouteForecast.value.length && liveRouteKey.value) {
+    return liveRouteForecast.value;
   }
 
   // 1. Map to closest regional city in hourlyForecastsMap

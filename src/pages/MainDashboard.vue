@@ -67,6 +67,7 @@ const props = defineProps<{
   userLat?: number | null;
   userLng?: number | null;
   additionalInfo?: AdditionalWeatherInfo;
+  maritimLive?: { waveDesc: string; waveCat: string; warningDesc: string; wilpel: string } | null;
 }>();
 
 const emit = defineEmits<{
@@ -538,6 +539,7 @@ onUnmounted(() => {
     :is-open="isMaritimeDrawerOpen"
     :initial-sector-id="activeMaritimeSector"
     :selected-city="selectedCity"
+    :maritim-live="props.maritimLive"
     @close="isMaritimeDrawerOpen = false"
   />
   <AviationAdvisorDrawer

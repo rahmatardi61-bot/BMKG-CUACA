@@ -20,8 +20,39 @@ const modes = [
 ];
 const activeModeInfo = computed(() => modes.find(m => m.id === activeMode.value) || modes[0]);
 
-// Zona perairan Indonesia (lat/lng + data maritim mock)
+// Zona perairan Indonesia — awal mock, di-overlay data LIVE maritim public_api
+// (centroid geojson wilayah + kategori gelombang overview). Angin mode tetap mock.
+import { getWilayahPerairanGeo, getOverviewGelombang, getPerairanFiles, geoCentroid, WAVE_CAT_MID } from '../services/bmkg/openData';
+
 interface Zone { name: string; lat: number; lng: number; wave: number; wind: number; }
+
+/** Zona LIVE: centroid polygon wilayah (geojson resmi) + kategori gelombang overview.
+ *  Wind mode: overview tak punya angin per-wilayah → angka ilustratif (mid ×6). */
+async function loadLiveZones(): Promise<Zone[] | null> {
+  try {
+    const [geo, overview, files] = await Promise.all([
+      getWilayahPerairanGeo(), getOverviewGelombang(), getPerairanFiles(),
+    ]);
+    if (!geo || !overview || !files?.length) return null;
+    const names = new Map<string, string>();
+    for (const n of files.map(String)) {
+      names.set(n.split('_')[0], n.replace(/^[^.]+_/, '').replace(/\.json$/, ''));
+    }
+    const live: Zone[] = [];
+    for (const f of (geo as { features: { properties: Record<string, unknown>; geometry: unknown }[] }).features) {
+      const code = String(f.properties?.code ?? f.properties?.kode ?? '');
+      const cen = geoCentroid(f as never);
+      const ov = (overview as Record<string, Record<string, string>>)[code];
+      if (!cen || !ov) continue;
+      const cat = String(ov.today || '').toLowerCase();
+      const wave = Object.entries(WAVE_CAT_MID).find(([k]) => cat.includes(k))?.[1] ?? 1;
+      live.push({ name: names.get(code) || code, lat: cen.lat, lng: cen.lng, wave, wind: wave * 6 });
+    }
+    return live.length >= 20 ? live : null;
+  } catch { return null; }
+}
+
+// fallback mock (dipakai bila data live gagal)
 const zones: Zone[] = [
   { name: 'Perairan Utara Aceh', lat: 5.5, lng: 96.0, wave: 2.4, wind: 22 },
   { name: 'Perairan Sumatera Utara', lat: 3.6, lng: 98.5, wave: 1.8, wind: 18 },
@@ -150,8 +181,11 @@ watch(() => props.selectedCity, () => {
   });
 });
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('click', handleClickOutside);
+  // Muat zona LIVE dulu (centroid wilayah + gelombang resmi) sebelum peta digambar
+  const live = await loadLiveZones();
+  if (live) zones.splice(0, zones.length, ...live);
   initMap();
   // Card masuk via lazy-load: pastikan ukuran container sudah benar
   setTimeout(() => map?.invalidateSize(), 150);

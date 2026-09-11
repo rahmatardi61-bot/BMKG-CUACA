@@ -3,6 +3,7 @@ import {
   Car, 
   Plane, 
   Compass, 
+  Train, 
   CheckCircle2, 
   AlertTriangle, 
   AlertOctagon 
@@ -18,6 +19,7 @@ const getTypeIcon = (type: string) => {
   switch (type) {
     case 'road': return Car;
     case 'air': return Plane;
+    case 'rail': return Train;
     case 'maritime': return Compass;
     default: return Car;
   }
@@ -40,6 +42,8 @@ const getBgIconClass = (type: string) => {
       return 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400';
     case 'air':
       return 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10 dark:text-indigo-400';
+    case 'rail':
+      return 'bg-violet-50 text-violet-500 dark:bg-violet-500/10 dark:text-violet-400';
     case 'maritime':
       return 'bg-sky-50 text-sky-500 dark:bg-sky-500/10 dark:text-sky-400';
     default:

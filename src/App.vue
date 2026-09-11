@@ -44,6 +44,7 @@ const activeTab = ref('Beranda');
 const cities = ref(['Mencari lokasi...', ...citiesList.slice(1)]);
 // ── API BMKG live (fallback: mock di bawah) ───────────────────────────────────
 import { useBmkgWeather, CITY_COORDS } from './composables/useBmkgWeather';
+import { initDwtWindStations } from './utils/gfsWindGrid';
 const bmkgWeather = useBmkgWeather();
 const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, amandemenCount } = bmkgWeather;
 const isDev = import.meta.env.DEV;
@@ -486,6 +487,8 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
+  // DWT angin REAL utk peta (WindMap/WeatherRadarMap) — fire & forget, fallback sintetis
+  void initDwtWindStations();
   // Load preferences from local storage or default to 'dark'
   const storedTheme = localStorage.getItem('bmkg-theme-v2');
   if (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') {

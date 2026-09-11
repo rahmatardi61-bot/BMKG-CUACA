@@ -6,9 +6,12 @@ import {
   ChevronLeft, ChevronRight, CornerUpRight
 } from 'lucide-vue-next';
 import { cityAnalysisMap } from '../data/mockData';
+import { buildCityAnalysis } from '../services/analysisNarrative';
+import type { WeatherData } from '../types/weather';
 
 const props = defineProps<{
   selectedCity: string;
+  weatherData?: WeatherData | null;
 }>();
 
 const emit = defineEmits<{
@@ -171,6 +174,8 @@ const getDistance = (cityFull: string, baseLocalDistanceStr: string) => {
 // ─── City advisor from cityAnalysisMap ────────────────────────────────────────
 const cityAdvisor = computed(() => {
   if (!props.selectedCity) return null;
+  // Narasi dinamis dari kondisi cuaca saat ini (live/mock); fallback: map statis lama
+  if (props.weatherData) return buildCityAnalysis(props.weatherData, props.selectedCity);
   const lc = props.selectedCity.toLowerCase();
   if (cityAnalysisMap[props.selectedCity]) return cityAnalysisMap[props.selectedCity];
   if (lc.includes('jakarta') || lc.includes('gambir')) return cityAnalysisMap['DKI Jakarta'];

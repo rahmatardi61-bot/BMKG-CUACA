@@ -45,8 +45,8 @@ import type {
   WarningAlert, 
   NewsArticle 
 } from '../types/weather';
-import { cityAnalysisMap } from '../data/mockData';
 import { cityLandmarks } from '../data/cityLandmarks';
+import { buildCityAnalysis } from '../services/analysisNarrative';
 import { 
   MapPin,
   ChevronDown,
@@ -75,9 +75,8 @@ const emit = defineEmits<{
   (e: 'detect-location'): void;
 }>();
 
-const currentAnalysis = computed(() => {
-  return cityAnalysisMap[props.selectedCity] || cityAnalysisMap['Brontokusuman, Kec. Mergangsan, Kota Yogyakarta, DI Yogyakarta'];
-});
+// Narasi dinamis dari data cuaca saat ini (live BMKG atau mock) — menggantikan cityAnalysisMap statis
+const currentAnalysis = computed(() => buildCityAnalysis(props.weatherData, props.selectedCity, props.forecasts, props.additionalInfo));
 
 // additionalInfo: bisa dioverride dari App.vue dengan data live API BMKG (useBmkgWeather)
 const additionalInfo = computed(() => {
@@ -439,6 +438,7 @@ onUnmounted(() => {
       <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 200ms;">
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
         <MajorCitiesCarousel 
+          :weather-data="weatherData"
           :selected-city="selectedCity" 
           :show-activities="!isLocating && !(isGeolocated && selectedCity === cities[0])"
           @select-city="$emit('select-city', $event)" 

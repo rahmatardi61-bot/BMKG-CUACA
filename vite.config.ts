@@ -27,6 +27,15 @@ getPubTok(); // warm saat dev server start
 
 // path proxy = PERSIS path upstream (tanpa alias) — devtools menampilkan /api/df/... seperti API aslinya.
 // Header khusus (Referer/Origin/X-API-KEY/x-public-token) di-inject di sini, transparan bagi client.
+// DWT (publik.bmkg.go.id) tidak punya CORS → lewat proxy juga (tanpa header khusus)
+const DWT_PROXY = ['/event', {
+  target: 'https://publik.bmkg.go.id',
+  changeOrigin: true,
+  configure(proxy: any) {
+    proxy.on('proxyReq', (proxyReq: any) => proxyReq.setHeader('User-Agent', UA));
+  },
+}];
+
 const PROXY_ENTRIES: Array<[string, { pubtok?: boolean }]> = [
   ['/api/df', {}],
   ['/api/public', { pubtok: true }],
@@ -51,7 +60,7 @@ const bmkgProxy = Object.fromEntries(PROXY_ENTRIES.map(([prefix, flags]) => [pre
 export default defineConfig({
   plugins: [vue()],
   server: {
-    proxy: bmkgProxy,
+    proxy: { ...bmkgProxy, '/event': DWT_PROXY[1] },
   },
   build: {
     rollupOptions: {

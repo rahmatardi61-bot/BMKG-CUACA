@@ -64,6 +64,9 @@ export interface WindStationRef {
  * ZERO RECTANGULAR BOXES! ZERO CIRCULAR BLOBS!
  */
 export function getGfsWindVectorAt(lat: number, lng: number): { u: number; v: number; speed: number; directionDeg: number } {
+  // Prioritas: data angin REAL DWT BMKG; fallback: model sintetis di bawah
+  const real = dwtVectorAt(lat, lng);
+  if (real) return real;
   const radLat = (lat * Math.PI) / 180;
   const radLng = (lng * Math.PI) / 180;
 
@@ -94,6 +97,80 @@ export function interpolateWindVectorField(
   _stations?: WindStationRef[]
 ): { u: number; v: number; speed: number; directionDeg: number } {
   return getGfsWindVectorAt(lat, lng);
+}
+
+// ── DWT BMKG (publik.bmkg.go.id) — data angin REAL per kecamatan ────────────
+// /event/source/dwt/* tidak punya CORS → dev lewat proxy vite (/event), prod
+// percobaan direct (fallback: sintetis di bawah). Struktur baris:
+// [prov, wilayah, kecamatan, lat, lon, kode, waktu_utc, [hu, temp, kode_cuaca, arah, ws], flag]
+const COMPASS: Record<string, number> = {
+  N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315,
+  'UTARA': 0, 'TIMUR LAUT': 45, 'TIMUR': 90, 'TENGGARA': 135, 'SELATAN': 180,
+  'BARAT DAYA': 225, 'BARAT': 270, 'BARAT LAUT': 315,
+};
+
+export function windLetterToDeg(letter: string): number {
+  const l = (letter || '').trim().toUpperCase();
+  if (l in COMPASS) return COMPASS[l];
+  // 'TIMUR TIMUR LAUT' dsb: ambil 2 kata terakhir yg cocok
+  const words = l.split(/\s+/);
+  for (let i = 0; i < words.length; i++) {
+    const cand = words.slice(i).join(' ');
+    if (cand in COMPASS) return COMPASS[cand];
+  }
+  return 90;
+}
+
+let dwtStations: WindStationRef[] = [];
+export function getDwtStations(): WindStationRef[] { return dwtStations; }
+
+/**
+ * Muat grid angin REAL dari DWT jalur darat (1234 kecamatan per jam UTC).
+ * Dev: lewat proxy vite (/event/...). Dipanggil sekali dari App.vue; jika
+ * gagal (CORS prod/offline) grid tetap pakai field sintetis.
+ */
+export async function initDwtWindStations(): Promise<number> {
+  if (dwtStations.length) return dwtStations.length;
+  try {
+    const manifest = await (await fetch('/event/source/dwt/apiDF_Darat/manifest_times.json')).json();
+    const file = (manifest.files || []).at(-1) as string | undefined;
+    if (!file) return 0;
+    const rows = await (await fetch(`/event/source/dwt/apiDF_Darat/${file}`)).json();
+    dwtStations = (rows as unknown[][])
+      .filter((r: unknown[]) => typeof r[3] === 'number' && typeof r[4] === 'number' && Array.isArray(r[7]))
+      .map((r: unknown[]) => ({
+        lat: r[3] as number,
+        lng: r[4] as number,
+        windSpeed: parseFloat(String((r[7] as string[])[4])) || 0,
+        windDeg: windLetterToDeg(String((r[7] as string[])[3])),
+      }));
+    if (import.meta.env.DEV) console.info(`[DWT] ${dwtStations.length} stasiun angin dimuat dari ${file}`);
+    return dwtStations.length;
+  } catch {
+    return 0; // fallback ke field sintetis
+  }
+}
+
+/** IDW 3 titik terdekat dari stasiun DWT (returns null jika belum ada data) */
+function dwtVectorAt(lat: number, lng: number) {
+  if (dwtStations.length < 3) return null;
+  const nearest = dwtStations
+    .map(s => ({ s, d: (s.lat - lat) ** 2 + (s.lng - lng) ** 2 }))
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 3);
+  if (nearest[0].d > 25) return null; // di luar jangkauan data (>5°)
+  let wu = 0, wv = 0, wt = 0;
+  for (const { s, d } of nearest) {
+    const rad = (s.windDeg * Math.PI) / 180;
+    const u = -s.windSpeed * Math.sin(rad);
+    const v = -s.windSpeed * Math.cos(rad);
+    const w = 1 / (d + 0.01);
+    wu += u * w; wv += v * w; wt += w;
+  }
+  const u = wu / wt, v = wv / wt;
+  const speed = Math.hypot(u, v);
+  const directionDeg = (Math.atan2(-u, -v) * 180 / Math.PI + 360) % 360;
+  return { u: +u.toFixed(3), v: +v.toFixed(3), speed: +speed.toFixed(2), directionDeg: Math.round(directionDeg) };
 }
 
 /**

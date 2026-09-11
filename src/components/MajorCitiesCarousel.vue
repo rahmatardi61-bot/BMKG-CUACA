@@ -11,6 +11,7 @@ import AroundActivityPanel from './AroundActivityPanel.vue';
 const props = defineProps<{
   selectedCity: string;
   showActivities: boolean;
+  weatherData?: import('../types/weather').WeatherData;
 }>();
 
 const emit = defineEmits<{
@@ -404,7 +405,8 @@ onUnmounted(() => {
       <!-- Around Activity -->
       <AroundActivityPanel 
         v-if="showActivities || !cityLandmarks.some(l => l.fullName === selectedCity)" 
-        :selected-city="activeCarouselCity" 
+        :selected-city="activeCarouselCity"
+        :weather-data="weatherData"
         @select-course="emit('select-course', $event)"
         class="pt-4"
       />

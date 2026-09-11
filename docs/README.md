@@ -23,7 +23,7 @@ dipakai / belum dipakai / tersedia versi resminya.
 | `api-reference.md` | Referensi teknis semua endpoint (internal scraped + resmi open data) + model auth/proxy | Implementasi / debugging |
 | `team-notes.md` | Keputusan penyesuaian satuan (§1), endpoint tanpa slot UI (§2), temuan teknis (§3), **smoke test checklist** (§4) | Diskusi tim / QA manual |
 | `pages-original.md` | Peta route & section→API web original | Meniru perilaku UI original |
-| `bmkg-api-mapping.xlsx` | **SATU file xlsx, 5 sheet**: `API Mapping` (32 endpoint, status + akses dev), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Ringkasan` | Presentasi/rapat tim |
+| `bmkg-api-mapping.xlsx` | **SATU file xlsx, 6 sheet**: `API Mapping` (32 endpoint, status + akses dev), `Temuan API Resmi` (list + contoh sample asli per endpoint, modal diskusi tim), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Ringkasan` | Presentasi/rapat tim |
 | `scrapping_cuaca-bmkg-go-id/` | Data: baseline JSON, screenshot, teks UI, report + tooling Playwright (`capture/probe/api_probe/diff.mjs`) | Butuh data mentah / re-scrape |
 
 ## Aturan main dokumentasi

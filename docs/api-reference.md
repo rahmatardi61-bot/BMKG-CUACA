@@ -244,3 +244,39 @@ GET https://www.bmkg.go.id/alerts/nowcast/id/{kode_detail_cap}_alert.xml  (CAP, 
   harian today/tomorrow) — internal test 4 titik Sumbar = kosong saat RSS punya item (item RSS
   pun bisa stale/expired di feed)
 - → Kandidat sumber peringatan yang **selalu terisi** & resmi; butuh adapter RSS/CAP baru
+
+## 3.5 DWT — Digital Weather for Traffic (resmi, dari daftar partner)
+
+Basis: `https://publik.bmkg.go.id/event/source/dwt/` — jam dalam **UTC**, DIRECT, tanpa auth.
+
+### a) Forecast per jam (jalur kereta & darat)
+
+| Endpoint | Isi |
+|---|---|
+| `GET .../dwt/apiDF_Kereta/manifest_times.json` | Daftar file jam-an (window ~42 jam ke depan) |
+| `GET .../dwt/apiDF_Kereta/{YYYYMMDD}HH.json` | Forecast 1 jam: **178 stasiun kereta** (jalur Jawa) |
+| `GET .../dwt/apiDF_Darat/manifest_times.json` | Daftar file jam-an (window ~48 jam) |
+| `GET .../dwt/apiDF_Darat/{YYYYMMDD}HH.json` | Forecast 1 jam: **1234 kecamatan** |
+
+Format per baris (array-of-array, sample tersimpan):
+
+```
+[prov, wilayah_parent, kecamatan, lat, lon, kode_bmkg, "YYYY-MM-DD HH:00:00",
+ [hu_percent, temp_c, kode_cuaca, arah_angin, kecepatan_angin], "ndf"]
+ex: ["bengkulu","Kab. Bengkulu Utara","Lais",-3.517,102.014,"5010927",
+     "2026-09-08 17:00:00", ["85","26","1","E","14.4"], "ndf"]
+```
+
+- `kode_cuaca` = tabel sama dengan internal (`0` Cerah, `1` Cerah Berawan, …)
+- Kereta: index 0 kosong (`""`); Darat: index 0 = nama provinsi
+- → Card **Weather for Traffic** (darat & kereta) — per kecamatan/stasiun, per jam UTC
+
+### b) PresentWeather (cuaca saat ini)
+
+| Endpoint | Status saat test (11 Sep 2026) |
+|---|---|
+| `GET .../dwt/api_getdwt.php?type=pwxDarat` | 200 tapi `[]` (kosong) |
+| `GET .../dwt/api_getdwt.php?type=pwxKereta` | **timeout/koneksi diputus** — flaky, butuh retry |
+
+Catatan: ambil `{YYYYMMDD}HH` dari manifest, jangan hardcode. Manifest hanya berisi jam
+yang sudah dirilis server (rolling).

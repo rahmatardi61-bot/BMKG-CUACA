@@ -153,13 +153,53 @@ curl -s -A "<UA browser lengkap>" https://cuaca.bmkg.go.id/ \
 
 ---
 
-# Bagian 3 — BMKG Open Data (RESMI — data.bmkg.go.id)
+# Bagian 3 — BMKG Open Data (RESMI — data.bmkg.go.id & maritim.bmkg.go.id/public_api)
 
-> Ditemukan 10 Sep 2026. **Terdokumentasi resmi, tanpa auth, CORS `*` (direct dari browser),
-> limit 60 req/menit/IP, WAJIB atribusi "BMKG" di UI.** Ringkasan tabel: `bmkg-api-mapping.xlsx`
+> **Jalur resmi dari daftar partner BMKG.** Terdokumentasi, tanpa auth, limit 60 req/menit/IP
+> (kecuali disebut lain), **WAJIB atribusi "BMKG" di UI**. Sample response tersimpan:
+> `scrapping_cuaca-bmkg-go-id/baseline/open-data/`. Ringkasan tabel: `bmkg-api-mapping.xlsx`
 > sheet **Official Open Data**.
+>
+> ⚠️ Web original (cuaca.bmkg.go.id) **TIDAK memakai** API Open Data ini (0 request di baseline) —
+> dia pakai API internal ISDP. Open Data = peluang jalur resmi tambahan untuk redesign.
 
-## Prakiraan cuaca per desa (ADM4)
+## 3.1 API Maritim — maritim.bmkg.go.id/public_api (resmi, dari daftar partner)
+
+**Index:** `https://maritim.bmkg.go.id/public_api/` — "Data Terbuka BMKG (Cuaca Maritim)"
+Semua data digital hasil pemodelan BMKG (per 17 Feb 2025).
+
+### a) Cuaca Perairan — 232 wilayah perairan
+
+| Endpoint | Isi |
+|---|---|
+| `GET /public_api/perairan_list` | Daftar file JSON per wilayah (name, file_date, kb) |
+| `GET /public_api/perairan/{file}` | Data prakiraan 1 wilayah (contoh `F.09_Teluk%20Jakarta.json`) |
+| `GET /public_api/static/wilayah_perairan.json` | **GeoJSON polygon** 232 wilayah + kode referensi (725 KB) |
+| `GET /public_api/overview/gelombang.json` | Overview kategori gelombang per wilayah (today/tomorrow/h2/h3) |
+
+- Format waktu: 4 slot prakiraan berurutan **12-12-24-24 jam** (`time_desc`: Hari ini, Besok, H+2, H+3)
+- Field per slot: `weather`, `weather_desc` (narasi), **`warning_desc`** (peringatan dini cuaca buruk —
+  contoh "Waspada Angin Kencang"), `wave_cat`/`wave_desc` (kategori + rentang m), `wind_from/to`,
+  `wind_speed_min/max` (knot), `area_remark`
+- **Kode wilayah (contoh `F.09` Teluk Jakarta) SAMA dengan kode respons internal
+  `/api/v1/public/maritim/nearest-location`** → sambungan natural: GPS → nearest-location → code →
+  fetch perairan resmi
+- → Cocok untuk card: **Aktivitas Pesisir & Laut, Pelayaran, WaveRadarMap**
+
+### b) Cuaca Pelabuhan — 294 pelabuhan
+
+| Endpoint | Isi |
+|---|---|
+| `GET /public_api/pelabuhan_list` | Daftar file JSON pelabuhan (port_id, name) |
+| `GET /public_api/pelabuhan/{file}` | Data 1 pelabuhan (contoh `0088_Sintete.json`) |
+
+- Per pelabuhan: `port_id`, `name`, koordinat, `type` (utama/…)
+- Field per slot (2 rilis terakhir): semua field perairan **plus**: `current_from/to`,
+  `current_speed_min/max` (arus cm/s), `visibility`, `rh_min/max`, `temp_min/max`,
+  **`low_tide`/`high_tide` + jamnya** (pasut!)
+- → Cocok untuk card: **Pelayaran / Pelabuhan, tinggi rendah pasut**
+
+## 3.2 Prakiraan cuaca per desa (ADM4)
 
 ```
 GET https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah_tingkat_IV}
@@ -176,19 +216,31 @@ contoh: https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=31.71.03.1001
 - Implikasi: kandidat jalur DIRECT untuk 3-harian hourly; internal `df/forecast/coord` tetap
   berguna untuk 7–10 hari (official belum menyediakan)
 
-## Gempabumi (sudah dipakai redesign — ternyata bagian resmi program ini)
+## 3.3 Gempabumi (resmi — sudah dipakai redesign, path terverifikasi dari halaman open data)
 
-- `data.bmkg.go.id/DataMKG/TEWS/autogempa.json` (M5.0+)
-- `data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json`
-- `data.bmkg.go.id/DataMKG/TEWS/tsunamiterkini.json` (belum dipakai)
-- Format JSON/XML/JPG, update per kejadian, limit 60 req/menit/IP
+Basis: `https://data.bmkg.go.id/DataMKG/TEWS/` (+ `.json` / `.xml`)
 
-## Peringatan dini cuaca (Nowcast) — RSS/CAP
+| Endpoint | Isi | Status di redesign |
+|---|---|---|
+| `GET .../TEWS/autogempa.json` | Gempa terbaru (M5.0+) | ✅ EarthquakeActivity |
+| `GET .../TEWS/gempaterkini.json` | Daftar gempa M5.0+ terkini (15 entri) | ✅ EarthquakeHistory |
+| `GET .../TEWS/gempadirasakan.json` | Gempa dirasakan (dengan felt reports) | ✅ EarthquakeHistory |
+| `GET .../TEWS/tsunamiterkini.json` | **404** — path tidak tersedia (dinyatakan ada di halaman open data, tunggu path resmi) | — |
+
+Field gempa: `Tanggal, Jam, DateTime, Coordinates, Lintang, Bujur, Magnitude, Kedalaman, Wilayah, Potensi`
+(+ shakemap jpg: `https://static.bmkg.go.id/[kode_shakemap].jpg`)
+
+## 3.4 Peringatan Dini Cuaca (Nowcast) — RSS/CAP
 
 ```
 GET https://www.bmkg.go.id/alerts/nowcast/id          (RSS feed, per provinsi)
 GET https://www.bmkg.go.id/alerts/nowcast/id/{kode_detail_cap}_alert.xml  (CAP, s/d kecamatan)
 ```
 
-- Kandidat pengganti RESMI `/api/public/weather/warning` (internal, wajib proxy) — butuh
-  adapter RSS/CAP baru
+- RSS item: `title` (mis. "Hujan Lebat disertai Petir di Sumatera Barat"), `link` (CAP), `description`
+- CAP 1.2 (`urn:oasis:names:tc:emergency:cap:1.2`): `event`, `severity`, `certainty`, `expires`,
+  `description` (daftar kecamatan terdampak), `areaDesc`
+- ⚠️ **Produk berbeda dari** `/api/public/weather/warning` internal (nowcast 3-jam vs peringatan
+  harian today/tomorrow) — internal test 4 titik Sumbar = kosong saat RSS punya item (item RSS
+  pun bisa stale/expired di feed)
+- → Kandidat sumber peringatan yang **selalu terisi** & resmi; butuh adapter RSS/CAP baru

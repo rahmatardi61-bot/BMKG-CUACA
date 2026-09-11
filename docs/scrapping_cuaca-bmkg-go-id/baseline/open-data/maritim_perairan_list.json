@@ -1,0 +1,1164 @@
+{
+  "files": [
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2457,
+      "name": "R.07_Perairan Merauke.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2453,
+      "name": "I.07_Perairan Gresik - Surabaya.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2385,
+      "name": "N.02_Laut Sulawesi bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2412,
+      "name": "O.14_Perairan timur Obi.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2537,
+      "name": "L.15_Perairan P. Bonerate - Kalaotoa bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2487,
+      "name": "C.06_Perairan timur Lampung bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2544,
+      "name": "H.03_Samudera Hindia selatan Jawa Barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2366,
+      "name": "E.01_Perairan Riau.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2519,
+      "name": "U.04_Samudera Hindia selatan Banten.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2548,
+      "name": "I.14_Samudera Hindia selatan Jawa Timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2513,
+      "name": "H.05_Perairan Kebumen - Purworejo.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2400,
+      "name": "E.02_Perairan Kep. Batam.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2535,
+      "name": "T.09_Laut Banda selatan bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2323,
+      "name": "O.11_Teluk Weda.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2560,
+      "name": "T.10_Perairan Kep. Sermata - Kep. Leti.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2408,
+      "name": "K.05_Selat Sumba bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2548,
+      "name": "L.05_Perairan Spermonde Makassar bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2461,
+      "name": "I.06_Perairan Tuban - Lamongan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2537,
+      "name": "I.03_Laut Jawa bagian selatan Bawean.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2483,
+      "name": "T.06_Laut Banda utara bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2417,
+      "name": "K.15_Selat Wetar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2527,
+      "name": "L.14_Perairan P. Bonerate - Kalaotoa bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2527,
+      "name": "O.02_Samudera Pasifik utara Halmahera bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2405,
+      "name": "M.05_Perairan Sulawesi Barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2457,
+      "name": "A.02_Selat Malaka bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2500,
+      "name": "R.06_Laut Arafuru bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2497,
+      "name": "K.07_Laut Sawu bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2494,
+      "name": "T.08_Laut Banda selatan bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2344,
+      "name": "O.06_Perairan Bacan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2474,
+      "name": "L.16_Laut Flores bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2424,
+      "name": "O.13_Perairan timur Halmahera.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2407,
+      "name": "M.09_Perairan Kalimantan Utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2416,
+      "name": "Q.05_Perairan selatan Biak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2519,
+      "name": "I.02_Laut Jawa bagian utara Bawean.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2510,
+      "name": "A.07_Perairan Meulaboh - Kep. Sinabang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2435,
+      "name": "S.02_Perairan Banggai bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2467,
+      "name": "H.06_Perairan Yogyakarta.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2550,
+      "name": "R.02_Perairan Amamapare - Agats bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2383,
+      "name": "N.13_Teluk Tomini bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2526,
+      "name": "R.08_Laut Arafuru selatan Merauke.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2461,
+      "name": "S.06_Perairan Manui Kendari bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2465,
+      "name": "G.05_Perairan Pekalongan - Kendal.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2434,
+      "name": "J.10_Perairan utara Sumbawa.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2415,
+      "name": "L.06_Perairan Spermonde Makassar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2434,
+      "name": "T.01_Laut Seram bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2523,
+      "name": "K.13_Perairan selatan Kupang - P. Rote.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2399,
+      "name": "M.07_Selat Makassar bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2516,
+      "name": "N.08_Perairan Bitung - Likupang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2501,
+      "name": "H.01_Perairan Sukabumi - Cianjur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2505,
+      "name": "F.01_Selat Karimata bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2427,
+      "name": "A.03_Perairan Sabang - Banda Aceh.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2559,
+      "name": "S.07_Laut Banda timur Sulawesi Tenggara bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2390,
+      "name": "G.07_Perairan Jepara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2497,
+      "name": "A.01_Perairan utara Sabang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2425,
+      "name": "O.15_Perairan Kep. Sula bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2459,
+      "name": "T.14_Perairan Kep. Kai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2460,
+      "name": "A.05_Selat Malaka bagian tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2425,
+      "name": "D.03_Perairan utara Kep. Anambas.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2469,
+      "name": "N.07_Perairan Kep. Sitaro.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2437,
+      "name": "P.08_Perairan Fak-Fak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2432,
+      "name": "C.04_Teluk Lampung bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2586,
+      "name": "S.16_Laut Banda timur Sulawesi Tenggara bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2434,
+      "name": "K.10_Selat Alor - Pantar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2447,
+      "name": "D.12_Perairan Kendawangan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2562,
+      "name": "R.05_Perairan Yos Sudarso bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2376,
+      "name": "Q.02_Perairan barat Biak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2426,
+      "name": "F.10_Perairan Karawang - Subang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2323,
+      "name": "O.10_Teluk Kau.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2488,
+      "name": "K.04_Selat Sumba bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2437,
+      "name": "S.04_Perairan Teluk Tolo bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2470,
+      "name": "U.03_Perairan selatan Banten.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2407,
+      "name": "M.08_Perairan barat Sulawesi Tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2418,
+      "name": "N.01_Perairan utara Sulawesi Utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2429,
+      "name": "D.02_Perairan selatan Kep. Anambas.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2573,
+      "name": "S.08_Laut Banda timur Sulawesi Tengara bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2474,
+      "name": "J.07_Selat Lombok bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2510,
+      "name": "G.03_Perairan Kep. Karimun Jawa.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2415,
+      "name": "S.01_Perairan Banggai bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2504,
+      "name": "F.03_Perairan utara P. Belitung.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2497,
+      "name": "J.03_Selat Bali bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2528,
+      "name": "B.03_Perairan timur P. Siberut.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2505,
+      "name": "T.13_Laut Arafuru bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2477,
+      "name": "A.06_Perairan barat Aceh.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2540,
+      "name": "S.15_Perairan selatan Wakatobi bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2455,
+      "name": "T.15_Perairan Kep. Aru.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2377,
+      "name": "U.01_Selat Sunda bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2448,
+      "name": "I.11_Selat Madura bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2558,
+      "name": "K.14_Samudera Hindia selatan Kupang - P. Rote.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2494,
+      "name": "K.03_Selat Sape bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2423,
+      "name": "Q.06_Teluk Cenderawasih.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2449,
+      "name": "H.04_Perairan Cilacap.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2421,
+      "name": "O.09_Perairan Morotai bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2397,
+      "name": "P.03_Perairan Manokwari.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2458,
+      "name": "I.08_Perairan utara Madura.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2331,
+      "name": "P.07_Teluk Bintuni.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2472,
+      "name": "O.03_Perairan Halmahera Barat bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2379,
+      "name": "L.09_Teluk Bone bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2359,
+      "name": "F.09_Teluk Jakarta.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2485,
+      "name": "I.10_Perairan Kep. Kangean.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2511,
+      "name": "C.05_Samudera Hindia barat Lampung.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2514,
+      "name": "B.12_Samudera Hindia barat Bengkulu.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2398,
+      "name": "D.05_Perairan utara Kep. Natuna.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2369,
+      "name": "F.02_Selat Gelasa.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2593,
+      "name": "K.08_Samudera Hindia selatan P. Sumba - P. Sabu.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2509,
+      "name": "J.12_Samudera Hindia selatan NTB.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2472,
+      "name": "L.11_Perairan timur Kep. Selayar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2480,
+      "name": "B.11_Perairan timur P. Enggano.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2565,
+      "name": "B.09_Samudera Hindia barat Kep. Mentawai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2473,
+      "name": "P.02_Perairan Raja Ampat bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2459,
+      "name": "I.09_Perairan Kep. Sapudi.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2493,
+      "name": "B.06_Perairan barat P. Pagai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2418,
+      "name": "J.08_Laut Sumbawa.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2557,
+      "name": "H.07_Samudera Hindia selatan Jawa Tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2413,
+      "name": "D.04_Perairan barat Kep. Natuna.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2528,
+      "name": "R.03_Laut Arafuru timur Kepulauan Aru.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2416,
+      "name": "K.02_Selat Sape bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2520,
+      "name": "P.06_Perairan Sorong bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2505,
+      "name": "B.05_Perairan timur P. Pagai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2391,
+      "name": "O.04_Perairan Kep. Loloda.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2484,
+      "name": "J.05_Selat Lombok bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2446,
+      "name": "S.03_Perairan Teluk Tolo bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2408,
+      "name": "K.11_Selat Ombai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2495,
+      "name": "B.10_Perairan barat Bengkulu.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2472,
+      "name": "F.11_Perairan Indramayu - Cirebon.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2438,
+      "name": "D.10_Perairan Pontianak - Mempawah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2518,
+      "name": "M.01_Perairan Kota Baru bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2496,
+      "name": "F.04_Perairan selatan P. Belitung.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2377,
+      "name": "Q.03_Perairan utara Biak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2446,
+      "name": "C.08_Selat Bangka bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2546,
+      "name": "B.01_Perairan barat Sumatera Barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2493,
+      "name": "T.12_Perairan Kep. Tanimbar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2416,
+      "name": "J.09_Selat Alas bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2372,
+      "name": "E.05_Selat Berhala.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2473,
+      "name": "F.06_Laut Jawa bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2514,
+      "name": "A.08_Samudera Hindia barat Aceh.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2397,
+      "name": "F.08_Perairan Kep. Seribu.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2517,
+      "name": "S.14_Perairan selatan Wakatobi bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2476,
+      "name": "S.11_Perairan Bau-bau bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2534,
+      "name": "I.05_Laut Jawa bagian timur Masalembo.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2547,
+      "name": "K.12_Perairan utara Kupang - P. Rote.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2447,
+      "name": "T.05_Perairan selatan P. Seram.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2388,
+      "name": "O.12_Laut Halmahera.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2507,
+      "name": "T.16_Laut Arafuru bagian tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2493,
+      "name": "T.11_Perairan Kep. Babar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2414,
+      "name": "K.01_Perairan utara Flores.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2436,
+      "name": "N.11_Perairan selatan Sulawesi Utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2397,
+      "name": "M.03_Perairan Balikpapan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2432,
+      "name": "L.13_Laut Flores bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2394,
+      "name": "N.03_Laut Sulawesi bagian tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2449,
+      "name": "L.03_Perairan Spermonde Pangkep bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2530,
+      "name": "A.09_Perairan Kep. Nias - Sibolga.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2429,
+      "name": "P.09_Perairan Kaimana.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2466,
+      "name": "C.01_Perairan barat Lampung.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2508,
+      "name": "I.13_Perairan selatan Jawa Timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2453,
+      "name": "K.06_Laut Sawu bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2436,
+      "name": "T.04_Perairan P. Ambon - Kep. Lease.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2494,
+      "name": "P.01_Samudera Pasifik utara Papua Barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2410,
+      "name": "D.01_Laut Natuna Utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2527,
+      "name": "L.01_Selat Makassar bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2475,
+      "name": "S.12_Perairan utara Wakatobi bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2523,
+      "name": "B.04_Perairan timur P. Sipora.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2477,
+      "name": "J.11_Selat Alas bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2418,
+      "name": "N.04_Laut Sulawesi bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2419,
+      "name": "J.01_Laut Bali.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2433,
+      "name": "T.03_Perairan P. Buru.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2452,
+      "name": "D.11_Perairan Ketapang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2478,
+      "name": "U.02_Selat Sunda bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2501,
+      "name": "D.13_Perairan Kepulauan Karimata.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2426,
+      "name": "N.12_Teluk Tomini bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2473,
+      "name": "T.02_Laut Seram bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2374,
+      "name": "O.07_Perairan Obi.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2444,
+      "name": "G.08_Perairan Pati - Rembang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2519,
+      "name": "T.07_Laut Banda utara bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2506,
+      "name": "H.02_Perairan Garut - Pangandaran.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2521,
+      "name": "J.06_Samudera Hindia selatan Bali.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2453,
+      "name": "P.05_Perairan Misool.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2490,
+      "name": "C.07_Perairan timur Lampung bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2398,
+      "name": "L.04_Perairan Spermonde Pangkep.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2417,
+      "name": "N.10_Laut Maluku bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2554,
+      "name": "O.01_Samudera Pasifik utara Halmahera bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2569,
+      "name": "G.01_Perairan Kalimantan Tengah bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2445,
+      "name": "G.04_Perairan Brebes - Pemalang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2399,
+      "name": "L.12_Laut Flores bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2360,
+      "name": "D.08_Laut Natuna.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2485,
+      "name": "D.06_Perairan selatan Kep. Natuna - Pulau Midai.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2555,
+      "name": "A.10_Samudera Hindia barat Kep. Nias.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2565,
+      "name": "I.01_Perairan Kalimantan Tengah bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2439,
+      "name": "G.06_Perairan Semarang - Demak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2491,
+      "name": "R.04_Perairan Yos Sudarso bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2410,
+      "name": "D.07_Perairan Kep. Subi - Serasan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2450,
+      "name": "Q.01_Samudera Pasifik utara Biak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2410,
+      "name": "N.09_Laut Maluku bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2460,
+      "name": "N.05_Perairan Kep. Sangihe.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2390,
+      "name": "J.02_Selat Bali bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2398,
+      "name": "E.03_Perairan Kep. Bintan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2460,
+      "name": "I.12_Selat Madura bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2479,
+      "name": "O.16_Perairan Kep. Sula bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2423,
+      "name": "E.04_Perairan Kep. Lingga.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2484,
+      "name": "L.10_Teluk Bone bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2510,
+      "name": "L.07_Perairan barat Kep. Selayar.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2395,
+      "name": "L.02_Perairan Pare - pare.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2428,
+      "name": "D.09_Perairan Singkawang - Sambas.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2455,
+      "name": "S.05_Perairan Manui Kendari bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2425,
+      "name": "Q.04_Perairan timur Biak.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2448,
+      "name": "N.06_Perairan Kep. Talaud.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2375,
+      "name": "F.07_Perairan utara Banten.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2423,
+      "name": "S.10_Perairan Bau-bau bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2419,
+      "name": "O.05_Perairan Ternate - Batang Dua.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2473,
+      "name": "M.04_Selat Makassar bagian tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2501,
+      "name": "Q.08_Samudera Pasifik utara Jayapura.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2520,
+      "name": "B.07_Perairan barat P. Sipora.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2517,
+      "name": "F.05_Selat Karimata bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2408,
+      "name": "E.06_Perairan utara P. Bangka.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2561,
+      "name": "R.01_Perairan Amamapare - Agats bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2537,
+      "name": "I.04_Laut Jawa bagian barat Masalembo.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2395,
+      "name": "A.04_Perairan Lhokseumawe.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2500,
+      "name": "L.08_Perairan Kep. Sabalana.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2396,
+      "name": "K.09_Selat Flores - Lamakera.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2567,
+      "name": "S.09_Laut Banda timur Sulawesi Tenggara bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2495,
+      "name": "G.02_Laut Jawa bagian tengah.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2465,
+      "name": "P.04_Perairan Raja Ampat - Sorong.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2468,
+      "name": "C.02_Selat Sunda bagian barat.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2534,
+      "name": "M.02_Perairan Kota Baru bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2525,
+      "name": "B.08_Perairan barat P. Siberut.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2516,
+      "name": "B.02_Perairan utara P. Siberut.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2404,
+      "name": "C.09_Selat Bangka bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2521,
+      "name": "S.13_Perairan utara Wakatobi bagian timur.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2441,
+      "name": "O.08_Perairan Morotai bagian utara.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2419,
+      "name": "M.06_Perairan Samarinda - Bontang.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2485,
+      "name": "C.03_Teluk Lampung bagian selatan.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2442,
+      "name": "Q.07_Perairan Jayapura - Sarmi.json"
+    },
+    {
+      "file_date": "2026-09-10 23:39 UTC",
+      "kb": 2432,
+      "name": "J.04_Selat Badung.json"
+    }
+  ]
+}

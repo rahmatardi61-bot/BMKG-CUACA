@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+.vscode
+output_screenshots
+orig_bak_images
+*.docx
+*.pdf
+Dockerfile
+.dockerignore
+README.md

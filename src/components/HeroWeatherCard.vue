@@ -14,7 +14,7 @@ import {
   Calendar,
   X
 } from 'lucide-vue-next';
-import type { WeatherData } from '../types/weather';
+import type { WeatherData, HourlyForecast } from '../types/weather';
 import { getCityTheme } from '../data/cityThemes';
 import type { AdditionalWeatherInfo } from '../data/weatherHelpers';
 import { 
@@ -29,6 +29,8 @@ const props = defineProps<{
   cities: string[];
   selectedCity: string;
   additionalInfo?: AdditionalWeatherInfo;
+  /** prakiraan live dari forecast/coord; fallback ke mock bila kosong */
+  forecasts?: HourlyForecast[];
 }>();
 
 const emit = defineEmits<{
@@ -54,7 +56,7 @@ const handleGlobalClick = () => {
   }
 };
 
-const getWeatherDescription = (status: string, precipitation: number, tempMax: number): string => {
+const getWeatherDescription = (status: string, precipitation: number, temp: number): string => {
   const s = (status || '').toLowerCase();
   if (s.includes('petir') || s.includes('badai') || s.includes('thunder')) {
     return 'Potensi hujan lebat disertai kilat/petir dan angin kencang sesaat. Hindari tempat terbuka dan pohon rindang.';
@@ -69,7 +71,7 @@ const getWeatherDescription = (status: string, precipitation: number, tempMax: n
     return 'Kondisi cuaca didominasi cerah berawan dengan angin sejuk. Sangat ideal dan nyaman untuk aktivitas luar ruangan.';
   }
   if (s.includes('cerah')) {
-    return `Cuaca cerah terik dengan suhu puncak ${tempMax}°C. Disarankan menggunakan tabir surya dan menjaga hidrasi.`;
+    return `Cuaca cerah terik dengan suhu puncak ${temp}°C. Disarankan menggunakan tabir surya dan menjaga hidrasi.`;
   }
   if (s.includes('berawan tebal') || s.includes('mendung')) {
     return 'Langit cenderung tertutup awan tebal dengan udara sejuk. Peluang gerimis lokal di beberapa titik.';
@@ -165,8 +167,7 @@ interface DailyForecastItem {
   dateShort: string;
   dateFull: string;
   isToday: boolean;
-  tempMin: number;
-  tempMax: number;
+  temp: number;
   status: string;
   icon: any;
   iconColor: string;
@@ -247,7 +248,9 @@ const getForecastWeatherStyle = (status: string) => {
 // 7-day weather forecast (Sekarang / Hari ini + 7 hari ke depan)
 const sevenDaysForecast = computed<DailyForecastItem[]>(() => {
   const city = props.selectedCity;
-  const forecasts = hourlyForecastsMap[city] || hourlyForecastsMap['DKI Jakarta'] || [];
+  const forecasts = props.forecasts?.length
+    ? props.forecasts
+    : hourlyForecastsMap[city] || hourlyForecastsMap['DKI Jakarta'] || [];
   if (!forecasts.length) return [];
 
   const groups: Record<string, typeof forecasts> = {};
@@ -269,15 +272,16 @@ const sevenDaysForecast = computed<DailyForecastItem[]>(() => {
     const dayOfWeek = indonesianDays[dateObj.getDay()];
     const dateShort = `${String(d).padStart(2, '0')} ${indonesianMonths[m - 1]}`;
 
-    const temps = slots.map(s => s.temp);
-    const minTemp = idx === 0 ? props.weatherData.tempMin : Math.min(...temps);
-    const maxTemp = idx === 0 ? props.weatherData.tempMax : Math.max(...temps);
-
-    const middaySlot = slots.find(s => s.time === '12:00' || s.time === '13:00') || slots[Math.floor(slots.length / 2)];
-    const status = idx === 0 ? props.weatherData.status : (middaySlot?.status || 'Cerah');
-    const precip = Math.max(...slots.map(s => s.precipitation ?? 0));
-    const hum = idx === 0 ? props.weatherData.humidity : (middaySlot?.humidity ?? 70);
-    const wind = idx === 0 ? props.weatherData.windSpeed : (middaySlot?.windSpeed ?? 12);
+    // ponytail: samakan dgn web original — satu suhu per hari dari slot pertama grup.
+    // API tidak punya tmin/tmax, jadi min/max harian di-skip dulu.
+    const rep = slots[0];
+    const temp = idx === 0 ? props.weatherData.temp : (rep?.temp ?? 0);
+    const status = idx === 0 ? props.weatherData.status : (rep?.status || 'Cerah');
+    const precip = idx === 0
+      ? Math.max(...slots.map(s => s.precipitation ?? 0))
+      : (rep?.precipitation ?? 0);
+    const hum = idx === 0 ? props.weatherData.humidity : (rep?.humidity ?? 70);
+    const wind = idx === 0 ? props.weatherData.windSpeed : (rep?.windSpeed ?? 12);
 
     const style = getForecastWeatherStyle(status);
 
@@ -288,8 +292,7 @@ const sevenDaysForecast = computed<DailyForecastItem[]>(() => {
       dateShort,
       dateFull: `${d} ${indonesianMonths[m - 1]} ${y}`,
       isToday: idx === 0,
-      tempMin: minTemp,
-      tempMax: maxTemp,
+      temp,
       status,
       icon: style.icon,
       iconColor: style.colorClass,
@@ -662,10 +665,9 @@ const submitReport = () => {
               <component :is="day.icon" class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300" :class="day.iconColor" />
             </div>
 
-            <!-- Min / Max Temperature -->
+            <!-- Temperature -->
             <div class="w-full mt-auto flex items-baseline justify-center gap-1.5">
-              <span class="text-sm font-black tracking-tight text-white">{{ day.tempMax }}°</span>
-              <span class="text-[11px] font-semibold text-white/60">{{ day.tempMin }}°</span>
+              <span class="text-sm font-black tracking-tight text-white">{{ day.temp }}°</span>
             </div>
 
             <!-- Precipitation badge -->
@@ -707,15 +709,15 @@ const submitReport = () => {
 
                 <!-- Descriptive Narrative -->
                 <p class="text-[11px] text-white/80 leading-relaxed mb-3">
-                  {{ getWeatherDescription(day.status, day.precipitation, day.tempMax) }}
+                  {{ getWeatherDescription(day.status, day.precipitation, day.temp) }}
                 </p>
 
                 <!-- Key Parameters Grid -->
                 <div class="grid grid-cols-3 gap-1.5 pt-1">
-                  <!-- Suhu Range -->
+                  <!-- Suhu -->
                   <div class="p-1.5 rounded-[4px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
                     <span class="text-[9px] text-white/60 font-medium leading-none">Suhu</span>
-                    <span class="text-[11px] font-black text-white mt-1">{{ day.tempMax }}° / {{ day.tempMin }}°</span>
+                    <span class="text-[11px] font-black text-white mt-1">{{ day.temp }}°</span>
                   </div>
                   <!-- Peluang Hujan -->
                   <div class="p-1.5 rounded-[4px] bg-white/5 border border-white/10 flex flex-col items-center text-center">
@@ -804,13 +806,9 @@ const submitReport = () => {
               </div>
             </div>
 
-            <!-- Col 4: T (Max) · R (Min) -->
+            <!-- Col 4: Suhu -->
             <div class="flex items-center justify-end text-right shrink-0">
-              <span class="text-xs font-medium text-slate-400 dark:text-slate-500 mr-1">T</span>
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ day.tempMax }}°</span>
-              <span class="mx-1.5 text-slate-300 dark:text-slate-600 font-bold">·</span>
-              <span class="text-xs font-medium text-slate-400 dark:text-slate-500 mr-1">R</span>
-              <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ day.tempMin }}°</span>
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ day.temp }}°</span>
             </div>
           </div>
 
@@ -826,10 +824,10 @@ const submitReport = () => {
                   <component :is="day.icon" class="w-4 h-4" :class="day.mobileIconColor" />
                   <span>{{ day.status }}</span>
                 </div>
-                <span class="text-blue-600 dark:text-blue-400 font-bold">{{ day.tempMax }}° / {{ day.tempMin }}°</span>
+                <span class="text-blue-600 dark:text-blue-400 font-bold">{{ day.temp }}°</span>
               </div>
               <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mb-2.5">
-                {{ getWeatherDescription(day.status, day.precipitation, day.tempMax) }}
+                {{ getWeatherDescription(day.status, day.precipitation, day.temp) }}
               </p>
               <div class="grid grid-cols-3 gap-1.5 text-[10px] text-center pt-2 border-t border-slate-200/70 dark:border-slate-700/70">
                 <div class="bg-white dark:bg-slate-900/60 p-1.5 rounded-[4px] border border-slate-200/60 dark:border-slate-700/60 shadow-xs">

@@ -38,16 +38,16 @@ const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 import LazyCardLoader from '../components/LazyCardLoader.vue';
 
-import type { 
-  WeatherData, 
-  HourlyForecast, 
-  TransportStatus, 
-  WarningAlert, 
-  NewsArticle 
+import type {
+  WeatherData,
+  HourlyForecast,
+  TransportStatus,
+  WarningAlert,
+  NewsArticle
 } from '../types/weather';
 import { cityLandmarks } from '../data/cityLandmarks';
 import { buildCityAnalysis } from '../services/analysisNarrative';
-import { 
+import {
   MapPin,
   ChevronDown,
   Search
@@ -96,7 +96,7 @@ watch(
     if (oldCity) {
       const newIdx = props.cities.indexOf(newCity);
       const oldIdx = props.cities.indexOf(oldCity);
-      
+
       if (newIdx !== -1 && oldIdx !== -1) {
         slideDirection.value = newIdx > oldIdx ? 'slide-left' : 'slide-right';
       } else {
@@ -150,8 +150,8 @@ const majorCitiesList = [
 
 const otherCities = computed(() => {
   return props.cities.slice(1).filter(city => {
-    return !majorCitiesList.some(major => 
-      city.toLowerCase() === major.toLowerCase() || 
+    return !majorCitiesList.some(major =>
+      city.toLowerCase() === major.toLowerCase() ||
       city.toLowerCase().startsWith(major.toLowerCase() + ',')
     );
   });
@@ -243,10 +243,10 @@ onUnmounted(() => {
 <template>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      
+
       <!-- 3 Analysis Cards (Activity Advisories) - Full Width (Col Span 3) -->
       <div class="lg:col-span-3 space-y-3">
-        
+
         <!-- Emergency Alerts Cards -->
         <AlertsPanel :alerts="alerts" />
 
@@ -256,7 +256,7 @@ onUnmounted(() => {
           <div class="flex items-center justify-between md:justify-start gap-2 mb-2.5 w-full md:w-auto">
             <!-- Left: Location Dropdown Toggle -->
             <div class="relative min-w-0" ref="dropdownContainer">
-              <div 
+              <div
                 id="location-dropdown-toggle"
                 @click="showDropdown = !showDropdown"
                 class="inline-flex items-center gap-1.5 py-1 text-left transition-all select-none hover:opacity-90 active:scale-[0.98] duration-200 outline-none cursor-pointer group max-w-full"
@@ -269,14 +269,14 @@ onUnmounted(() => {
               </div>
 
               <!-- Dropdown List -->
-              <div 
-                v-if="showDropdown" 
+              <div
+                v-if="showDropdown"
                 class="absolute left-0 mt-2 w-72 sm:w-80 rounded-[4px] shadow-xl border overflow-hidden py-2 z-50 animate-fade-in
                   bg-white/95 border-slate-100/80 backdrop-blur-md dark:bg-brand-navy-900/95 dark:border-brand-navy-800/40"
               >
                 <!-- 1. The Realtime Location (cities[0]) -->
-                <button 
-                  v-for="city in [cities[0]]" 
+                <button
+                  v-for="city in [cities[0]]"
                   :key="city"
                   :id="'location-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
                   @click="$emit('select-city', city); showDropdown = false"
@@ -288,19 +288,19 @@ onUnmounted(() => {
                 >
                   <div class="flex items-center justify-between w-full">
                     <div class="flex items-center gap-1.5">
-                      <MapPin 
-                        v-if="city === cities[0]" 
-                        class="w-3.5 h-3.5 text-blue-500 dark:text-brand-cyan shrink-0" 
+                      <MapPin
+                        v-if="city === cities[0]"
+                        class="w-3.5 h-3.5 text-blue-500 dark:text-brand-cyan shrink-0"
                       />
-                      <span 
+                      <span
                         class="text-xs tracking-tight transition-colors"
                         :class="city === selectedCity ? 'font-black text-blue-600 dark:text-brand-cyan' : 'font-bold text-slate-700 dark:text-slate-200'"
                       >
                         {{ splitLocation(city).main }}
                       </span>
                     </div>
-                    
-                    <span 
+
+                    <span
                       v-if="isGeolocated && city === cities[0]"
                       class="px-1.5 py-0.5 text-[8px] font-black uppercase rounded bg-blue-50 text-blue-600 dark:bg-brand-cyan/15 dark:text-brand-cyan"
                     >
@@ -318,7 +318,7 @@ onUnmounted(() => {
 
                 <!-- 2. Other custom cities (if any) -->
                 <template v-if="otherCities.length > 0">
-                  <button 
+                  <button
                     v-for="city in otherCities"
                     :key="city"
                     :id="'location-option-' + city.split(',')[0].toLowerCase().replace(/ /g, '-')"
@@ -327,7 +327,7 @@ onUnmounted(() => {
                     :class="city === selectedCity ? 'bg-slate-50/50 dark:bg-brand-navy-950/20' : ''"
                   >
                     <div class="flex items-center justify-between w-full">
-                      <span 
+                      <span
                         class="text-xs tracking-tight transition-colors"
                         :class="city === selectedCity ? 'font-black text-blue-600 dark:text-brand-cyan' : 'font-bold text-slate-700 dark:text-slate-200'"
                       >
@@ -342,7 +342,7 @@ onUnmounted(() => {
                 </template>
 
                 <!-- 3. Search Dropdown Empty State (if no other custom cities) -->
-                <div 
+                <div
                   v-else
                   class="px-4 py-4 flex flex-col items-center justify-center text-center gap-2"
                 >
@@ -367,7 +367,7 @@ onUnmounted(() => {
             <div class="shrink-0 flex items-center">
               <!-- Lokasi Saya Badge (Clickable button) -->
               <div v-if="isCustomGeolocated" class="relative group">
-                <button 
+                <button
                   type="button"
                   @click.stop="detectLocation"
                   class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none whitespace-nowrap"
@@ -389,7 +389,7 @@ onUnmounted(() => {
 
               <!-- Cari Lokasi Saya Button (Clickable button, shown when not geolocated) -->
               <div v-else class="relative group">
-                <button 
+                <button
                   type="button"
                   @click.stop="detectLocation"
                   class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[9px] font-black tracking-wider uppercase bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 active:scale-95 dark:bg-brand-cyan/20 dark:text-brand-cyan dark:hover:bg-brand-cyan/30 border border-blue-500/20 dark:border-brand-cyan/30 cursor-pointer transition-all duration-200 outline-none whitespace-nowrap"
@@ -415,9 +415,10 @@ onUnmounted(() => {
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             <!-- Large Hero Weather Card (Span 2 - Same width as Carousel below) -->
             <div class="lg:col-span-2 animate-fade-in scroll-section flex flex-col h-full" style="animation-delay: 100ms;">
-              <HeroWeatherCard 
+              <HeroWeatherCard
                 class="h-full flex-1"
-                :weather-data="weatherData" 
+                :weather-data="weatherData"
+                :forecasts="forecasts"
                 :cities="cities"
                 :selected-city="selectedCity"
                 :additional-info="additionalInfo"
@@ -438,17 +439,17 @@ onUnmounted(() => {
       <!-- Left Column: Primary Weather Overview & Forecast (Span 2) -->
       <div class="lg:col-span-2 space-y-8 animate-fade-in scroll-section" style="animation-delay: 200ms;">
         <!-- Elegant 10 Major Cities Landmark Row with Auto-Slide Carousel with backdrop -->
-        <MajorCitiesCarousel 
+        <MajorCitiesCarousel
           :weather-data="weatherData"
-          :selected-city="selectedCity" 
+          :selected-city="selectedCity"
           :show-activities="!isLocating && !(isGeolocated && selectedCity === cities[0])"
-          @select-city="$emit('select-city', $event)" 
+          @select-city="$emit('select-city', $event)"
           @select-course="handleSelectCourse($event)"
         />
 
         <!-- Current Weather Overview -->
-        <CurrentWeather 
-          :weather-data="weatherData" 
+        <CurrentWeather
+          :weather-data="weatherData"
           :cities="cities"
           :selected-city="selectedCity"
           :additional-info="additionalInfo"
@@ -457,12 +458,12 @@ onUnmounted(() => {
         />
 
         <!-- Temperature Trend Line Graph & Hourly Flex -->
-        <ForecastPanel :forecasts="forecasts" />
 
+        <ForecastPanel :forecasts="forecasts" />
         <!-- BMKG Satellite Map with Lazy Viewport Skeleton Loader -->
-        <LazyCardLoader 
-          min-height="460px" 
-          title="Memuat Citra Satelit Himawari-9" 
+        <LazyCardLoader
+          min-height="460px"
+          title="Memuat Citra Satelit Himawari-9"
           subtitle="Menghubungkan citra satelit BMKG"
         >
           <SatelliteMap
@@ -472,12 +473,12 @@ onUnmounted(() => {
         </LazyCardLoader>
 
         <!-- BMKG Maritime Weather Map with Lazy Viewport Skeleton Loader -->
-        <LazyCardLoader 
-          min-height="540px" 
-          title="Memuat Peta Maritim INAWAVES" 
+        <LazyCardLoader
+          min-height="540px"
+          title="Memuat Peta Maritim INAWAVES"
           subtitle="Memuat data perairan & pelabuhan Indonesia"
         >
-          <MarineMap 
+          <MarineMap
             :selected-city="selectedCity"
             :user-lat="userLat"
             :user-lng="userLng"
@@ -494,12 +495,12 @@ onUnmounted(() => {
         -->
 
         <!-- Real-time Earthquake Seismic Proximity Monitor with Lazy Viewport Skeleton Loader -->
-        <LazyCardLoader 
-          min-height="480px" 
-          title="Memuat Sensor Seismik Gempa Real-time" 
+        <LazyCardLoader
+          min-height="480px"
+          title="Memuat Sensor Seismik Gempa Real-time"
           subtitle="Sinkronisasi data sensor gempa BMKG"
         >
-          <EarthquakeHistory 
+          <EarthquakeHistory
             :selected-city="selectedCity"
             :user-lat="userLat"
             :user-lng="userLng"

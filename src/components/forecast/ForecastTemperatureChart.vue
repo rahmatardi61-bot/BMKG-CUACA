@@ -107,7 +107,9 @@ const tempDayGroups = computed(() => {
       }
       spark.push(Math.max(...vals));
     }
-    return { date, slots, maxVal, minVal, maxProb, spark };
+    // ponytail: suhu representatif = slot pertama grup (samakan dgn web original)
+    const temp = slots[0]?.temp ?? 0;
+    return { date, slots, maxVal, minVal, maxProb, spark, temp };
   });
 });
 
@@ -486,7 +488,7 @@ onUnmounted(() => {
               {{ group.maxVal }}<span class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">%</span>
             </template>
             <template v-else>
-              {{ group.maxVal }}° <span class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">/ {{ group.minVal }}°</span>
+              {{ group.temp }}°
             </template>
           </div>
           <div class="flex items-center gap-1 mt-1">

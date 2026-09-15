@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { 
+import {
   ChevronDown,
   Droplet,
   Sunrise,
@@ -79,7 +79,7 @@ onUnmounted(() => {
   <div class="relative w-full rounded-[4px] overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50">
     <!-- Top Glow Border Line -->
     <div class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent rounded-t-[4px]"></div>
-    
+
     <!-- ── Header ─────────────────────────────── -->
     <div class="p-5 pb-3.5 flex items-center justify-between gap-3 border-b border-slate-100/40 dark:border-brand-navy-800/30 relative z-10">
       <!-- Left: Title -->
@@ -109,8 +109,8 @@ onUnmounted(() => {
             bg-slate-100/60 border-transparent hover:bg-slate-200/50 text-slate-700
             dark:bg-brand-navy-900/60 dark:hover:bg-brand-navy-800/50 dark:text-slate-200"
         >
-          <component 
-            :is="getTabIcon(activeTab)" 
+          <component
+            :is="getTabIcon(activeTab)"
             class="w-3.5 h-3.5 text-blue-500 dark:text-brand-cyan"
           />
           <span class="text-xs tracking-wide">{{ activeTab }}</span>

@@ -1,16 +1,36 @@
+# Dependencies
 node_modules
+
+# Build outputs
 dist
-.git
-.gitignore
-.env
-.env.*
-*.log
-.DS_Store
-.vscode
+
+# Docs / screenshot (tidak dipakai saat build)
 output_screenshots
 orig_bak_images
 *.docx
 *.pdf
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files — JANGAN di-exclude: .env (VITE_*) dibaca vite saat build
+# .env
+
+# Git
+.git
+.gitignore
+
+# Docker
 Dockerfile
-.dockerignore
-README.md
+docker.sh
+docker-compose.yml

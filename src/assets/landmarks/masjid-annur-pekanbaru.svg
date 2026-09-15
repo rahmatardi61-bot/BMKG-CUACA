@@ -1,0 +1,32 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pkSun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ecfdf5" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#a7f3d0" stop-opacity="0.15" />
+    </linearGradient>
+    <linearGradient id="pkDome" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#eab308" />
+      <stop offset="50%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <linearGradient id="pkWalls" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0fdf4" />
+      <stop offset="100%" stop-color="#dcfce7" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="48" r="35" fill="url(#pkSun)" />
+  <!-- Masjid Raya An-Nur Pekanbaru Melayu-style Mosque -->
+  <rect x="5" y="78" width="90" height="10" rx="1.5" fill="url(#pkWalls)" />
+  <!-- Main Hall -->
+  <rect x="22" y="60" width="56" height="18" fill="url(#pkWalls)" />
+  <rect x="28" y="64" width="44" height="14" fill="#15803d" opacity="0.15" />
+  <!-- Grand Yellow Dome -->
+  <path d="M 33 60 C 33 40, 67 40, 67 60 Z" fill="url(#pkDome)" />
+  <path d="M 50 43 L 50 34" stroke="#eab308" stroke-width="1.8" />
+  <circle cx="50" cy="33" r="1.5" fill="#fef08a" />
+  <!-- Minarets -->
+  <rect x="12" y="44" width="6" height="34" fill="url(#pkWalls)" />
+  <path d="M 10 44 L 20 44 L 15 38 Z" fill="url(#pkDome)" />
+  <rect x="82" y="44" width="6" height="34" fill="url(#pkWalls)" />
+  <path d="M 80 44 L 90 44 L 85 38 Z" fill="url(#pkDome)" />
+</svg>

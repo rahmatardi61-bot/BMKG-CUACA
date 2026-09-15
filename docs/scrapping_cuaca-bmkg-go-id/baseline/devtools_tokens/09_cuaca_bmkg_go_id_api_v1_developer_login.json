@@ -1,0 +1,5 @@
+{
+ "message": "User doesn't exist!!",
+ "error": "Not Found",
+ "statusCode": 404
+}

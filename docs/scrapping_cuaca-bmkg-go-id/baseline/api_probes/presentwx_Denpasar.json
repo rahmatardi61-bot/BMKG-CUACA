@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=-8.65&lon=115.216667
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 115.21622854456868,
+   "lat": -8.650444742510196,
+   "adm1": "51",
+   "adm2": "51.71",
+   "adm3": "51.71.04",
+   "adm4": "51.71.04.2002",
+   "provinsi": "Bali",
+   "kotkab": "Kota Denpasar",
+   "kecamatan": "Denpasar Utara",
+   "desa": "Dangin Puri Kauh",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 1,
+   "weather_desc": "Cerah",
+   "weather_desc_en": "Sunny",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 15:20:00",
+   "t": 28,
+   "tcc": 79,
+   "wd_deg": 148,
+   "wd": "SE",
+   "wd_to": "NW",
+   "ws": 16.7,
+   "hu": 75,
+   "vs": 8108,
+   "vs_text": "< 9 km"
+  }
+ }
+}

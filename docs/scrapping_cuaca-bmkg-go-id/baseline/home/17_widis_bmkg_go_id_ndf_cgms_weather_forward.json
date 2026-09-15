@@ -1,0 +1,39 @@
+{
+ "message": "Request failed with status code 502",
+ "name": "AxiosError",
+ "stack": "AxiosError: Request failed with status code 502\n    at settle (/app/node_modules/axios/dist/node/axios.cjs:2106:12)\n    at IncomingMessage.handleStreamEnd (/app/node_modules/axios/dist/node/axios.cjs:3491:11)\n    at IncomingMessage.emit (node:events:536:35)\n    at IncomingMessage.emit (node:domain:489:12)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)\n    at Axios.request (/app/node_modules/axios/dist/node/axios.cjs:4731:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+ "config": {
+  "transitional": {
+   "silentJSONParsing": true,
+   "forcedJSONParsing": true,
+   "clarifyTimeoutError": false
+  },
+  "adapter": [
+   "xhr",
+   "http",
+   "fetch"
+  ],
+  "transformRequest": [
+   null
+  ],
+  "transformResponse": [
+   null
+  ],
+  "timeout": 0,
+  "xsrfCookieName": "XSRF-TOKEN",
+  "xsrfHeaderName": "X-XSRF-TOKEN",
+  "maxContentLength": -1,
+  "maxBodyLength": -1,
+  "env": {},
+  "headers": {
+   "Accept": "application/json, text/plain, */*",
+   "User-Agent": "axios/1.13.2",
+   "Accept-Encoding": "gzip, compress, deflate, br"
+  },
+  "method": "get",
+  "url": "https://cuaca.bmkg.go.id/blog/wp-json/wp/v2/posts?_embed",
+  "allowAbsoluteUrls": true
+ },
+ "code": "ERR_BAD_RESPONSE",
+ "status": 502
+}

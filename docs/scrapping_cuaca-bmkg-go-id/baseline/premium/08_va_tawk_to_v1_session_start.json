@@ -1,0 +1,36 @@
+{
+ "ok": true,
+ "data": {
+  "uid": {
+   "domain": "bmkg.go.id",
+   "u": "1.1hHsbWCZmhf2z1hGPvd7oaoAnfRBgBGJiC20qGVMLDHTx4kjm7boS5RPyiC9XVthOPwj95qLiLj2Kophk1rbzsnRlrpd4p9MFSS34fvwvWxY8D6ySyF",
+   "uv": 3
+  },
+  "vid": "65662d381db16644c5558bf6-eu78N7rVGDApDk1G6D5e7",
+  "tkn": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZpc2l0b3ItYXBwbGljYXRpb24tc2VydmVyLTIwMjEwMjIifQ.eyJwaWQiOiI2NTY2MmQzODFkYjE2NjQ0YzU1NThiZjYiLCJ2aWQiOiI2NTY2MmQzODFkYjE2NjQ0YzU1NThiZjYtZXU3OE43clZHREFwRGsxRzZENWU3Iiwic2lkIjoiNmE5ZmI0NzZjNjFjNDJhN2NkOWIyYzU5IiwiaWF0IjoxNzg4ODUxMzE4LCJleHAiOjE3ODg4NTMxMTgsImp0aSI6IlFCZVFmYlRGWWNVWkxvd3BwTzdPTCJ9.A0jX25N7IOWEPilj0Fn7qqPmw9DpIRTPL5D7tnhAaeOEKjzqiZQF21FaUaW77oGJTttsoGP-1kbfCRJFfvXTpg",
+  "tknExp": 1800,
+  "sk": "6a9fb476c61c42a7cd9b2c59",
+  "n": "V1788851318788686",
+  "e": "",
+  "te": "",
+  "chid": "1db63900-ab54-11f1-ac90-09374dd17ec6",
+  "c": [],
+  "cver": 0,
+  "cw": "min",
+  "sdo": true,
+  "dpt": "",
+  "vss": "vsb84.tawk.to",
+  "pcfs": false,
+  "bblc": false,
+  "lmst": 0,
+  "transfer": null,
+  "transferVer": 1,
+  "cc": "ID",
+  "rc": "YO",
+  "ast": "online",
+  "dptst": [],
+  "asver": 40,
+  "ewt": 0,
+  "settingsVersion": "2-3-0"
+ }
+}

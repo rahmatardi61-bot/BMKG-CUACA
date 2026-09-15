@@ -1,0 +1,50 @@
+// 200 https://cuaca.bmkg.go.id/api/v1/sunset/json?lat=-8.65&lng=115.216667
+{
+ "results": {
+  "date": "2026-09-08",
+  "sunrise": "6:16:22 AM",
+  "sunset": "6:17:36 PM",
+  "first_light": "5:06:43 AM",
+  "last_light": "7:27:15 PM",
+  "dawn": "5:55:22 AM",
+  "dusk": "6:38:35 PM",
+  "solar_noon": "12:16:55 PM",
+  "golden_hour": "5:49:48 PM",
+  "day_length": "12:01:14",
+  "nautical_twilight_begin": "5:31:02 AM",
+  "nautical_twilight_end": "7:02:56 PM",
+  "timezone": "Asia/Makassar",
+  "utc_offset": 480,
+  "sun_altitude": 75.66,
+  "sun_azimuth": 0,
+  "sunrise_azimuth": 84.3,
+  "sunset_azimuth": 275.51,
+  "moonrise": "3:44:45 AM",
+  "moonset": "3:43:37 PM",
+  "moon_illumination": 10.14,
+  "moon_phase": "Waning Crescent",
+  "moon_phase_value": 0.9,
+  "moon_always_up": false,
+  "moon_always_down": false,
+  "elevation": 32,
+  "sun_status": "normal",
+  "golden_hour_morning": {
+   "begin": "6:03:30 AM",
+   "end": "6:44:10 AM"
+  },
+  "golden_hour_evening": {
+   "begin": "5:49:48 PM",
+   "end": "6:30:28 PM"
+  },
+  "blue_hour_morning": {
+   "begin": "5:55:22 AM",
+   "end": "6:03:30 AM"
+  },
+  "blue_hour_evening": {
+   "begin": "6:30:28 PM",
+   "end": "6:38:35 PM"
+  }
+ },
+ "status": "OK",
+ "tzid": "Asia/Makassar"
+}

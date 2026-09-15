@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="/cap/nowcast-rss-style.xsl"?>
+    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+            <title>Peringatan Dini Cuaca BMKG</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/rss.xml</link>
+            <description>Peringatan Dini Cuaca dari BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</description>
+            <atom:link href="https://www.bmkg.go.id/alerts/nowcast/id/rss.xml" rel="self" type="application/rss+xml"/>
+            <language>id</language>
+            <copyright>public domain</copyright>
+            <pubDate>Fri, 11 Sep 2026 07:15:38 +0000</pubDate>
+            <lastBuildDate>Fri, 11 Sep 2026 07:15:38 +0000</lastBuildDate>
+            <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+            
+        <item>
+            <title>Hujan Lebat disertai Petir di Sumatera Barat</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CSB20260824001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 24 August 2026, 09:00 WIB di sebagian wilayah Sumatera Barat, khususnya di Bungus Teluk Kabung, Koto Xi Tarusan, Padang Selatan, Siberut Barat Daya.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 24 August 2026, 11:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.11.07.13.001</guid>
+            <pubDate>Mon, 24 Aug 2026 08:30:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Sulawesi Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CSG20260824003_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 24 August 2026, 09:00 WITA di sebagian wilayah Sulawesi Tengah, khususnya di Balaesang, Kasimbar, Sirenja, Toribulu.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 24 August 2026, 12:00 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.11.07.72.003</guid>
+            <pubDate>Mon, 24 Aug 2026 08:40:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Aceh</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CAH20260824002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 24 August 2026, 07:34 WIB di sebagian wilayah Aceh, khususnya di Darul Kamal, Pulau Banyak, Rundeng, Simpang Kiri, Sultan Daulat.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 24 August 2026, 10:54 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.11.07.11.002</guid>
+            <pubDate>Mon, 24 Aug 2026 07:24:00 +0700</pubDate>
+        </item>
+        </channel>
+    </rss>

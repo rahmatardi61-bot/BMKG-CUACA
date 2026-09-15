@@ -1,0 +1,5 @@
+// 404 https://widis.bmkg.go.id/ndf/cgms/weather/forward
+{
+ "status": "ERROR",
+ "error": "Incorrect API URL"
+}

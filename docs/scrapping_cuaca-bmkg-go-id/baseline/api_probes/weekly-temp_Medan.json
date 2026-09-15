@@ -1,0 +1,38 @@
+// 200 https://cuaca.bmkg.go.id/api/public/weather/weekly-temperature?lat=3.595196&long=98.672226
+{
+ "statusCode": 200,
+ "message": "OK!",
+ "data": {
+  "daily": [
+   {
+    "date": "2026-09-08T00:00:00Z",
+    "temperature": 26.0295748143097
+   },
+   {
+    "date": "2026-09-09T00:00:00Z",
+    "temperature": 25.856868100476053
+   },
+   {
+    "date": "2026-09-10T00:00:00Z",
+    "temperature": 25.90476677576312
+   },
+   {
+    "date": "2026-09-11T00:00:00Z",
+    "temperature": 26.269319539818504
+   },
+   {
+    "date": "2026-09-12T00:00:00Z",
+    "temperature": 25.386463121457034
+   },
+   {
+    "date": "2026-09-13T00:00:00Z",
+    "temperature": 26.171874945609545
+   },
+   {
+    "date": "2026-09-14T00:00:00Z",
+    "temperature": 0
+   }
+  ],
+  "weekly": 22.23126675677628
+ }
+}

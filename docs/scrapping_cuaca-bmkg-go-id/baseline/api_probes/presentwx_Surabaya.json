@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=-7.257472&lon=112.752083
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 112.74775916216697,
+   "lat": -7.257835008041191,
+   "adm1": "35",
+   "adm2": "35.78",
+   "adm3": "35.78.07",
+   "adm4": "35.78.07.1004",
+   "provinsi": "Jawa Timur",
+   "kotkab": "Kota Surabaya",
+   "kecamatan": "Genteng",
+   "desa": "Ketabang",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 1,
+   "weather_desc": "Cerah",
+   "weather_desc_en": "Sunny",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 14:20:00",
+   "t": 32,
+   "tcc": 96,
+   "wd_deg": 113,
+   "wd": "E",
+   "wd_to": "W",
+   "ws": 25.5,
+   "hu": 39,
+   "vs": 9996,
+   "vs_text": "< 10 km"
+  }
+ }
+}

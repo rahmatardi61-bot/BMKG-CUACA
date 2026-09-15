@@ -1,0 +1,37 @@
+{
+ "version": 8,
+ "name": "ISDP Minimap Style",
+ "id": "isdp-minimap-style-v1",
+ "center": [
+  106.8456,
+  -6.2088
+ ],
+ "zoom": 4,
+ "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+ "sources": {
+  "baselayer": {
+   "type": "raster",
+   "tiles": [
+    "https://cuaca.bmkg.go.id/api/public/maps/minimap/tiles/{z}/{x}/{y}?public_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicHVibGljX2FjY2VzcyIsImlhdCI6MTc4ODg1MDQwMywiZXhwIjoxNzg4ODUyMjAzfQ.0AdHTcHeh1enBbbYynGNk59-JXjaHLtAIc4hiqAtDk8"
+   ],
+   "tileSize": 256
+  }
+ },
+ "layers": [
+  {
+   "id": "background",
+   "type": "background",
+   "paint": {
+    "background-color": "rgba(255, 255, 255, 1)"
+   }
+  },
+  {
+   "id": "baselayer",
+   "type": "raster",
+   "source": "baselayer",
+   "paint": {
+    "raster-opacity": 1
+   }
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+// 200 https://cuaca.bmkg.go.id/api/public/weather/warning?lat=-5.147665&long=119.432731
+{
+ "statusCode": 200,
+ "message": "OK!",
+ "data": {
+  "today": {},
+  "tomorrow": null
+ }
+}

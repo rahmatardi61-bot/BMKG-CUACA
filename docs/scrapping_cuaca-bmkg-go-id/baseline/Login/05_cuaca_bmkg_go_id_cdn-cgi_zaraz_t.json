@@ -1,0 +1,16 @@
+{
+ "e": [
+  "(function(w,d){;w.zarazData.executed.push(\"Pageview\");})(window,document)",
+  "(function(w,d){{(function(w,d){zaraz.__zarazMCListeners={\"google-analytics_v4_0bd2\":[\"visibilityChange\"]};})(window,document);}})(window,document)"
+ ],
+ "f": [
+  [
+   "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=0bba835e-d6fc-41ea-8bd2-cd92e58dd902&_u=KGDAAEADQAAAAC%7E&z=1762549765",
+   {}
+  ],
+  [
+   "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=0bba835e-d6fc-41ea-8bd2-cd92e58dd902&_u=KGDAAEADQAAAAC%7E&z=846716103",
+   {}
+  ]
+ ]
+}

@@ -1,0 +1,5 @@
+// 401 https://cuaca.bmkg.go.id/api/v1/developer/token-management/services
+{
+ "message": "Unauthorized",
+ "statusCode": 401
+}

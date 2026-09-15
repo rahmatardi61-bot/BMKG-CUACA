@@ -1,0 +1,9 @@
+{
+ "first_name": "\"first_name\" is not allowed to be empty",
+ "last_name": "\"last_name\" is not allowed to be empty",
+ "email": "\"email\" is not allowed to be empty",
+ "no_hp": "\"no_hp\" is not allowed to be empty",
+ "company": "\"company\" is not allowed to be empty",
+ "position": "\"position\" is not allowed to be empty",
+ "password": "\"password\" is not allowed to be empty"
+}

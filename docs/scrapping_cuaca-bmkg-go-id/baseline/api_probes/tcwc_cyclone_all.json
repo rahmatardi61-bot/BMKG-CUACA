@@ -1,0 +1,1740 @@
+// 200 https://cuaca.bmkg.go.id/api/v1/tcwc/cyclone/all
+{
+ "status": "OK",
+ "data": {
+  "docs": [
+   {
+    "_id": "67b446d42719de8e91f91cd3",
+    "technical_bulletin": "https://drive.google.com/file/d/1q6O6OvVvOVV7OsqcPwsWhZG9aB4dyLDv/view?usp=sharing",
+    "public_bulletin": "https://drive.google.com/file/d/1srXcaxP7BRgdHKjp6DKCDG5fg8SZdrhq/view?usp=sharing",
+    "ocean_gale": [
+     "Samudera Hindia selatan Jawa Timur",
+     "Samudera Hindia selatan Jawa Tengah",
+     "Samudera Hindia selatan Jawa Barat",
+     "Samudera Hindia selatan Banten",
+     "Perairan selatan Banten",
+     "Perairan Sukabumi - Cianjur",
+     "Perairan Garut - Pangandaran",
+     "Perairan Cilacap",
+     "Perairan Kebumen - Purworejo",
+     "Perairan Yogyakarta",
+     "Perairan selatan Jawa Timur",
+     "Samudera Hindia barat Lampung",
+     "Selat Sunda bagian selatan",
+     "Selat Sunda bagian barat",
+     "Perairan barat Lampung",
+     "Samudera Hindia selatan Bali",
+     "Samudera Hindia selatan NTB",
+     "Samudera Hindia selatan Kupang - P. Rote",
+     "Samudera Hindia selatan P. Sumba - P. Sabu",
+     "Perairan selatan Kupang - P. Rote"
+    ],
+    "gale": [
+     "JAWA BARAT",
+     "LAMPUNG",
+     "BANTEN"
+    ],
+    "extreme_weather": [
+     "JAWA BARAT",
+     "LAMPUNG",
+     "BANTEN"
+    ],
+    "month": 1,
+    "year": 2025,
+    "area": "bbs",
+    "name": "TC BIANCA",
+    "description_id": "TC BIANCA (99S)",
+    "description": "TC BIANCA (99S)",
+    "is_current": false,
+    "track": [
+     {
+      "geometry": {
+       "coordinates": [
+        128.7,
+        -10.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719ded8f7f9b8e3",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-18T00:00:00.000Z",
+       "pressure": 1009,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-18 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        126.5,
+        -11.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de476df9b8e4",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-18T12:00:00.000Z",
+       "pressure": 1008,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-18 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        126.1,
+        -11.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de43b8f9b8e5",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-19T00:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-19 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        127.4,
+        -11.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de3d1bf9b8e6",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-19T12:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-19 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        121.2,
+        -13.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de5e93f9b8e7",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-20T00:00:00.000Z",
+       "pressure": 1005,
+       "meanWind": 25,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-20 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        116.9,
+        -14.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de27fff9b8e8",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-21T00:00:00.000Z",
+       "pressure": 1004,
+       "meanWind": 30,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-21 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        112.3,
+        -15
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de29aff9b8e9",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-22T00:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-22 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        108.6,
+        -16.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de78f3f9b8ea",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-23T00:00:00.000Z",
+       "pressure": 1004,
+       "meanWind": 30,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-23 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        105.8,
+        -17.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de0e5ef9b8eb",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-23T12:00:00.000Z",
+       "pressure": 1000,
+       "meanWind": 35,
+       "gust": 50,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-23 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        104.7,
+        -18.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de7b56f9b8ec",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-24T00:00:00.000Z",
+       "pressure": 991,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-24 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        103.1,
+        -19.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc89d02719de2d26f9b8ed",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-24T12:00:00.000Z",
+       "pressure": 980,
+       "meanWind": 65,
+       "gust": 90,
+       "cat": "3",
+       "accuracy": "-",
+       "dateString": "2025-02-24 12:00:00 UTC",
+       "name": "TC BIANCA"
+      }
+     }
+    ],
+    "forecast": [
+     {
+      "geometry": {
+       "coordinates": [
+        102.4,
+        -20.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719debecdf9b868",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-25T00:00:00Z",
+       "pressure": 967,
+       "meanWind": 80,
+       "gust": "110",
+       "cat": "3",
+       "dateString": "2025-02-25 00:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        101.8,
+        -22.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719de5e69f9b869",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-25T12:00:00Z",
+       "pressure": 970,
+       "meanWind": 75,
+       "gust": "105",
+       "cat": "3",
+       "dateString": "2025-02-25 12:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        101.4,
+        -23.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719de5dc1f9b86a",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-26T00:00:00Z",
+       "pressure": 990,
+       "meanWind": 50,
+       "gust": "70",
+       "cat": "2",
+       "dateString": "2025-02-26 00:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        101.6,
+        -25.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719deb8c4f9b86b",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-26T12:00:00Z",
+       "pressure": 995,
+       "meanWind": 40,
+       "gust": "55",
+       "cat": "1",
+       "dateString": "2025-02-26 12:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        100.8,
+        -25.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719de99caf9b86c",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-27T00:00:00Z",
+       "pressure": 1002,
+       "meanWind": 30,
+       "gust": "45",
+       "cat": "0",
+       "dateString": "2025-02-27 00:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        99.2,
+        -25.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67bc84dc2719de8126f9b86d",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-27T12:00:00Z",
+       "pressure": 1006,
+       "meanWind": 25,
+       "gust": "45",
+       "cat": "0",
+       "dateString": "2025-02-27 12:00:00Z UTC",
+       "name": "TC BIANCA"
+      }
+     }
+    ],
+    "createdAt": "2025-02-18T08:37:40.011Z",
+    "updatedAt": "2025-02-25T02:07:08.968Z",
+    "publication": {
+     "movement": false,
+     "movementChoose": {
+      "0h": "",
+      "24h": "",
+      "48h": "",
+      "72h": ""
+     },
+     "warningText": "",
+     "positionAccuration": "sekitar",
+     "intensity": "Storm",
+     "intensity24": "Hurricane",
+     "windQuadran": "",
+     "finalPublication": true,
+     "nextPublicationTime": "29/1300 UTC",
+     "accurationArea": {
+      "type": "FeatureCollection",
+      "features": []
+     }
+    },
+    "direct_impact": false
+   },
+   {
+    "_id": "67ac29082719de4b5bf88a09",
+    "technical_bulletin": "https://drive.google.com/file/d/1Cf8Y9SEWQh_JHGMp9ldCnNcWkDRO_mkZ/view?usp=drive_link",
+    "public_bulletin": "https://drive.google.com/file/d/1JezB3O7shfSRbSmPkaMjDQNzB1Uoq6BN/view?usp=drive_link",
+    "ocean_gale": [
+     "Samudera Hindia barat Aceh",
+     "Samudera Hindia barat Kep. Nias",
+     "Samudera Hindia barat Kep. Mentawai",
+     "Samudera Hindia barat Bengkulu",
+     "Samudera Hindia barat Lampung"
+    ],
+    "gale": [],
+    "extreme_weather": [],
+    "month": 1,
+    "year": 2025,
+    "area": "bbs",
+    "name": "TC TALIAH",
+    "description_id": "Siklon Tropis Taliah",
+    "description": "Tropical Cyclone Taliah",
+    "is_current": false,
+    "track": [
+     {
+      "geometry": {
+       "coordinates": [
+        117.7,
+        -14.4
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de25f8f88b97",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-02T00:00:00.000Z",
+       "pressure": 996,
+       "meanWind": 30,
+       "gust": 45,
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-02 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        116.1,
+        -14.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de955bf88b98",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-02T12:00:00.000Z",
+       "pressure": 982,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-02 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        115,
+        -15
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de1449f88b99",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-03T00:00:00.000Z",
+       "pressure": 983,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-03 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        113.6,
+        -15.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719deb8ccf88b9a",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-03T12:00:00.000Z",
+       "pressure": 976,
+       "meanWind": 60,
+       "gust": 85,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-03 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        112.1,
+        -15.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de6c6ef88b9b",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-04T00:00:00.000Z",
+       "pressure": 968,
+       "meanWind": 70,
+       "gust": 100,
+       "cat": "3",
+       "accuracy": "-",
+       "dateString": "2025-02-04 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        110.4,
+        -15.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de0546f88b9c",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-04T12:00:00.000Z",
+       "pressure": 968,
+       "meanWind": 70,
+       "gust": 100,
+       "cat": "3",
+       "accuracy": "-",
+       "dateString": "2025-02-04 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        108.2,
+        -15.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de53ddf88b9d",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-05T00:00:00.000Z",
+       "pressure": 973,
+       "meanWind": 65,
+       "gust": 90,
+       "cat": "3",
+       "accuracy": "-",
+       "dateString": "2025-02-05 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        106,
+        -15.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de1e74f88b9e",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-05T12:00:00.000Z",
+       "pressure": 980,
+       "meanWind": 55,
+       "gust": 75,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-05 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        105.3,
+        -14.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719deade0f88b9f",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-06T00:00:00.000Z",
+       "pressure": 982,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-06 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        102.6,
+        -14.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de0248f88ba0",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-06T12:00:00.000Z",
+       "pressure": 987,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-06 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        100.2,
+        -15.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de73b0f88ba1",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-07T00:00:00.000Z",
+       "pressure": 989,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-07 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        98.1,
+        -16.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de5433f88ba2",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-07T12:00:00.000Z",
+       "pressure": 993,
+       "meanWind": 40,
+       "gust": 55,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-07 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        96,
+        -16
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719deb676f88ba3",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-08T00:00:00.000Z",
+       "pressure": 993,
+       "meanWind": 45,
+       "gust": 65,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-08 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        95,
+        -15.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719dee147f88ba4",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-08T12:00:00.000Z",
+       "pressure": 990,
+       "meanWind": 45,
+       "gust": 65,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-08 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        94.9,
+        -15.4
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de97d9f88ba5",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-09T00:00:00.000Z",
+       "pressure": 992,
+       "meanWind": 40,
+       "gust": 55,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-09 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        93.5,
+        -15.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de1ecff88ba6",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-09T12:00:00.000Z",
+       "pressure": 996,
+       "meanWind": 35,
+       "gust": 50,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-09 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        93,
+        -14.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de4523f88ba7",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T00:00:00.000Z",
+       "pressure": 995,
+       "meanWind": 35,
+       "gust": 50,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-10 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        92.4,
+        -14.4
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de561ff88ba8",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T12:00:00.000Z",
+       "pressure": 992,
+       "meanWind": 40,
+       "gust": 55,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-10 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        92.1,
+        -14.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de74fbf88ba9",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T00:00:00.000Z",
+       "pressure": 993,
+       "meanWind": 40,
+       "gust": 55,
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-11 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        91.8,
+        -15.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de3b5ef88baa",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T12:00:00.000Z",
+       "pressure": 988,
+       "meanWind": 50,
+       "gust": 70,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-11 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        90.8,
+        -16.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac32492719de11c3f88bab",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-12T00:00:00.000Z",
+       "pressure": 980,
+       "meanWind": 60,
+       "gust": 85,
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-12 00:00:00 UTC",
+       "name": "TC TALIAH"
+      }
+     }
+    ],
+    "forecast": [
+     {
+      "geometry": {
+       "coordinates": [
+        89.7,
+        -18.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac31b92719de1a15f88b24",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-12T12:00:00Z",
+       "pressure": 976,
+       "meanWind": 60,
+       "gust": "85.0",
+       "cat": "2.0",
+       "dateString": "2025-02-12 12:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        88.1,
+        -20.5
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac31b92719ded876f88b25",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-13T00:00:00Z",
+       "pressure": 976,
+       "meanWind": 60,
+       "gust": "85.0",
+       "cat": "2.0",
+       "dateString": "2025-02-13 00:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        85,
+        -22.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac31b92719de7c60f88b26",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-14T00:00:00Z",
+       "pressure": 982,
+       "meanWind": 50,
+       "gust": "70.0",
+       "cat": "2.0",
+       "dateString": "2025-02-14 00:00:00Z UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        83.1,
+        -24
+       ],
+       "type": "Point"
+      },
+      "_id": "67ac31b92719de17b6f88b27",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-15T00:00:00Z",
+       "pressure": 986,
+       "meanWind": 45,
+       "gust": "65.0",
+       "cat": "1.0",
+       "dateString": "2025-02-15 00:00:00Z UTC",
+       "name": "TC TALIAH"
+      }
+     }
+    ],
+    "createdAt": "2025-02-12T04:52:24.692Z",
+    "updatedAt": "2025-02-13T12:23:59.908Z",
+    "publication": {
+     "movement": false,
+     "movementChoose": {
+      "0h": "",
+      "24h": "",
+      "48h": "",
+      "72h": ""
+     },
+     "warningText": "",
+     "positionAccuration": "sekitar",
+     "intensity": "Storm",
+     "intensity24": "Hurricane",
+     "windQuadran": "",
+     "finalPublication": true,
+     "nextPublicationTime": "29/1300 UTC",
+     "accurationArea": {
+      "type": "FeatureCollection",
+      "features": []
+     }
+    }
+   },
+   {
+    "_id": "67abfa732719de24a7f88523",
+    "technical_bulletin": "https://drive.google.com/file/d/1WXxVKwKqmTijSkIjigmLWbUVc9ie4WE2/view?usp=drive_link",
+    "public_bulletin": "https://drive.google.com/file/d/16CC7X9lkbp88WODMGo4H_eTqbU_Bx8BD/view?usp=drive_link",
+    "ocean_gale": [
+     "Samudera Hindia selatan Jawa Tengah",
+     "Perairan Cilacap",
+     "Perairan Kebumen - Purworejo",
+     "Perairan Yogyakarta",
+     "Samudera Hindia selatan Jawa Timur",
+     "Perairan selatan Jawa Timur",
+     "Samudera Hindia selatan Bali",
+     "Samudera Hindia selatan NTB",
+     "Selat Lombok bagian selatan",
+     "Selat Alas bagian selatan",
+     "Samudera Hindia selatan P. Sumba - P. Sabu",
+     "Samudera Hindia selatan Kupang - P. Rote",
+     "Perairan selatan Kupang - P. Rote",
+     "Perairan utara Kupang - P. Rote",
+     "Laut Sawu bagian selatan",
+     "Laut Sawu bagian utara",
+     "Selat Sumba bagian barat",
+     "Selat Sumba bagian timur",
+     "Selat Sape bagian selatan",
+     "Selat Sape bagian utara",
+     "Perairan Sukabumi - Cianjur",
+     "Perairan Garut - Pangandaran",
+     "Selat Badung",
+     "Selat Bali bagian selatan",
+     "Selat Bali bagian utara",
+     "Samudera Hindia selatan Jawa Barat"
+    ],
+    "gale": [
+     "NUSA TENGGARA TIMUR"
+    ],
+    "extreme_weather": [],
+    "month": 2,
+    "year": 2025,
+    "area": "bbs",
+    "name": "TC ZELIA",
+    "description": "TC Zelia",
+    "description_id": "TC Zelia",
+    "is_current": false,
+    "direct_impact": false,
+    "track": [
+     {
+      "geometry": {
+       "coordinates": [
+        119.1,
+        -17.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de0ce2f8b9bb",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T12:00:00.000Z",
+       "pressure": "-",
+       "meanWind": 35,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-11 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.9,
+        -18.5
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719deaad9f8b9bc",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T18:00:00.000Z",
+       "pressure": "-",
+       "meanWind": 40,
+       "gust": "-",
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-11 18:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        119.6,
+        -18.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de0fadf8b9bd",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-12T00:00:00.000Z",
+       "pressure": 985,
+       "meanWind": 45,
+       "gust": "-",
+       "cat": "1",
+       "accuracy": "-",
+       "dateString": "2025-02-12 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.6,
+        -19
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de97cff8b9be",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-12T12:00:00.000Z",
+       "pressure": 976,
+       "meanWind": 55,
+       "gust": "-",
+       "cat": "2",
+       "accuracy": "-",
+       "dateString": "2025-02-12 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.1,
+        -19
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de1181f8b9bf",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-13T00:00:00.000Z",
+       "pressure": 941,
+       "meanWind": 100,
+       "gust": 140,
+       "cat": "4",
+       "accuracy": "-",
+       "dateString": "2025-02-13 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.2,
+        -19.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de3d0cf8b9c0",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-13T12:00:00.000Z",
+       "pressure": 928,
+       "meanWind": 110,
+       "gust": 155,
+       "cat": "5",
+       "accuracy": "-",
+       "dateString": "2025-02-13 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.6,
+        -19.5
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de1aa3f8b9c1",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-14T00:00:00.000Z",
+       "pressure": 927,
+       "meanWind": 110,
+       "gust": 155,
+       "cat": "5",
+       "accuracy": "-",
+       "dateString": "2025-02-14 00:00:00 UTC",
+       "name": "TC ZELIA"
+      }
+     }
+    ],
+    "forecast": [
+     {
+      "geometry": {
+       "coordinates": [
+        118.9,
+        -20.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719dea928f8b9b8",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-14T12:00:00.000Z",
+       "pressure": 948,
+       "meanWind": 90,
+       "gust": "-",
+       "cat": "4",
+       "accuracy": 30,
+       "dateString": "2025-02-14 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        118.6,
+        -22.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de7769f8b9b9",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-15T00:00:00.000Z",
+       "pressure": 982,
+       "meanWind": 50,
+       "gust": "-",
+       "cat": "2",
+       "accuracy": 60,
+       "dateString": "2025-02-15 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        117.3,
+        -25.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67aebacb2719de549af8b9ba",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-16T00:00:00.000Z",
+       "pressure": 994,
+       "meanWind": 30,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": 85,
+       "dateString": "2025-02-16 00:00:00 UTC",
+       "name": "TC ZELIA"
+      }
+     }
+    ],
+    "createdAt": "2025-02-12T01:33:39.141Z",
+    "updatedAt": "2025-02-14T21:53:19.807Z",
+    "publication": {
+     "movement": false,
+     "movementChoose": {
+      "0h": "",
+      "24h": "",
+      "48h": "",
+      "72h": ""
+     },
+     "warningText": "",
+     "positionAccuration": "sekitar",
+     "intensity": "Storm",
+     "intensity24": "Hurricane",
+     "windQuadran": "",
+     "finalPublication": true,
+     "nextPublicationTime": "29/1300 UTC",
+     "accurationArea": {
+      "type": "FeatureCollection",
+      "features": []
+     }
+    }
+   },
+   {
+    "_id": "67a9b6c22719de351af85286",
+    "technical_bulletin": "",
+    "public_bulletin": "",
+    "ocean_gale": [
+     "Laut Natuna Utara",
+     "Perairan selatan Kep. Anambas",
+     "Perairan utara Kep. Anambas",
+     "Perairan barat Kep. Natuna",
+     "Perairan utara Kep. Natuna",
+     "Perairan selatan Kep. Natuna - Pulau Midai"
+    ],
+    "gale": [],
+    "extreme_weather": [],
+    "month": 12,
+    "year": 2025,
+    "area": "bbu",
+    "name": "Bibit 93W",
+    "description": "Bibit 93W",
+    "description_id": "Bibit 93W",
+    "is_current": false,
+    "direct_impact": false,
+    "track": [
+     {
+      "geometry": {
+       "coordinates": [
+        114.7,
+        8.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de3264f91e0f",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T00:00:00.000Z",
+       "pressure": 1007,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-10 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        114.1,
+        8.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de6e83f91e10",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T12:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-10 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        113.3,
+        7.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de1f22f91e11",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T00:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-11 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        114.1,
+        11.2
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719ded766f91e12",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T12:00:00.000Z",
+       "pressure": 1008,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-11 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        113.5,
+        11.7
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de766bf91e13",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-12T00:00:00.000Z",
+       "pressure": 1008,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-12 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        111.7,
+        13.5
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de815ef91e14",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-13T00:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-13 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        111.9,
+        13.3
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de5cb6f91e15",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-13T12:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-13 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        111.9,
+        12.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719deddb1f91e16",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-14T00:00:00.000Z",
+       "pressure": 1006,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-14 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        110.7,
+        9.5
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de721df91e17",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-15T00:00:00.000Z",
+       "pressure": 1008,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-15 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        108.6,
+        6.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de3f44f91e18",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-16T00:00:00.000Z",
+       "pressure": 1008,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-16 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        105.5,
+        3.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de2326f91e19",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-17T00:00:00.000Z",
+       "pressure": 1009,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-17 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        105.3,
+        1.6
+       ],
+       "type": "Point"
+      },
+      "_id": "67b4528d2719de152bf91e1a",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-18T00:00:00.000Z",
+       "pressure": 1010,
+       "meanWind": 20,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-18 00:00:00 UTC",
+       "name": "Bibit 93W"
+      }
+     }
+    ],
+    "forecast": [],
+    "createdAt": "2025-02-10T08:20:18.396Z",
+    "updatedAt": "2025-02-18T12:46:51.524Z",
+    "publication": {
+     "movement": false,
+     "movementChoose": {
+      "0h": "",
+      "24h": "",
+      "48h": "",
+      "72h": ""
+     },
+     "warningText": "",
+     "positionAccuration": "sekitar",
+     "intensity": "Storm",
+     "intensity24": "Hurricane",
+     "windQuadran": "",
+     "finalPublication": true,
+     "nextPublicationTime": "29/1300 UTC",
+     "accurationArea": {
+      "type": "FeatureCollection",
+      "features": []
+     }
+    }
+   },
+   {
+    "_id": "67a702aa2719de9759f814f8",
+    "technical_bulletin": "",
+    "public_bulletin": "",
+    "ocean_gale": [
+     "Samudera Hindia selatan Kupang - P. Rote",
+     "Perairan selatan Kupang - P. Rote",
+     "Laut Sawu bagian utara",
+     "Laut Sawu bagian selatan",
+     "Perairan utara Kupang - P. Rote",
+     "Samudera Hindia selatan Jawa Timur",
+     "Samudera Hindia selatan Bali",
+     "Samudera Hindia selatan NTB",
+     "Samudera Hindia selatan P. Sumba - P. Sabu",
+     "Selat Sumba bagian timur",
+     "Selat Sumba bagian barat",
+     "Samudera Hindia selatan Banten",
+     "Samudera Hindia selatan Jawa Barat",
+     "Samudera Hindia selatan Jawa Tengah",
+     "Perairan selatan Banten",
+     "Perairan Sukabumi - Cianjur",
+     "Perairan Garut - Pangandaran",
+     "Perairan Cilacap",
+     "Perairan Kebumen - Purworejo",
+     "Perairan Yogyakarta",
+     "Perairan selatan Jawa Timur"
+    ],
+    "gale": [
+     "NUSA TENGGARA BARAT",
+     "NUSA TENGGARA TIMUR",
+     "BALI",
+     "JAWA TIMUR"
+    ],
+    "extreme_weather": [
+     "NUSA TENGGARA BARAT",
+     "BALI",
+     "JAWA TIMUR",
+     "NUSA TENGGARA TIMUR"
+    ],
+    "month": 2,
+    "year": 2025,
+    "area": "bbs",
+    "name": "Bibit 96S",
+    "description": "96S",
+    "description_id": "96S",
+    "is_current": false,
+    "direct_impact": false,
+    "track": [
+     {
+      "geometry": {
+       "coordinates": [
+        126.4,
+        -13.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719deb490f87c75",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-08T00:00:00.000Z",
+       "pressure": 1002,
+       "meanWind": 15,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-08 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        124.7,
+        -14.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719defcecf87c76",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-08T12:00:00.000Z",
+       "pressure": 999.4,
+       "meanWind": 18.9,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-08 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        123.9,
+        -14.9
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719de7bcef87c77",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-09T00:00:00.000Z",
+       "pressure": 998,
+       "meanWind": 25,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-09 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        121.8,
+        -15.1
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719de04d0f87c78",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T00:00:00.000Z",
+       "pressure": 998,
+       "meanWind": 25,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-10 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        120.6,
+        -16
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719deeeccf87c79",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-10T12:00:00.000Z",
+       "pressure": 997,
+       "meanWind": 25,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-10 12:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        120.6,
+        -15.8
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719decac8f87c7a",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T00:00:00.000Z",
+       "pressure": 997,
+       "meanWind": 25,
+       "gust": "-",
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-11 00:00:00 UTC"
+      }
+     },
+     {
+      "geometry": {
+       "coordinates": [
+        119.6,
+        -17.4
+       ],
+       "type": "Point"
+      },
+      "_id": "67ab78272719deebe0f87c7b",
+      "type": "Feature",
+      "properties": {
+       "date": "2025-02-11T12:00:00.000Z",
+       "pressure": 990,
+       "meanWind": 40,
+       "gust": 55,
+       "cat": "L",
+       "accuracy": "-",
+       "dateString": "2025-02-11 12:00:00 UTC",
+       "name": "Bibit 96S"
+      }
+     }
+    ],
+    "forecast": [],
+    "createdAt": "2025-02-08T07:07:22.187Z",
+    "updatedAt": "2025-02-12T01:32:40.270Z",
+    "publication": {
+     "movement": false,
+     "movementChoose": {
+      "0h": "",
+      "24h": "",
+      "48h": "",
+      "72h": ""
+     },
+     "warningText": "",
+     "positionAccuration": "sekitar",
+     "intensity": "Storm",
+     "intensity24": "Hurricane",
+     "windQuadran": "",
+     "finalPublication": true,
+     "nextPublicationTime": "29/1300 UTC",
+     "accurationArea": {
+      "type": "FeatureCollection",
+      "features": []
+     }
+    }
+   }
+  ],
+  "total": 41,
+  "limit": 5,
+  "page": 1,
+  "pages": 9
+ }
+}

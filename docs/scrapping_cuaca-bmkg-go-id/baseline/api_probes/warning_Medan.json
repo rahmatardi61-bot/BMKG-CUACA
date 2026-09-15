@@ -1,0 +1,33 @@
+// 200 https://cuaca.bmkg.go.id/api/public/weather/warning?lat=3.595196&long=98.672226
+{
+ "statusCode": 200,
+ "message": "OK!",
+ "data": {
+  "today": {
+   "objectid": 151,
+   "idkecamatan": 127105,
+   "idlaporan": "CSU20260901002",
+   "namaanalis": "bmkgmedan",
+   "namakecamatan": "Medan Barat",
+   "idkotakab": 1271,
+   "namakotakab": "Kota Medan",
+   "namaprovinsi": "SUMATERA UTARA",
+   "kategoridampak": "['HujanSedang-Lebat', 'Kilat/Petir', 'AnginKencang']",
+   "waktuberlaku": 1788243600000,
+   "waktupembuatan": 1788241800000,
+   "waktuberakhir": 1788255900000,
+   "tipearea": "Area Meluas",
+   "approval": "Setuju",
+   "laporanlapangan": null,
+   "indeksrisiko": 0.60883431,
+   "upt": "BMKG SUMATERA UTARA",
+   "kodewilayah": "CSU",
+   "kodekategoridampak": 1,
+   "kode_wilayah_right": "CSU",
+   "no_sorting": 2,
+   "st_area(shape)": 0.0004832589125000001,
+   "st_length(shape)": 0.1401831619286595
+  },
+  "tomorrow": null
+ }
+}

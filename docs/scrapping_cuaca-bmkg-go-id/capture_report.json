@@ -1,0 +1,110 @@
+[
+ {
+  "route": "/",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 21,
+  "sections": []
+ },
+ {
+  "route": "/aviation",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 13,
+  "sections": []
+ },
+ {
+  "route": "/berita",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 6,
+  "sections": []
+ },
+ {
+  "route": "/berita/infografis",
+  "ok": true,
+  "title": "500 - | Nuxt",
+  "apiCount": 6,
+  "sections": [
+   {
+    "tag": "H1",
+    "text": "500"
+   }
+  ]
+ },
+ {
+  "route": "/berita/video",
+  "ok": true,
+  "title": "500 - | Nuxt",
+  "apiCount": 6,
+  "sections": [
+   {
+    "tag": "H1",
+    "text": "500"
+   }
+  ]
+ },
+ {
+  "route": "/ibf",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 16,
+  "sections": []
+ },
+ {
+  "route": "/map",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 34,
+  "sections": []
+ },
+ {
+  "route": "/maritim",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 9,
+  "sections": []
+ },
+ {
+  "route": "/perbandingan",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 8,
+  "sections": []
+ },
+ {
+  "route": "/premium",
+  "ok": true,
+  "title": "",
+  "apiCount": 11,
+  "sections": []
+ },
+ {
+  "route": "/devtools",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 8,
+  "sections": []
+ },
+ {
+  "route": "/devtools/tokens",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 9,
+  "sections": []
+ },
+ {
+  "route": "/Login",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 6,
+  "sections": []
+ },
+ {
+  "route": "/register",
+  "ok": true,
+  "title": "Cuaca BMKG",
+  "apiCount": 6,
+  "sections": []
+ }
+]

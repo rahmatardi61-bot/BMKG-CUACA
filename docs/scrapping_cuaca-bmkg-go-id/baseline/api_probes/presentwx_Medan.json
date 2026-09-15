@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=3.595196&lon=98.672226
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 98.6715148831495,
+   "lat": 3.6008470509285644,
+   "adm1": "12",
+   "adm2": "12.71",
+   "adm3": "12.71.05",
+   "adm4": "12.71.05.1002",
+   "provinsi": "Sumatera Utara",
+   "kotkab": "Kota Medan",
+   "kecamatan": "Medan Barat",
+   "desa": "Silalas",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 4,
+   "weather_desc": "Berawan Tebal",
+   "weather_desc_en": "Overcast",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/berawan tebal-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 14:20:00",
+   "t": 30,
+   "tcc": 46,
+   "wd_deg": 70,
+   "wd": "NE",
+   "wd_to": "SW",
+   "ws": 6.1,
+   "hu": 72,
+   "vs": 9964,
+   "vs_text": "< 10 km"
+  }
+ }
+}

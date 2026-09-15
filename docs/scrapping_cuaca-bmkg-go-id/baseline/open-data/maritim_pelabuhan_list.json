@@ -1,0 +1,3238 @@
+{
+  "files": [
+    {
+      "coor": [
+        1.198331,
+        109.054462
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1728,
+      "name": "0088_Sintete.json",
+      "portname": "Sintete",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.00214,
+        109.285391
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1742,
+      "name": "0310_PPP Sungai Rengas.json",
+      "portname": "PPP Sungai Rengas",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.531535,
+        110.21588
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1657,
+      "name": "0092_Kendawangan.json",
+      "portname": "Kendawangan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        4.145037,
+        117.665883
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1686,
+      "name": "0237_Nunukan.json",
+      "portname": "Nunukan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.6679806,
+        115.261925
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1683,
+      "name": "0603_Sanur.json",
+      "portname": "Sanur",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.35863269,
+        105.81975796
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1650,
+      "name": "0325_PPP Labuhan Maringgai.json",
+      "portname": "PPP Labuhan Maringgai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.67206,
+        115.55675
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1728,
+      "name": "0559_Mentigi.json",
+      "portname": "Mentigi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.024312,
+        131.242495
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1631,
+      "name": "0452_Arar.json",
+      "portname": "Arar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.8161046,
+        119.49650816
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1691,
+      "name": "0219_Biringkasi.json",
+      "portname": "Biringkasi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.47938659,
+        140.37922382
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1674,
+      "name": "0505_PPN Merauke.json",
+      "portname": "PPN Merauke",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.638437,
+        108.087731
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1653,
+      "name": "0475_Pulau Tiga.json",
+      "portname": "Pulau Tiga",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.673501,
+        125.061763
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1634,
+      "name": "0465_Likupang.json",
+      "portname": "Likupang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.671619,
+        115.553233
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1742,
+      "name": "0169_Nusa Penida.json",
+      "portname": "Nusa Penida",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.835036,
+        120.517619
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1714,
+      "name": "0531_Pamamata, Selayar.json",
+      "portname": "Pamamata, Selayar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.02081413,
+        122.98861477
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1682,
+      "name": "0231_Langara.json",
+      "portname": "Langara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.84083214,
+        122.73105567
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1601,
+      "name": "0229_Raha.json",
+      "portname": "Raha",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.17656,
+        123.067995
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0581_Kamaru.json",
+      "portname": "Kamaru",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.0333892,
+        117.53464771
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1626,
+      "name": "0198_Tanjung Santan.json",
+      "portname": "Tanjung Santan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.534242,
+        115.509335
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1649,
+      "name": "0167_Padangbai.json",
+      "portname": "Padangbai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.71162106,
+        108.56879081
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1621,
+      "name": "0107_Cirebon.json",
+      "portname": "Cirebon",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.986576,
+        117.988101
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1618,
+      "name": "0199_Sangkuliran.json",
+      "portname": "Sangkuliran",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.2861781,
+        122.28710175
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1655,
+      "name": "0416_Mawasangka.json",
+      "portname": "Mawasangka",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.24655186,
+        108.07697534
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1701,
+      "name": "0383_Tanjung Batu.json",
+      "portname": "Tanjung Batu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.735789,
+        123.893262
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1678,
+      "name": "0598_Tomia.json",
+      "portname": "Tomia",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.411223,
+        121.868417
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0543_Wakai.json",
+      "portname": "Wakai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.534335,
+        103.660082
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1582,
+      "name": "0537_Talang Duku.json",
+      "portname": "Talang Duku",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        5.89595662,
+        95.33580541
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1777,
+      "name": "0490_TPI Ie Meulle.json",
+      "portname": "TPI Ie Meulle",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.009895,
+        127.41111
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1636,
+      "name": "0432_Kayoa.json",
+      "portname": "Kayoa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.510711,
+        108.851915
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1658,
+      "name": "0566_Pulau Temajo.json",
+      "portname": "Pulau Temajo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.370889,
+        123.404532
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1608,
+      "name": "0401_Lewoleba.json",
+      "portname": "Lewoleba",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.288288,
+        123.766172
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1638,
+      "name": "0553_Wowong.json",
+      "portname": "Wowong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.059416,
+        119.465604
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1665,
+      "name": "1001_Untia-Makassar.json",
+      "portname": "Untia-Makassar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.12278919,
+        119.40804005
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1713,
+      "name": "0010_Soekarno - Hatta.json",
+      "portname": "Soekarno - Hatta",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.508771,
+        123.063138
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1706,
+      "name": "0245_Gorontalo.json",
+      "portname": "Gorontalo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.334359,
+        127.881913
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1633,
+      "name": "0584_Weda.json",
+      "portname": "Weda",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.99766,
+        100.371432
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1696,
+      "name": "0002_Teluk Bayur.json",
+      "portname": "Teluk Bayur",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.662733,
+        119.740983
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1692,
+      "name": "0427_PPN Donggala.json",
+      "portname": "PPN Donggala",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.411231,
+        121.86843
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1674,
+      "name": "0606_Wakai.json",
+      "portname": "Wakai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.491755,
+        105.796904
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1660,
+      "name": "0486_TPI Panimbang.json",
+      "portname": "TPI Panimbang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.87053874,
+        105.75480299
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1666,
+      "name": "0371_ASDP Bakauheni.json",
+      "portname": "ASDP Bakauheni",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.676427,
+        127.456607
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1670,
+      "name": "0593_Goto.json",
+      "portname": "Goto",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.013554,
+        108.864955
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1670,
+      "name": "0477_Subi.json",
+      "portname": "Subi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.703193,
+        120.096647
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1644,
+      "name": "0544_Toboli.json",
+      "portname": "Toboli",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.9093817,
+        106.0920656
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1663,
+      "name": "0116_Bojonegara.json",
+      "portname": "Bojonegara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.746072,
+        107.628461
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1627,
+      "name": "0099_Tanjung Pandan.json",
+      "portname": "Tanjung Pandan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.12440269,
+        103.92746488
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1622,
+      "name": "0084_Sekupang.json",
+      "portname": "Sekupang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.472095,
+        122.904247
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1752,
+      "name": "0572_Labuan, Buton Utara.json",
+      "portname": "Labuan, Buton Utara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.071389,
+        104.200898
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1751,
+      "name": "0540_PPI Nipah Panjang.json",
+      "portname": "PPI Nipah Panjang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.42702113,
+        122.59972591
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1602,
+      "name": "0577_Waara.json",
+      "portname": "Waara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.508104,
+        117.155324
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1567,
+      "name": "0194_Samarinda.json",
+      "portname": "Samarinda",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.360455,
+        99.45252
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1677,
+      "name": "0491_Kuala Tanjung.json",
+      "portname": "Kuala Tanjung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.446696,
+        125.208082
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1700,
+      "name": "0356_PPS Bitung.json",
+      "portname": "PPS Bitung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.431713,
+        130.804737
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1637,
+      "name": "0451_Waesai.json",
+      "portname": "Waesai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.50543731,
+        108.90792797
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1699,
+      "name": "0587_Kijing International Port.json",
+      "portname": "Kijing International Port",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.318312,
+        122.049219
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1645,
+      "name": "0414_Dongkala.json",
+      "portname": "Dongkala",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.792772,
+        109.958201
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1655,
+      "name": "0089_Sukabangun.json",
+      "portname": "Sukabangun",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.45477862,
+        122.61016846
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1607,
+      "name": "0232_Baubau.json",
+      "portname": "Baubau",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.759426,
+        108.713653
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1636,
+      "name": "0564_Pulau Lemukutan.json",
+      "portname": "Pulau Lemukutan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        4.631485,
+        95.571466
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1606,
+      "name": "0493_Calang.json",
+      "portname": "Calang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.88394883,
+        131.26274482
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1649,
+      "name": "0428_Klademak.json",
+      "portname": "Klademak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.0028824,
+        119.6213947
+      ],
+      "file_date": "2025-07-15 07:35 UTC",
+      "kb": 1739,
+      "name": "1002_Pelabuhan Nusantara Pare Pare.json",
+      "portname": "Pelabuhan Nusantara Pare Pare",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.72370295,
+        128.01508784
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1681,
+      "name": "0605_Tobelo.json",
+      "portname": "Tobelo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.27075,
+        127.083845
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1640,
+      "name": "0268_Namlea.json",
+      "portname": "Namlea",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.056907,
+        125.98203
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1604,
+      "name": "0585_Sanana.json",
+      "portname": "Sanana",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.741121,
+        127.559672
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1640,
+      "name": "0435_Sofifi.json",
+      "portname": "Sofifi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.38139691,
+        120.75485229
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1600,
+      "name": "0243_Poso.json",
+      "portname": "Poso",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.379997,
+        119.612159
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1687,
+      "name": "0387_Garongkong.json",
+      "portname": "Garongkong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.121565,
+        103.843134
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1600,
+      "name": "0539_Muara Sabak.json",
+      "portname": "Muara Sabak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.02253056,
+        109.34044361
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1564,
+      "name": "0009_Dwikora.json",
+      "portname": "Dwikora",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.671997,
+        115.559211
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1733,
+      "name": "0560_Sampalan.json",
+      "portname": "Sampalan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.76756089,
+        127.37779498
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1709,
+      "name": "0359_PPN Ternate.json",
+      "portname": "PPN Ternate",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.704359,
+        111.153891
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1635,
+      "name": "0331_PPP Bajomulyo.json",
+      "portname": "PPP Bajomulyo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.73154157,
+        116.07712462
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1607,
+      "name": "0172_Lembar.json",
+      "portname": "Lembar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.55874,
+        115.45797
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1696,
+      "name": "0561_Tribuana Kusamba.json",
+      "portname": "Tribuana Kusamba",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -9.638949,
+        120.250733
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1647,
+      "name": "0189_Waingapu.json",
+      "portname": "Waingapu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.049674,
+        128.291256
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0448_Daruba-Morotai.json",
+      "portname": "Daruba-Morotai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.73916881,
+        108.98891423
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1709,
+      "name": "0005_Tanjung Intan.json",
+      "portname": "Tanjung Intan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.1981949,
+        124.55118656
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0464_Amurang.json",
+      "portname": "Amurang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.305703,
+        97.609921
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1674,
+      "name": "0027_Gunung Sitoli.json",
+      "portname": "Gunung Sitoli",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.01807244,
+        105.95240196
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1608,
+      "name": "0480_Ciwandan.json",
+      "portname": "Ciwandan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.74416252,
+        107.63367282
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0313_PPN Tanjung Pandan.json",
+      "portname": "PPN Tanjung Pandan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.72896842,
+        98.79120827
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1654,
+      "name": "0026_Sibolga.json",
+      "portname": "Sibolga",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.989044,
+        121.340938
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1610,
+      "name": "0225_Kolonodale.json",
+      "portname": "Kolonodale",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.410665,
+        105.851227
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1690,
+      "name": "0328_PPP Teladas.json",
+      "portname": "PPP Teladas",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.69953453,
+        132.44125843
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0297_Kokas.json",
+      "portname": "Kokas",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.3240778,
+        119.35595556
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1690,
+      "name": "0499_Galesong.json",
+      "portname": "Galesong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.23951,
+        109.138895
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1608,
+      "name": "0389_Tebas Kuala.json",
+      "portname": "Tebas Kuala",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.37186,
+        105.822128
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1647,
+      "name": "0114_PP Labuan.json",
+      "portname": "PP Labuan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.0075,
+        109.76861111
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1646,
+      "name": "0311_PPP Teluk Batang.json",
+      "portname": "PPP Teluk Batang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.886864,
+        136.245077
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0280_Serui.json",
+      "portname": "Serui",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.78379143,
+        98.71509089
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1662,
+      "name": "0301_PPS Belawan.json",
+      "portname": "PPS Belawan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.43848505,
+        125.19146058
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1698,
+      "name": "0012_Samudera.json",
+      "portname": "Samudera",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.47926077,
+        96.38215542
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1656,
+      "name": "0023_Sinabang.json",
+      "portname": "Sinabang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.842346,
+        120.85443
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1602,
+      "name": "0399_Aimere.json",
+      "portname": "Aimere",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.338727,
+        128.920555
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1602,
+      "name": "0269_Amahai.json",
+      "portname": "Amahai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.867442,
+        121.583612
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1603,
+      "name": "0546_Ampana.json",
+      "portname": "Ampana",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.466321,
+        105.317403
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1603,
+      "name": "0003_Panjang.json",
+      "portname": "Panjang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.549392,
+        120.385968
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1604,
+      "name": "0215_Bajoe.json",
+      "portname": "Bajoe",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.73345473,
+        108.58246019
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1665,
+      "name": "0315_PPN Kejawanan.json",
+      "portname": "PPN Kejawanan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.682824,
+        98.833334
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1571,
+      "name": "0597_Ambarita.json",
+      "portname": "Ambarita",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.10265793,
+        106.77192271
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1625,
+      "name": "0105_Muara Angke.json",
+      "portname": "Muara Angke",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.521837,
+        116.832732
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1684,
+      "name": "0567_Pototano.json",
+      "portname": "Pototano",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.15365576,
+        103.99702308
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1725,
+      "name": "0082_Ferry Harbour Bay.json",
+      "portname": "Ferry Harbour Bay",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.606118,
+        120.463574
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0576_Bira.json",
+      "portname": "Bira",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.556885,
+        122.50823
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0579_Kadatua.json",
+      "portname": "Kadatua",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.724771,
+        109.022811
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1697,
+      "name": "0340_PPS Cilacap.json",
+      "portname": "PPS Cilacap",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.419529,
+        122.851327
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1718,
+      "name": "0463_Amolengo.json",
+      "portname": "Amolengo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.93117697,
+        105.99667387
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1653,
+      "name": "0370_ASDP Merak.json",
+      "portname": "ASDP Merak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.309155,
+        123.289117
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0224_Banggai.json",
+      "portname": "Banggai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.07691,
+        129.427012
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1594,
+      "name": "0583_Gebe.json",
+      "portname": "Gebe",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.69409066,
+        128.17694306
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1660,
+      "name": "0015_Yos Sudarso.json",
+      "portname": "Yos Sudarso",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.569548,
+        119.501546
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1665,
+      "name": "0541_Taman Nasional Pulau Komodo.json",
+      "portname": "Taman Nasional Pulau Komodo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.720384,
+        109.394682
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1658,
+      "name": "0591_Logending.json",
+      "portname": "Logending",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.4966929,
+        124.84156844
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1652,
+      "name": "0250_Manado.json",
+      "portname": "Manado",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.85237534,
+        122.89703006
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1622,
+      "name": "0246_PPN Kwandang.json",
+      "portname": "PPN Kwandang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.826585,
+        122.487367
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1626,
+      "name": "0501_Muara Sampara.json",
+      "portname": "Muara Sampara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.226395,
+        111.074326
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1748,
+      "name": "0346_PPP Tamperan.json",
+      "portname": "PPP Tamperan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.86799,
+        134.075913
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1686,
+      "name": "0284_Manokwari.json",
+      "portname": "Manokwari",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.366166,
+        122.616713
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1610,
+      "name": "0578_Tolandano.json",
+      "portname": "Tolandano",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.95137,
+        124.382145
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1600,
+      "name": "0586_Bobong.json",
+      "portname": "Bobong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.988322,
+        103.436404
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1708,
+      "name": "0534_Internasional Tanjung Balai Karimun.json",
+      "portname": "Internasional Tanjung Balai Karimun",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.700589,
+        111.337487
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1647,
+      "name": "0334_PPP Tasik Agung.json",
+      "portname": "PPP Tasik Agung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.66891,
+        127.474399
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0569_Kupal.json",
+      "portname": "Kupal",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.97210568,
+        122.57823944
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1610,
+      "name": "0011_Kendari.json",
+      "portname": "Kendari",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.677366,
+        128.189243
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1650,
+      "name": "0361_PPN Ambon.json",
+      "portname": "PPN Ambon",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.490192,
+        121.838667
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1638,
+      "name": "0185_Seba.json",
+      "portname": "Seba",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.235773,
+        123.706065
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1649,
+      "name": "0554_Balauring.json",
+      "portname": "Balauring",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.15537846,
+        112.66200542
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1607,
+      "name": "0151_Gresik.json",
+      "portname": "Gresik",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.724984,
+        123.045189
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1676,
+      "name": "0186_Rote.json",
+      "portname": "Rote",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.862661,
+        109.193709
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1632,
+      "name": "0590_Larangan Tegal.json",
+      "portname": "Larangan Tegal",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.3635357,
+        104.81446266
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1633,
+      "name": "0380_Tanjung Api Api.json",
+      "portname": "Tanjung Api Api",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.49982623,
+        104.62030828
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1619,
+      "name": "0119_Kota Agung.json",
+      "portname": "Kota Agung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.09631135,
+        106.88499342
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1631,
+      "name": "0004_Tanjung Priok.json",
+      "portname": "Tanjung Priok",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.88133,
+        109.749869
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0496_PPP Klidang Lor.json",
+      "portname": "PPP Klidang Lor",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.434228,
+        98.89858
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1573,
+      "name": "0594_Sipinggan.json",
+      "portname": "Sipinggan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.43376903,
+        125.54899053
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1614,
+      "name": "0466_Pananaru.json",
+      "portname": "Pananaru",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.089688,
+        105.65221
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1556,
+      "name": "0121_Mesuji.json",
+      "portname": "Mesuji",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.47685963,
+        140.39037672
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1701,
+      "name": "0286_Merauke.json",
+      "portname": "Merauke",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.285497,
+        120.453565
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1635,
+      "name": "0557_Reo.json",
+      "portname": "Reo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.545231,
+        129.896066
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1669,
+      "name": "0267_Banda Neira.json",
+      "portname": "Banda Neira",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.635889,
+        123.8599
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1685,
+      "name": "0599_Kaledupa.json",
+      "portname": "Kaledupa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.68331466,
+        120.4281571
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1614,
+      "name": "0500_Bangsalae.json",
+      "portname": "Bangsalae",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.886465,
+        127.500218
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1661,
+      "name": "0433_Sidangole.json",
+      "portname": "Sidangole",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.495754,
+        108.907979
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1660,
+      "name": "0565_Sui Kunyit.json",
+      "portname": "Sui Kunyit",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.845037,
+        109.622093
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1624,
+      "name": "0589_Wonokerto.json",
+      "portname": "Wonokerto",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.283845,
+        117.595787
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1696,
+      "name": "0195_Tarakan.json",
+      "portname": "Tarakan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.508409,
+        132.083196
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1646,
+      "name": "0457_Sausapor.json",
+      "portname": "Sausapor",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.194908,
+        123.465465
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1683,
+      "name": "0552_Hansisi.json",
+      "portname": "Hansisi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.16858959,
+        104.00032645
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1704,
+      "name": "0014_Batu Ampar.json",
+      "portname": "Batu Ampar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.071434,
+        121.896798
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1705,
+      "name": "0574_Tanjung Pising.json",
+      "portname": "Tanjung Pising",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.91644,
+        110.049838
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1668,
+      "name": "0335_PPP Tawang.json",
+      "portname": "PPP Tawang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.002246,
+        107.746951
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1602,
+      "name": "0476_Midai.json",
+      "portname": "Midai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.533717,
+        133.45158
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1630,
+      "name": "0458_Babo.json",
+      "portname": "Babo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.005917,
+        124.0266
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1685,
+      "name": "0600_Binongko.json",
+      "portname": "Binongko",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.742516,
+        109.010018
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1705,
+      "name": "0592_Sentolo Kawat.json",
+      "portname": "Sentolo Kawat",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.3372936,
+        99.06226158
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1569,
+      "name": "0595_Balige.json",
+      "portname": "Balige",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.16306547,
+        114.4373703
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1628,
+      "name": "0170_ASDP Gilimanuk.json",
+      "portname": "ASDP Gilimanuk",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.6143169,
+        122.2201454
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1649,
+      "name": "0551_Maumere.json",
+      "portname": "Maumere",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.329298,
+        123.304496
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1612,
+      "name": "0555_Adonara.json",
+      "portname": "Adonara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.987696,
+        105.704647
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1644,
+      "name": "0471_Letung.json",
+      "portname": "Letung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.772425,
+        122.053221
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1611,
+      "name": "0573_Kasipute.json",
+      "portname": "Kasipute",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.307223,
+        121.735213
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1727,
+      "name": "0556_Pulau Palue.json",
+      "portname": "Pulau Palue",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.058509,
+        113.942093
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1731,
+      "name": "0154_Kalianget.json",
+      "portname": "Kalianget",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.43203,
+        127.303143
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1648,
+      "name": "0571_Indari.json",
+      "portname": "Indari",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.795806,
+        108.035645
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1644,
+      "name": "0474_Sedanau.json",
+      "portname": "Sedanau",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.849603,
+        109.128758
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1632,
+      "name": "0336_PPP Tegalsari.json",
+      "portname": "PPP Tegalsari",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.82141,
+        110.544755
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1687,
+      "name": "0333_Morodemak.json",
+      "portname": "Morodemak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.74817785,
+        115.21384763
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1738,
+      "name": "0165_Benoa, Bali.json",
+      "portname": "Benoa, Bali",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.796252,
+        122.659326
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1645,
+      "name": "0545_Pagimana.json",
+      "portname": "Pagimana",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        4.73687959,
+        107.99857339
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1694,
+      "name": "0473_Pulau Laut.json",
+      "portname": "Pulau Laut",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.183621,
+        103.932807
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1645,
+      "name": "0450_Krui.json",
+      "portname": "Krui",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        4.960279,
+        97.773104
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1647,
+      "name": "0492_Idi.json",
+      "portname": "Idi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.585532,
+        128.328544
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0270_Tulehu.json",
+      "portname": "Tulehu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.125613,
+        128.132325
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1685,
+      "name": "0443_Subaim.json",
+      "portname": "Subaim",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.133242,
+        104.055774
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1769,
+      "name": "0441_Ferry Batam Centre International.json",
+      "portname": "Ferry Batam Centre International",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.19980282,
+        108.9921124
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1667,
+      "name": "0309_PPN Pemangkat.json",
+      "portname": "PPN Pemangkat",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.273526,
+        116.805177
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1687,
+      "name": "0193_Semayang, Balikpapan.json",
+      "portname": "Semayang, Balikpapan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.03223,
+        106.5777
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1640,
+      "name": "0533_Cituis Rawa Saban.json",
+      "portname": "Cituis Rawa Saban",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.56445639,
+        97.82642841
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1664,
+      "name": "0028_Teluk Dalam.json",
+      "portname": "Teluk Dalam",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.8384073,
+        105.8837909
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1740,
+      "name": "0487_PPI Binuangen.json",
+      "portname": "PPI Binuangen",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.90446413,
+        115.259113
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1706,
+      "name": "0502_PP Muara Kintap.json",
+      "portname": "PP Muara Kintap",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.14333278,
+        114.40050602
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1628,
+      "name": "0164_ASDP Ketapang.json",
+      "portname": "ASDP Ketapang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.629291,
+        122.525663
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0580_Siompu.json",
+      "portname": "Siompu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        5.59648867,
+        95.52610159
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1708,
+      "name": "0016_Malahayati.json",
+      "portname": "Malahayati",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.859299,
+        109.692574
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0329_PPN Pekalongan.json",
+      "portname": "PPN Pekalongan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.904529,
+        105.813229
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1622,
+      "name": "0472_Kuala Maras.json",
+      "portname": "Kuala Maras",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.19420248,
+        114.83583927
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1665,
+      "name": "0168_Celukan Bawang.json",
+      "portname": "Celukan Bawang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.659294,
+        98.933163
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1568,
+      "name": "0596_Ajibata.json",
+      "portname": "Ajibata",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.602492,
+        121.61773
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1721,
+      "name": "0542_Raijua.json",
+      "portname": "Raijua",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.165333,
+        117.487031
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1605,
+      "name": "0200_Lok Tuan.json",
+      "portname": "Lok Tuan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.85295,
+        109.414665
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1669,
+      "name": "0588_Asem Doyong.json",
+      "portname": "Asem Doyong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.790323,
+        108.860189
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1662,
+      "name": "0563_Teluk Suak.json",
+      "portname": "Teluk Suak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.24324578,
+        116.77685738
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1616,
+      "name": "0418_Penajam.json",
+      "portname": "Penajam",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.342309,
+        122.990058
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1610,
+      "name": "0191_Larantuka.json",
+      "portname": "Larantuka",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.87794933,
+        131.24533899
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0291_Sorong.json",
+      "portname": "Sorong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.757183,
+        134.238152
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1597,
+      "name": "0272_Dobo.json",
+      "portname": "Dobo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.97305982,
+        122.58288042
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1622,
+      "name": "0353_PPS Kendari.json",
+      "portname": "PPS Kendari",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.485069,
+        116.674471
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1644,
+      "name": "0568_Kayangan.json",
+      "portname": "Kayangan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.22166304,
+        124.51181173
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1693,
+      "name": "0188_Kalabahi.json",
+      "portname": "Kalabahi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.710507,
+        119.856685
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1611,
+      "name": "0429_Pantoloan.json",
+      "portname": "Pantoloan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.716452,
+        114.21209
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1646,
+      "name": "0524_Jangkar.json",
+      "portname": "Jangkar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.454163,
+        140.360198
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1644,
+      "name": "0602_Depapre.json",
+      "portname": "Depapre",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.65205,
+        105.589752
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1681,
+      "name": "0489_PP Sumur.json",
+      "portname": "PP Sumur",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.73229936,
+        113.2241243
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1662,
+      "name": "0497_PP Mayangan.json",
+      "portname": "PP Mayangan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.626368,
+        127.604025
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1673,
+      "name": "0438_Babang.json",
+      "portname": "Babang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.21640226,
+        106.21736526
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1607,
+      "name": "0085_Tarempa.json",
+      "portname": "Tarempa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.200851,
+        116.817897
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1615,
+      "name": "0419_Karingau.json",
+      "portname": "Karingau",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.11664888,
+        106.80830956
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1628,
+      "name": "0101_Sunda Kelapa.json",
+      "portname": "Sunda Kelapa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.445471,
+        122.454548
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1609,
+      "name": "0412_Torobulu.json",
+      "portname": "Torobulu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.49493945,
+        119.87450525
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1617,
+      "name": "0182_Labuan Bajo.json",
+      "portname": "Labuan Bajo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.738616,
+        122.373896
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0406_Tondasi, Muna Barat.json",
+      "portname": "Tondasi, Muna Barat",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.88430863,
+        110.44014931
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1702,
+      "name": "0129_Karimun Jawa.json",
+      "portname": "Karimun Jawa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.207475,
+        127.128711
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1639,
+      "name": "0570_Busua.json",
+      "portname": "Busua",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.74519487,
+        111.72436022
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1581,
+      "name": "0142_Kumai.json",
+      "portname": "Kumai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.54456149,
+        140.71397329
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1685,
+      "name": "0278_Jayapura.json",
+      "portname": "Jayapura",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.262231,
+        121.794872
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0407_Sikeli.json",
+      "portname": "Sikeli",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.271081,
+        109.357903
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1569,
+      "name": "0479_Rasau Jaya.json",
+      "portname": "Rasau Jaya",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.496876,
+        109.007436
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1651,
+      "name": "0478_Serasan.json",
+      "portname": "Serasan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.735581,
+        127.384544
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1681,
+      "name": "0434_Rum.json",
+      "portname": "Rum",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.262342,
+        122.217122
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1683,
+      "name": "0548_Dolong.json",
+      "portname": "Dolong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.09908809,
+        106.91655602
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1614,
+      "name": "0104_Kalibaru.json",
+      "portname": "Kalibaru",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.09331454,
+        106.95871257
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1607,
+      "name": "0102_Marunda.json",
+      "portname": "Marunda",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.659133,
+        123.196979
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1658,
+      "name": "0444_Wa Ode Buri.json",
+      "portname": "Wa Ode Buri",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.833,
+        117.506048
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1657,
+      "name": "0483_Pelabuhan di DKI Jakartaa.json",
+      "portname": "Pelabuhan di DKI Jakartaa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.48678446,
+        105.25295724
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1661,
+      "name": "0326_PPP Lempasing.json",
+      "portname": "PPP Lempasing",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.219626,
+        123.519203
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1639,
+      "name": "0398_Bolok.json",
+      "portname": "Bolok",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.0470224,
+        105.9231226
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1667,
+      "name": "0481_Pelabuhan ANyer.json",
+      "portname": "Pelabuhan ANyer",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -10.19545133,
+        123.52778435
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1643,
+      "name": "0008_Tenau.json",
+      "portname": "Tenau",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.807368,
+        103.479706
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1661,
+      "name": "0538_Roro Kuala Tungkal.json",
+      "portname": "Roro Kuala Tungkal",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.931989,
+        132.309951
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1604,
+      "name": "0292_Fak-fak.json",
+      "portname": "Fak-fak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.391221,
+        123.162871
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1611,
+      "name": "0402_Waiwerang.json",
+      "portname": "Waiwerang",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.624076,
+        122.709582
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1636,
+      "name": "0413_Tampo.json",
+      "portname": "Tampo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.993126,
+        103.394044
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1649,
+      "name": "0536_Khusus Bea Cukai.json",
+      "portname": "Khusus Bea Cukai",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.590774,
+        110.647769
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0128_Jepara.json",
+      "portname": "Jepara",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.837115,
+        120.515563
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1687,
+      "name": "0405_Pamamata.json",
+      "portname": "Pamamata",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.606929,
+        120.463409
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1699,
+      "name": "0404_Tanjung Bira.json",
+      "portname": "Tanjung Bira",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.93952487,
+        110.42057889
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1697,
+      "name": "0006_Tanjung Mas.json",
+      "portname": "Tanjung Mas",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.302438,
+        122.344018
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1686,
+      "name": "0547_Pasokan.json",
+      "portname": "Pasokan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.38685396,
+        114.57486712
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1695,
+      "name": "0350_PPN Pengambengan.json",
+      "portname": "PPN Pengambengan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.828108,
+        129.84614
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1650,
+      "name": "0459_Misool.json",
+      "portname": "Misool",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.23078,
+        135.583111
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0281_Nabire.json",
+      "portname": "Nabire",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.243992,
+        107.90422
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1616,
+      "name": "0504_Patimban.json",
+      "portname": "Patimban",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.02945523,
+        99.59292093
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1667,
+      "name": "0379_Tua Pejat.json",
+      "portname": "Tua Pejat",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.02868,
+        106.16404
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1629,
+      "name": "0115_PP Karangantu.json",
+      "portname": "PP Karangantu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.720323,
+        96.80962
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1658,
+      "name": "0494_Susoh Blang Pidie.json",
+      "portname": "Susoh Blang Pidie",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.030085,
+        100.399527
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1641,
+      "name": "0377_Teluk Bungus.json",
+      "portname": "Teluk Bungus",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.883831,
+        128.29712
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1606,
+      "name": "0582_Buli.json",
+      "portname": "Buli",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.727733,
+        134.505521
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1685,
+      "name": "0285_Wasior.json",
+      "portname": "Wasior",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.897189,
+        122.83118
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1669,
+      "name": "0575_Pure.json",
+      "portname": "Pure",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.633466,
+        132.74224
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1597,
+      "name": "0271_Tual.json",
+      "portname": "Tual",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.18718719,
+        136.07521794
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1647,
+      "name": "0013_Biak.json",
+      "portname": "Biak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.93923591,
+        126.6945076
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1611,
+      "name": "0252_Lirung.json",
+      "portname": "Lirung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.0028824,
+        119.6213947
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1718,
+      "name": "1002_Nusantara Pare Pare.json",
+      "portname": "Nusantara Pare Pare",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.475617,
+        127.419959
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1686,
+      "name": "0446_Pulau Moti.json",
+      "portname": "Pulau Moti",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.80648,
+        116.250342
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1581,
+      "name": "0430_Pondong.json",
+      "portname": "Pondong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.335101,
+        128.341853
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1609,
+      "name": "0276_Waipirit.json",
+      "portname": "Waipirit",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.76631645,
+        127.37747312
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1700,
+      "name": "0431_Bastiong.json",
+      "portname": "Bastiong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.486327,
+        122.109028
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1703,
+      "name": "0549_Marisa.json",
+      "portname": "Marisa",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.05663,
+        121.590237
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1679,
+      "name": "0409_Kolaka.json",
+      "portname": "Kolaka",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.476201,
+        119.446938
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1665,
+      "name": "0498_Tanjung Silopo.json",
+      "portname": "Tanjung Silopo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.996277,
+        124.86189
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1631,
+      "name": "0187_Atapupu.json",
+      "portname": "Atapupu",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.72370295,
+        128.01508784
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1681,
+      "name": "0437_Tobelo.json",
+      "portname": "Tobelo",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.999271,
+        99.81489
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1650,
+      "name": "0047_Tanjung Balai Asahan.json",
+      "portname": "Tanjung Balai Asahan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.338528,
+        123.534933
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1678,
+      "name": "0423_Wanci.json",
+      "portname": "Wanci",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.8919444,
+        108.39166667
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1642,
+      "name": "0469_Penagi.json",
+      "portname": "Penagi",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.8541274,
+        121.6618024
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1666,
+      "name": "0550_Ende, Flores.json",
+      "portname": "Ende, Flores",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.47948304,
+        105.65361857
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1692,
+      "name": "0528_Marina Tanjung Lesung.json",
+      "portname": "Marina Tanjung Lesung",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.792076,
+        98.713921
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1646,
+      "name": "0001_Belawan.json",
+      "portname": "Belawan",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.541114,
+        112.964655
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1557,
+      "name": "0470_Sampit.json",
+      "portname": "Sampit",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        3.601774,
+        125.50099
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1603,
+      "name": "0251_Tahuna.json",
+      "portname": "Tahuna",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.71432,
+        108.500161
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1659,
+      "name": "0601_Pangandaran.json",
+      "portname": "Pangandaran",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.9214811,
+        105.995156
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1613,
+      "name": "0485_Indah Kiat.json",
+      "portname": "Indah Kiat",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.677746,
+        109.274602
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1621,
+      "name": "0529_Padang Tikar.json",
+      "portname": "Padang Tikar",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.431965,
+        116.008538
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1608,
+      "name": "0532_Batulicin.json",
+      "portname": "Batulicin",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.779036,
+        127.388334
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1729,
+      "name": "0257_Ahmad Yani, Ternate.json",
+      "portname": "Ahmad Yani, Ternate",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.23256,
+        105.831963
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1617,
+      "name": "0488_PP Pasauran.json",
+      "portname": "PP Pasauran",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.004734,
+        103.353545
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1637,
+      "name": "0535_Parit Rampak.json",
+      "portname": "Parit Rampak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        2.732797,
+        125.415955
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1630,
+      "name": "0562_Ulu Siau.json",
+      "portname": "Ulu Siau",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -4.00335803,
+        119.62197304
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1690,
+      "name": "0207_Pare-pare.json",
+      "portname": "Pare-pare",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -1.246666,
+        100.43175
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1679,
+      "name": "0495_PPP Carocok.json",
+      "portname": "PPP Carocok",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -6.10004959,
+        106.80178433
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1646,
+      "name": "0106_PPS Muara Baru.json",
+      "portname": "PPS Muara Baru",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -2.08458195,
+        105.13225079
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1705,
+      "name": "0382_Tanjung Kelian.json",
+      "portname": "Tanjung Kelian",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.608187,
+        120.463669
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0530_Bira.json",
+      "portname": "Bira",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -5.85141424,
+        112.6431676
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1738,
+      "name": "0391_Sangkapura.json",
+      "portname": "Sangkapura",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.877424,
+        131.251758
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0456_Dermaga Usaha Mina.json",
+      "portname": "Dermaga Usaha Mina",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.953008,
+        122.796361
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1675,
+      "name": "0417_Luwuk.json",
+      "portname": "Luwuk",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        0.331076,
+        127.439021
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1725,
+      "name": "0449_Pulau Makian.json",
+      "portname": "Pulau Makian",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -0.88944867,
+        131.26801931
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1694,
+      "name": "0455_Pelayaran Rakyat Sorong.json",
+      "portname": "Pelayaran Rakyat Sorong",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -7.18647042,
+        112.72228342
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1628,
+      "name": "0007_Tanjung Perak.json",
+      "portname": "Tanjung Perak",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -3.320286,
+        114.561909
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1582,
+      "name": "0339_PP Banjarmasin.json",
+      "portname": "PP Banjarmasin",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.434639,
+        123.060462
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1601,
+      "name": "0558_Solor.json",
+      "portname": "Solor",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.36253,
+        124.096535
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1626,
+      "name": "0183_Baranusa, Alor.json",
+      "portname": "Baranusa, Alor",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        1.319809,
+        126.363889
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1692,
+      "name": "0439_Batang Dua.json",
+      "portname": "Batang Dua",
+      "type": "utama"
+    },
+    {
+      "coor": [
+        -8.448176,
+        118.714063
+      ],
+      "file_date": "2026-09-10 23:47 UTC",
+      "kb": 1606,
+      "name": "0173_Bima, NTB.json",
+      "portname": "Bima, NTB",
+      "type": "utama"
+    }
+  ]
+}

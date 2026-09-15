@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
+    <!-- Preconnect to Google Fonts to fetch fonts faster and prevent Flash of Unstyled Text (FOUT) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#070c19" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="description" content="Portal Redesign Digital Weather Info BMKG - Layanan Informasi Cuaca Publik, Penerbangan, Maritim, Peringatan Dini Angin & Hujan, dan Satelit Cuaca Himawari-9." />
+    <meta name="keywords" content="BMKG, Info BMKG, Cuaca Indonesia, Radar Cuaca, Satelit Himawari-9, Gempa Megathrust, Peringatan Dini" />
+    <meta name="author" content="BMKG Indonesia" />
+    <title>BMKG | Portal Informasi Cuaca, Iklim & Geofisika Indonesia</title>
+    <script>
+      (function() {
+        try {
+          const theme = localStorage.getItem('bmkg-theme-v2');
+          const isDark = theme !== 'light';
+          const root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+            root.style.backgroundColor = '#070c19';
+            root.style.colorScheme = 'dark';
+          } else {
+            root.classList.remove('dark');
+            root.style.backgroundColor = '#eef5ff';
+            root.style.colorScheme = 'light';
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#eef5ff');
+            const metaScheme = document.querySelector('meta[name="color-scheme"]');
+            if (metaScheme) metaScheme.setAttribute('content', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+

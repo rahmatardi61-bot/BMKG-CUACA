@@ -1,0 +1,36 @@
+// 200 https://cuaca.bmkg.go.id/api/presentwx/coord?lat=-5.147665&lon=119.432731
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 119.43341843445022,
+   "lat": -5.149891085273544,
+   "adm1": "73",
+   "adm2": "73.71",
+   "adm3": "73.71.13",
+   "adm4": "73.71.13.1007",
+   "provinsi": "Sulawesi Selatan",
+   "kotkab": "Kota Makassar",
+   "kecamatan": "Rappocini",
+   "desa": "Balla Parang",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 1,
+   "weather_desc": "Cerah",
+   "weather_desc_en": "Sunny",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah-am.svg",
+   "datetime": "2026-09-08T07:20:00.000Z",
+   "local_datetime": "2026-09-08 15:20:00",
+   "t": 32,
+   "tcc": 96,
+   "wd_deg": 181,
+   "wd": "S",
+   "wd_to": "N",
+   "ws": 20.3,
+   "hu": 54,
+   "vs": 20012,
+   "vs_text": "> 10 km"
+  }
+ }
+}

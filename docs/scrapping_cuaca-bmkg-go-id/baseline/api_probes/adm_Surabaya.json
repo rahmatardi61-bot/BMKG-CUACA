@@ -1,0 +1,14 @@
+// 200 https://cuaca.bmkg.go.id/api/df/v1/adm/coord?lat=-7.257472&lon=112.752083
+{
+ "adm1": "35",
+ "adm2": "35.78",
+ "adm3": "35.78.07",
+ "adm4": "35.78.07.1004",
+ "provinsi": "Jawa Timur",
+ "kotkab": "Kota Surabaya",
+ "kecamatan": "Genteng",
+ "desa": "Ketabang",
+ "lon": 112.74775916216697,
+ "lat": -7.257835008041191,
+ "distance": 0
+}

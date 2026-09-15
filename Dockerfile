@@ -25,5 +25,6 @@ ENV NODE_ENV=production PORT=8080
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/api ./api
 COPY server.mjs ./
+USER node
 EXPOSE 8080
 CMD ["node", "server.mjs"]

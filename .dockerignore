@@ -4,7 +4,9 @@ node_modules
 # Build outputs
 dist
 
-# Docs / screenshot (tidak dipakai saat build)
+# Docs / artefak (tidak dipakai saat build)
+# docs/artifacts = proposal, screenshot, aset desain, tooling pembuatnya
+docs
 output_screenshots
 orig_bak_images
 *.docx

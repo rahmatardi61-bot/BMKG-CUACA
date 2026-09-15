@@ -1,6 +1,10 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// artefak (output_screenshots/) ada di parent dir
+process.chdir(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'));
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const BASE_URL = 'http://127.0.0.1:4173/';

@@ -25,12 +25,14 @@ dipakai / belum dipakai / tersedia versi resminya.
 | `pages-original.md` | Peta route & section→API web original | Meniru perilaku UI original |
 | `bmkg-api-mapping.xlsx` | **SATU file xlsx, 6 sheet**: `API Mapping` (32 endpoint, status + akses dev), `Temuan API Resmi` (list + contoh sample asli per endpoint, modal diskusi tim), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Ringkasan` | Presentasi/rapat tim |
 | `scrapping_cuaca-bmkg-go-id/` | Data: baseline JSON, screenshot, teks UI, report + tooling Playwright (`capture/probe/api_probe/diff.mjs`) | Butuh data mentah / re-scrape |
+| `artifacts/` | Proposal (docx/pdf), `comparison.html`, screenshot redesign, aset asli docx, + `scripts/` pembuatnya | Presentasi/rapat, regenerate artefak |
 
 ## Aturan main dokumentasi
 
 - **Markdown** = narasi & referensi (4 file konten + index ini). Baru menambah dokumen = pikir dua kali; masukkan ke file yang ada dulu.
 - **xlsx** = satu file `bmkg-api-mapping.xlsx`, di-edit **manual** (WPS/Excel) — kolom status & akses per endpoint; jangan membuat file xlsx baru.
 - **Data scraping** = output tool, jangan diedit manual; update via `node capture.mjs capture` / `node api_probe.mjs` di folder tooling (lihat `scrapping_cuaca-bmkg-go-id/README.md`).
+- **`artifacts/`** = non-kode (proposal/screenshot/aset desain). Script `artifacts/scripts/*` pakai path relatif ke `artifacts/` dan sudah `chdir` sendiri — jalankan dari mana saja.
 - Semua ini **modal pencocokan data** — bukan API docs resmi. Kekurangan data resmi diisi dari scraping; begitu BMKG merilis docs resmi, dokumen internal mengalah.
 
 ## Alur kerja cepat

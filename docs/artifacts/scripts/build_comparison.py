@@ -1,5 +1,8 @@
 import os
 
+# artefak (comparison.html, output_screenshots/, orig_bak_images/) ada di parent dir
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 html = '''<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Compare Original vs New</title>
 <style>

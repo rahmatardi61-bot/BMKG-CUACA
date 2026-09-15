@@ -1,4 +1,8 @@
+import os
 import docx
+
+# artefak (docx) ada di parent dir
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DOCX_PATH = 'Proposal_Persetujuan_Redesign_BMKG_Cuaca.docx'
 

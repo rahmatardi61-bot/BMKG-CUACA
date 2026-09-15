@@ -4,6 +4,9 @@ import os
 import shutil
 from PIL import Image
 
+# artefak (docx, output_screenshots/) ada di parent dir
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 DOCX_PATH = 'Proposal_Persetujuan_Redesign_BMKG_Cuaca.docx'
 BACKUP_PATH = 'Proposal_Persetujuan_Redesign_BMKG_Cuaca.docx.bak'
 SCREENSHOTS_DIR = 'output_screenshots'

@@ -20,10 +20,26 @@
 | 🟡 **BEDA-SUMBER** | **9** | Fitur ada di redesign, tapi datanya dari sumber berbeda (mock/OSM/OSRM/inderaja/Carto) |
 | 🔵 **REDESIGN-ONLY** | **4** | Sumber yang hanya dipakai redesign (tidak ada di original) |
 
-**Endpoint original terimplementasi identik (memanggil API yang sama): 0.**
-Seluruh data cuaca di redesign berasal dari `src/data/mockData.ts` (1.089 baris) +
-beberapa sumber eksternal non-ISDP. Ini wajar untuk fase redesign, dan tabel ini jadi
-backlog integrasi.
+**Catatan penting:** angka di tabel atas adalah **hasil audit awal (10 Sep 2026)** dan
+sudah tidak menggambarkan kondisi sekarang. Per **15 Sep 2026** sebagian besar kartu utama
+sudah memakai data live — rincian per kartu ada di sheet **Audit Content Card**
+(`bmkg-api-mapping.xlsx`) dan `team-notes.md` §6.
+
+| Yang sudah LIVE | Sumber |
+|---|---|
+| Dashboard cuaca (sekarang, per jam, 10 hari), warning/nowcast, sunset, gempa, berita | internal `df`/`public`/`presentwx` + RSS nowcast resmi |
+| Peta maritim — gelombang **232 wilayah perairan resmi** + popup detail | `maritim.bmkg.go.id/public_api` (DIRECT) |
+| Kartu pelabuhan terdekat + pasut | `public_api/pelabuhan_list` + `pelabuhan/{file}.json` |
+| Transportasi (DWT jalan/kereta, maritim perairan), advisor maritim, forecast per titik rute | campuran internal + public_api |
+| Aktivitas darat (POI: nilai cuaca live per titik) | `df/forecast/coord` per lat-lng POI |
+| **Fallback resmi** bila forecast internal kosong/gagal | `api.bmkg.go.id/publik/prakiraan-cuaca?adm4=` |
+
+Yang **masih mock/estimasi** beserta alasannya: kualitas udara/ISPU (tidak ada sumber —
+`ispu.bmkg.go.id` & `ispu.menlhk.go.id` tidak merespons, `api.bmkg.go.id/publik/ispu` 404),
+`comfortIndex.tempText`, daftar POI AroundActivity & LocationSearch (memang konten kurasi),
+layer angin/cuaca + mode pelabuhan di peta maritim (tidak ada endpoint bulk — 232/294 request),
+Aviation advisor, sisa `maritimeAdvisorData`, `MajorCitiesCarousel`, dan `mockData.ts`
+(kini murni fallback saat API gagal).
 
 ## Prioritas implementasi yang disarankan
 
@@ -59,6 +75,23 @@ Catatan auth singkat (detail: `scrapping_cuaca-bmkg-go-id/api_client_auth.md`):
 `*` data ter-fetch, slot UI menyusul. `**` layer peta masih CartoCDN.
 Smoke test A–D lulus (10 Sep); E (deploy Vercel) ditunda.
 
+### Fase 6 — Tier A & B (15 Sep 2026)
+
+| # | Item | Status |
+|---|---|---|
+| A1 | Bug `currentSlot()` (`doc.data`, bukan `doc.slots`) — sebelumnya mematikan **seluruh** integrasi maritim live | ✅ |
+| A2 | Peta maritim live: 232 polygon wilayah perairan resmi + warna/label overview + popup detail | ✅ |
+| A3 | Section Berita dirender (`NewsSection` — datanya sudah lama ter-fetch tapi tidak dipakai) | ✅ |
+| A4 | "Aktivitas Pelayaran" pakai gelombang resmi (bukan estimasi angin) | ✅ |
+| A5 | AroundActivityPanel: nilai cuaca live per titik POI | ✅ |
+| B6 | Peringatan dini **nowcast RSS resmi**, difilter per provinsi (proxy `/alerts` baru) | ✅ |
+| B7 | Kartu **Pelabuhan & Pasut** (pasut dikonversi ke WIB/WITA/WIT) | ✅ |
+| B8 | Fallback jalur resmi `prakiraan-cuaca?adm4=` | ✅ |
+| B9 | `WaveRadarMap` bug properti diperbaiki, **sengaja tidak dipasang** (duplikat peta maritim) | ⏸️ |
+
+Verifikasi: `npm run build` lolos + smoke test browser (0 page error; 7 request live 200,
+termasuk 232 wilayah perairan dan pelabuhan Sunda Kelapa). Detail: `team-notes.md` §6.
+
 ## ⚠️ Endpoint yang WAJIB lewat proxy (kondisi dev saat ini)
 
 Untuk tim dev: request dari **browser langsung** ke endpoint di bawah ini **pasti ditolak**
@@ -75,12 +108,14 @@ Di network tab devtools, request tetap tampil dengan **path identik upstream** (
 | `/api/v1/public` | `maritim/nearest-location` | `x-public-token` + `X-API-KEY` | idem |
 | `/api/v1/user` | `subscribe-type` (belum dipakai) | `x-public-token` + `X-API-KEY` | idem |
 | `/blog` | WP REST berita | `Referer` | konsistensi + tanpa CORS terjamin |
+| `/alerts` | RSS nowcast peringatan dini (`www.bmkg.go.id/alerts/nowcast/id`) | — (proxy murni) | **upstream tidak mengirim header CORS** → browser diblokir tanpa proxy |
 
 **DIRECT (tanpa proxy — browser bisa panggil langsung, URL penuh tampil di devtools):**
 `/api/presentwx/coord`, `/api/v1/sunset/json`, `/api/v1/tcwc/cyclone/all`, dan seluruh
 endpoint `/api/v1/*` lainnya yang auth-nya hanya `X-API-KEY` (maps metadata, sus/modelrun,
 tourism.json, maritim/route, water-area, impact list), plus service eksternal (spartan,
-bmkg-sus, circlegeo) dan redesign-only (Nominatim/Overpass/OSRM/TEWS).
+bmkg-sus, circlegeo), `api.bmkg.go.id/publik/*` (Open Data, CORS `*`), seluruh
+`maritim.bmkg.go.id/public_api/*` (echo Origin), dan redesign-only (Nominatim/Overpass/OSRM/TEWS).
 
 Kolom **"Akses (dev)"** di `bmkg-api-mapping.xlsx` (sheet API Mapping) dan kolom **"Akses di Dev"** di
 `catatan-dev-team.xlsx` (sheet Web) sudah menandai ini per baris.

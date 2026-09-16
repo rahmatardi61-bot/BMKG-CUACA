@@ -280,3 +280,130 @@ ex: ["bengkulu","Kab. Bengkulu Utara","Lais",-3.517,102.014,"5010927",
 
 Catatan: ambil `{YYYYMMDD}HH` dari manifest, jangan hardcode. Manifest hanya berisi jam
 yang sudah dirilis server (rolling).
+
+---
+
+## 3.6 Catatan implementasi maritim & nowcast (diverifikasi 15 Sep 2026)
+
+### a) Bentuk respons maritim — array ada di `data`, bukan `slots`
+Semua dokumen perairan/pelabuhan memakai bentuk:
+
+```
+perairan : { code: "F.09", name: "Teluk Jakarta", issued: "…", info: "…", data: [ {slot}, {slot}, … ] }
+pelabuhan: { port_id: "0088", name: "Sintete", latitude: …, longitude: …, type: "utama", data: [ … ] }
+```
+
+- `data` berisi **4 slot**: Hari ini, Besok, H+2, H+3 (`time_desc` ada di perairan; di pelabuhan
+  slot tidak menyertakan `time_desc`, urutan tetap sama).
+- ️ Kode redesign sempat membaca `doc.slots`/`doc.slot` → selalu `null` sehingga **seluruh
+  integrasi maritim live tidak pernah aktif**. Sudah diperbaiki di `openData.currentSlot()`.
+- Field pelabuhan **nullable**: `low_tide`, `low_tide_time`, `high_tide`, `high_tide_time`
+  `null` di sebagian pelabuhan (contoh: `0101_Sunda Kelapa.json`) → UI harus menyembunyikan blok pasut.
+
+### b) `wilayah_perairan` — path yang benar
+| URL | Hasil |
+|---|---|
+| `…/public_api/static/wilayah_perairan.json` | ✅ 200, 232 feature Polygon + properti `WP_1` (kode, mis. `U.04`), `WP_IMM` (nama), `WilPel`, `simbol` |
+| `…/public_api/wilayah_perairan.geojson` | ❌ 404 (sempat dipakai kode → overlay peta tidak pernah muncul) |
+| `…/public_api/static/wilayah_perairan.geojson` | ❌ 404 |
+
+Join natural: `properties.WP_1`  kunci `overview/gelombang.json`  prefix nama file di `perairan_list`.
+
+### c) Nowcast RSS — wajib lewat proxy (tanpa CORS)
+```
+GET https://www.bmkg.go.id/alerts/nowcast/id          → 200, application/xml
+Header CORS: TIDAK ADA  → request dari browser langsung akan diblokir
+```
+
+- Item RSS: `title`, `link` (URL CAP per provinsi), `description` (kalimat + **daftar kecamatan
+  yang sangat panjang**), `author`, `category`, `guid`, `pubDate`.
+- Feed bersifat **nasional** (satu feed memuat semua provinsi) → redesign memfilter per provinsi
+  hasil `df/v1/adm/coord` supaya pengguna Jakarta tidak melihat peringatan Jambi.
+- Severity tidak ada di RSS (hanya di CAP) → dipetakan kasar dari judul (lihat `nowcast.ts`).
+
+- Jalur proxy yang dipakai redesign:
+  - dev: Vite mem-proxy `/alerts/*` → `https://www.bmkg.go.id` (`vite.config.ts`, `NOWCAST_PROXY`).
+  - prod/Docker: `api/bmkg/[...path].ts` memetakan `alerts/*` → `https://www.bmkg.go.id/*`.
+    Handler edge ini juga dipakai `server.mjs`, jadi tidak ada perubahan terpisah.
+- Parser: `src/services/bmkg/nowcast.ts` (murni, tanpa `import.meta.env`, bisa dites Node) +
+  self-check `nowcast.check.ts`:
+  `node --experimental-strip-types src/services/bmkg/nowcast.check.ts`.
+
+### d) Prioritas peringatan
+`nowcast` (resmi, per provinsi) **menang** atas `GET /api/public/weather/warning` (internal) bila
+keduanya ada. `warning` internal tetap dipakai sebagai fallback/pelengkap.
+
+## 3.7 Open Data `prakiraan-cuaca?adm4=` — sudah dipakai sebagai fallback
+
+```
+GET https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=31.71.03.1001   → 200 (tanpa proxy, CORS *)
+```
+
+- **Bentuk item identik** dengan `df/v1/forecast/coord` (`data[0].cuaca` = array grup hari, item
+  punya `local_datetime`) → `forecastToHourly()` dipakai ulang tanpa adapter baru.
+- Dipakai di `useBmkgWeather.ts` sebagai **fallback** kalau forecast internal kosong/gagal
+  (jalur resmi terdokumentasi, aman untuk jangka panjang).
+- Tetap butuh `adm4` (kode wilayah 4 level), yang berasal dari endpoint internal
+  `df/v1/adm/coord` — belum ada sumber `adm4` resmi independen.
+
+## 3.8 Kualitas udara / ISPU — TIDAK ADA SUMBER (per 15 Sep 2026)
+
+| Kandidat | Hasil |
+|---|---|
+| `https://ispu.bmkg.go.id` | 000 (tidak merespons) |
+| `https://www.bmkg.go.id/kualitas-udara` | 301 → 404 |
+| `https://api.bmkg.go.id/publik/ispu` | 404 |
+| `https://ispu.menlhk.go.id` | 000 (tidak merespons) |
+
+→ Nilai AQI/PM2,5 di redesign adalah **estimasi** (`f(suhu, hash nama kota)`), bukan data live.
+Badge UI sudah diubah menjadi **"ESTIMASI"**. Jangan kembalikan ke "LIVE" sampai ada sumber resmi.
+
+## 3.9 Dua field maritim yang belum dipakai
+
+| Field | Status |
+|---|---|
+| `current_speed_min`/`_max` (arus pelabuhan) | **di-skip** — satuan ambigu (dokumen menyebut cm/s, tapi nilai 0.06–0.46 lebih mirip m/s). Tunggu konfirmasi BMKG. |
+| `wind_speed_min`/`_max` perairan | dipakai (knot) untuk teks angin di kartu pelabuhan |
+
+## 3.10 Cara membaca satu slot prakiraan (field per item)
+
+Contoh item nyata (dari `df/v1/forecast/coord` maupun Open Data `prakiraan-cuaca` — bentuknya sama):
+
+```json
+{
+  "datetime": "2026-09-16T05:00:00Z",      "t": 33,   "tcc": 33,  "tp": 0,
+  "weather": 1, "weather_desc": "Cerah",   "weather_desc_en": "Sunny",
+  "wd_deg": 97, "wd": "E",  "wd_to": "W",  "ws": 13.4, "hu": 36,
+  "vs": 19986,  "vs_text": "> 10 km",      "time_index": "28-29",
+  "analysis_date": "2026-09-15T00:00:00",
+  "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah-am.svg",
+  "utc_datetime": "2026-09-16 05:00:00",   "local_datetime": "2026-09-16 12:00:00"
+}
+```
+
+| Field | Arti | Satuan (terverifikasi) | Dipakai di redesign |
+|---|---|---|---|
+| `datetime` | waktu slot, ISO **UTC** (ada `Z`) | – | tidak (pakai `local_datetime`) |
+| `utc_datetime` / `local_datetime` | waktu slot versi string `YYYY-MM-DD HH:mm:ss` (UTC vs lokal WIB/WITA/WIT) | – | ✅ `local_datetime` → tanggal/jam |
+| `t` | suhu udara | °C | ✅ suhu |
+| `hu` | kelembapan relatif | % | ✅ kelembapan |
+| `ws` | kecepatan angin | **km/jam** (resmi) | ✅ angin (label UI "km/j") |
+| `wd` / `wd_to` | arah angin **dari** / **menuju** (mata angin) | – | ✅ `wd` (arah datang) |
+| `wd_deg` | derajat arah angin dari (0–360) | ° | ✅ rotasi ikon panah |
+| `tcc` | tutupan awan total | % | ⚠️ dipakai sebagai proksi UV (bukan UV asli) |
+| `tp` | curah hujan periode ini | mm | ✅ tapi `%` badge = `min(100, tp × 20)` — **aproksimasi**, bukan probabilitas hujan |
+| `weather` | kode kondisi cuaca (angka) | – | ❌ (pakai `weather_desc`) |
+| `weather_desc` / `_en` | kondisi cuaca teks (ID/EN) | – | ✅ status + pemilihan ikon |
+| `vs` | jarak pandang (numerik) | **meter** (`19986` → "> 10 km"); tabel resmi hanya mendokumentasikan `vs_text` | ✅ `vs/1000` km |
+| `vs_text` | jarak pandang versi teks | km | ❌ (pakai numerik) |
+| `time_index` | label blok jam relatif ke `analysis_date` (mis. `28-29` = jam ke-28–29) | – | ❌ (pakai `local_datetime`) |
+| `analysis_date` | waktu produksi run prakiraan (UTC) | – | ❌ |
+| `image` | URL ikon cuaca resmi (SVG) | – | ❌ (redesign pakai ikon lucide sendiri) |
+
+**Yang TIDAK ada di response:** `tmin`/`tmax` (min–max suhu harian) dan **probabilitas hujan**.
+Karena itu: kartu strip 8 hari & tab Suhu hanya memakai **satu suhu per hari** (slot pertama),
+dan badge `%` hujan adalah `tp × 20` — aproksimasi, bukan peluang hujan resmi.
+
+**Struktur:** item-item ini dikelompokkan **per hari** → `data[0].cuaca` = array grup hari
+(10 grup di API internal `df/v1/forecast/coord`, 3 grup di Open Data `prakiraan-cuaca`),
+tiap grup berisi slot per 3 jam (8 slot/hari). Ambil `cuaca[i][0]` = slot pertama hari ke-i.

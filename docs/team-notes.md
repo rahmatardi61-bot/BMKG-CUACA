@@ -98,3 +98,66 @@ Jalankan `npm run dev`, buka `http://localhost:5173`. Checklist:
 Semua integrasi lewat `useBmkgWeather` di `App.vue` — matikan dengan mengosongkan
 env `VITE_BMKG_PROXY` tidak cukup; rollback sebenarnya: `git revert` commit integrasi,
 atau komentari pemanggilan `loadCity`/computed live di `App.vue` (data kembali 100% mock).
+
+---
+
+## 6. Iterasi "Tier A & B" (15 Sep 2026)
+
+Lanjutan dari audit kartu mock vs live (`bmkg-api-mapping.xlsx` sheet **Audit Content Card**).
+Semua item di bawah sudah **jalan di dev** dan diverifikasi lewat browser otomatis
+(Playwright: cek teks kartu + daftar request + `pageerror`).
+
+### 6.1 Yang diimplementasikan
+
+| # | Item | Sumber data live | File utama |
+|---|---|---|---|
+| A1 | **Fix bug**: `currentSlot()` membaca `doc.slots`, padahal API resmi mengirim array di **`doc.data`** → seluruh integrasi maritim live (status transport maritim, patch drawer, teks pelayaran) tidak pernah aktif | maritim public_api | `services/bmkg/openData.ts` |
+| A2 | **MarineMap**: layer gelombang memakai 232 polygon **wilayah perairan resmi** + warna/label dari overview live; klik wilayah → popup detail resmi (rentang gelombang, angin, cuaca, peringatan). Legend & timeline ikut live (Hari ini/Besok/H+2/H+3) | `/static/wilayah_perairan.json`, `/overview/gelombang.json`, `/perairan/{file}.json` | `MarineMap.vue` |
+| A3 | **Berita**: `NewsSection` dipasang (sebelumnya data WP sudah di-fetch tapi prop `articles` tidak pernah dirender) | blog WP + video BMKG | `MainDashboard.vue` |
+| A4 | **Aktivitas Pelayaran**: pakai gelombang resmi perairan, bukan estimasi `0.3 + angin×0.04` | `/api/v1/public/maritim/nearest-location` → perairan | `WeatherActivity.vue` |
+| A5 | **AroundActivityPanel**: nilai cuaca per titik POI (comfort/hujan/UV/jam-an) diambil live dari `df/forecast/coord` per lat-lng POI; daftar POI tetap konten kurasi | internal `df/forecast/coord` | `AroundActivityPanel.vue` |
+| B6 | **Peringatan dini nowcast resmi** (RSS) menang atas `warning` internal, difilter per provinsi (feed-nya nasional). Proxy baru: dev `/alerts` → `www.bmkg.go.id`, prod lewat `api/bmkg/[...path].ts` | `https://www.bmkg.go.id/alerts/nowcast/id` | `services/bmkg/nowcast.ts`, `vite.config.ts`, `api/bmkg/[...path].ts` |
+| B7 | **Kartu baru "Pelabuhan & Pasut"** — pelabuhan terdekat + gelombang, suhu, kelembapan, angin, jarak pandang, pasang/surut (jam dikonversi ke WIB/WITA/WIT) | `/pelabuhan_list`, `/pelabuhan/{file}.json` | `PortTideCard.vue` |
+| B8 | **Fallback jalur resmi**: kalau `df/forecast/coord` kosong/gagal → `api.bmkg.go.id/publik/prakiraan-cuaca?adm4=` (bentuk item identik, adapter sama) | Open Data `prakiraan-cuaca` | `useBmkgWeather.ts`, `services/bmkg/api.ts` |
+| B9 | **WaveRadarMap**: bug properti diperbaiki (`WP_1`/`WP_IMM`, sebelumnya baca `code`/`kode` → semua zona kosong). **Tidak dipasang** — lihat §6.3 | overview + geojson | `WaveRadarMap.vue` |
+
+**Bug lama lain yang ketemu & diperbaiki saat ini:**
+- `getWilayahPerairanGeo()` memakai path `…/wilayah_perairan.geojson` yang **404** (path benar `/static/wilayah_perairan.json`) → overlay peta maritim tidak pernah muncul.
+- Overlay itu juga membaca properti `name`/`code` yang tidak ada di geojson resmi (benar: `WP_IMM`/`WP_1`).
+- `LandBasedActivities.vue`: `ReferenceError: Cannot access 'currentStep' before initialization` — ref dideklarasikan di bawah `computed` yang dibaca `watch(..., { immediate: true })`, jadi **setup crash di setiap load**. Deklarasi dipindah ke atas.
+
+### 6.2 Hasil verifikasi (dev, 15 Sep 2026)
+
+- Kartu Pelabuhan tampil live: contoh Jakarta → **Sunda Kelapa (0101)**, gelombang 0.5–1.25 m (Rendah), suhu 26–29 °C, kelembapan 68–81%, angin Timur 2–5 knot, jarak pandang 10.0 km.
+- Peta maritim: legend live **78 Rendah + 123 Sedang + 31 Tinggi = 232** wilayah (pas dengan jumlah wilayah resmi), label timeline "Hari ini · Rilis terbaru BMKG".
+- Berita & Pelabuhan & peta maritim ter-render; **0 page error** setelah fix TDZ.
+- Request live yang terverifikasi 200: `overview/gelombang.json`, `static/wilayah_perairan.json`, `perairan/F.09…`, `perairan_list`, `pelabuhan/0101…`, `pelabuhan_list`, `/alerts/nowcast/id`.
+- `blog/wp-json/wp/v2/posts` sesekali **502** dari sisi BMKG (sudah diketahui) → otomatis fallback ke artikel mock.
+
+### 6.3 Keputusan & hal yang sengaja belum dikerjakan
+
+1. **WaveRadarMap tidak dipasang.** Setelah MarineMap menampilkan gelombang live, WaveRadarMap menjadi visualisasi kembar (dua peta Leaflet + dua kali fetch geojson di satu halaman). Kodenya kini benar dan siap dipasang kapan saja kalau tim memutuskan memakai kartu ringkas itu sebagai ganti peta besar.
+2. **Layer angin & cuaca di MarineMap tetap snapshot.** Endpoint resmi tidak menyediakan angin/cuaca **bulk** per wilayah (hanya kategori gelombang via overview); mengambil detail 232 wilayah berarti 232 request. Layer gelombang sudah live.
+3. **MarineMap mode Pelabuhan masih snapshot** (`public/data/ports.json`, 294 pelabuhan) — data live pelabuhan hanya diambil untuk **pelabuhan terdekat** (kartu B7). Menghidupkan seluruh layer = 294 request.
+4. **Kualitas udara (AQI/PM2,5) tidak dibuat live — tidak ada sumbernya.** `ispu.bmkg.go.id` tidak bisa diakses, `www.bmkg.go.id/kualitas-udara` → 404, `api.bmkg.go.id/publik/ispu` → 404, `ispu.menlhk.go.id` tidak merespons. Badge di card itu diubah dari **"ISPU LIVE"** menjadi **"ESTIMASI"** supaya tidak menyesatkan (angkanya masih `f(pm25)` dari suhu + hash nama kota).
+5. **Indeks Kenyamanan** masih memakai label `tempText` statis dari `weatherHelpers.getComfortIndex()`; status/emoji-nya sudah mengikuti suhu live.
+6. **Arus pelabuhan tidak ditampilkan** — satuannya ambigu (dokumen resmi menyebut cm/s, tapi nilainya 0.06–0.46 sehingga lebih masuk akal m/s). Daripada salah satuan, field ini di-skip sampai ada konfirmasi BMKG.
+
+### 6.4 Cara menguji ulang
+
+```bash
+npm run dev
+# lalu di browser: kartu "Pelabuhan & Pasut" (kanan bawah), peta maritim (klik satu wilayah),
+# section Berita (bawah kolom kiri), dan badge "ESTIMASI" di card kualitas udara.
+node --experimental-strip-types src/services/bmkg/nowcast.check.ts   # self-check parser RSS
+```
+
+### 6.5 Nonaktif sementara (permintaan produk, 16 Sep 2026)
+
+1. **MajorCitiesCarousel — auto-geser & fetch per kota dimatikan.** Timer 10 detik dan seluruh
+   logika auto-slide **dihapus** dari `MajorCitiesCarousel.vue` (bukan di-comment), dan tidak ada
+   fetch cuaca per kota. Kartu kini statis: landmark + nama kota ("Aktif"/"Pilih Kota").
+   Konsekuensi bila nanti dinyalakan: menampilkan suhu live 10 kota = **10 request tambahan**
+   (`df/forecast/coord` per kota), jadi keputusan ini sekaligus menghemat kuota proxy.
+2. **Teks sampah `aldskj`** yang ter-render di antara carousel dan CurrentWeather (sisa edit
+   manual di `MainDashboard.vue`) sudah dihapus.

@@ -51,7 +51,9 @@ import {
 } from './services/bmkg/openData';
 import type { TransportStatus } from './types/weather';
 const bmkgWeather = useBmkgWeather();
-const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, amandemenCount } = bmkgWeather;
+const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, livePort, amandemenCount } = bmkgWeather;
+/** indikator loading khusus kartu pelabuhan (fetch-nya terpisah dari data utama) */
+const portLoading = computed(() => bmkgWeather.status.value === 'loading' && !livePort.value);
 const isDev = import.meta.env.DEV;
 // 'live' = data BMKG asli; 'mock' = fallback mockData.ts; 'loading' = sedang fetch
 const dataSource = computed(() => {
@@ -698,6 +700,8 @@ onMounted(() => {
         :forecasts="activeHourlyForecasts"
         :transport-statuses="activeTransportStatuses"
         :maritim-live="maritimLive"
+        :port="livePort"
+        :port-loading="portLoading"
         :alerts="activeWarningAlerts"
         :articles="activeArticles"
         :cities="cities"

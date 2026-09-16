@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { fetchMarineSectors, fetchMarinePorts } from '../data/indonesiaMapData';
 import type { IndonesiaMarineSector, MarinePort } from '../data/indonesiaMapData';
 import { getCityCoordinates } from '../data/earthquakeData';
-import { getWilayahPerairanGeo } from '../services/bmkg/openData';
+import { getWilayahPerairanGeo, getOverviewGelombangTyped, getPerairanByCode, WAVE_CAT_MID, type WaveOverviewEntry } from '../services/bmkg/openData';
 
 const props = withDefaults(defineProps<{
   selectedCity?: string;
@@ -34,6 +34,78 @@ const INDONESIA_GEOJSON_URLS = [
 const activeMode = defineModel<'perairan' | 'pelabuhan'>('activeMode', { default: 'perairan' });
 const activeLayer = defineModel<'gelombang' | 'cuaca' | 'angin'>('activeLayer', { default: 'gelombang' });
 const hoursAhead = defineModel<number>('hoursAhead', { default: 0 });
+
+// ── Layer gelombang LIVE ─────────────────────────────────────────────────────
+// Sumber: maritim.bmkg.go.id/public_api (resmi, CORS *)
+//  • geometri + nama + KODE wilayah : /static/wilayah_perairan.json (232 polygon)
+//  • kategori gelombang per hari    : /overview/gelombang.json (Hari ini/Besok/H+2/H+3)
+//  • detail per wilayah (klik)      : /perairan/{file}.json (wave_desc, angin, peringatan)
+// ponytail: endpoint bulk hanya menyediakan KATEGORI gelombang → tinggi angkanya
+// memakai titik tengah rentang resmi (WAVE_CAT_MID); label menampilkan kategori asli.
+const LIVE_SLOTS = ['today', 'tomorrow', 'h2', 'h3'] as const;
+const LIVE_SLOT_LABELS = ['Hari ini', 'Besok', 'H+2', 'H+3'];
+const liveSlotIdx = computed(() => Math.min(hoursAhead.value, LIVE_SLOTS.length - 1));
+const liveSlotLabel = computed(() => LIVE_SLOT_LABELS[liveSlotIdx.value]);
+const liveWave = ref<Record<string, WaveOverviewEntry>>({});
+const liveLabelPoints = ref<Array<{ center: [number, number]; text: string }>>([]);
+let liveOverlay: L.GeoJSON | null = null;
+let liveOverlayCenters: Array<{ center: [number, number]; code: string }> = [];
+
+const liveCategoryOf = (code: string): string | null => {
+  const cat = liveWave.value[code]?.[LIVE_SLOTS[liveSlotIdx.value]];
+  return typeof cat === 'string' && cat ? cat : null;
+};
+
+/** style polygon wilayah resmi: warna = kategori gelombang live (fallback abu) */
+const liveOverlayStyle = (feature?: unknown): L.PathOptions => {
+  const code = String((feature as { properties?: { WP_1?: string } })?.properties?.WP_1 ?? '');
+  const cat = code ? liveCategoryOf(code) : null;
+  const mid = cat ? WAVE_CAT_MID[cat.toLowerCase()] : undefined;
+  return {
+    color: isDark.value ? '#94a3b8' : '#475569',
+    weight: 0.5,
+    opacity: 0.35,
+    fillColor: mid != null ? getWaveColor(mid) : '#64748b',
+    fillOpacity: mid != null ? (isDark.value ? 0.5 : 0.62) : 0.12,
+  };
+};
+
+/** label peta = kategori gelombang resmi untuk slot hari yang sedang dipilih */
+const refreshLiveLabels = () => {
+  const pts: Array<{ center: [number, number]; text: string }> = [];
+  for (const c of liveOverlayCenters) {
+    const cat = liveCategoryOf(c.code);
+    if (cat) pts.push({ center: c.center, text: cat });
+  }
+  liveLabelPoints.value = pts;
+};
+
+/** klik wilayah → popup berisi data RESMI: kategori hari terpilih + detail perairan (cached) */
+const openLivePopup = async (code: string, name: string, wilpel: string | undefined, layer: L.Polygon) => {
+  const idx = liveSlotIdx.value;
+  const ov = liveWave.value[code];
+  const cat = ov?.[LIVE_SLOTS[idx]] ?? '-';
+  const row = (label: string, value: string) =>
+    `<div style="display:flex;justify-content:space-between;gap:10px;margin-top:3px;"><span style="color:#94a3b8;">${label}</span><span style="font-weight:700;">${value}</span></div>`;
+  let html = `<div style="min-width:200px;font-size:11px;">
+    <div style="font-weight:800;font-size:12px;">${name}</div>
+    <div style="font-size:9px;color:#94a3b8;margin-bottom:5px;">Kode ${code}${wilpel ? ` · ${wilpel}` : ''}</div>`;
+  html += row(`Gelombang ${liveSlotLabel.value}`, String(cat));
+
+  const doc = await getPerairanByCode(code);
+  const slot = doc?.data?.[idx] ?? doc?.data?.[0];
+  if (slot) {
+    html += row('Rentang', slot.wave_desc || '-');
+    html += row('Angin', `${slot.wind_speed_min ?? '-'}–${slot.wind_speed_max ?? '-'} knot${slot.wind_from ? ` ${slot.wind_from}` : ''}`);
+    html += row('Cuaca', slot.weather || '-');
+    if (slot.warning_desc && slot.warning_desc.toUpperCase() !== 'NIL') {
+      html += `<div style="margin-top:5px;font-size:10px;font-weight:700;color:#fbbf24;">⚠ ${slot.warning_desc}</div>`;
+    }
+  }
+  html += `<div style="margin-top:6px;font-size:9px;color:#64748b;">Sumber: BMKG Open Data${ov?.issued ? ` · rilis ${ov.issued}` : ''}</div></div>`;
+
+  layer.bindPopup(html, { className: 'bmkg-marine-popup' }).openPopup();
+};
 
 // Mobile menus
 const isMobileLayerOpen = ref(false);
@@ -307,16 +379,26 @@ const drawLabels = () => {
   ctx.lineWidth = 3;
   ctx.lineJoin  = 'round';
 
-  indonesiaMarineSectors.forEach((sector) => {
-    const forecast = sector.forecasts[hoursAhead.value] || sector.forecasts[0];
-    let text = '';
-    if (activeLayer.value === 'gelombang')   text = `${forecast.waveHeight}m`;
-    else if (activeLayer.value === 'angin')  text = `${forecast.windSpeed}kt`;
-    else                                     text = getWeatherEmojiChar(forecast.weather);
+  // Sumber label: layer gelombang = wilayah RESMI (kode) + kategori LIVE;
+  // layer angin/cuaca = snapshot sektor (endpoint bulk resmi tidak menyediakannya).
+  const points: Array<{ center: [number, number]; text: string }> = [];
+  if (activeLayer.value === 'gelombang' && liveLabelPoints.value.length) {
+    points.push(...liveLabelPoints.value);
+  } else {
+    indonesiaMarineSectors.forEach((sector) => {
+      const forecast = sector.forecasts[hoursAhead.value] || sector.forecasts[0];
+      const text = activeLayer.value === 'angin'
+        ? `${forecast.windSpeed}kt`
+        : getWeatherEmojiChar(forecast.weather);
+      points.push({ center: sector.center, text });
+    });
+  }
 
+  for (const p of points) {
+    const text = p.text;
     // Get layer point for this coordinate
-    const pt = map!.latLngToLayerPoint(L.latLng(sector.center[0], sector.center[1]));
-    
+    const pt = map!.latLngToLayerPoint(L.latLng(p.center[0], p.center[1]));
+
     // Canvas coordinate is its layer point minus the canvas's own top-left layer point
     const x = pt.x - canvasTopLeft.x;
     const y = pt.y - canvasTopLeft.y;
@@ -325,7 +407,7 @@ const drawLabels = () => {
     ctx.strokeText(text, x, y);
     ctx.fillStyle   = fillColor;
     ctx.fillText(text, x, y);
-  });
+  }
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -367,6 +449,14 @@ const stopPlay = () => {
 
 // Time label helper
 const getFormattedTime = (hours: number) => {
+  // Layer gelombang = data RESMI per hari (Hari ini/Besok/H+2/H+3), bukan per jam.
+  if (activeLayer.value === 'gelombang' && liveLabelPoints.value.length) {
+    const i = Math.min(hours, LIVE_SLOTS.length - 1);
+    return {
+      label: LIVE_SLOT_LABELS[i],
+      subtitle: i === 0 ? 'Rilis terbaru BMKG' : `Prakiraan ${LIVE_SLOT_LABELS[i].toLowerCase()}`,
+    };
+  }
   const now = new Date();
   const targetDate = new Date(now.getTime() + hours * 3600 * 1000);
   const days   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -385,8 +475,21 @@ const getFormattedTime = (hours: number) => {
   };
 };
 
-// Legend counts
+// Legend counts — dihitung dari KATEGORI LIVE (overview resmi) utk layer gelombang,
+// dan dari snapshot sektor utk layer angin/cuaca.
+const LIVE_CAT_TO_KEY: Record<string, string> = {
+  tenang: 'tenang', rendah: 'rendah', sedang: 'sedang', tinggi: 'tinggi',
+  'sangat tinggi': 'sangatTinggi', ekstrem: 'ekstrem', 'sangat ekstrem': 'sangatEkstrem',
+};
 const getLegendCount = (category: string) => {
+  if (activeLayer.value === 'gelombang' && liveLabelPoints.value.length) {
+    let n = 0;
+    for (const c of liveOverlayCenters) {
+      const cat = liveCategoryOf(c.code);
+      if (cat && (LIVE_CAT_TO_KEY[cat.toLowerCase()] ?? 'noData') === category) n++;
+    }
+    return n;
+  }
   const base: Record<string, number> = { tenang:31, rendah:168, sedang:156, tinggi:0, sangatTinggi:0, ekstrem:0, sangatEkstrem:0, noData:0 };
   const v = (hoursAhead.value * 7) % 5;
   if (category === 'tenang') return base.tenang - v;
@@ -530,8 +633,22 @@ const renderLayers = () => {
     indonesiaMarineSectors.forEach((sector, idx) => {
       const forecast = sector.forecasts[hoursAhead.value] || sector.forecasts[0];
       const polygon  = polygonInstances[idx];
-      if (polygon) polygon.setStyle({ fillColor: getWaveColor(forecast.waveHeight), fillOpacity: isDark.value ? 0.45 : 1.0, color: 'rgba(255,255,255,0.4)', weight: 1.2, opacity: 1.0 });
+      if (polygon) polygon.setStyle({
+        fillColor: getWaveColor(forecast.waveHeight),
+        // layer gelombang pakai polygon RESMI (live) → sembunyikan fill snapshot
+        fillOpacity: activeLayer.value === 'gelombang' && liveLabelPoints.value.length
+          ? 0.02
+          : (isDark.value ? 0.45 : 1.0),
+        opacity: activeLayer.value === 'gelombang' && liveLabelPoints.value.length ? 0.25 : 1.0,
+        color: 'rgba(255,255,255,0.4)', weight: 1.2,
+      });
     });
+    const liveVisible = activeLayer.value === 'gelombang' && liveLabelPoints.value.length > 0;
+    if (liveOverlay) liveOverlay.setStyle(liveOverlayStyle as never);
+    if (liveOverlay && map) {
+      if (liveVisible && !map.hasLayer(liveOverlay)) map.addLayer(liveOverlay);
+      if (!liveVisible && map.hasLayer(liveOverlay)) map.removeLayer(liveOverlay);
+    }
 
     // Redraw label canvas in one pass
     drawLabels();
@@ -539,6 +656,7 @@ const renderLayers = () => {
   } else {
     if (!map.hasLayer(portsGroup))      map.addLayer(portsGroup);
     if (map.hasLayer(seaSectorsGroup))  map.removeLayer(seaSectorsGroup);
+    if (liveOverlay && map.hasLayer(liveOverlay)) map.removeLayer(liveOverlay);
     if (labelCanvas) labelCanvas.style.display = 'none';
   }
 };
@@ -549,18 +667,28 @@ onMounted(() => {
   nextTick(() => {
     sharedCanvasRenderer = L.canvas({ padding: 0.1 });
 
-    // Overlay polygon WILAYAH PERAIRAN (geojson resmi maritim, CORS *) — klik: nama + kode
-    void getWilayahPerairanGeo().then((geo) => {
+    // Overlay WILAYAH PERAIRAN RESMI (geojson maritim, CORS *) + kategori gelombang LIVE.
+    // ponytail: path geojson-nya dulu 404 & nama properti salah (name/code vs WP_IMM/WP_1)
+    // → overlay resmi tidak pernah muncul dan popup selalu "Wilayah Perairan".
+    void Promise.all([getWilayahPerairanGeo(), getOverviewGelombangTyped()]).then(([geo, overview]) => {
+      if (overview) liveWave.value = overview;
       if (!geo || !map) return;
-      L.geoJSON(geo as never, {
-        style: { color: '#22d3ee', weight: 0.7, opacity: 0.5, fillColor: '#22d3ee', fillOpacity: 0.05 },
-        onEachFeature: (f, l) => {
-          const p = (f.properties ?? {}) as Record<string, unknown>;
-          const label = String(p.name ?? p.nama ?? p.code ?? p.kode ?? 'Wilayah Perairan');
-          const code = String(p.code ?? p.kode ?? '');
-          l.bindPopup(`<b>${label}</b>${code ? ` (${code})` : ''}`);
+      liveOverlay = L.geoJSON(geo as never, {
+        style: liveOverlayStyle as never,
+        onEachFeature: (f: never, l: L.Layer) => {
+          const p = ((f as { properties?: Record<string, string> }).properties ?? {});
+          const code = String(p.WP_1 ?? '');
+          const name = String(p.WP_IMM ?? 'Wilayah Perairan');
+          const bounds = (l as L.Polygon).getBounds();
+          if (bounds.isValid()) {
+            const ctr = bounds.getCenter();
+            liveOverlayCenters.push({ center: [ctr.lat, ctr.lng], code });
+          }
+          (l as L.Path).on('click', () => { void openLivePopup(code, name, p.WilPel, l as L.Polygon); });
         },
-      }).addTo(map);
+      });
+      refreshLiveLabels();
+      renderLayers();
     });
     canvasLandRenderer   = L.canvas({ padding: 0.1, pane: 'landPane' });
 
@@ -660,7 +788,7 @@ watch([activeMode, activeLayer], ([newMode], [oldMode]) => {
   if (newMode !== oldMode && geoJsonLandLayer) geoJsonLandLayer.bringToFront();
 });
 
-watch(hoursAhead, () => { renderLayers(); });
+watch(hoursAhead, () => { refreshLiveLabels(); renderLayers(); });
 
 watch(isDark, () => {
   if (map) { updateTileLayers(); updateGeoJsonStyle(); renderLayers(); }

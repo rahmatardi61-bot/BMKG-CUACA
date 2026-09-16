@@ -32,6 +32,8 @@ const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWea
 const AppDownloadCTA = defineAsyncComponent(() => import('../components/AppDownloadCTA.vue'));
 const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const PortTideCard = defineAsyncComponent(() => import('../components/PortTideCard.vue'));
+const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
 // const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
@@ -53,6 +55,7 @@ import {
   Search
 } from 'lucide-vue-next';
 import { getAdditionalWeatherData, type AdditionalWeatherInfo } from '../data/weatherHelpers';
+import type { PortInfo } from '../composables/useBmkgWeather';
 
 const props = defineProps<{
   weatherData: WeatherData;
@@ -68,6 +71,8 @@ const props = defineProps<{
   userLng?: number | null;
   additionalInfo?: AdditionalWeatherInfo;
   maritimLive?: { waveDesc: string; waveCat: string; warningDesc: string; wilpel: string } | null;
+  port?: PortInfo | null;
+  portLoading?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -506,6 +511,9 @@ onUnmounted(() => {
             :user-lng="userLng"
           />
         </LazyCardLoader>
+
+        <!-- Berita & pengumuman BMKG (WP REST + video) -->
+        <NewsSection v-if="articles?.length" :articles="articles" />
       </div>
 
       <!-- Right Column: Sidebar (Weather Activity & Analysis, Alerts, & Transport) (Span 1) -->
@@ -520,6 +528,7 @@ onUnmounted(() => {
           :slide-direction="slideDirection"
           :current-city-landmark-svg="currentCityLandmarkSvg"
           :current-city-short-name="currentCityShortName"
+          :maritim-live="maritimLive"
           @open-maritime-advisor="openMaritimeAdvisor"
           @open-aviation-advisor="openAviationAdvisor"
           @open-land-advisor="openLandAdvisor"
@@ -528,6 +537,9 @@ onUnmounted(() => {
 
         <!-- Traffic & Transport advisories -->
         <TransportWeather :statuses="transportStatuses" />
+
+        <!-- Pelabuhan terdekat + pasut (BMKG Open Data) -->
+        <PortTideCard :port="port ?? null" :selected-city="selectedCity" :loading="portLoading" />
       </div>
     </div>
 

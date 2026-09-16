@@ -7,6 +7,8 @@ import {
 } from 'lucide-vue-next';
 import { cityAnalysisMap } from '../data/mockData';
 import { buildCityAnalysis } from '../services/analysisNarrative';
+import { bmkg } from '../services/bmkg/api';
+import { forecastToHourly } from '../services/bmkg/adapters';
 import type { WeatherData } from '../types/weather';
 
 const props = defineProps<{
@@ -220,7 +222,9 @@ const getCategoryIcon = (category: GolfCourse['category']) => {
 };
 
 // ─── Golf courses computed ────────────────────────────────────────────────────
-const golfCourses = computed<GolfCourse[]>(() => {
+// Daftar POI = konten kurasi (tetap), tapi NILAI CUACANYA live dari
+// df/forecast/coord per titik (lihat loadLivePoiWeather di bawah).
+const staticPois = computed<GolfCourse[]>(() => {
   if (!props.selectedCity) return [];
   const cityLower = props.selectedCity.toLowerCase();
   let raw: GolfCourse[] = [];
@@ -300,6 +304,59 @@ const golfCourses = computed<GolfCourse[]>(() => {
     distance: getDistance(props.selectedCity, course.distance)
   }));
 });
+
+// ─── Cuaca LIVE per titik POI (df/forecast/coord) ────────────────────────────
+// Menimpa comfort/rain/uv/harian hasil hardcode; nilai statis tetap dipakai
+// sebagai fallback selama request berjalan atau kalau request gagal.
+const liveByPoi = ref<Record<number, Partial<GolfCourse>>>({});
+
+const loadLivePoiWeather = async (pois: GolfCourse[]) => {
+  const targets = pois.filter(p => p.lat !== 0 || p.lng !== 0);
+  const out: Record<number, Partial<GolfCourse>> = {};
+  await Promise.all(targets.map(async (p) => {
+    try {
+      const res = await bmkg.forecast(p.lat, p.lng);
+      const hourly = forecastToHourly(res);
+      if (!hourly.length) return;
+      // slot pertama grup hari ini = jam terdekat (aturan sama dgn strip web asli)
+      const now = hourly[0];
+      const rainPct = Math.max(...hourly.slice(0, 12).map(h => h.precipitation ?? 0));
+      const st = (now.status || '').toLowerCase();
+      const uv = /petir|hujan/.test(st) ? 2 : /berawan/.test(st) ? 5 : 8;
+      const nyaman = now.temp <= 26;
+      out[p.id] = {
+        comfortIndex: nyaman ? 'Nyaman' : 'Cukup',
+        comfortEmoji: now.temp <= 26 ? '😊' : now.temp <= 31 ? '😐' : '🥵',
+        rainWarning: rainPct >= 60
+          ? `Potensi hujan tinggi (${rainPct}%) dalam 12 jam ke depan — siapkan jas hujan.`
+          : rainPct >= 30
+            ? `Ada potensi hujan ringan (${rainPct}%) — pantau perubahan cuaca.`
+            : `Tidak ada potensi hujan berarti (${rainPct}%) di sekitar lokasi ini.`,
+        uvWarning: uv >= 8
+          ? `Indeks UV tinggi (${now.temp}°C). Gunakan tabir surya & hindari paparan lama di siang hari.`
+          : `Suhu ${now.temp}°C, angin ${now.windSpeed ?? '-'} km/jam — ${nyaman ? 'nyaman untuk aktivitas luar ruangan.' : 'cukup gerah, jaga hidrasi.'}`,
+        hourly: hourly.slice(0, 4).map((h, i) => ({
+          time: h.time,
+          isCurrent: i === 0,
+          temp: h.temp,
+          windSpeed: h.windSpeed ?? 0,
+          windDirIcon: ArrowDown,
+          rain: (h.precipitation ?? 0) / 100,
+          icon: getIconComponent(/cerah/i.test(h.status) && !/berawan/i.test(h.status) ? 'Sun' : 'Cloud', h.time),
+        })),
+      };
+    } catch {
+      /* fallback: nilai statis POI */
+    }
+  }));
+  liveByPoi.value = out;
+};
+
+/** POI + nilai live (kalau sudah termuat) */
+const golfCourses = computed<GolfCourse[]>(() =>
+  staticPois.value.map(c => ({ ...c, ...(liveByPoi.value[c.id] ?? {}) })));
+
+watch(staticPois, (list) => { void loadLivePoiWeather(list); }, { immediate: true });
 
 // Computed active course for mobile carousel view
 const activeMobileCourse = computed(() => {

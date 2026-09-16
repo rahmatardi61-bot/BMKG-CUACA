@@ -3,10 +3,13 @@
 // - inject Referer + Origin (wajib untuk /api/df/*)
 // - inject X-API-KEY (untuk /api/v1/*)
 // - inject x-public-token fresh (cache ~25 menit) untuk /api/public/*, /v1/public/*, /v1/user/*
-// Dipakai otomatis saat project di-deploy ke Vercel (folder api/ terdeteksi Vercel).
+// - path `alerts/*` (nowcast RSS) diarahkan ke www.bmkg.go.id (tanpa CORS di sana)
+// Dipakai otomatis saat project di-deploy ke Vercel (folder api/ terdeteksi Vercel),
+// dan juga oleh server.mjs (Docker) — jadi perubahan di sini berlaku untuk keduanya.
 export const config = { runtime: 'edge' };
 
 const UPSTREAM = 'https://cuaca.bmkg.go.id';
+const NOWCAST_UPSTREAM = 'https://www.bmkg.go.id';
 const API_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFjNWFkZWUxYzY5MzM0NjY2N2EzZWM0MWRlMjBmZWZhNDcxOTNjYzcyZDgwMGRiN2ZmZmFlMWVhYjcxZGYyYjQiLCJpYXQiOjE3MDE1ODMzNzl9.D1VNpMoTUVFOUuQW0y2vSjttZwj0sKBX33KyrkaRMcQ';
 const UA =
@@ -30,17 +33,15 @@ async function getPubTok(): Promise<string> {
 
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  const path = url.pathname.replace(/^\/api-bmkg\/?/, ''); // "api/df/v1/forecast/coord" | "blog/wp-json/..."
-  const target = `${UPSTREAM}/${path}${url.search}`;
+  const path = url.pathname.replace(/^\/api-bmkg\/?/, ''); // "api/df/v1/forecast/coord" | "alerts/nowcast/id"
+  const isNowcast = path.startsWith('alerts/');
+  const target = `${isNowcast ? NOWCAST_UPSTREAM : UPSTREAM}/${path}${url.search}`;
 
-  const headers: Record<string, string> = {
-    Referer: UPSTREAM + '/',
-    Origin: UPSTREAM,
-    'User-Agent': UA,
-    Accept: 'application/json',
-  };
-  if (path.includes('api/v1/')) headers['X-API-KEY'] = API_KEY;
-  if (path.includes('api/public/') || path.includes('v1/public/') || path.includes('v1/user/')) {
+  const headers: Record<string, string> = isNowcast
+    ? { 'User-Agent': UA, Accept: 'application/xml' }
+    : { Referer: UPSTREAM + '/', Origin: UPSTREAM, 'User-Agent': UA, Accept: 'application/json' };
+  if (!isNowcast && path.includes('api/v1/')) headers['X-API-KEY'] = API_KEY;
+  if (!isNowcast && (path.includes('api/public/') || path.includes('v1/public/') || path.includes('v1/user/'))) {
     const tok = await getPubTok();
     if (tok) headers['x-public-token'] = tok;
   }

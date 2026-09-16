@@ -25,20 +25,26 @@ async function cached<T>(key: string, load: () => Promise<T>): Promise<T | null>
 
 export interface PerairanSlot {
   valid_from?: string;
-  time_desc?: string;
+  valid_to?: string;
+  time_desc?: string;    // 'Hari ini' | 'Besok' | 'H+2' | 'H+3'
   weather?: string;
   weather_desc?: string;
   warning_desc?: string; // 'NIL' = tanpa peringatan
-  wind_speed_min?: string;
-  wind_speed_max?: string;
+  wind_from?: string;
+  wind_speed_min?: number;
+  wind_speed_max?: number;
   wave_cat?: string;     // 'Tenang' | 'Rendah' | 'Sedang' | 'Tinggi' | ...
   wave_desc?: string;    // '0.5 - 1.25 m'
 }
 
 export interface PerairanDoc {
+  code?: string;
   name?: string;
+  issued?: string;
   wilpel?: string;
   slots?: PerairanSlot[];
+  /** array slot dari API resmi (4 slot: Hari ini/Besok/H+2/H+3) */
+  data?: PerairanSlot[];
   [k: string]: unknown;
 }
 
@@ -77,13 +83,36 @@ export async function getOverviewGelombang(): Promise<Record<string, unknown> | 
 let wilayahGeo: unknown | null = null;
 export async function getWilayahPerairanGeo(): Promise<unknown | null> {
   if (wilayahGeo) return wilayahGeo;
-  const data = await cached(`${MARITIM}/wilayah_perairan.geojson`, async () => {
-    const res = await fetch(`${MARITIM}/wilayah_perairan.geojson`);
+  // ponytail: path benar ada di /static/wilayah_perairan.json — versi `.geojson`
+  // selalu 404 (bug lama), sehingga overlay peta maritim tidak pernah muncul.
+  const data = await cached(`${MARITIM}/static/wilayah_perairan.json`, async () => {
+    const res = await fetch(`${MARITIM}/static/wilayah_perairan.json`);
     if (!res.ok) throw new Error(`wilayah ${res.status}`);
     return res.json();
   });
   wilayahGeo = data;
   return data;
+}
+
+/** kode wilayah ('U.04') & nama ('Samudera Hindia selatan Banten') dari properties geojson resmi */
+export interface WilayahPerairanFeature {
+  type: 'Feature';
+  properties: { WP_1?: string; WP_IMM?: string; WilPel?: string; simbol?: string };
+  geometry: unknown;
+}
+
+/** kategori gelombang per kode wilayah: { 'U.04': { issued, today, tomorrow, h2, h3 } } */
+export interface WaveOverviewEntry {
+  issued?: string;
+  today?: string;
+  tomorrow?: string;
+  h2?: string;
+  h3?: string;
+}
+
+export async function getOverviewGelombangTyped(): Promise<Record<string, WaveOverviewEntry> | null> {
+  const raw = await getOverviewGelombang();
+  return (raw as Record<string, WaveOverviewEntry>) ?? null;
 }
 
 /** parse '0.5 - 1.25 m' → {min, max} */
@@ -97,10 +126,83 @@ export const WAVE_CAT_MID: Record<string, number> = {
   'sangat tinggi': 5.0, 'ekstrem': 7.5, 'sangat ekstrem': 10.0,
 };
 
-/** slot perairan "hari ini" (slot terawal yang masih berlaku) */
-export function currentSlot(doc: PerairanDoc): PerairanSlot | null {
-  const slots = (doc.slots || (doc as { slot?: PerairanSlot[] }).slot || []);
+/**
+ * slot perairan "hari ini" (slot terawal yang masih berlaku).
+ * ponytail: API resmi mengirim array di `data` (bukan `slots`) — dulu bug di sini
+ * membuat seluruh integrasi maritim live tidak pernah kepakai (selalu null).
+ */
+export function currentSlot(doc: PerairanDoc | null): PerairanSlot | null {
+  const slots = doc?.data || doc?.slots || (doc as { slot?: PerairanSlot[] } | null)?.slot || [];
   return slots[0] ?? null;
+}
+
+// ─ MARITIM pelabuhan (public_api, 294 pelabuhan) ───────────────────────────
+
+/** satu baris dari `pelabuhan_list` — sudah ada koordinat, jadi tidak perlu fetch detail utk cari terdekat */
+export interface PelabuhanInfo {
+  file: string;
+  portname: string;
+  type?: string;
+  lat: number;
+  lon: number;
+}
+
+/** slot pelabuhan: semua field perairan + arus, pasut, suhu/kelembapan, jarak pandang */
+export interface PelabuhanSlot extends PerairanSlot {
+  current_from?: string;
+  current_speed_min?: number;
+  current_speed_max?: number;
+  visibility?: number; // meter
+  rh_min?: number;
+  rh_max?: number;
+  temp_min?: number;
+  temp_max?: number;
+  low_tide?: number;
+  low_tide_time?: string;
+  high_tide?: number;
+  high_tide_time?: string;
+}
+
+export interface PelabuhanDoc {
+  port_id?: string;
+  name?: string;
+  latitude?: number;
+  longitude?: number;
+  type?: string;
+  data?: PelabuhanSlot[];
+}
+
+export async function getPelabuhanList(): Promise<PelabuhanInfo[] | null> {
+  return cached<PelabuhanInfo[]>(`${MARITIM}/pelabuhan_list`, async () => {
+    const res = await fetch(`${MARITIM}/pelabuhan_list`);
+    if (!res.ok) throw new Error(`pelabuhan list ${res.status}`);
+    const json = (await res.json()) as { files?: Array<{ name?: string; portname?: string; type?: string; coor?: [number, number] }> };
+    return (json.files ?? [])
+      .filter(f => f.name && Array.isArray(f.coor))
+      .map(f => ({ file: String(f.name), portname: String(f.portname ?? ''), type: f.type, lat: f.coor![0], lon: f.coor![1] }));
+  });
+}
+
+/** doc pelabuhan terkini dari nama file (mis. '0088_Sintete.json') */
+export async function getPelabuhanByFile(file: string): Promise<PelabuhanDoc | null> {
+  return cached<PelabuhanDoc>(`${MARITIM}/pelabuhan/${file}`, async () => {
+    const res = await fetch(`${MARITIM}/pelabuhan/${encodeURIComponent(file)}`);
+    if (!res.ok) throw new Error(`pelabuhan ${res.status}`);
+    return res.json();
+  });
+}
+
+/** pelabuhan terdekat dari satu titik (cari di list dulu, baru fetch detailnya) */
+export async function getNearestPelabuhan(lat: number, lon: number): Promise<PelabuhanDoc | null> {
+  const list = await getPelabuhanList();
+  if (!list?.length) return null;
+  let best: PelabuhanInfo | null = null;
+  let bestD = Infinity;
+  for (const p of list) {
+    const d = (p.lat - lat) ** 2 + (p.lon - lon) ** 2;
+    if (d < bestD) { bestD = d; best = p; }
+  }
+  return best ? getPelabuhanByFile(best.file) : null;
 }
 
 // ── DWT (angin/cuaca per kecamatan & stasiun kereta) ────────────────────────

@@ -24,41 +24,14 @@ import { cityLandmarks } from '../data/cityLandmarks';
 const carouselContainer = ref<HTMLElement | null>(null);
 
 const localActiveCity = ref('DKI Jakarta');
-const hasUserSelectedCity = ref(false);
 
 // Determine the active city in the 10 major cities carousel
 const activeCarouselCity = computed(() => localActiveCity.value);
 
-// ─── Auto Slide Timer Logic (10 seconds interval) ───
-let autoSlideInterval: number | null = null;
-
-const stopAutoSlide = () => {
-  if (autoSlideInterval) {
-    clearInterval(autoSlideInterval);
-    autoSlideInterval = null;
-  }
-};
-
-const startAutoSlide = () => {
-  stopAutoSlide();
-  if (hasUserSelectedCity.value) return;
-  
-  autoSlideInterval = window.setInterval(() => {
-    const currentIndex = cityLandmarks.findIndex(l => l.fullName === activeCarouselCity.value);
-    if (currentIndex !== -1) {
-      const nextIndex = (currentIndex + 1) % cityLandmarks.length;
-      const nextCity = cityLandmarks[nextIndex];
-      
-      // Auto-slide only changes the local highlight/landmark card view
-      // and does not change the parent dashboard's selected city.
-      localActiveCity.value = nextCity.fullName;
-    }
-  }, 10000); // 10 seconds
-};
-
+// ponytail: auto-geser (10 dtk) + fetch cuaca per kota SENGAJA dimatikan dulu.
+// Kartu kini statis (landmark + nama kota). Kalau nanti mau suhu live 10 kota,
+// itu berarti 10 request tambahan — hidupkan lagi saat memang dibutuhkan.
 const selectCityManually = (city: string) => {
-  hasUserSelectedCity.value = true;
-  stopAutoSlide();
   emit('select-city', city);
 };
 
@@ -69,11 +42,6 @@ watch(
     const isMajor = cityLandmarks.some(l => l.fullName === newCity);
     if (isMajor) {
       localActiveCity.value = newCity;
-    } else {
-      // If it is a custom location (e.g. user clicked "Lokasi Saya" in the parent),
-      // we reset hasUserSelectedCity so the auto slide resumes.
-      hasUserSelectedCity.value = false;
-      startAutoSlide();
     }
   },
   { immediate: true }
@@ -123,16 +91,12 @@ const handleClickOutsideHint = (event: MouseEvent) => {
   }
 };
 
-// Reset auto-slide timer and scroll active card into view when active city changes
+// Scroll kartu aktif ke tengah saat kota aktif berubah
 watch(activeCarouselCity, () => {
   scrollToActiveCard();
-  if (!hasUserSelectedCity.value) {
-    startAutoSlide(); // resets the 10s timer
-  }
 });
 
 onMounted(() => {
-  startAutoSlide();
   // Scroll to active card on initial load
   setTimeout(() => {
     scrollToActiveCard();
@@ -141,7 +105,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  stopAutoSlide();
   document.removeEventListener('click', handleClickOutsideHint);
 });
 </script>

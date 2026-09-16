@@ -67,6 +67,13 @@ const todayIso = computed(() => {
 });
 
 // ── Generate realistic hourly data from a LocationData condition ─────────────
+// ── State dasar: HARUS di atas computed di bawah, karena `activeWeatherLocation`
+// dibaca watcher ber-`immediate: true` saat setup. Kalau dideklarasikan belakangan,
+// setup gagal dengan "Cannot access 'currentStep' before initialization".
+const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
+const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
+const destinationLocation = ref<LocationData | null>(null);
+
 // Active location for weather table (destination when selected, else start)
 const activeWeatherLocation = computed(() => {
   if (currentStep.value === 'selected' && destinationLocation.value) return destinationLocation.value;
@@ -238,12 +245,9 @@ onMounted(() => {
 let _weatherClockInterval: ReturnType<typeof setInterval> | null = null;
 
 // Steps & Interactive states
-const currentStep = ref<'overview' | 'search' | 'selected' | 'directions'>('overview');
 const userRequestedRoute = ref(false); // Only true when user explicitly clicks Petunjuk Arah
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
-const startLocation = ref<LocationData>(locationsList.find(c => c.id === 'bangunjiwo') || locationsList[0]);
-const destinationLocation = ref<LocationData | null>(null);
 const activeTravelMode = ref('car');
 const isLocating = ref(false);
 

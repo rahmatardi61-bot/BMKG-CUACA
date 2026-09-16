@@ -36,6 +36,15 @@ const DWT_PROXY = ['/event', {
   },
 }];
 
+// Nowcast RSS (www.bmkg.go.id) — tanpa header CORS → lewat proxy (tanpa header khusus)
+const NOWCAST_PROXY = ['/alerts', {
+  target: 'https://www.bmkg.go.id',
+  changeOrigin: true,
+  configure(proxy: any) {
+    proxy.on('proxyReq', (proxyReq: any) => proxyReq.setHeader('User-Agent', UA));
+  },
+}];
+
 const PROXY_ENTRIES: Array<[string, { pubtok?: boolean }]> = [
   ['/api/df', {}],
   ['/api/public', { pubtok: true }],
@@ -60,7 +69,7 @@ const bmkgProxy = Object.fromEntries(PROXY_ENTRIES.map(([prefix, flags]) => [pre
 export default defineConfig({
   plugins: [vue()],
   server: {
-    proxy: { ...bmkgProxy, '/event': DWT_PROXY[1] },
+    proxy: { ...bmkgProxy, '/event': DWT_PROXY[1], '/alerts': NOWCAST_PROXY[1] },
   },
   build: {
     rollupOptions: {

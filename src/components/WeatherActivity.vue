@@ -23,6 +23,7 @@ const props = defineProps<{
     windAngle: number;
     windDir: string;
   };
+  maritimLive?: { waveDesc: string; waveCat: string; warningDesc: string; wilpel: string } | null;
   selectedCity: string;
   slideDirection: string;
   currentCityLandmarkSvg: string;
@@ -50,6 +51,16 @@ const comfortIndex = computed(() => getComfortIndex(props.weatherData.temp));
 
 const shippingDesc = computed(() => {
   const windKts = Math.round(props.weatherData.windSpeed * 0.539957);
+  // Data RESMI perairan (maritim public_api via nearest-location) — dipakai kalau ada.
+  // ponytail: estimasi gelombang dari angin hanya fallback saat API perairan belum termuat.
+  const live = props.maritimLive;
+  if (live?.waveDesc) {
+    const warn = live.warningDesc && live.warningDesc !== 'NIL';
+    const area = live.wilpel ? ` Perairan ${live.wilpel}.` : '';
+    return warn
+      ? `PERINGATAN: ${live.warningDesc}. Tinggi gelombang ${live.waveDesc} (kategori ${live.waveCat}) dengan angin ${windKts} knot — tunda aktivitas pelayaran & perikanan sampai kondisi membaik.${area}`
+      : `Tinggi gelombang ${live.waveDesc} (kategori ${live.waveCat}) dengan angin ${windKts} knot. Kondisi alur pelayaran terpantau ${/tenang|rendah/i.test(live.waveCat) ? 'kondusif' : 'perlu kewaspadaan'}.${area}`;
+  }
   const waveEst = +(0.3 + (props.weatherData.windSpeed * 0.04)).toFixed(1);
   
   if (waveEst > 2.0 || windKts > 20) {
@@ -238,10 +249,10 @@ const airQualitySummary = computed(() => {
           </div>
         </div>
 
-        <!-- Telemetry Live Badge -->
+        <!-- Badge: nilai ISPU/AQI di card ini masih ESTIMASI (belum ada sumber resmi) — jangan klaim live -->
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/80 dark:bg-brand-navy-950/80 border border-slate-200/50 dark:border-brand-navy-800 text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider shrink-0">
-          <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
-          <span>ISPU LIVE</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          <span>ESTIMASI</span>
         </span>
       </div>
 

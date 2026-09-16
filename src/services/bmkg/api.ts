@@ -67,6 +67,25 @@ export function bmkgDirect<T>(path: string, params: Record<string, string | numb
   return getJson<T>(`${BMKG_BASE}/${path.replace(/^\//, '')}${q ? `?${q}` : ''}`, headers);
 }
 
+/**
+ * Nowcast RSS (peringatan dini cuaca) — host `www.bmkg.go.id`, TIDAK punya header
+ * CORS → tetap lewat proxy (dev: vite `/alerts`; prod: api/bmkg/[...path].ts).
+ */
+export function bmkgNowcastRss(): Promise<string> {
+  return request(`${PROXY}/alerts/nowcast/id`).then(r => r.text());
+}
+
+/**
+ * BMKG Open Data RESMI (ACAO `*` → direct, tanpa proxy).
+ * Bentuk item-nya identik dengan `forecast/coord` internal → `forecastToHourly` bisa dipakai ulang.
+ */
+export const bmkgOfficial = {
+  prakiraanCuacaAdm4: (adm4: string) =>
+    getJson<BmkgForecastResponse>(
+      `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${encodeURIComponent(adm4)}`,
+    ),
+};
+
 // ── Endpoint helpers (typed) ──────────────────────────────────────────────────
 import type {
   BmkgAdmResponse,

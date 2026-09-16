@@ -40,13 +40,15 @@ async function loadLiveZones(): Promise<Zone[] | null> {
     }
     const live: Zone[] = [];
     for (const f of (geo as { features: { properties: Record<string, unknown>; geometry: unknown }[] }).features) {
-      const code = String(f.properties?.code ?? f.properties?.kode ?? '');
+      // ponytail: properti geojson resmi = WP_1 (kode) / WP_IMM (nama) — versi lama
+      // membaca `code`/`kode` yang tidak ada, sehingga semua zona kosong.
+      const code = String(f.properties?.WP_1 ?? f.properties?.code ?? f.properties?.kode ?? '');
       const cen = geoCentroid(f as never);
       const ov = (overview as Record<string, Record<string, string>>)[code];
       if (!cen || !ov) continue;
       const cat = String(ov.today || '').toLowerCase();
       const wave = Object.entries(WAVE_CAT_MID).find(([k]) => cat.includes(k))?.[1] ?? 1;
-      live.push({ name: names.get(code) || code, lat: cen.lat, lng: cen.lng, wave, wind: wave * 6 });
+      live.push({ name: names.get(code) || String(f.properties?.WP_IMM ?? code), lat: cen.lat, lng: cen.lng, wave, wind: wave * 6 });
     }
     return live.length >= 20 ? live : null;
   } catch { return null; }

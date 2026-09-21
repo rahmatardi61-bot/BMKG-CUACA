@@ -127,7 +127,7 @@ const transitionName = computed(() =>
 </script>
 
 <template>
-  <div class="relative" ref="wrapperRef" v-if="alerts && alerts.length > 0">
+  <div class="relative" ref="wrapperRef" v-if="alerts && alerts.length > 0" v-api-marker:alerts>
 
     <!-- ─────────────────────────────────────────────────────────────────────────
          1. MOBILE VIEW: Single Card Carousel with Slide Navigation & Touch Swipe

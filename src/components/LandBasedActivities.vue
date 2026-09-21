@@ -1991,7 +1991,7 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between fullscreen-map-container">
+      <div v-if="isOpen" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between fullscreen-map-container" v-api-marker:land-based>
         
         <!-- The Background Map -->
         <div ref="desktopSlot" class="absolute inset-0 w-full h-full z-0 bg-slate-800">

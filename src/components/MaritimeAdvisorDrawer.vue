@@ -130,7 +130,7 @@ const getSectorLabel = (id: string) => {
 
 <template>
   <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-hidden flex flex-col justify-end md:flex-row md:justify-end">
+    <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-hidden flex flex-col justify-end md:flex-row md:justify-end" v-api-marker:maritime-advisor>
       <!-- Backdrop Overlay (reloaded) -->
       <Transition name="drawer-fade" appear>
         <div 

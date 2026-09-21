@@ -458,7 +458,7 @@ const submitReport = () => {
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col">
+  <div class="w-full h-full flex flex-col" v-api-marker:hero>
     <!-- Full Width: Large Hero Weather Card -->
     <div 
       class="w-full h-full flex-1 rounded-[4px] p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col justify-between gap-8 group weather-card-dynamic text-white transition-all duration-300"

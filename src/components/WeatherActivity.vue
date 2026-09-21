@@ -140,7 +140,7 @@ const airQualitySummary = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" v-api-marker:weather-activity>
     <!-- Index Kenyamanan Card (Futuristic & Compact) -->
     <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
       <!-- Neon Accent Top Line -->

@@ -111,7 +111,7 @@ onUnmounted(() => {
 
 <template>
   <!-- Full-width: Carousel card with backdrop -->
-  <div class="relative w-full">
+  <div class="relative w-full" v-api-marker:major-cities>
 
     <!-- Carousel card with backdrop -->
     <div class="relative bg-white/85 dark:bg-brand-navy-900/80 border border-slate-100/50 dark:border-brand-navy-700/20 no-blur rounded-[4px] p-5 shadow-sm overflow-hidden">

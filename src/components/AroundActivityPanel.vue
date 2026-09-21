@@ -467,7 +467,7 @@ const openRoute = (course: GolfCourse) => {
 </script>
 
 <template>
-  <div class="space-y-2.5">
+  <div class="space-y-2.5" v-api-marker:around-activity>
     <!-- ── Header ───────────────────────────────────────────────────────────── -->
     <div class="flex items-center justify-between">
       <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">

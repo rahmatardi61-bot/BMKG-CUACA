@@ -161,3 +161,42 @@ node --experimental-strip-types src/services/bmkg/nowcast.check.ts   # self-chec
    (`df/forecast/coord` per kota), jadi keputusan ini sekaligus menghemat kuota proxy.
 2. **Teks sampah `aldskj`** yang ter-render di antara carousel dan CurrentWeather (sisa edit
    manual di `MainDashboard.vue`) sudah dihapus.
+
+---
+
+## 7. API BOX MARKER (branch `api-box-marker`, alat dev — BUKAN untuk publik)
+
+Tujuan: membedakan sekali lihat kartu mana yang **live API**, **campuran**, atau **mock** —
+untuk diskusi dengan partner: API mana yang terpakai, mana yang bisa dibuang, dan API apa
+yang dibutuhkan konten yang belum ready.
+
+### Cara kerja
+
+| Elemen | Penjelasan |
+|---|---|
+| **Border 3px** | 🔴 merah = nilai kartu dari API live · 🟠 amber = campuran (ada child/nilai pakai API, ada yang mock) · ⚪ abu = mock/statis |
+| **Chip (kanan-atas)** | Nama pendek API yang dipakai kartu, mis. `⚡ df/coord · present`; kartu mock = `🔌 MOCK` |
+| **Tooltip (hover chip)** | Nama API lengkap, jumlah call, **query asli terakhir** (URL+param), dan **sample response asli** (potongan 1000 karakter, status HTTP). Ditambah rincian per bagian (🟢 live / 🟡 estimasi / 🔌 mock) dan catatan. |
+| **Panel kanan-bawah** | Klik `■ API BOX MARKER` → rekap SEMUA API terdaftar: ✓ hijau = pernah dipanggil (dengan jumlah), ○ abu = **tidak pernah dipanggil → kandidat dibuang** |
+
+### Implementasi (singkat)
+
+- `src/dev/apiMarker.ts` — registry API (pencocokan URL→id) + registry kartu (`CARD_MARKERS`)
+  + directive `v-api-marker` + patch `window.fetch` (dev-only): SEMUA request terekam otomatis
+  (URL, status, sample response via `res.clone()`), tanpa mengubah call-site mana pun.
+- Dipasang di `src/main.ts`; **semua ter-guard `import.meta.env.DEV`** → di build prod: tanpa
+  border, tanpa chip, tanpa patch fetch (directive terdaftar tapi no-op, jadi tidak ada warning).
+- Pemakaian di kartu: satu atribut di root komponen, contoh
+  `<HeroWeatherCard v-api-marker:hero …>` (pakai **arg** directive, bukan value, agar id
+  bertanda hubung tidak dianggap ekspresi JS oleh Volar/vue-tsc).
+- Analogi `v-chip` & `v-tooltip` Vuetify dibuat manual (project tidak pakai Vuetify).
+
+### Kartu yang sudah ditandai (17)
+
+hero, current-weather, forecast-panel, alerts, news, earthquake, satellite, major-cities (mock),
+transport (campuran), weather-activity (campuran), marine-map (campuran), port-tide,
+around-activity (campuran), land-based (campuran), maritime-advisor (campuran),
+aviation-advisor (mock), location-search (mock).
+
+Menambah kartu baru: tambahkan entri di `CARD_MARKERS` (src/dev/apiMarker.ts) lalu beri atribut
+`v-api-marker:<id>` di root komponennya.

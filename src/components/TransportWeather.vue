@@ -53,7 +53,7 @@ const getBgIconClass = (type: string) => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" v-api-marker:transport>
     <div class="flex items-center justify-between mb-2">
       <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Transportasi & Lalu Lintas</h3>
       <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Weather for Traffic</span>

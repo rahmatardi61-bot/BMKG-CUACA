@@ -289,7 +289,7 @@ onUnmounted(() => {
   <div 
     ref="searchContainerRef"
     class="relative w-full transition-all duration-300 select-none"
-  >
+   v-api-marker:location-search>
     <!-- ─── Search Input Bar ─── -->
     <div 
       class="relative flex items-center bg-slate-100/60 dark:bg-brand-navy-900/60 border border-slate-200/80 dark:border-white/10 rounded-[4px] pl-3.5 pr-1.5 py-1.5 transition-all duration-300 shadow-sm"

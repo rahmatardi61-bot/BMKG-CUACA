@@ -22,7 +22,7 @@ const getCategoryClass = (category: string) => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" v-api-marker:news>
     <!-- Header Section -->
     <div class="flex items-center justify-between mb-2">
       <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Berita & Pengumuman</h3>

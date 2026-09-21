@@ -803,7 +803,7 @@ watch(
 </script>
 
 <template>
-  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-6 shadow-sm backdrop-blur-md">
+  <div class="bg-white/70 dark:bg-brand-navy-900/60 border border-slate-100/50 dark:border-brand-navy-700/20 rounded-[4px] p-6 shadow-sm backdrop-blur-md" v-api-marker:marine-map>
     <!-- Header Area -->
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>

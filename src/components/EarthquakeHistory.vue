@@ -698,7 +698,7 @@ const getMmiWidth = (mmi: string) => {
 <template>
   <div 
     class="relative w-full rounded-[4px] p-5 overflow-hidden border border-white/10 dark:border-brand-navy-800/40 backdrop-blur-xl text-left bg-white/80 dark:bg-brand-navy-900/60 transition-all duration-300 hover:border-white/15 dark:hover:border-brand-navy-850/50"
-  >
+   v-api-marker:earthquake>
     <!-- Top Glow Border Line -->
     <div 
       class="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent rounded-t-[4px]"

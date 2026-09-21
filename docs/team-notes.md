@@ -184,10 +184,13 @@ yang dibutuhkan konten yang belum ready.
 - `src/dev/apiMarker.ts` — registry API (pencocokan URL→id) + registry kartu (`CARD_MARKERS`)
   + directive `v-api-marker` + patch `window.fetch` (dev-only): SEMUA request terekam otomatis
   (URL, status, sample response via `res.clone()`), tanpa mengubah call-site mana pun.
-- Dipasang di `src/main.ts`; **semua ter-guard `MARKER_ACTIVE`** = dev server **atau** URL
-  dengan query **`?apimarker=1`** → jadi di deploy Vercel/staging pun bisa dipakai: buka
-  `https://<domain>/?apimarker=1` dan bagikan URL itu ke partner. Tanpa query: bersih,
-  tanpa border/chip/patch fetch (directive no-op, tidak ada warning).
+- Dipasang di `src/main.ts`; **semua ter-guard `MARKER_ACTIVE`**, aktif jika salah satu:
+  1. dev server (`npm run dev`) — otomatis;
+  2. env **`VITE_API_MARKER=1`** (Vercel → Settings → Environment Variables, atau `.env` lokal)
+     → selalu aktif di build tersebut;
+  3. query URL **`?apimarker=1`** → aktif sesi itu saja (praktis untuk dibagikan ke partner:
+     `https://<domain>/?apimarker=1`).
+  Tanpa ketiganya: bersih — tanpa border/chip/patch fetch (directive no-op, tanpa warning).
 - Pemakaian di kartu: satu atribut di root komponen, contoh
   `<HeroWeatherCard v-api-marker:hero …>` (pakai **arg** directive, bukan value, agar id
   bertanda hubung tidak dianggap ekspresi JS oleh Volar/vue-tsc).

@@ -17,9 +17,14 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import type { Directive } from 'vue';
 
-// Aktif di dev server, ATAU di deploy mana pun lewat URL ?apimarker=1
-// (buat demo partner di Vercel/staging tanpa mengubah build).
-export const MARKER_ACTIVE = import.meta.env.DEV || /[?&]apimarker=1/.test(window.location.search);
+// Aktif jika salah satu:
+//   1. dev server (`npm run dev`)                 — otomatis
+//   2. env VITE_API_MARKER=1 (Vercel/.env lokal)  — selalu aktif di build itu
+//   3. URL ?apimarker=1                           — aktif sesi itu saja
+export const MARKER_ACTIVE =
+  import.meta.env.DEV ||
+  import.meta.env.VITE_API_MARKER === '1' ||
+  /[?&]apimarker=1/.test(window.location.search);
 const DEV = MARKER_ACTIVE;
 
 // ── Definisi API: urutan match penting (spesifik dulu) ──────────────────────

@@ -110,7 +110,7 @@ async function submit(): Promise<void> {
       <!-- catatan -->
       <p class="mt-5 text-center text-[10px] text-slate-500 leading-relaxed">
         Halaman ini terpisah dari aplikasi publik — khusus internal &amp; mitra kerja.<br />
-        Sesi aktif 7 hari di browser ini. Sumber data: BMKG.
+        Sesi aktif 24 jam di browser ini. Sumber data: BMKG.
       </p>
     </div>
   </div>

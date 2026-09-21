@@ -214,8 +214,9 @@ tanpa sesi → root = LoginPage).
 
 - Kredensial hardcoded di `src/services/auth.ts`: user **`bmkg`** / password **`demo2026`**
   — ganti di sana, atau (saat go-public) hapus `main.ts` seleksi root-nya.
-- Sesi disimpan di `localStorage` (`bmkg.auth.session`), berlaku **7 hari**; logout =
-  hapus key itu (belum ada tombol logout di UI).
+- Sesi disimpan di `localStorage` (`bmkg.auth.session`), berlaku **24 jam** (dicek saat
+  dibaca → sesi kedaluwarsa otomatis ditolak); logout = hapus key itu (belum ada
+  tombol logout di UI).
 - **Titik tukar ke auth resmi** sudah disiapkan di `auth.ts`: ganti isi `login()` dengan
   panggilan API + simpan token, sisanya (`isAuthenticated`/`session`/`logout`) tinggal
   menyesuaikan. Untuk proteksi server-side (cookie/token di edge), pola `middleware.ts`

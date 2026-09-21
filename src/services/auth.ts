@@ -14,7 +14,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 const SESSION_KEY = 'bmkg.auth.session';
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // sesi 7 hari di browser ini
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // sesi 24 jam
 
 /** user → password (HARDCODE, sementara). Ganti saat auth resmi tersedia. */
 const USERS: Record<string, string> = {

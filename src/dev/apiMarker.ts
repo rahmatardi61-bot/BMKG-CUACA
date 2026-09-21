@@ -22,8 +22,8 @@ import type { Directive } from 'vue';
 //   2. env VITE_API_MARKER=1 (Vercel/.env lokal)  — selalu aktif di build itu
 //   3. URL ?apimarker=1                           — aktif sesi itu saja
 export const MARKER_ACTIVE =
-  import.meta.env.DEV ||
   import.meta.env.VITE_API_MARKER === '1' ||
+  import.meta.env.DEV ||
   /[?&]apimarker=1/.test(window.location.search);
 const DEV = MARKER_ACTIVE;
 

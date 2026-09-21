@@ -64,7 +64,7 @@ const totalById = new Map<string, number>();
 /** Dipanggil dari patch window.fetch (dev-only). Tidak melempar error. */
 export function recordApiCall(url: string, method: string, status: number, body: string): void {
   const id = matchApiId(url);
-  const call: ApiCall = { url, method, status, sample: body.slice(0, 1000), at: new Date().toISOString() };
+  const call: ApiCall = { url, method, status, sample: body.slice(0, 100_000), at: new Date().toISOString() };
   const list = callsById.get(id) ?? [];
   list.push(call);
   if (list.length > 3) list.shift();
@@ -196,14 +196,41 @@ const tooltip = el('div', {
   border: `2px solid ${BORDER.live}`, borderRadius: '8px',
   padding: '10px 12px', fontSize: '11px', lineHeight: '1.45',
   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-  boxShadow: '0 8px 24px rgba(0,0,0,.45)', pointerEvents: 'none',
+  boxShadow: '0 8px 24px rgba(0,0,0,.45)', userSelect: 'text', cursor: 'auto',
+  maxHeight: '70vh', overflowY: 'auto',
 });
 document.body?.appendChild(tooltip);
 
-function tRow(label: string, value: string, color = '#94a3b8'): HTMLElement {
+async function copyText(t: string): Promise<boolean> {
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch {
+    try {
+      const ta = el('textarea', { position: 'fixed', opacity: '0' }, t) as HTMLTextAreaElement;
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); ta.remove(); return ok;
+    } catch { return false; }
+  }
+}
+
+function copyBtn(getText: () => string): HTMLElement {
+  const b = el('button', {
+    background: '#334155', color: '#e2e8f0', border: 'none', borderRadius: '4px',
+    padding: '1px 7px', fontSize: '10px', cursor: 'pointer', fontWeight: '700', flexShrink: '0',
+  }, '\u{1F4CB} salin');
+  b.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ok = await copyText(getText());
+    b.textContent = ok ? '\u2705 tersalin' : '\u274c gagal';
+    setTimeout(() => { b.textContent = '\u{1F4CB} salin'; }, 1200);
+  });
+  return b;
+}
+
+function tRow(label: string, value: string, color = '#94a3b8', copyValue?: string): HTMLElement {
   const row = el('div', { margin: '2px 0' });
   row.appendChild(el('span', { color, fontWeight: '700', marginRight: '6px' }, label));
   row.appendChild(el('span', { color: '#e2e8f0', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }, value));
+  if (copyValue !== undefined) row.appendChild(copyBtn(() => copyValue));
   return row;
 }
 
@@ -227,12 +254,16 @@ function renderTooltip(marker: CardMarker, cardId: string): void {
     const last = lastCall(id);
     tooltip.appendChild(tRow('calls', String(n), n > 0 ? '#4ade80' : '#64748b'));
     if (last) {
-      tooltip.appendChild(tRow('query', `${last.method} ${last.url.slice(0, 300)}`, '#7dd3fc'));
-      tooltip.appendChild(el('div', { color: '#64748b', marginTop: '4px' }, `sample (status ${last.status}, ${last.sample.length} ch):`));
+      tooltip.appendChild(tRow('query', `${last.method} ${last.url.slice(0, 300)}`, '#7dd3fc', `${last.method} ${last.url}`));
+      const shown = last.sample.slice(0, 1000);
+      const sh = el('div', { color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' });
+      sh.appendChild(el('span', {}, `sample (status ${last.status}, ${last.sample.length} ch${last.sample.length > shown.length ? ', tampil 1000' : ''}):`));
+      sh.appendChild(copyBtn(() => last.sample));
+      tooltip.appendChild(sh);
       const pre = el('pre', {
-        whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: '140px', overflow: 'auto',
+        whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: '220px', overflow: 'auto',
         background: '#1e293b', borderRadius: '4px', padding: '4px 6px', fontSize: '10px', color: '#a5f3fc', margin: '2px 0 4px',
-      }, last.sample);
+      }, shown);
       tooltip.appendChild(pre);
     } else {
       tooltip.appendChild(tRow('sample', 'belum ada call terekam (klik/setel ulang halaman bila seharusnya ada)', '#64748b'));
@@ -271,7 +302,7 @@ function attachMarker(root: HTMLElement, cardId: string, marker: CardMarker): vo
     renderTooltip(marker, cardId);
     tooltip.style.display = 'block';
     const r = chip.getBoundingClientRect();
-    const w = Math.min(tooltip.offsetWidth, 440);
+    const w = Math.min(tooltip.offsetWidth, 480);
     const h = tooltip.offsetHeight;
     let left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
     let top = r.bottom + 8;
@@ -279,9 +310,16 @@ function attachMarker(root: HTMLElement, cardId: string, marker: CardMarker): vo
     tooltip.style.left = `${left}px`;
     tooltip.style.top = `${top}px`;
   });
-  chip.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  chip.addEventListener('mouseleave', () => { hideTimer = window.setTimeout(hideTooltip, 350); });
   root.appendChild(chip);
 }
+
+// tooltip interaktif: tetap terbuka selama kursor di dalamnya (seleksi, scroll, salin);
+// tutup saat kursor meninggalkan chip DAN tooltip
+let hideTimer: ReturnType<typeof setTimeout> | undefined;
+function hideTooltip(): void { tooltip.style.display = 'none'; }
+tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+tooltip.addEventListener('mouseleave', hideTooltip);
 
 export const apiMarkerDirective: Directive<HTMLElement, string> = {
   mounted(el, binding) {

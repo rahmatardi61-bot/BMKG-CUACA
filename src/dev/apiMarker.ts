@@ -17,7 +17,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import type { Directive } from 'vue';
 
-const DEV = import.meta.env.DEV;
+// Aktif di dev server, ATAU di deploy mana pun lewat URL ?apimarker=1
+// (buat demo partner di Vercel/staging tanpa mengubah build).
+export const MARKER_ACTIVE = import.meta.env.DEV || /[?&]apimarker=1/.test(window.location.search);
+const DEV = MARKER_ACTIVE;
 
 // ── Definisi API: urutan match penting (spesifik dulu) ──────────────────────
 type ApiDef = { id: string; short: string; name: string; urlHint: string };

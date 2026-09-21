@@ -206,16 +206,19 @@ aviation-advisor (mock), location-search (mock).
 Menambah kartu baru: tambahkan entri di `CARD_MARKERS` (src/dev/apiMarker.ts) lalu beri atribut
 `v-api-marker:<id>` di root komponennya.
 
-### 7.1 Gate auth sementara (Vercel)
+### 7.1 Halaman login (gate sementara)
 
-Deployment Vercel branch ini **dipagari HTTP Basic Auth** lewat `middleware.ts` (Routing
-Middleware Vercel, edge, jalan sebelum CDN cache):
+Akses ke aplikasi dibatasi lewat **halaman login UI** (`src/pages/LoginPage.vue`) — bukan
+popup Basic Auth. Jalan seragam di dev lokal & Vercel (client-side, di `main.ts`:
+tanpa sesi → root = LoginPage).
 
-- Kredensial hardcoded di file `middleware.ts` (konstanta di atas): user **`bmkg`** /
-  password **`demo2026`** — **ganti di sana**, atau hapus file-nya saat go-public.
-- Melindungi halaman **dan** `/api/bmkg/*` (route tanpa ekstensi file). Aset hashed
-  (*.js/css/png) sengaja terbuka — percuma tanpa `index.html`.
-- Login = popup bawaan browser; setelah sukses, request `fetch` aplikasi ikut membawa
-  kredensial (same-origin) sehingga data live tetap jalan normal.
-- **Hanya di Vercel** — `npm run dev` lokal & Docker (server.mjs) tidak terpengaruh.
-- Verifikasi: buka deployment dalam incognito → harus muncul popup login; salah password → 401.
+- Kredensial hardcoded di `src/services/auth.ts`: user **`bmkg`** / password **`demo2026`**
+  — ganti di sana, atau (saat go-public) hapus `main.ts` seleksi root-nya.
+- Sesi disimpan di `localStorage` (`bmkg.auth.session`), berlaku **7 hari**; logout =
+  hapus key itu (belum ada tombol logout di UI).
+- **Titik tukar ke auth resmi** sudah disiapkan di `auth.ts`: ganti isi `login()` dengan
+  panggilan API + simpan token, sisanya (`isAuthenticated`/`session`/`logout`) tinggal
+  menyesuaikan. Untuk proteksi server-side (cookie/token di edge), pola `middleware.ts`
+  Vercel bisa dipasang kembali (pernah ada di commit `5c197cd`).
+- Batas jujur: ini gate klien — user teknis masih bisa mem-bypass. Kredensial ikut di
+  bundle. Cukup untuk menahan publik kasual selama masa demo.

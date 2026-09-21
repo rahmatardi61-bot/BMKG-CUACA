@@ -205,3 +205,17 @@ aviation-advisor (mock), location-search (mock).
 
 Menambah kartu baru: tambahkan entri di `CARD_MARKERS` (src/dev/apiMarker.ts) lalu beri atribut
 `v-api-marker:<id>` di root komponennya.
+
+### 7.1 Gate auth sementara (Vercel)
+
+Deployment Vercel branch ini **dipagari HTTP Basic Auth** lewat `middleware.ts` (Routing
+Middleware Vercel, edge, jalan sebelum CDN cache):
+
+- Kredensial hardcoded di file `middleware.ts` (konstanta di atas): user **`bmkg`** /
+  password **`demo2026`** — **ganti di sana**, atau hapus file-nya saat go-public.
+- Melindungi halaman **dan** `/api/bmkg/*` (route tanpa ekstensi file). Aset hashed
+  (*.js/css/png) sengaja terbuka — percuma tanpa `index.html`.
+- Login = popup bawaan browser; setelah sukses, request `fetch` aplikasi ikut membawa
+  kredensial (same-origin) sehingga data live tetap jalan normal.
+- **Hanya di Vercel** — `npm run dev` lokal & Docker (server.mjs) tidak terpengaruh.
+- Verifikasi: buka deployment dalam incognito → harus muncul popup login; salah password → 401.

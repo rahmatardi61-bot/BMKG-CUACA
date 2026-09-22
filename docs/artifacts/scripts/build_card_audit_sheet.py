@@ -180,7 +180,7 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     e_lines, f_lines, g_blocks, h_lines = [], [], [], []
     for api_id in m['apis']:
         name = defs.get(api_id, {}).get('name', api_id)
-        e_lines.append(f'• {name}')
+        e_lines.append(f'▸ {name}')
         call = (calls.get(api_id) or [{}])[-1]
         if call:
             f_lines.append((f'[{call.get("status", "?")}] {call.get("url", "?")}', call.get('proxied', False)))

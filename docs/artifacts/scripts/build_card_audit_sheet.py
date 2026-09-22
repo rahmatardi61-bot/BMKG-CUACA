@@ -240,5 +240,46 @@ for col, w in {'A': 5, 'B': 28, 'C': 70, 'D': 14, 'E': 30, 'F': 48, 'G': 92, 'H'
     ws.column_dimensions[col].width = w
 ws.freeze_panes = 'A5'
 
+# ══ sheet 'Sample Full': response mentah UTUH — tanpa dipotong ══
+# Batas fisik sel Excel = 32.767 char → respons panjang dipecah per 30.000 char
+# (kolom '#' = potongan ke-N; gabungkan berurutan = respons asli utuh).
+sf = wb.create_sheet('Sample Full')
+sf['A1'] = ('SAMPLE RESPONSE LENGKAP — respons asli utuh dari hasil fetch. '
+            'Sel Excel maks 32.767 char → respons panjang dipecah per 30.000 char '
+            '(kolom # = urutan potongan). Sample penuh juga tersedia di docs/screenshots/cards/dump.json')
+sf['A1'].font = Font(bold=True, size=11)
+sf.merge_cells('A1:F1')
+for c, (h, w) in enumerate(zip(['Card', 'API', '#', 'Status', 'URL', 'Response (utuh, potongan 30rb char)'],
+                               [24, 30, 5, 8, 46, 180]), start=1):
+    cell = sf.cell(row=2, column=c, value=h)
+    cell.font = Font(bold=True, size=9)
+    cell.border = thin
+    cell.alignment = Alignment(vertical='center')
+    sf.column_dimensions[chr(64 + c)].width = w
+
+card_of = {}
+for cid, cd in dump.get('cards', {}).items():
+    for aid in cd.get('apis', []):
+        card_of.setdefault(aid, cid)
+
+r = 3
+for api_id, clist in (dump.get('calls') or {}).items():
+    api_name = defs.get(api_id, {}).get('name', api_id)
+    for call in clist:
+        sample = call.get('sample', '')
+        if not sample:
+            continue
+        chunks = [sample[i:i + 30000] for i in range(0, len(sample), 30000)]
+        for ci, ch in enumerate(chunks, start=1):
+            vals = [card_of.get(api_id, '—'), api_name, ci, call.get('status', '?'),
+                    call.get('url', '?'), ch]
+            for c, v in enumerate(vals, start=1):
+                cell = sf.cell(row=r, column=c, value=v)
+                cell.border = thin
+                cell.font = Font(size=8, name='Courier New') if c == 6 else Font(size=9)
+            sf.row_dimensions[r].height = 12
+            r += 1
+sf.freeze_panes = 'A3'
+
 wb.save(XLSX)
 print(f"OK — sheet '{SHEET}': {len(cards)} card, gambar {sum(1 for c in cards if os.path.exists(os.path.join(tmp, f'{c}.jpg')))}")

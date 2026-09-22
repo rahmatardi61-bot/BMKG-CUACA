@@ -22,7 +22,62 @@ BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')
 CARD_DIR = os.path.join(BASE, 'docs', 'screenshots', 'cards')
 XLSX = os.path.join(BASE, 'docs', 'bmkg-api-mapping.xlsx')
 SHEET = 'Audit Card + Screenshot'
-SAMPLE_MAX = 1500  # batas aman sel Excel (32.767)
+SAMPLE_MAX = 600  # per API (batas sel Excel 32.767; sample penuh tetap di dump.json)
+
+# Field response yang dipakai UI + penjelasannya (sumber kebenaran:
+# src/services/bmkg/adapters.ts, openData.ts, dan komponen terkait)
+API_USAGE = {
+  'df-forecast': ('data[0].cuaca[][] → t, hu, weather_desc, tp, ws, tcc, local_datetime',
+    'Suhu & kelembapan; weather_desc → ikon lucide (descToIcon); hujan mm → % (tp×20, aproksimasi); local_datetime → urutan jam & strip 7 hari (slot pertama tiap grup). API tidak punya tmin/tmax/UV → diestimasi.'),
+  'df-adm': ('provinsi, kotkab, kecamatan, desa',
+    'Resolusi koordinat → wilayah administratif; label lokasi kartu.'),
+  'df-amandemen': ('data[] (item cuaca amandemen terbaru)',
+    'Pembaruan prakiraan (amandemen) → menyegarkan nilai/badge peringatan.'),
+  'presentwx': ('data.t, hu, weather_desc, ws, tcc, vs, local_datetime',
+    'Kondisi terobservasi saat ini: suhu, status→ikon, "terasa seperti" = t+(hu-50)/10, UV estimasi dari tcc, jarak pandang vs m→km.'),
+  'sunset': ('sunrise, sunset (format 12-jam)',
+    'Dikonversi ke HH:mm → info matahari terbit/terbenam di CurrentWeather.'),
+  'public-warning': ('data.today / data.tomorrow (warning_level, impact/description)',
+    'Peringatan hari ini/besok → severity Awas/Siaga/Waspada → AlertsPanel; kosong = tanpa peringatan.'),
+  'public-warning-cyclone': ('data siklon terdampak',
+    'Peringatan siklon untuk wilayah — hanya muncul saat ada siklon aktif.'),
+  'nowcast': ('XML RSS: <item> per provinsi (title, description, pubDate)',
+    'Peringatan dini 3-6 jam resmi; difilter per provinsi; menang atas warning internal df.'),
+  'blog-wp': ('[].title.rendered, excerpt.rendered, link, _embedded (featured media)',
+    'Artikel berita WP → NewsSection; fallback mock saat upstream 502 (sering).'),
+  'public-video': ('[].judul, video_url',
+    'Video berita terbaru (per hashtag) → tab video NewsSection.'),
+  'tews': ('features[].properties (magnitude, kedalaman, wilayah, waktu)',
+    'Autogempa terkini + gempa dirasakan → EarthquakePanel.'),
+  'dwt': ('rows [kota, kecamatan/stasiun, lat, lng, id, waktu, slots cuaca[]]',
+    'Cuaca kecamatan (jalan raya) & stasiun (kereta) terdekat ≤2° → kartu transportasi.'),
+  'maritim-nearest': ('code / nama wilayah laut terdekat',
+    'Anchor koordinat → wilayah perairan/pelabuhan resmi terdekat.'),
+  'maritim-perairan': ('data[] → weather_desc, wave_desc, wind_speed_min/max, warning_desc, time_desc',
+    'Slot perairan resmi (Hari ini…H+3) → kartu maritim & aktivitas pelayaran; currentSlot = slot pertama yang masih berlaku.'),
+  'maritim-overview': ('{code: issued, today, tomorrow, wave_desc}',
+    'Ringkasan 232 wilayah → warna peta laut + legend gelombang.'),
+  'maritim-wilayah': ('features[].geometry (polygon 232 wilayah)',
+    'Polygon GeoJSON → layer batas wilayah perairan di peta.'),
+  'maritim-pelabuhan-list': ('files[].coor, file',
+    'Koordinat 294 pelabuhan → pilih terdekat → fetch detail.'),
+  'maritim-pelabuhan': ('detail pelabuhan + data pasut',
+    'Pasut (UTC → zona waktu pelabuhan) → PortTideCard; pasut null → blok disembunyikan.'),
+  'official-forecast': ('data[].cuaca[][] → t, hu, weather_desc, tp',
+    'Fallback prakiraan resmi (open-data) bila df kosong — bentuk item identik df.'),
+  'overpass': ('elements[].lat/lon/tags',
+    'POI OpenStreetMap sekitar pengguna → AroundActivity.'),
+  'nominatim': ('[].lat/lon/display_name',
+    'Geocode nama tempat → koordinat.'),
+  'osrm': ('routes[].geometry, duration, distance',
+    'Rute antar titik → panel aktivitas darat.'),
+  'satelit': ('(PNG) inderaja.bmkg.go.id H08_*.png',
+    'Citra Himawari-9 → background panel satelit (bukan JSON; terekam sebagai request gambar).'),
+  'tcwc-cyclone': ('data siklon tropis aktif',
+    'Posisi & intensitas siklon → panel siklon.'),
+  'local-json': ('file statis /data|sectors|ports.json',
+    'Snapshot lokal (layer angin, pelabuhan, landmark) → bagian kartu yang mock.'),
+}
 
 JUDUL = {
     'hero': 'Hero Weather Card — Cuaca Hari Ini',
@@ -77,19 +132,20 @@ wrap = Alignment(wrap_text=True, vertical='top')
 head_fill = PatternFill('solid', fgColor='1F3864')
 head_font = Font(bold=True, color='FFFFFF', size=10)
 
-ws.merge_cells('A1:H1')
+ws.merge_cells('A1:I1')
 ws['A1'] = 'AUDIT CONTENT CARD + SCREENSHOT — komponen, API yang dipakai, query, sample response'
 ws['A1'].font = Font(bold=True, size=13)
-ws.merge_cells('A2:H2')
+ws.merge_cells('A2:I2')
 ws['A2'] = ('Screenshot diambil dari deployment prod (server.mjs + dist, data live) dengan API BOX MARKER aktif '
             '— border merah = live, amber = campuran, abu = mock (lihat kolom Status). '
+    'Kolom "Field dipakai UI" = pemetaan response → nilai yang dirender (sumber: src/services/bmkg/adapters.ts). '
             'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js')
 ws['A2'].font = Font(size=9, italic=True, color='555555')
-ws.merge_cells('A3:H3')
+ws.merge_cells('A3:I3')
 ws['A3'] = 'Status: ✅ LIVE = nilai kartu dari API live  |  ⚠️ CAMPURAN = sebagian live/sebagian mock  |  🔌 MOCK = statis/estimasi'
 ws['A3'].font = Font(size=9, bold=True, color='555555')
 
-headers = ['No', 'Komponen', 'Screenshot', 'Status', 'API dipakai', 'Query / URL terakhir', 'Sample Response (potongan)', 'Catatan']
+headers = ['No', 'Komponen', 'Screenshot', 'Status', 'API dipakai', 'Query / URL terakhir', 'Sample Response (per API, dipotong)', 'Field dipakai UI + penjelasan', 'Catatan']
 for c, h in enumerate(headers, 1):
     cell = ws.cell(row=4, column=c, value=h)
     cell.fill, cell.font, cell.border = head_fill, head_font, thin
@@ -117,51 +173,51 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     sc.fill = PatternFill('solid', fgColor=fill)
     sc.alignment = Alignment(vertical='top')
 
-    # E: API dipakai — F: query/url — G: sample
-    e_lines, f_lines, sample = [], [], ''
+    # E: API dipakai — F: query/url — G: sample PER API — H: field dipakai UI + penjelasan
+    e_lines, f_lines, g_blocks, h_lines = [], [], [], []
     for api_id in m['apis']:
         name = defs.get(api_id, {}).get('name', api_id)
         e_lines.append(f'• {name}')
         call = (calls.get(api_id) or [{}])[-1]
         if call:
             f_lines.append(f'[{call.get("status", "?")}] {call.get("url", "?")}')
-            sample = sample or call.get('sample', '')
+            pot = ' '.join(call.get('sample', '')[:SAMPLE_MAX].split())  # pretty-print → 1 baris
+            g_blocks.append(f'▸ {name}\n{pot}{" …" if len(call.get("sample", "")) > SAMPLE_MAX else ""}')
         else:
             f_lines.append(f'(belum terekam saat capture) — {name}')
+            g_blocks.append(f'▸ {name}\n(tidak ada response live)')
+        fields, penjelasan = API_USAGE.get(api_id, ('(belum terpetakan)', ''))
+        h_lines.append(f'▸ {fields}\n  {penjelasan}')
     ws.cell(row=row, column=5, value='\n'.join(e_lines) if e_lines else '— (tanpa API live)')
     ws.cell(row=row, column=6, value='\n'.join(f_lines) if f_lines else '—')
-    if sample:
-        pot = ' '.join(sample[:SAMPLE_MAX].split())  # rapikan: JSON pretty-print → 1 baris (seragam dgn row lain)
-        ws.cell(row=row, column=7, value=pot + (' … (dipotong)' if len(sample) > SAMPLE_MAX else ''))
-    else:
-        ws.cell(row=row, column=7, value='— (tidak ada response live)')
-
-    # estimasi tinggi teks kolom G (sample) — biar tinggi baris mengikuti konten terpanjang
-    txt = ws.cell(row=row, column=7).value or ''
-    est_lines = sum(max(1, -(-len(seg) // 112)) for seg in str(txt).split('\n'))
-    est_h = est_lines * 10.5 + 6
+    ws.cell(row=row, column=7, value='\n\n'.join(g_blocks) if g_blocks else '— (tidak ada response live)')
+    ws.cell(row=row, column=8, value='\n'.join(h_lines) if h_lines else '— (kartu tanpa API live — 100% statis)')
 
     note = m.get('note', '')
     parts = m.get('parts') or []
-    h_lines = [note] if note else []
-    h_lines += [f"– {p['label']} ({'live' if p['type'] == 'live' else 'est' if p['type'] == 'est' else 'mock'})" for p in parts]
-    ws.cell(row=row, column=8, value='\n'.join(h_lines) or '—')
+    i_lines = [note] if note else []
+    i_lines += [f"– {p['label']} ({'live' if p['type'] == 'live' else 'est' if p['type'] == 'est' else 'mock'})" for p in parts]
+    ws.cell(row=row, column=9, value='\n'.join(i_lines) or '—')
 
     # format baris
-    for c in range(1, 9):
+    for c in range(1, 10):
         cell = ws.cell(row=row, column=c)
         cell.border = thin
-        if c in (2, 5, 6, 7, 8):
+        if c in (2, 5, 6, 7, 8, 9):
             cell.alignment = wrap
-        if c in (1, 2, 5):
+        if c in (1, 2, 5, 8):
             cell.font = Font(size=9)
         if c in (6, 7):
             cell.font = Font(size=8, name='Courier New')
-    # batas tinggi baris Excel = 409,5 pt (teks lebih panjang tetap utuh di sel, tinggal di-klik)
+    # tinggi baris = konten terpanjang (sample per-API / field+penjelasan / catatan); batas Excel 409,5pt
+    def est_h_of(col, chars):
+        txt = str(ws.cell(row=row, column=col).value or '')
+        return sum(max(1, -(-len(seg) // chars)) for seg in txt.split('\n')) * 10.5 + 6
+    est_h = max(est_h_of(7, 92), est_h_of(8, 56), est_h_of(9, 38))
     ws.row_dimensions[row].height = min(409, max(90, est_h, img_h * 0.75 + 8)) if img_h else min(409, max(90, est_h))
     row += 1
 
-for col, w in {'A': 5, 'B': 30, 'C': 70, 'D': 14, 'E': 34, 'F': 52, 'G': 115, 'H': 44}.items():
+for col, w in {'A': 5, 'B': 28, 'C': 70, 'D': 14, 'E': 30, 'F': 48, 'G': 92, 'H': 56, 'I': 38}.items():
     ws.column_dimensions[col].width = w
 ws.freeze_panes = 'A5'
 

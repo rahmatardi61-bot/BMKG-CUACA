@@ -203,11 +203,18 @@ Artefak mentah: `docs/scrapping_satellite-bmkg-go-id/` (network.json, ui.json, u
 | Peta | MapLibre (WebGL) | Leaflet (raster img) | Setara; keduanya sah — tak perlu migrasi |
 | Tile API | `api22/tile` TMS + modelrun | **sama persis** | ✅ paritas penuh |
 | Basemap | Esri World Imagery + pbf provinsi | Esri World Imagery | ✅ sama (pbf = bonus BMKG) |
-| Param | 9 layer Himawari | 4 (EH/NC/RP/WV) | ⬆ mudah: extend `PARAM_BY_TAB` dgn SW/SM/VA/VS |
+| Param | 9 layer Himawari | **8** (EH/NC/RP/WV/SW/SM/VA/VS; hires skip) | ✅ |
 | Timeline | 18 frame @10 mnt (3 jam) | 18 frame @10 mnt | ✅ paritas |
-| Play | ya + kecepatan 300 ms | ya, fixed 1,5 s | ⬆ opsional: input kecepatan |
-| Colorbar suhu | −100…60 °C (EH) | tidak ada | ⬆ opsional: gradient CSS murah |
-| Fly-to area | 36 provinsi | tidak ada | ⬆ opsional: pakai dropdown kota existing |
+| Play | ya + kecepatan 300 ms | ya, input ms default 300 | ✅ |
+| Colorbar suhu | −100…60 °C (EH) | ✓ gradient CSS saat param EH | ✅ |
+| Fly-to area | 36 provinsi | ✓ 9 area (Indonesia + 8 wilayah) | ✅ |
+| Label channel | nama layer di panel | badge channel aktif + label tab | ✅ |
 | Overlay petir/OSCT/RDCA | ada (pbf /tmp/points) | tidak | ❌ skip — data tidak terpakai publik |
 | GK2A/GSMAP | ada (stale) | tidak | ❌ skip — sesuai §5 (stale) |
 | Atribusi | ada | "Sumber citra: BMKG" | ✅ |
+
+**State implementasi kartu (final, lihat `src/components/SatelliteMap.vue`):**
+- 1 `TileLayer` per frame (18 layer, opacity 0) **pra-muat** saat data masuk; play/geser slider = toggle opacity saja → 0 request jaringan, tanpa glitch (jangan pakai `setUrl()` per frame — memicu buang+muat ulang tile → kedip)
+- Ganti param/frames → rebuild layer (tile lama ter-cache browser → murah)
+- Label tab jujur per channel; channel visible (`NC`/`VS`) memang gelap saat malam — dijelaskan badge, bukan bug
+- Fallback: modelrun gagal → gambar statis inderaja via `<img>` + badge MODE STATIS

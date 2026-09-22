@@ -82,6 +82,8 @@ Error: koordinat `999` / kosong → `403 {status:403, message:"Forbidden"}` (buk
 | WIDIS | `https://widis.bmkg.go.id/ndf/cgms/weather/forward` | satellite weather forward (butuh param; 404 tanpa) |
 | Windmap SUS | `https://bmkg-sus.geo.id/windmap/ecmwf/1000` | ECMWF wind tiles |
 | CircleGeo | `https://tiles.circlegeo.com/data/{indocg,administration}.json` | boundary administratif peta |
+| Satellite Tile API | `https://satellite.bmkg.go.id/api22/modelrun` + `/api22/tile/{z}/{x}/{y}.png?tiletype=himawari9&modelname=himawari9&param={EH\|NC\|WV\|RP\|SW\|SM\|VA\|VS}&baserun={ISO-UTC}` | tile Himawari-9 TMS (skema `tms:true`), 18 frame @10 mnt, CORS `*` — dipakai kartu Citra Satelit (detail: `satellite-himawari.md`) |
+| Inderaja (statis) | `https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_{EH,NC,WE,RP,RD}_{Area}.png` | PNG 1674×1118, **tanpa CORS → hanya `<img>`** — fallback kartu Citra Satelit |
 | Blog WP | `https://cuaca.bmkg.go.id/blog/wp-json/wp/v2/` | konten /berita* — **dirender SSR** (tidak muncul di XHR) |
 | Weather lama | `https://weather.bmkg.go.id/api/` | `defaultURL` di runtime config (belum terpakai di capture) |
 | Chat | `tawk.to` | widget livechat |

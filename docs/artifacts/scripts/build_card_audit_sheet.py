@@ -74,7 +74,7 @@ API_USAGE = {
   'osrm': ('routes[].geometry, duration, distance',
     'Rute antar titik → panel aktivitas darat.'),
   'satellite-modelrun': ('himawari9[] (baserun ISO UTC, terbaru index 0)',
-    'Satellite Tile API — daftar 18 frame @10 menit → timeline slider peta satelit interaktif (CORS *, tanpa proxy).'),
+    'Satellite Tile API — daftar 18 frame @10 menit → 18 TileLayer pra-muat; play = toggle opacity (0 request saat animasi). CORS *, tanpa proxy.'),
   'satelit': ('(PNG biner) inderaja.bmkg.go.id H08_*.png',
     'Citra Himawari statis → FALLBACK peta satelit bila Tile API gagal (background <img>; terekam sebagai request gambar biner).'),
   'tcwc-cyclone': ('data siklon tropis aktif',

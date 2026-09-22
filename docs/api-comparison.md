@@ -156,7 +156,7 @@ Kolom **"Akses (dev)"** di `bmkg-api-mapping.xlsx` (sheet API Mapping) dan kolom
 | `GET /api/v1/public/maritim/nearest-location` | Wilayah laut terdekat | `WaveRadarMap.vue`, `MaritimeAdvisorDrawer.vue` | 🔴 BELUM | — |
 | `GET /api/v1/maritim/route` | Rute pelayaran | `TransportWeather.vue` | 🟡 BEDA-SUMBER | OSRM |
 | `GET /api/v1/maritim/water-area/water_area_point.geojson` | Titik area laut | — | 🔴 BELUM | — |
-| `GET /api/v1/sus/modelrun` | Katalog run model radar/windmap | `SatelliteMap.vue` | 🟡 BEDA-SUMBER | inderaja HIMA (statis) |
+| `GET /api/v1/sus/modelrun` | Katalog run model radar/windmap | — (windmap belum dibuat) | 🟡 BEDA-SUMBER | — (katalog radar/windmap, bukan satelit) |
 | `GET /api/v1/api/signature/impact/public/list/<tanggal>` | IBF 7 hari (/ibf, /map) | — | 🔴 BELUM | — |
 | `GET /api/v1/maps/*/metadata/tiles` (5 varian) | Metadata layer peta | `SatelliteMap.vue`, `WaveRadarMap.vue` | 🟡 BEDA-SUMBER | CartoCDN basemap |
 | `GET /api/v1/tourism/tiles/data/tourism.json` | POI wisata | `LandBasedActivities.vue` | 🟡 BEDA-SUMBER | Overpass (OSM) |
@@ -170,7 +170,7 @@ Kolom **"Akses (dev)"** di `bmkg-api-mapping.xlsx` (sheet API Mapping) dan kolom
 | Endpoint | Dipakai di Original | Komponen Redesign | Status | Sumber Pengganti |
 |---|---|---|---|---|
 | `spartan.bmkg.go.id/map/modelrun` | Katalog 14+ model (GFS, SPARTAN, QPE, FDRS, dll) | — | 🔴 BELUM | — |
-| `widis.bmkg.go.id/ndf/cgms/weather/forward` | Data satelit CGMS | `SatelliteMap.vue` | 🟡 BEDA-SUMBER | inderaja HIMA (statis) |
+| `widis.bmkg.go.id/ndf/cgms/weather/forward` | Data satelit CGMS | `SatelliteMap.vue` | 🟢 SETARA | Satellite Tile API `satellite.bmkg.go.id/api22` — peta interaktif 8 param + 18 frame (detail: `satellite-himawari.md`) |
 | `bmkg-sus.geo.id/windmap/ecmwf/1000` | Tile angin ECMWF | — | 🔴 BELUM | — |
 | `tiles.circlegeo.com/data/{indocg,administration}.json` | Boundary administratif | `SatelliteMap.vue` | 🟡 BEDA-SUMBER | CartoCDN |
 | `cuaca.bmkg.go.id/blog/wp-json/wp/v2/` | Konten /berita* (SSR) | `NewsSection.vue` | 🔴 BELUM | `mockData.ts` |

@@ -55,7 +55,8 @@ const API_DEFS: (ApiDef & { match: RegExp })[] = [
   { id: 'overpass', short: 'overpass', name: 'Overpass API: POI OpenStreetMap', urlHint: 'overpass-api.de/api/interpreter', match: /overpass-api\.de/ },
   { id: 'nominatim', short: 'nominatim', name: 'Nominatim: geocode OSM', urlHint: 'nominatim.openstreetmap.org/search', match: /nominatim\.openstreetmap\.org/ },
   { id: 'osrm', short: 'osrm', name: 'OSRM: routing', urlHint: 'router.project-osrm.org/route', match: /router\.project-osrm\.org/ },
-  { id: 'satelit', short: 'satelit', name: 'Citra Satelit Himawari-9 (background-image, bukan fetch)', urlHint: 'inderaja.bmkg.go.id/IMAGE/HIMA/H08_*.png', match: /inderaja\.bmkg\.go\.id/ },
+  { id: 'satelit', short: 'satelit', name: 'Citra Satelit inderaja (fallback <img>, bukan fetch)', urlHint: 'inderaja.bmkg.go.id/IMAGE/HIMA/H08_*.png', match: /inderaja\.bmkg\.go\.id/ },
+  { id: 'satellite-modelrun', short: 'sat-tile-api', name: 'Satellite Tile API: daftar 18 frame (modelrun)', urlHint: 'satellite.bmkg.go.id/api22/modelrun', match: /satellite\.bmkg\.go\.id\/api22\/modelrun/ },
   { id: 'local-json', short: 'lokal', name: 'File statis lokal (snapshot/aset)', urlHint: '/data/*.json', match: /^\/(data|sectors|ports)\.json/ },
 ];
 
@@ -114,8 +115,8 @@ export const CARD_MARKERS: Record<string, CardMarker> = {
   },
   earthquake: { kind: 'live', apis: ['tews'], note: 'autogempa + gempadirasakan, 2 endpoint TEWS.' },
   satellite: {
-    kind: 'live', apis: ['satelit'],
-    note: 'Gambar PNG inderaja.bmkg.go.id (background-image <img> → TIDAK terekam patch fetch).',
+    kind: 'live', apis: ['satellite-modelrun', 'satelit'],
+    note: 'Peta Leaflet interaktif + tile Himawari (satellite.bmkg.go.id/api22, CORS *, 18 frame @10 mnt; modelrun terekam fetch, tile dimuat Leaflet via <img> → tak tampak di patch). Fallback statis: inderaja PNG.',
   },
   'major-cities': {
     kind: 'mock', apis: [], parts: [{ type: 'mock', label: 'Kartu statis: landmark + nama kota (auto-geser & fetch sengaja dimatikan, 16 Sep)' }],

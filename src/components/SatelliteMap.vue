@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { 
   Radar, 
   Activity,
@@ -12,9 +14,7 @@ import {
   Wind
 } from 'lucide-vue-next';
 
-const props = defineProps<{
-  selectedCity: string;
-}>();
+
 
 const emit = defineEmits<{
   (e: 'select-city', city: string): void;
@@ -57,100 +57,38 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-const cities = [
-  { name: 'Sumatera Utara', x: '12%', y: '28%', temp: '30°C', weather: 'Berawan', wind: '10 km/h' },
-  { name: 'DKI Jakarta', x: '22%', y: '62%', temp: '34°C', weather: 'Cerah', wind: '12 km/h' },
-  { name: 'Jawa Barat', x: '25%', y: '65%', temp: '26°C', weather: 'Hujan Ringan', wind: '8 km/h' },
-  { name: 'DI Yogyakarta', x: '33%', y: '68%', temp: '31°C', weather: 'Cerah Berawan', wind: '10 km/h' },
-  { name: 'Jawa Timur', x: '41%', y: '67%', temp: '35°C', weather: 'Cerah Berawan', wind: '15 km/h' },
-  { name: 'Bali', x: '47%', y: '68%', temp: '31°C', weather: 'Cerah Berawan', wind: '14 km/h' },
-  { name: 'Sulawesi Selatan', x: '54%', y: '50%', temp: '32°C', weather: 'Hujan Sedang', wind: '18 km/h' }
-];
+// ── Tile API satellite.bmkg.go.id (CORS *, 18 frame, interval 10 menit) ──
+// docs: docs/satellite-himawari.md — tms:true wajib, maxZoom 8, 204 = di luar cakupan (skip)
+const SATELLITE = 'https://satellite.bmkg.go.id';
+const PARAM_BY_TAB: Record<string, string> = { suhu: 'EH', awan: 'NC', hujan: 'RP', angin: 'WV' };
 
-// Real-time ticking clock state & playback timeline states
-const currentTime = ref(new Date());
-const selectedTimeIndex = ref(5); // 0 to 5, where 5 is 'Sekarang'
+const frames = ref<string[]>([]);          // baserun ISO 8601 UTC, terbaru di index 0
+const frameIndex = ref(0);
+const satError = ref(false);
 const isPlaying = ref(false);
-const cacheBuster = ref(Date.now());
+const cacheBuster = ref(Date.now());       // cache-killer untuk fallback statis inderaja
 
-let clockIntervalId: any = null;
+let map: L.Map | null = null;
+let himaLayer: L.TileLayer | null = null;
 let playIntervalId: any = null;
-let cacheIntervalId: any = null;
+let refreshId: any = null;
 
-// Timezone computation based on active city selection
-const cityTimezone = computed(() => {
-  const city = props.selectedCity.toLowerCase();
-  if (city.includes('makassar') || city.includes('denpasar')) {
-    return { offset: 8, label: 'WITA' };
-  }
-  return { offset: 7, label: 'WIB' };
-});
+const tileUrl = (baserun: string) =>
+  `${SATELLITE}/api22/tile/{z}/{x}/{y}.png?tiletype=himawari9&modelname=himawari9` +
+  `&param=${PARAM_BY_TAB[activeTab.value] ?? 'EH'}&baserun=${encodeURIComponent(baserun)}`;
 
-// Calculate current local date/time of the selected city
-const localTime = computed(() => {
-  const utc = currentTime.value.getTime() + (currentTime.value.getTimezoneOffset() * 60000);
-  return new Date(utc + (3600000 * cityTimezone.value.offset));
-});
+const frameLabel = (iso: string) =>
+  iso ? `${new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })} WIB` : '—';
 
-// Generate 6 hourly steps where the last index is 'Sekarang'
-const timelineSteps = computed(() => {
-  const steps = [];
-  const baseTime = localTime.value;
-  
-  for (let i = 5; i >= 0; i--) {
-    if (i === 0) {
-      steps.push({
-        label: 'Sekarang',
-        subLabel: 'Live Feed',
-        timeStr: 'Sekarang'
-      });
-    } else {
-      const pastTime = new Date(baseTime.getTime() - (i * 3600000));
-      const hour = String(pastTime.getHours()).padStart(2, '0');
-      const timeStr = `${hour}:00`;
-      steps.push({
-        label: timeStr,
-        subLabel: `${i} jam lalu`,
-        timeStr: timeStr
-      });
-    }
-  }
-  return steps;
-});
+const detectionText = computed(() =>
+  frames.value.length ? `Deteksi: ${frameLabel(frames.value[frameIndex.value])}` : 'Deteksi: memuat frame…'
+);
 
-// Dynamic weather value variance based on the timeline steps
-const dynamicCities = computed(() => {
-  const hourOffset = 5 - selectedTimeIndex.value; // 0 for Sekarang, up to 5 for 5 hours ago
-  return cities.map(city => {
-    const baseTemp = parseInt(city.temp);
-    const nameHash = city.name.charCodeAt(0) + city.name.charCodeAt(city.name.length - 1);
-    
-    // Vary temperature slightly
-    const tempDiff = Math.round(Math.sin((hourOffset + nameHash) * 0.85) * 2) - Math.floor(hourOffset / 2);
-    const newTemp = baseTemp + tempDiff;
-    
-    // Vary wind speed slightly
-    const baseWind = parseInt(city.wind);
-    const windDiff = Math.round(Math.cos((hourOffset + nameHash) * 0.7) * 3);
-    const newWind = Math.max(4, baseWind + windDiff);
+const isStale = computed(() =>
+  frames.value.length > 0 && Date.now() - new Date(frames.value[0]).getTime() > 3_600_000
+);
 
-    // Vary weather condition slightly
-    let weather = city.weather;
-    if (hourOffset > 0) {
-      const states = ['Cerah', 'Cerah Berawan', 'Berawan', 'Hujan Ringan', 'Hujan Sedang'];
-      const index = Math.abs(nameHash + hourOffset) % states.length;
-      weather = states[index];
-    }
-
-    return {
-      ...city,
-      temp: `${newTemp}°C`,
-      wind: `${newWind} km/h`,
-      weather
-    };
-  });
-});
-
+// Fallback statis: gambar inderaja (dipakai hanya saat Tile API gagal)
 const imageUrls: Record<string, string> = {
   suhu: 'https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Indonesia.png',
   awan: 'https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_NC_Indonesia.png',
@@ -160,59 +98,46 @@ const imageUrls: Record<string, string> = {
 
 const activeImageUrl = computed(() => imageUrls[activeTab.value]);
 
-// Dynamic map style with horizontal drift based on time offset to simulate animation
-const mapBgStyle = computed(() => {
-  const offset = (selectedTimeIndex.value - 5) * 10; // offset between -50px and 0px
-  return {
-    backgroundImage: `url(${activeImageUrl.value}?t=${cacheBuster.value})`,
-    backgroundSize: 'cover',
-    backgroundPosition: `calc(50% + ${offset}px) 60%`
-  };
-});
+// Fallback statis (inderaja <img>) bila Tile API gagal
+const mapBgStyle = computed(() => ({
+  backgroundImage: `url(${activeImageUrl.value}?t=${cacheBuster.value})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center'
+}));
 
-const hoveredCity = ref<string | null>(null);
-
-const selectedCityInfo = computed(() => {
-  return dynamicCities.value.find(c => props.selectedCity.toLowerCase().includes(c.name.toLowerCase())) || dynamicCities.value[1];
-});
-
-const isSelectedCity = (cityName: string) => {
-  return selectedCityInfo.value.name === cityName;
-};
-
-const activeTooltipCity = computed(() => {
-  return hoveredCity.value ?? selectedCityInfo.value.name;
-});
-
-const selectedCitySpotlightStyle = computed(() => {
-  const city = selectedCityInfo.value;
-  let color = '239, 68, 68'; // Suhu: Red
-  if (activeTab.value === 'awan') {
-    color = '241, 245, 249'; // Awan: Light blue/white
-  } else if (activeTab.value === 'hujan') {
-    color = '6, 182, 212'; // Hujan: Cyan
-  } else if (activeTab.value === 'angin') {
-    color = '132, 204, 22'; // Angin: Lime
+async function loadFrames() {
+  try {
+    const res = await fetch(`${SATELLITE}/api22/modelrun`);
+    if (!res.ok) throw new Error(`modelrun ${res.status}`);
+    const list = (await res.json()).himawari9 ?? [];
+    if (!list.length) throw new Error('frame kosong');
+    const prevNewest = frames.value[0];
+    frames.value = list;
+    if (prevNewest && prevNewest !== list[0]) {
+      frameIndex.value = Math.min(frameIndex.value + 1, list.length - 1); // ikut frame baru, jaga posisi slider
+    }
+    satError.value = false;
+  } catch {
+    satError.value = true;
   }
-  
-  return {
-    background: `radial-gradient(circle at ${city.x} ${city.y}, rgba(${color}, 0.55) 0%, rgba(${color}, 0.2) 28%, transparent 62%)`
-  };
-});
+}
 
-const detectionText = computed(() => {
-  const step = timelineSteps.value[selectedTimeIndex.value];
-  if (step.timeStr === 'Sekarang') {
-    return `Deteksi: Sekarang (${cityTimezone.value.label})`;
-  }
-  return `Deteksi: ${step.timeStr} ${cityTimezone.value.label}`;
+function applyFrame() {
+  const baserun = frames.value[frameIndex.value];
+  if (!map || !himaLayer || !baserun) return;
+  himaLayer.setUrl(tileUrl(baserun)); // ganti frame tanpa flicker
+}
+
+watch(activeTab, () => {
+  if (himaLayer) himaLayer.setUrl(tileUrl(frames.value[frameIndex.value] ?? ''));
 });
+watch(frameIndex, applyFrame);
 
 // Playback slider controls
 const startPlayback = () => {
   stopPlayback();
   playIntervalId = setInterval(() => {
-    selectedTimeIndex.value = (selectedTimeIndex.value + 1) % 6;
+    frameIndex.value = frames.value.length ? (frameIndex.value + 1) % frames.value.length : 0;
   }, 1500);
 };
 
@@ -233,28 +158,44 @@ const togglePlay = () => {
 };
 
 const selectTime = (index: number) => {
-  selectedTimeIndex.value = index;
+  frameIndex.value = index;
   isPlaying.value = false;
   stopPlayback();
 };
 
-onMounted(() => {
-  // Real-time ticking clock
-  clockIntervalId = setInterval(() => {
-    currentTime.value = new Date();
-  }, 1000);
+onMounted(async () => {
+  await loadFrames();
+  if (!satError.value) {
+    await nextTick();
+    map = L.map('satellite-leaflet', {
+      center: [-2.5, 118],
+      zoom: 5,
+      maxZoom: 8, // data Himawari habis ~z=8 (docs/satellite-himawari.md)
+      attributionControl: false
+    });
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, attribution: '' }).addTo(map);
+    himaLayer = L.tileLayer(tileUrl(frames.value[frameIndex.value] ?? ''), {
+      tms: true,          // skema TMS — wajib
+      crossOrigin: true,  // canvas tidak tainted
+      opacity: 0.9,
+      maxNativeZoom: 8,
+      maxZoom: 8
+    }).addTo(map);
+  }
 
-  // Cache buster updates every 5 minutes
-  cacheIntervalId = setInterval(() => {
-    cacheBuster.value = Date.now();
-  }, 300000);
+  // polling modelrun — situs BMKG 30 detik; 60 detik cukup sopan
+  refreshId = setInterval(loadFrames, 60_000);
+  // cache buster fallback statis tiap 5 menit
+  setInterval(() => { cacheBuster.value = Date.now(); }, 300_000);
 
   window.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
-  if (clockIntervalId) clearInterval(clockIntervalId);
-  if (cacheIntervalId) clearInterval(cacheIntervalId);
+  if (refreshId) clearInterval(refreshId);
+  map?.remove();
+  map = null;
+  himaLayer = null;
   window.removeEventListener('click', handleClickOutside);
   stopPlayback();
 });
@@ -323,78 +264,22 @@ onUnmounted(() => {
 
     <!-- Map container -->
     <div class="relative w-full h-[280px] rounded-[4px] overflow-hidden bg-slate-900 select-none shadow-inner border border-transparent">
-      <!-- Radar grid mesh overlay -->
-      <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-      
-      <!-- Coordinate lines -->
-      <div class="absolute inset-x-0 top-1/2 h-[1px] bg-slate-700/30 border-dashed pointer-events-none"></div>
-      <div class="absolute inset-y-0 left-1/2 w-[1px] bg-slate-700/30 border-dashed pointer-events-none"></div>
-      
-      <!-- Dynamic heatmap background -->
-      <div 
-        class="absolute inset-0 transition-all duration-700 ease-in-out bg-slate-950"
-        :style="mapBgStyle"
-      >
+      <!-- Peta Leaflet interaktif + tile Himawari asli (Tile API, CORS *) -->
+      <div v-if="!satError" id="satellite-leaflet" class="absolute inset-0 z-0"></div>
+
+      <!-- Fallback statis: gambar inderaja via background <img> bila Tile API gagal -->
+      <div v-else class="absolute inset-0 bg-slate-950 transition-all duration-700" :style="mapBgStyle">
         <div class="absolute inset-0 bg-brand-navy-950/15 dark:bg-brand-navy-950/40 mix-blend-multiply"></div>
+        <div class="absolute top-2 left-2 z-20 bg-amber-500/90 text-slate-950 text-[8px] font-bold px-2 py-0.5 rounded-[4px]">MODE STATIS — Tile API tidak tersedia</div>
       </div>
 
-      <!-- Spotlight overlay -->
-      <div class="absolute inset-0 pointer-events-none transition-all duration-700 ease-in-out" :style="selectedCitySpotlightStyle"></div>
-
-      <!-- Map Radar Pins -->
-      <div 
-        v-for="city in dynamicCities" 
-        :key="city.name" 
-        class="absolute" 
-        :style="{ left: city.x, top: city.y }"
-        @mouseenter="hoveredCity = city.name"
-        @mouseleave="hoveredCity = null"
-        @click="emit('select-city', city.name)"
+      <!-- Banner data tertunda (frame terakhir > 1 jam) -->
+      <div
+        v-if="!satError && isStale"
+        class="absolute top-3 left-3 z-20 bg-amber-500/90 text-slate-950 text-[8px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1 pointer-events-none"
       >
-        <div class="relative flex items-center justify-center cursor-pointer group">
-          <span 
-            class="absolute rounded-full animate-ping"
-            :class="isSelectedCity(city.name) ? 'w-8 h-8 bg-yellow-400/50' : 'w-6 h-6 bg-brand-cyan/40'"
-            style="animation-duration: 2s;"
-          ></span>
-          <span 
-            class="absolute w-3 h-3 rounded-full border-2 transition-all duration-300"
-            :class="isSelectedCity(city.name) ? 'bg-yellow-300 border-yellow-100 shadow-[0_0_8px_2px_rgba(250,204,21,0.7)]' : 'bg-blue-500 dark:bg-brand-cyan border-white/30'"
-          ></span>
-          
-          <span 
-            class="absolute top-4.5 px-2.5 py-0.5 backdrop-blur-sm rounded-[4px] text-[10px] font-semibold whitespace-nowrap shadow-md"
-            :class="isSelectedCity(city.name) ? 'bg-yellow-400 text-slate-900 border border-yellow-200' : 'bg-slate-900/90 border border-slate-700/40 text-white'"
-          >
-            {{ city.name }}
-          </span>
-
-          <div 
-            v-if="activeTooltipCity === city.name" 
-            class="absolute bottom-9 left-1/2 -translate-x-1/2 w-36 rounded-[4px] p-3.5 z-30 shadow-2xl border text-white backdrop-blur-md animate-fade-in pointer-events-none"
-            :class="isSelectedCity(city.name) ? 'bg-yellow-950/90 border-yellow-600/40' : 'bg-slate-950/90 border-slate-800/40'"
-          >
-            <h5 class="text-xs font-bold tracking-wider border-b pb-1.5 mb-2 flex items-center justify-between"
-              :class="isSelectedCity(city.name) ? 'border-yellow-700/50' : 'border-slate-800/50'"
-            >
-              <span>{{ city.name }}</span>
-            </h5>
-            <div class="space-y-1 text-[10px] text-slate-300 font-medium">
-              <p class="flex justify-between">
-                <span>Suhu:</span>
-                <span class="font-bold" :class="isSelectedCity(city.name) ? 'text-yellow-300' : 'text-brand-cyan'">{{ city.temp }}</span>
-              </p>
-              <p class="flex justify-between">
-                <span>Cuaca:</span>
-                <span class="font-semibold text-slate-100">{{ city.weather }}</span>
-              </p>
-              <p class="flex justify-between">
-                <span>Angin:</span>
-                <span class="font-semibold text-slate-100">{{ city.wind }}</span>
-              </p>
-            </div>
-          </div>
-        </div>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
+        DATA BMKG TERTUNDA
       </div>
 
       <!-- Floating Metadata Corner Badge (bottom-left) -->
@@ -409,19 +294,24 @@ onUnmounted(() => {
 
       <!-- Live / Playback badge (top-right) -->
       <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-sm border border-slate-800/30 rounded-[4px] px-2.5 py-1 text-white font-medium flex items-center gap-1.5 pointer-events-none text-[8px] z-20">
-        <span 
+        <span
           class="w-1.5 h-1.5 rounded-full"
-          :class="selectedTimeIndex === 5 ? 'bg-emerald-500 animate-ping' : 'bg-amber-500'"
+          :class="satError || frameIndex === 0 ? 'bg-emerald-500 animate-ping' : 'bg-amber-500'"
         ></span>
         <span class="font-bold tracking-widest text-slate-300">
-          {{ selectedTimeIndex === 5 ? 'LIVE FEED' : 'PLAYBACK' }}
+          {{ satError || frameIndex === 0 ? 'LIVE FEED' : 'PLAYBACK' }}
         </span>
       </div>
 
-      <!-- Floating Timeline Controller (bottom-right) -->
+      <!-- Atribusi wajib -->
+      <div class="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 text-[7px] font-semibold text-slate-400 pointer-events-none">
+        Sumber citra: BMKG Himawari-9
+      </div>
+
+      <!-- Floating Timeline Controller (bottom-right): 18 frame asli, interval 10 menit -->
       <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/40 rounded-[4px] p-1.5 text-white flex items-center gap-2 z-20 shadow-lg">
         <div class="relative group flex-shrink-0">
-          <button 
+          <button
             @click="togglePlay"
             class="w-6 h-6 flex items-center justify-center bg-blue-600 dark:bg-brand-cyan hover:bg-blue-500 dark:hover:bg-brand-cyan/80 active:scale-95 text-white dark:text-brand-navy-950 rounded-lg transition-all cursor-pointer"
           >
@@ -433,24 +323,23 @@ onUnmounted(() => {
           <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 pointer-events-none opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-250 ease-out whitespace-nowrap">
             <div class="relative bg-slate-900/95 dark:bg-slate-950/95 border border-slate-800 dark:border-slate-800/60 text-white text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.25)] flex items-center gap-1.5 backdrop-blur-sm">
               <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-950/95 border-b border-r border-slate-800 dark:border-slate-800/60 rotate-45"></div>
-              <span>Play/Pause Satelit</span>
+              <span>Putar animasi 18 frame</span>
             </div>
           </div>
         </div>
-        
-        <div class="flex items-center gap-0.5">
-          <button 
-            v-for="(step, idx) in timelineSteps" 
-            :key="idx"
-            @click="selectTime(idx)"
-            class="px-1.5 py-1 rounded text-[7.5px] font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap"
-            :class="selectedTimeIndex === idx
-              ? 'bg-blue-600 text-white dark:bg-brand-cyan dark:text-brand-navy-950 shadow-sm'
-              : 'bg-slate-800/60 text-slate-400 hover:bg-slate-700/80 hover:text-slate-200'"
-          >
-            {{ step.label }}
-          </button>
-        </div>
+
+        <input
+          v-if="frames.length"
+          type="range"
+          :min="0"
+          :max="frames.length - 1"
+          :value="frameIndex"
+          @input="selectTime(+($event.target as HTMLInputElement).value)"
+          class="w-24 h-1 accent-blue-500 dark:accent-brand-cyan cursor-pointer"
+        />
+        <span class="text-[7.5px] font-bold tracking-wider text-slate-300 whitespace-nowrap tabular-nums">
+          {{ frames.length ? `${frameLabel(frames[frameIndex])} · ${frames.length}fr` : 'memuat…' }}
+        </span>
       </div>
     </div>
   </div>

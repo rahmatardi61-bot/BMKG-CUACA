@@ -131,8 +131,8 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     ws.cell(row=row, column=5, value='\n'.join(e_lines) if e_lines else '— (tanpa API live)')
     ws.cell(row=row, column=6, value='\n'.join(f_lines) if f_lines else '—')
     if sample:
-        pot = sample[:SAMPLE_MAX]
-        ws.cell(row=row, column=7, value=pot + ('\n… (dipotong)' if len(sample) > SAMPLE_MAX else ''))
+        pot = ' '.join(sample[:SAMPLE_MAX].split())  # rapikan: JSON pretty-print → 1 baris (seragam dgn row lain)
+        ws.cell(row=row, column=7, value=pot + (' … (dipotong)' if len(sample) > SAMPLE_MAX else ''))
     else:
         ws.cell(row=row, column=7, value='— (tidak ada response live)')
 

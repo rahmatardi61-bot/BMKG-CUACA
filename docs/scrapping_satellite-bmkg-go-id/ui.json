@@ -1,0 +1,102 @@
+{
+ "title": "Himawari",
+ "lang": "en",
+ "leaflet": false,
+ "maplibre": true,
+ "buttons": [
+  "",
+  "Login",
+  "Himawari 9",
+  "GK2A",
+  "GSMAP",
+  "Overlays",
+  "Map Settings"
+ ],
+ "selects": [
+  {
+   "opts": [
+    "[object Object]|NANGGROE ACEH DARUSSALAM",
+    "[object Object]|INDONESIA",
+    "[object Object]|SUMATERA UTARA",
+    "[object Object]|SUMATERA BARAT",
+    "[object Object]|RIAU",
+    "[object Object]|JAMBI",
+    "[object Object]|SUMATERA SELATAN",
+    "[object Object]|BENGKULU",
+    "[object Object]|LAMPUNG",
+    "[object Object]|KEPULAUAN BANGKA BELITUNG",
+    "[object Object]|KEPULAUAN RIAU",
+    "[object Object]|NATUNA",
+    "[object Object]|DKI JAKARTA",
+    "[object Object]|JAWA BARAT",
+    "[object Object]|JAWA TENGAH",
+    "[object Object]|D.I. YOGYAKARTA",
+    "[object Object]|JAWA TIMUR",
+    "[object Object]|BANTEN",
+    "[object Object]|BALI",
+    "[object Object]|NUSA TENGGARA BARAT",
+    "[object Object]|NUSA TENGGARA TIMUR",
+    "[object Object]|KALIMANTAN BARAT",
+    "[object Object]|KALIMANTAN TENGAH",
+    "[object Object]|KALIMANTAN SELATAN",
+    "[object Object]|KALIMANTAN TIMUR",
+    "[object Object]|KALIMANTAN UTARA",
+    "[object Object]|SULAWESI UTARA",
+    "[object Object]|SULAWESI TENGAH",
+    "[object Object]|SULAWESI SELATAN",
+    "[object Object]|SULAWESI TENGGARA",
+    "[object Object]|GORONTALO",
+    "[object Object]|SULAWESI BARAT",
+    "[object Object]|MALUKU",
+    "[object Object]|MALUKU UTARA",
+    "[object Object]|PAPUA BARAT",
+    "[object Object]|PAPUA"
+   ]
+  }
+ ],
+ "inputs": [
+  "checkbox",
+  "checkbox",
+  "checkbox",
+  "checkbox",
+  "checkbox",
+  "checkbox",
+  "number",
+  "text",
+  "text",
+  "checkbox",
+  "checkbox",
+  "checkbox",
+  "checkbox"
+ ],
+ "labels": [
+  "Over Shooting Cloud Top Realtime",
+  "",
+  "Over Shooting Cloud Top 1 Hour Accumulation",
+  "Lightning 10",
+  "Lightning 30",
+  "Lightning 60",
+  "RDCA",
+  "Volcano",
+  "Provinsi",
+  "Kotkab",
+  "Label"
+ ],
+ "tiles": [],
+ "allImgHosts": [
+  "satellite.bmkg.go.id"
+ ],
+ "scripts": [
+  "s.js?z=JTdCJTIyZXhlY3V0ZWQlMjIlM0ElNUIlNUQlMkMlMjJ0JTIyJTNBJTIySGltYXdhcmklMjIlMkMlMjJ4JTIyJTNBMC4zMjQ1NzU1NzE0MzcxMjc1NiUyQyUyMnclMjIlM0ExNDQwJTJDJTIyaCUyMiUzQTkwMCUyQyUyMmolMjIlM0E5MDAlMkMlMjJlJTIyJTNBMTQ0MCUyQyUyMmwlMjIlM0ElMjJodHRwcyUzQSUyRiUyRnNhdGVsbGl0ZS5ibWtnLmdvLmlkJTJGJTIzNSUyRjAlMkYxMTUlMjIlMkMlMjJyJTIyJTNBJTIyJTIyJTJDJTIyayUyMiUzQTI0JTJDJTIybiUyMiUzQSUyMlVURi04JTIyJTJDJTIybyUyMiUzQS00MjAlMkMlMjJxJTIyJTNBJTVCJTVEJTdE",
+  "9e0c3a4.js",
+  "91d771c.js",
+  "79aa923.js",
+  "8fce836.js",
+  "bd7efaf.js",
+  "abbc6bd.js",
+  "3ea4230.js",
+  "594e73b.js",
+  "074edb5.js",
+  "v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495"
+ ]
+}

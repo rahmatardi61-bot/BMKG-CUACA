@@ -172,3 +172,42 @@ Polling `modelrun` tiap 30 s (meniru situs BMKG); handle 204=skip, 400=param sal
 ---
 
 *Bagian FE guide (hook React, proxy Next.js allowlist, contoh vanilla JS lengkap) tersimpan di arsip percakapan — inti teknisnya sudah diringkas §3–4. Minta jika butuh versi lengkapnya.*
+
+
+---
+
+## 6. Hasil scrape UI resmi satellite.bmkg.go.id (Playwright, 22 Sep 2026)
+
+Artefak mentah: `docs/scrapping_satellite-bmkg-go-id/` (network.json, ui.json, ui-panels.json, page.png, panel-layers.png).
+
+**Stack UI BMKG**: Nuxt + MapLibre/mapbox-gl (+ mapbox-gl-draw). Basemap = Esri World Imagery (raster) + vector pbf `tiles.circlegeo.com` (batas provinsi/kotkab, font openmaptiles). Render tile via WebGL canvas (bukan `<img>`).
+
+**Daftar layer resmi (dari DOM):**
+- **Himawari 9** (9): Infrared Enhanced `EH`, Natural Color `NC`, Water Vapor Enhanced `WV`, Rainfall Potential `RP`, Sandwich `SW`, Smoke `SM`, Volcanic Ash `VA`, Visible `VS`, Visibility Hires 500m (`himawari9hires`)
+- **GK2A**: EH/WV/RP (data stale) · **GSMAP**: Rain Rate + 12/24/72H accumulation (stale, tile 422)
+- **Overlays** (pbf/mbtiles via `apipoints`): Over Shooting Cloud Top Realtime & 1-Hour, Lightning 10/30/60, RDCA — isinya path `/tmp/points/…` (tidak bisa dipakai pihak ketiga)
+- **Basemap switch**: Satelit / Jalan / Polos + toggle Volcano, Provinsi, Kotkab, Label
+- **Select Area**: 36 area (provinsi + NATUNA + INDONESIA) → fly-to
+
+**Perilaku animasi & waktu:**
+- Animation bar: refresh, prev, play, next + slider timeline + **kecepatan "300 ms"** (input bebas)
+- **Window waktu = 3 jam terakhir** ("the time will only show the last 3 hours") ≈ 18 frame @10 menit — konsisten dengan `modelrun`
+- Timestamp besar: `HIMAWARI - 9 2026-09-22 10:00 UTC`
+- **Colorbar suhu IR**: −100…60 °C (20 tick) untuk param EH
+- Tile yang diminta UI asli: `z=6, x=48–56, y=29–34` — TMS, baserun dari `modelrun` (konfirmasi pola §1b)
+
+### Komparasi dengan kartu 'Citra Satelit Himawari-9' (bmkg-redesign)
+
+| Aspek | UI resmi BMKG | Kartu kita | Penilaian |
+|---|---|---|---|
+| Peta | MapLibre (WebGL) | Leaflet (raster img) | Setara; keduanya sah — tak perlu migrasi |
+| Tile API | `api22/tile` TMS + modelrun | **sama persis** | ✅ paritas penuh |
+| Basemap | Esri World Imagery + pbf provinsi | Esri World Imagery | ✅ sama (pbf = bonus BMKG) |
+| Param | 9 layer Himawari | 4 (EH/NC/RP/WV) | ⬆ mudah: extend `PARAM_BY_TAB` dgn SW/SM/VA/VS |
+| Timeline | 18 frame @10 mnt (3 jam) | 18 frame @10 mnt | ✅ paritas |
+| Play | ya + kecepatan 300 ms | ya, fixed 1,5 s | ⬆ opsional: input kecepatan |
+| Colorbar suhu | −100…60 °C (EH) | tidak ada | ⬆ opsional: gradient CSS murah |
+| Fly-to area | 36 provinsi | tidak ada | ⬆ opsional: pakai dropdown kota existing |
+| Overlay petir/OSCT/RDCA | ada (pbf /tmp/points) | tidak | ❌ skip — data tidak terpakai publik |
+| GK2A/GSMAP | ada (stale) | tidak | ❌ skip — sesuai §5 (stale) |
+| Atribusi | ada | "Sumber citra: BMKG" | ✅ |

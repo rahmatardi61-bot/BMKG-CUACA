@@ -1,0 +1,727 @@
+{
+ "requests": [
+  {
+   "m": "GET",
+   "t": "document",
+   "u": "https://satellite.bmkg.go.id/"
+  },
+  {
+   "m": "GET",
+   "t": "image",
+   "u": "https://satellite.bmkg.go.id/_nuxt/img/bmkgwhite.596f02a.svg"
+  },
+  {
+   "m": "GET",
+   "t": "image",
+   "u": "https://satellite.bmkg.go.id/Satellite.png"
+  },
+  {
+   "m": "GET",
+   "t": "image",
+   "u": "https://satellite.bmkg.go.id/Street.png"
+  },
+  {
+   "m": "GET",
+   "t": "image",
+   "u": "https://satellite.bmkg.go.id/Plain.png"
+  },
+  {
+   "m": "GET",
+   "t": "script",
+   "u": "https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495"
+  },
+  {
+   "m": "GET",
+   "t": "script",
+   "u": "blob:https://satellite.bmkg.go.id/dcf78cd3-274b-409f-9618-cbf5471b424f"
+  },
+  {
+   "m": "GET",
+   "t": "script",
+   "u": "blob:https://satellite.bmkg.go.id/dcf78cd3-274b-409f-9618-cbf5471b424f"
+  },
+  {
+   "m": "GET",
+   "t": "script",
+   "u": "blob:https://satellite.bmkg.go.id/dcf78cd3-274b-409f-9618-cbf5471b424f"
+  },
+  {
+   "m": "GET",
+   "t": "script",
+   "u": "blob:https://satellite.bmkg.go.id/dcf78cd3-274b-409f-9618-cbf5471b424f"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet.json"
+  },
+  {
+   "m": "POST",
+   "t": "xhr",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=26431901"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://www.google.com/ads/ga-audiences?t=sr&aip=1&_r=4&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=26431901&slf_rd=1"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=975930995"
+  },
+  {
+   "m": "POST",
+   "t": "xhr",
+   "u": "https://satellite.bmkg.go.id/cdn-cgi/rum?"
+  },
+  {
+   "m": "POST",
+   "t": "xhr",
+   "u": "https://satellite.bmkg.go.id/cdn-cgi/challenge-platform/h/g/jsd/oneshot/330e41bb475c/0.26350448236988766:1790068216:ZStw0xyWmbt_P0fxDoH2a10JkDmW23pZOYDA3lOXSw0/a3f080cf3e5b98b3"
+  },
+  {
+   "m": "POST",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/cdn-cgi/zaraz/t"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=1930978981"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=1429666646"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/26/16.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/27/16.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/25/16.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/24/16.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/25/15.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/26/15.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/24/15.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/5/27/15.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/intra.png"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/PhLightningFill.png"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/kotkab.json"
+  },
+  {
+   "m": "GET",
+   "t": "xhr",
+   "u": "https://satellite.bmkg.go.id/api22/modelrun"
+  },
+  {
+   "m": "GET",
+   "t": "xhr",
+   "u": "https://satellite.bmkg.go.id/apipoints"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/12/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/13/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/13/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/12/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/12/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/12/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/13/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/16/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/15/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/16/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/15/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/16/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/15/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/16/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/15/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/16/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/15/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/16/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/15/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/16/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/15/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://fonts.openmaptiles.org/Klokantech%20Noto%20Sans%20Bold/0-255.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/14/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/14/7.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/14/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/administration/4/13/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://tiles.circlegeo.com/data/planet/4/14/8.pbf"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/16/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/15/24"
+  },
+  {
+   "m": "GET",
+   "t": "image",
+   "u": "https://satellite.bmkg.go.id/time/playback.svg"
+  },
+  {
+   "m": "POST",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/cdn-cgi/zaraz/t"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/17/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/17/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/17/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/17/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/16/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/15/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/17/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/17/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/17/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/17/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/17/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/16/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/15/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/17/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/14/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/14/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/14/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/14/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/5/14/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/14/26"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/14/25"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/14/27"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=876806797"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=925153999"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/14/24"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/5/14/28"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/52/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/53/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/51/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/54/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/50/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/55/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/49/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/31.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/32.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/30.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/33.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/29.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/56/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  },
+  {
+   "m": "GET",
+   "t": "fetch",
+   "u": "https://satellite.bmkg.go.id/api22/tile/6/48/34.png?tiletype=himawari9&modelname=himawari9&param=EH&baserun=2026-09-22T10:00:00Z"
+  }
+ ],
+ "jsonBodies": {
+  "https://satellite.bmkg.go.id/cdn-cgi/zaraz/t": "{\"e\":[\"(function(w,d){;w.zarazData.executed.push(\\\"Pageview\\\");})(window,document)\",\"(function(w,d){{(function(w,d){zaraz.__zarazMCListeners={\\\"google-analytics_v4_0bd2\\\":[\\\"visibilityChange\\\"]};})(window,document);}})(window,document)\"],\"f\":[[\"https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=876806797\",{}],[\"https://stats.g.doubleclick.net/g/collect?t=dc&aip=1&_r=3&v=1&_v=j86&tid=G-V0DXE469PJ&cid=84d5bba6-2576-4e5c-bf79-3f7d372cc4d3&_u=KGDAAEADQAAAAC%7E&z=925153999\",{}]]}",
+  "https://tiles.circlegeo.com/data/planet.json": "{\"tiles\":[\"https://tiles.circlegeo.com/data/planet/{z}/{x}/{y}.pbf\"],\"name\":\"Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema + Tilemaker to OpenMapTiles schema\",\"format\":\"pbf\",\"basename\":\"planet.mbtiles\",\"id\":\"planet\",\"description\":\"Tile config based on OpenMapTiles schema\",\"version\":\"2\",\"minzoom\":0,\"maxzoom\":14,\"center\":[168.740625,0,14],\"bounds\":[-180,-90,180,85.06],\"type\":\"overlay\",\"generator\":\"tile-join v1.36.0\",\"generator_options\":\"tile-join --force '--output=/merged/planet.mbtiles' /data/0195732864.mbtiles /data/0512896473.mbtiles /data/0597643281.mbtiles /data/0623148975.mbtiles /data/0694817253.mbtiles /data/0738926514.mbtiles /data/1265478390.mbtiles /data/1326978504.mbtiles /data/1372564908.mbtiles /data/1426385907.mbtiles /data/1468930725.mbtiles /data/1490325867.mbtiles /data/1809742365.mbtiles /data/1832497650.mbtiles /data/2154987036.mbtiles /data/2160735984.mbtiles /data/2475610983.mbtiles /data/2596803417.mbtiles /data/2830547691.mbtiles /data/2956371048.mbtiles /data/3074689215.mbtiles /data/3097821456.mbtiles /data/3195847620.mbtiles /data/3470259681.mbtiles /data/3628540719.mbtiles /data/4517206893.mbtiles /data/4528137609.mbtiles /data/4573290861.mbtiles /data/4576320891.mbtiles /data/4635078291.mbtiles /data/5132048679.mbtiles /data/5160783924.mbtiles /data/5194863702.mbtiles /data/5479832601.mbtiles /data/5913827604.mbtiles /data/6058429731.mbtiles /data/6384179052.mbtiles /data/6398072415.mbtiles /data/6423189075.mbtiles /data/6472089513.mbtiles /data/7061528439.mbtiles /data/7089235614.mbtiles /data/7245318690.mbtiles /data/7642398150.mbtiles /data/7938052416.mbtiles /data/8075964321.mbtiles /data/8679325401.mbtiles /data/9042315876.mbtiles /data/9163427850.mbtiles /data/9265831407.mbtiles /data/9271604835.mbtiles /data/9426803175.mbtiles\",\"vector_layers\":[{\"id\":\"aerodrome_label\",\"description\":\"\",\"minzoom\":10,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"ele\":\"Number\",\"ele_ft\":\"Number\",\"iata\":\"String\",\"icao\":\"String\",\"name\":\"String\",\"name_int\":\"String\"}},{\"id\":\"aeroway\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"ref\":\"String\"}},{\"id\":\"boundary\",\"description\":\"\",\"minzoom\":0,\"maxzoom\":14,\"fields\":{\"admin_level\":\"Number\",\"class\":\"String\",\"disputed\":\"Number\",\"name\":\"String\",\"render_height\":\"Number\",\"render_min_height\":\"Number\",\"subclass\":\"String\"}},{\"id\":\"building\",\"description\":\"\",\"minzoom\":13,\"maxzoom\":14,\"fields\":{\"render_height\":\"Number\",\"render_min_height\":\"Number\"}},{\"id\":\"housenumber\",\"description\":\"\",\"minzoom\":14,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"housenumber\":\"String\"}},{\"id\":\"landcover\",\"description\":\"\",\"minzoom\":0,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"subclass\":\"String\"}},{\"id\":\"landuse\",\"description\":\"\",\"minzoom\":6,\"maxzoom\":14,\"fields\":{\"class\":\"String\"}},{\"id\":\"mountain_peak\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"ele\":\"Number\",\"ele_ft\":\"Number\",\"name\":\"String\",\"name_int\":\"String\",\"rank\":\"Number\"}},{\"id\":\"park\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"name\":\"String\",\"name_int\":\"String\"}},{\"id\":\"place\",\"description\":\"\",\"minzoom\":0,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"iso_a2\":\"String\",\"name\":\"String\",\"name_int\":\"String\",\"rank\":\"Number\"}},{\"id\":\"poi\",\"description\":\"\",\"minzoom\":12,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"name\":\"String\",\"name_int\":\"String\",\"rank\":\"Number\",\"subclass\":\"String\"}},{\"id\":\"transportation\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":14,\"fields\":{\"brunnel\":\"String\",\"class\":\"String\",\"oneway\":\"Number\",\"ramp\":\"Number\",\"service\":\"String\"}},{\"id\":\"transportation_name\",\"description\":\"\",\"minzoom\":8,\"maxzoom\":14,\"fields\":{\"class\":\"String\",\"name\":\"String\",\"name_int\":\"String\",\"network\":\"String\",\"ref\":\"String\",\"ref_length\":\"Number\",\"render_height\":\"Number\",\"render_min_height\":\"Number\",\"subclass\":\"String\"}},{\"id\":\"water\",\"description\":\"",
+  "https://tiles.circlegeo.com/data/kotkab.json": "{\"tiles\":[\"https://tiles.circlegeo.com/data/kotkab/{z}/{x}/{y}.pbf\"],\"name\":\"kotkab.mbtiles\",\"format\":\"pbf\",\"basename\":\"kotkab.mbtiles\",\"id\":\"kotkab\",\"description\":\"kotkab.mbtiles\",\"version\":\"2\",\"minzoom\":4,\"maxzoom\":15,\"center\":[121.646118,0.532829,15],\"bounds\":[95.010786,-11.007615,141.0194,6.07693],\"type\":\"overlay\",\"generator\":\"tippecanoe v1.32.0\",\"vector_layers\":[{\"id\":\"kotkab\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":15,\"fields\":{\"name\":\"String\"}}],\"tilestats\":{\"layerCount\":1,\"layers\":[{\"layer\":\"kotkab\",\"count\":522,\"geometry\":\"Polygon\",\"attributeCount\":1,\"attributes\":[{\"attribute\":\"name\",\"count\":511,\"type\":\"string\",\"values\":[\"Danau\",\"Hutan\",\"KAB. ACEH BARAT\",\"KAB. ACEH BARAT DAYA\",\"KAB. ACEH BESAR\",\"KAB. ACEH JAYA\",\"KAB. ACEH SELATAN\",\"KAB. ACEH SINGKIL\",\"KAB. ACEH TAMIANG\",\"KAB. ACEH TENGAH\",\"KAB. ACEH TENGGARA\",\"KAB. ACEH TIMUR\",\"KAB. ACEH UTARA\",\"KAB. AGAM\",\"KAB. ALOR\",\"KAB. ASAHAN\",\"KAB. ASMAT\",\"KAB. BADUNG\",\"KAB. BALANGAN\",\"KAB. BANDUNG\",\"KAB. BANDUNG BARAT\",\"KAB. BANGGAI\",\"KAB. BANGGAI KEPULAUAN\",\"KAB. BANGGAI LAUT\",\"KAB. BANGKA\",\"KAB. BANGKA BARAT\",\"KAB. BANGKA SELATAN\",\"KAB. BANGKA TENGAH\",\"KAB. BANGKALAN\",\"KAB. BANGLI\",\"KAB. BANJAR\",\"KAB. BANJARNEGARA\",\"KAB. BANTAENG\",\"KAB. BANTUL\",\"KAB. BANYU ASIN\",\"KAB. BANYUMAS\",\"KAB. BANYUWANGI\",\"KAB. BARITO KUALA\",\"KAB. BARITO SELATAN\",\"KAB. BARITO TIMUR\",\"KAB. BARITO UTARA\",\"KAB. BARRU\",\"KAB. BATANG\",\"KAB. BATANG HARI\",\"KAB. BATU BARA\",\"KAB. BEKASI\",\"KAB. BELITUNG\",\"KAB. BELITUNG TIMUR\",\"KAB. BELU\",\"KAB. BENER MERIAH\",\"KAB. BENGKALIS\",\"KAB. BENGKAYANG\",\"KAB. BENGKULU SELATAN\",\"KAB. BENGKULU TENGAH\",\"KAB. BENGKULU UTARA\",\"KAB. BERAU\",\"KAB. BIAK NUMFOR\",\"KAB. BIMA\",\"KAB. BINTAN\",\"KAB. BIREUEN\",\"KAB. BLITAR\",\"KAB. BLORA\",\"KAB. BOALEMO\",\"KAB. BOGOR\",\"KAB. BOJONEGORO\",\"KAB. BOLAANG MONGONDOW\",\"KAB. BOLAANG MONGONDOW SELATAN\",\"KAB. BOLAANG MONGONDOW TIMUR\",\"KAB. BOLAANG MONGONDOW UTARA\",\"KAB. BOMBANA\",\"KAB. BONDOWOSO\",\"KAB. BONE\",\"KAB. BONE BOLANGO\",\"KAB. BOVEN DIGOEL\",\"KAB. BOYOLALI\",\"KAB. BREBES\",\"KAB. BULELENG\",\"KAB. BULUKUMBA\",\"KAB. BULUNGAN\",\"KAB. BUNGO\",\"KAB. BUOL\",\"KAB. BURU\",\"KAB. BURU SELATAN\",\"KAB. BUTON\",\"KAB. BUTON TENGAH\",\"KAB. BUTON UTARA\",\"KAB. CIAMIS\",\"KAB. CIANJUR\",\"KAB. CILACAP\",\"KAB. CIREBON\",\"KAB. DAIRI\",\"KAB. DEIYAI\",\"KAB. DELI SERDANG\",\"KAB. DEMAK\",\"KAB. DHARMASRAYA\",\"KAB. DOGIYAI\",\"KAB. DOMPU\",\"KAB. DONGGALA\",\"KAB. EMPAT LAWANG\",\"KAB. ENDE\"]}]}]},\"tilejson\":\"3.0.0\"}",
+  "https://satellite.bmkg.go.id/apipoints": "[{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0250\",\"name\":\"/tmp/points/ldn10_20250321_0250.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0300\",\"name\":\"/tmp/points/ldn10_20250321_0300.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0310\",\"name\":\"/tmp/points/ldn10_20250321_0310.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0320\",\"name\":\"/tmp/points/ldn10_20250321_0320.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0330\",\"name\":\"/tmp/points/ldn10_20250321_0330.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn10_20250321_0340\",\"name\":\"/tmp/points/ldn10_20250321_0340.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn30_latest\",\"name\":\"/tmp/tmp16akum_5.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ldn60_latest\",\"name\":\"/tmp/tmp4rbjf9rk.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2200\",\"name\":\"/tmp/points/ot_1hour_20260921_2200.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2210\",\"name\":\"/tmp/points/ot_1hour_20260921_2210.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2220\",\"name\":\"/tmp/points/ot_1hour_20260921_2220.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2250\",\"name\":\"/tmp/points/ot_1hour_20260921_2250.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2300\",\"name\":\"/tmp/points/ot_1hour_20260921_2300.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2310\",\"name\":\"/tmp/points/ot_1hour_20260921_2310.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2320\",\"name\":\"/tmp/points/ot_1hour_20260921_2320.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2330\",\"name\":\"/tmp/points/ot_1hour_20260921_2330.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260921_2350\",\"name\":\"/tmp/points/ot_1hour_20260921_2350.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0010\",\"name\":\"/tmp/points/ot_1hour_20260922_0010.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0020\",\"name\":\"/tmp/points/ot_1hour_20260922_0020.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0040\",\"name\":\"/tmp/points/ot_1hour_20260922_0040.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0100\",\"name\":\"/tmp/points/ot_1hour_20260922_0100.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0110\",\"name\":\"/tmp/points/ot_1hour_20260922_0110.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0500\",\"name\":\"/tmp/points/ot_1hour_20260922_0500.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0550\",\"name\":\"/tmp/points/ot_1hour_20260922_0550.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0730\",\"name\":\"/tmp/points/ot_1hour_20260922_0730.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0800\",\"name\":\"/tmp/points/ot_1hour_20260922_0800.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0810\",\"name\":\"/tmp/points/ot_1hour_20260922_0810.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0820\",\"name\":\"/tmp/points/ot_1hour_20260922_0820.mbtiles\"},{\"imageType\":\"pbf\",\"url\":\"https://satellite.bmkg.go.id/apipoints/ot_1hour_20260922_0830\",\"name\":\"/tmp/points/ot_1ho",
+  "https://satellite.bmkg.go.id/api22/modelrun": "{\"gk2a\":[\"2026-09-15T19:10:00Z\",\"2026-09-15T19:00:00Z\",\"2026-09-15T18:50:00Z\",\"2026-09-15T18:40:00Z\",\"2026-09-15T18:30:00Z\",\"2026-09-15T18:20:00Z\",\"2026-09-15T18:10:00Z\",\"2026-09-15T18:00:00Z\",\"2026-09-15T17:50:00Z\",\"2026-09-15T17:40:00Z\",\"2026-09-15T17:30:00Z\",\"2026-09-15T17:20:00Z\",\"2026-09-15T17:10:00Z\",\"2026-09-15T17:00:00Z\",\"2026-09-15T16:50:00Z\",\"2026-09-15T16:40:00Z\",\"2026-09-15T16:30:00Z\",\"2026-09-15T16:20:00Z\"],\"gsmapaccum12h\":[\"2024-12-23T17:46:01Z\"],\"gsmapaccum24h\":[\"2024-12-24T04:40:01Z\"],\"gsmapaccum72h\":[\"2024-12-24T04:45:01Z\"],\"gsmaprainrate\":[\"2024-12-24T06:00:00Z\",\"2024-12-24T05:00:00Z\",\"2024-12-24T04:00:00Z\"],\"himawari9\":[\"2026-09-22T10:00:00Z\",\"2026-09-22T09:50:00Z\",\"2026-09-22T09:40:00Z\",\"2026-09-22T09:30:00Z\",\"2026-09-22T09:20:00Z\",\"2026-09-22T09:10:00Z\",\"2026-09-22T09:00:00Z\",\"2026-09-22T08:50:00Z\",\"2026-09-22T08:40:00Z\",\"2026-09-22T08:30:00Z\",\"2026-09-22T08:20:00Z\",\"2026-09-22T08:10:00Z\",\"2026-09-22T08:00:00Z\",\"2026-09-22T07:50:00Z\",\"2026-09-22T07:40:00Z\",\"2026-09-22T07:30:00Z\",\"2026-09-22T07:20:00Z\",\"2026-09-22T07:10:00Z\"],\"himawari9fd\":[\"2026-09-22T09:50:00Z\",\"2026-09-22T09:40:00Z\",\"2026-09-22T09:30:00Z\",\"2026-09-22T09:20:00Z\",\"2026-09-22T09:10:00Z\",\"2026-09-22T09:00:00Z\",\"2026-09-22T08:50:00Z\",\"2026-09-22T08:40:00Z\",\"2026-09-22T08:30:00Z\",\"2026-09-22T08:20:00Z\",\"2026-09-22T08:10:00Z\",\"2026-09-22T08:00:00Z\",\"2026-09-22T07:50:00Z\",\"2026-09-22T07:40:00Z\",\"2026-09-22T07:30:00Z\",\"2026-09-22T07:20:00Z\",\"2026-09-22T07:10:00Z\",\"2026-09-22T07:00:00Z\"],\"himawari9hires\":[\"2026-09-22T09:50:00Z\",\"2026-09-22T09:40:00Z\",\"2026-09-22T09:30:00Z\",\"2026-09-22T09:20:00Z\",\"2026-09-22T09:10:00Z\",\"2026-09-22T09:00:00Z\",\"2026-09-22T08:50:00Z\",\"2026-09-22T08:40:00Z\",\"2026-09-22T08:30:00Z\",\"2026-09-22T08:20:00Z\",\"2026-09-22T08:10:00Z\",\"2026-09-22T08:00:00Z\",\"2026-09-22T07:50:00Z\",\"2026-09-22T07:40:00Z\",\"2026-09-22T07:30:00Z\",\"2026-09-22T07:20:00Z\",\"2026-09-22T07:10:00Z\",\"2026-09-22T07:00:00Z\"]}"
+ },
+ "pageErrors": []
+}

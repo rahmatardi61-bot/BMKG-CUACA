@@ -141,7 +141,7 @@ ws.merge_cells('A2:I2')
 ws['A2'] = ('Screenshot diambil dari deployment prod (server.mjs + dist, data live) dengan API BOX MARKER aktif '
             '— border merah = live, amber = campuran, abu = mock (lihat kolom Status). '
     'Kolom "Field dipakai UI" = pemetaan response → nilai yang dirender (sumber: src/services/bmkg/adapters.ts). '
-    '*(proxy) merah = API tidak bisa diakses langsung dari browser (CORS / header khusus) — harus lewat proxy/alias untuk ambil response-nya. '
+    '*(proxy) merah = API tidak bisa diakses langsung dari browser (CORS / header khusus) — harus lewat proxy/alias untuk ambil response-nya. ''live = respon asli API · estimasi = nilai turunan/konversi dari API · mock = data statis (endpoint belum tersedia). '
             'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js')
 ws['A2'].font = Font(size=9, italic=True, color='555555')
 ws.merge_cells('A3:I3')
@@ -183,14 +183,14 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
         e_lines.append(f'▸ {name}')
         call = (calls.get(api_id) or [{}])[-1]
         if call:
-            f_lines.append((f'[{call.get("status", "?")}] {call.get("url", "?")}', call.get('proxied', False)))
+            f_lines.append((f'▸ [{call.get("status", "?")}] {call.get("url", "?")}', call.get('proxied', False)))
             pot = ' '.join(call.get('sample', '')[:SAMPLE_MAX].split())  # pretty-print → 1 baris
             g_blocks.append(f'▸ {name}\n{pot}{" …" if len(call.get("sample", "")) > SAMPLE_MAX else ""}')
         else:
-            f_lines.append((f'(belum terekam saat capture) — {name}', False))
+            f_lines.append((f'▸ {name} — (belum terekam saat capture)', False))
             g_blocks.append(f'▸ {name}\n(tidak ada response live)')
         fields, penjelasan = API_USAGE.get(api_id, ('(belum terpetakan)', ''))
-        h_lines.append(f'▸ {fields}\n  {penjelasan}')
+        h_lines.append(f'▸ {name}\n  Dipakai: {fields}\n  → {penjelasan}')
     ws.cell(row=row, column=5, value='\n'.join(e_lines) if e_lines else '— (tanpa API live)')
     # kolom F: URL asli upstream; ' *(proxy)' merah tebal = API butuh proxy/alias
     # (CORS / header khusus) kalau mau ambil response-nya
@@ -210,7 +210,7 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     note = m.get('note', '')
     parts = m.get('parts') or []
     i_lines = [note] if note else []
-    i_lines += [f"– {p['label']} ({'live' if p['type'] == 'live' else 'est' if p['type'] == 'est' else 'mock'})" for p in parts]
+    i_lines += [f"▸ {p['label']} — " + {'live': 'data asli dari API', 'est': 'estimasi/konversi dari API', 'mock': 'data statis (belum ada endpoint)'}[p['type']] for p in parts]
     ws.cell(row=row, column=9, value='\n'.join(i_lines) or '—')
 
     # format baris

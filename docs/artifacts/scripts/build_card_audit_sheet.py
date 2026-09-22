@@ -195,12 +195,15 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     # kolom F: URL asli upstream; ' *(proxy)' merah tebal = API butuh proxy/alias
     # (CORS / header khusus) kalau mau ambil response-nya
     if any(pr for _, pr in f_lines):
+        fnt = InlineFont(rFont='Courier New', sz=8)
+        red = InlineFont(rFont='Courier New', sz=8, b=True, color='FFCC0000')
         rt = CellRichText()
         for i, (line, proxied) in enumerate(f_lines):
-            if i: rt.append('\n')
-            rt.append(TextBlock(InlineFont(rFont='Courier New', sz=8), line))
+            # newline WAJIB di dalam TextBlock — string '\n' polos ditrim Excel (baris menyatu)
+            if i: rt.append(TextBlock(fnt, '\n'))
+            rt.append(TextBlock(fnt, line))
             if proxied:
-                rt.append(TextBlock(InlineFont(rFont='Courier New', sz=8, b=True, color='FFCC0000'), ' *(proxy)'))
+                rt.append(TextBlock(red, ' *(proxy)'))
         ws.cell(row=row, column=6, value=rt)
     else:
         ws.cell(row=row, column=6, value='\n'.join(l for l, _ in f_lines) if f_lines else '—')
@@ -227,7 +230,7 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     def est_h_of(col, chars):
         txt = str(ws.cell(row=row, column=col).value or '')
         return sum(max(1, -(-len(seg) // chars)) for seg in txt.split('\n')) * 10.5 + 6
-    est_h = max(est_h_of(7, 92), est_h_of(8, 56), est_h_of(9, 38))
+    est_h = max(est_h_of(6, 52), est_h_of(7, 92), est_h_of(8, 56), est_h_of(9, 38))
     ws.row_dimensions[row].height = min(409, max(90, est_h, img_h * 0.75 + 8)) if img_h else min(409, max(90, est_h))
     row += 1
 

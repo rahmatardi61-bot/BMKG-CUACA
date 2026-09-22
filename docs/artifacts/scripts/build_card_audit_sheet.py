@@ -17,6 +17,8 @@ from PIL import Image
 import openpyxl
 from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.cell.rich_text import CellRichText, TextBlock
+from openpyxl.cell.text import InlineFont
 
 BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))  # repo root (docs/artifacts/scripts → root)
 CARD_DIR = os.path.join(BASE, 'docs', 'screenshots', 'cards')
@@ -139,6 +141,7 @@ ws.merge_cells('A2:I2')
 ws['A2'] = ('Screenshot diambil dari deployment prod (server.mjs + dist, data live) dengan API BOX MARKER aktif '
             '— border merah = live, amber = campuran, abu = mock (lihat kolom Status). '
     'Kolom "Field dipakai UI" = pemetaan response → nilai yang dirender (sumber: src/services/bmkg/adapters.ts). '
+    '*(proxy) merah = API tidak bisa diakses langsung dari browser (CORS / header khusus) — harus lewat proxy/alias untuk ambil response-nya. '
             'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js')
 ws['A2'].font = Font(size=9, italic=True, color='555555')
 ws.merge_cells('A3:I3')
@@ -180,16 +183,27 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
         e_lines.append(f'• {name}')
         call = (calls.get(api_id) or [{}])[-1]
         if call:
-            f_lines.append(f'[{call.get("status", "?")}] {call.get("url", "?")}')
+            f_lines.append((f'[{call.get("status", "?")}] {call.get("url", "?")}', call.get('proxied', False)))
             pot = ' '.join(call.get('sample', '')[:SAMPLE_MAX].split())  # pretty-print → 1 baris
             g_blocks.append(f'▸ {name}\n{pot}{" …" if len(call.get("sample", "")) > SAMPLE_MAX else ""}')
         else:
-            f_lines.append(f'(belum terekam saat capture) — {name}')
+            f_lines.append((f'(belum terekam saat capture) — {name}', False))
             g_blocks.append(f'▸ {name}\n(tidak ada response live)')
         fields, penjelasan = API_USAGE.get(api_id, ('(belum terpetakan)', ''))
         h_lines.append(f'▸ {fields}\n  {penjelasan}')
     ws.cell(row=row, column=5, value='\n'.join(e_lines) if e_lines else '— (tanpa API live)')
-    ws.cell(row=row, column=6, value='\n'.join(f_lines) if f_lines else '—')
+    # kolom F: URL asli upstream; ' *(proxy)' merah tebal = API butuh proxy/alias
+    # (CORS / header khusus) kalau mau ambil response-nya
+    if any(pr for _, pr in f_lines):
+        rt = CellRichText()
+        for i, (line, proxied) in enumerate(f_lines):
+            if i: rt.append('\n')
+            rt.append(TextBlock(InlineFont(rFont='Courier New', sz=8), line))
+            if proxied:
+                rt.append(TextBlock(InlineFont(rFont='Courier New', sz=8, b=True, color='FFCC0000'), ' *(proxy)'))
+        ws.cell(row=row, column=6, value=rt)
+    else:
+        ws.cell(row=row, column=6, value='\n'.join(l for l, _ in f_lines) if f_lines else '—')
     ws.cell(row=row, column=7, value='\n\n'.join(g_blocks) if g_blocks else '— (tidak ada response live)')
     ws.cell(row=row, column=8, value='\n'.join(h_lines) if h_lines else '— (kartu tanpa API live — 100% statis)')
 

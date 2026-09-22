@@ -60,6 +60,32 @@ const dump = await p.evaluate(() => ({
   cards: window.__apiBox.cards, defs: window.__apiBox.defs,
   calls: window.__apiBox.calls(), totals: window.__apiBox.totals(),
 }));
+// decode URL proxy (/api/bmkg?path=…, /api-bmkgapi/…, path-style dev) → URL upstream asli
+// — biar sheet menampilkan API aslinya + flag proxied (marker *(proxy))
+function decodeProxyUrl(u) {
+  try {
+    const abs = new globalThis.URL(u, 'http://x'); // globalThis: const URL (target deploy) menimpa global URL!
+    const p = abs.searchParams.get('path');
+    if (p) {
+      const rest = new URLSearchParams(abs.search); rest.delete('path');
+      const q = rest.toString();
+      const host = p.startsWith('alerts/') ? 'www.bmkg.go.id' : p.startsWith('event/') ? 'publik.bmkg.go.id' : 'cuaca.bmkg.go.id';
+      return { url: `https://${host}/${decodeURIComponent(p)}${q ? '?' + q : ''}`, proxied: true };
+    }
+    if (!abs.hostname || abs.hostname === 'x') { // path-style dev / display proxy: /api/bmkg/api/df/…, /event/…, /alerts/…
+      const pth = abs.pathname.replace(/^\//, '').replace(/^(api\/bmkg|api-bmkg|api-bmkgapi)\//, '');
+      const host = pth.startsWith('alerts/') ? 'www.bmkg.go.id' : pth.startsWith('event/') ? 'publik.bmkg.go.id' : 'cuaca.bmkg.go.id';
+      return { url: `https://${host}/${pth}${abs.search}`, proxied: true };
+    }
+    return { url: abs.href, proxied: false };
+  } catch { return { url: u, proxied: false }; }
+}
+for (const id of Object.keys(dump.calls)) {
+  dump.calls[id] = dump.calls[id].map(c => {
+    const d = decodeProxyUrl(c.url);
+    return { ...c, url: d.url, proxied: d.proxied };
+  });
+}
 fs.writeFileSync('docs/screenshots/cards/dump.json', JSON.stringify(dump, null, 1));
 console.log(JSON.stringify(status));
 await b.close();

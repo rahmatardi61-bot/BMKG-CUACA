@@ -17,6 +17,7 @@ export const config = { runtime: 'edge' };
 
 const UPSTREAM = 'https://cuaca.bmkg.go.id';
 const NOWCAST_UPSTREAM = 'https://www.bmkg.go.id';
+const DWT_UPSTREAM = 'https://publik.bmkg.go.id';
 const API_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFjNWFkZWUxYzY5MzM0NjY2N2EzZWM0MWRlMjBmZWZhNDcxOTNjYzcyZDgwMGRiN2ZmZmFlMWVhYjcxZGYyYjQiLCJpYXQiOjE3MDE1ODMzNzl9.D1VNpMoTUVFOUuQW0y2vSjttZwj0sKBX33KyrkaRMcQ';
 const UA =
@@ -46,15 +47,19 @@ export default async function handler(req: Request): Promise<Response> {
   if (!path) return new Response(JSON.stringify({ error: 'parameter path wajib' }), { status: 400, headers: JSON_HEADERS });
 
   const isNowcast = path.startsWith('alerts/');
+  const isDwt = path.startsWith('event/');
   const own = new URLSearchParams(url.search);
   own.delete('path');
-  const target = `${isNowcast ? NOWCAST_UPSTREAM : UPSTREAM}/${path}${own.size ? `?${own}` : ''}`;
+  const host = isNowcast ? NOWCAST_UPSTREAM : isDwt ? DWT_UPSTREAM : UPSTREAM;
+  const target = `${host}/${path}${own.size ? `?${own}` : ''}`;
 
   const headers: Record<string, string> = isNowcast
     ? { 'User-Agent': UA, Accept: 'application/xml' }
-    : { Referer: UPSTREAM + '/', Origin: UPSTREAM, 'User-Agent': UA, Accept: 'application/json' };
-  if (!isNowcast && path.includes('api/v1/')) headers['X-API-KEY'] = API_KEY;
-  if (!isNowcast && (path.includes('api/public/') || path.includes('v1/public/') || path.includes('v1/user/'))) {
+    : isDwt
+      ? { 'User-Agent': UA, Accept: 'application/json' } // setara proxy vite /event (tanpa header khusus)
+      : { Referer: UPSTREAM + '/', Origin: UPSTREAM, 'User-Agent': UA, Accept: 'application/json' };
+  if (!isNowcast && !isDwt && path.includes('api/v1/')) headers['X-API-KEY'] = API_KEY;
+  if (!isNowcast && !isDwt && (path.includes('api/public/') || path.includes('v1/public/') || path.includes('v1/user/'))) {
     const tok = await getPubTok();
     if (tok) headers['x-public-token'] = tok;
   }

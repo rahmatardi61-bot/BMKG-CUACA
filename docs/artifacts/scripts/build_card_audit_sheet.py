@@ -8,7 +8,7 @@
 #
 # Regenerate:
 #   1) npm run build && node server.mjs            (port 8080, data live)
-#   2) node docs/artifacts/scripts/capture_card_screenshots.js
+#   2) node docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js
 #   3) python3 docs/artifacts/scripts/build_card_audit_sheet.py
 # ═══════════════════════════════════════════════════════════════════════════
 import json
@@ -83,7 +83,7 @@ ws['A1'].font = Font(bold=True, size=13)
 ws.merge_cells('A2:H2')
 ws['A2'] = ('Screenshot diambil dari deployment prod (server.mjs + dist, data live) dengan API BOX MARKER aktif '
             '— border merah = live, amber = campuran, abu = mock (lihat kolom Status). '
-            'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/artifacts/scripts/capture_card_screenshots.js')
+            'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js')
 ws['A2'].font = Font(size=9, italic=True, color='555555')
 ws.merge_cells('A3:H3')
 ws['A3'] = 'Status: ✅ LIVE = nilai kartu dari API live  |  ⚠️ CAMPURAN = sebagian live/sebagian mock  |  🔌 MOCK = statis/estimasi'

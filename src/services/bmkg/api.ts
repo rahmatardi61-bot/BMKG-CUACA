@@ -55,11 +55,21 @@ const qs = (params: Record<string, string | number | undefined>) =>
  * - prod  → `/api-bmkg?path=<encoded>&<query>` → Vercel function api/bmkg.ts / server.mjs
  *   (route polos, tanpa catch-all — lihat komentar di api/bmkg.ts)
  */
-function proxiedUrl(path: string, params: Record<string, string | number | undefined> = {}): string {
+/**
+ * URL same-origin yang difilter proxy BMKG.
+ * dev: `/event/...` (prefix = segmen pertama path, ditangani vite proxy)
+ * prod: `/api-bmkg?path=event%2F...` (api/bmkg.ts / server.mjs)
+ */
+export function bmkgProxied(path: string): string {
   const p = path.replace(/^\//, '');
+  if (import.meta.env.DEV) return `/${p}`;
+  return `${PROXY}?path=${encodeURIComponent(p)}`;
+}
+
+function proxiedUrl(path: string, params: Record<string, string | number | undefined> = {}): string {
+  const base = bmkgProxied(path);
   const q = qs(params);
-  if (import.meta.env.DEV) return `${p}${q ? `?${q}` : ''}`;
-  return `${PROXY}?path=${encodeURIComponent(p)}${q ? `&${q}` : ''}`;
+  return q ? `${base}${base.includes('?') ? '&' : '?'}${q}` : base;
 }
 
 /**
@@ -85,7 +95,7 @@ export function bmkgDirect<T>(path: string, params: Record<string, string | numb
  * CORS → lewat proxy (dev: vite `/alerts`; prod: api/bmkg.ts?path=alerts/…).
  */
 export function bmkgNowcastRss(): Promise<string> {
-  return request(proxiedUrl('alerts/nowcast/id')).then(r => r.text());
+  return request(bmkgProxied('alerts/nowcast/id')).then(r => r.text());
 }
 
 /**

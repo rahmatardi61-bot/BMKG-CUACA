@@ -1,10 +1,13 @@
 // BMKG Open Data resmi (11 Sep 2026) — knowledge base partner:
 //   - maritim.bmkg.go.id/public_api/*  → CORS * (direct dari browser)
-//   - publik.bmkg.go.id/event/source/dwt/* → tanpa CORS (dev lewat proxy vite /event)
+//   - publik.bmkg.go.id/event/source/dwt/* → tanpa CORS (lewat proxy: dev vite /event,
+//     prod /api-bmkg?path=event%2F… — lihat bmkgProxied di api.ts)
 // Semua fetch module-cached; dipakai TransportWeather/LandBased/WaveRadar/MarineMap/Advisor.
 
+import { bmkgProxied } from './api';
+
 const MARITIM = 'https://maritim.bmkg.go.id/public_api';
-const DWT = '/event/source/dwt';
+const DWT = (rest: string): string => bmkgProxied(`event/source/dwt/${rest}`);
 
 const CACHE_TTL = 30 * 60 * 1000; // 30 menit (slot maritim per 3 jam, DWT per jam)
 const cache = new Map<string, { data: unknown; at: number }>();
@@ -216,10 +219,10 @@ export interface DwtWeather {
 
 async function fetchDwtRows(kind: 'Darat' | 'Kereta'): Promise<DwtRow[] | null> {
   return cached(`dwt-${kind}-${new Date().toISOString().slice(0, 13)}`, async () => {
-    const manifest = await (await fetch(`${DWT}/apiDF_${kind}/manifest_times.json`)).json();
+    const manifest = await (await fetch(DWT(`apiDF_${kind}/manifest_times.json`))).json();
     const file = (manifest.files || []).at(-1) as string | undefined;
     if (!file) throw new Error('manifest kosong');
-    const rows = await (await fetch(`${DWT}/apiDF_${kind}/${file}`)).json();
+    const rows = await (await fetch(DWT(`apiDF_${kind}/${file}`))).json();
     return rows as DwtRow[];
   });
 }

@@ -3,7 +3,8 @@
 // "Audit Card + Screenshot" di docs/bmkg-api-mapping.xlsx).
 //
 // Prasyarat: `npm run build && node server.mjs` (prod-sim :8080, data live).
-// Jalankan: node docs/artifacts/scripts/capture_card_screenshots.js
+// Jalankan dari root repo: node docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js
+// (skrip di folder ini supaya import 'playwright' ketemu di node_modules lokal)
 // Output:   docs/screenshots/cards/<cardId>.png + dump.json
 // Catatan:  card drawer dibuka otomatis (Darat=nth0, Pelayaran=nth1, Penerbangan=nth3).
 // ═══════════════════════════════════════════════════════════════════════════

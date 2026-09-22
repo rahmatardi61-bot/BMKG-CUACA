@@ -21,6 +21,7 @@ dipakai / belum dipakai / tersedia versi resminya.
 |---|---|---|
 | `api-comparison.md` | Komparasi API original vs redesign vs official + status implementasi + daftar wajib-proxy | Mulai kerja / review backlog |
 | `api-reference.md` | Referensi teknis semua endpoint (internal scraped + resmi open data) + model auth/proxy | Implementasi / debugging |
+| `satellite-himawari.md` | **Citra satelit Himawari**: Tile API `satellite.bmkg.go.id` (CORS `*`, TMS, 18 frame) + gambar statis `inderaja` (tanpa CORS → `<img>` saja) + endpoint mati/stale | Integrasi peta satelit / animasi |
 | `team-notes.md` | Keputusan penyesuaian satuan (§1), endpoint tanpa slot UI (§2), temuan teknis (§3), **smoke test checklist** (§4) | Diskusi tim / QA manual |
 | `pages-original.md` | Peta route & section→API web original | Meniru perilaku UI original |
 | `bmkg-api-mapping.xlsx` | **SATU file xlsx, 9 sheet**: `API Mapping` (endpoint + status + akses dev), `Temuan API Resmi` (list + contoh sample asli per endpoint), `Audit Content Card` (**per kartu: live / mock / estimasi + sumber**), `Audit Card + Screenshot` (per kartu + **gambar komponen** + API/query/sample), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Sample Full` (**response utuh tanpa dipotong**, dipecah per 30rb char — batas sel Excel), `Ringkasan` | Presentasi/rapat tim |

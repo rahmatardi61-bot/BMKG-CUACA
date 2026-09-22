@@ -337,6 +337,7 @@ export const apiMarkerDirective: Directive<HTMLElement, string> = {
     const cardId = binding.arg ?? binding.value;
     const marker = CARD_MARKERS[cardId];
     if (!marker) { console.warn(`[api-marker] cardId tidak dikenal: ${cardId}`); return; }
+    el.dataset.apiBox = cardId; // locator untuk skrip screenshot/dokumentasi
     attachMarker(el, cardId, marker);
   },
   unmounted() { if (DEV) tooltip.style.display = 'none'; },
@@ -372,6 +373,14 @@ export function initApiMarkerDevTools(): void {
     fontWeight: '800', fontSize: '11px',
   }, '■ API BOX MARKER (dev) — klik untuk buka/tutup');
   btn.addEventListener('click', () => { body.style.display = body.style.display === 'none' ? 'block' : 'none'; });
+
+  // Hook ekstraksi data utk dokumentasi (skrip screenshot + sheet xlsx)
+  (window as unknown as Record<string, unknown>).__apiBox = {
+    cards: CARD_MARKERS,
+    defs: Object.fromEntries(API_DEFS.map(d => [d.id, { name: d.name, urlHint: d.urlHint }])),
+    calls: () => Object.fromEntries([...callsById].map(([id, list]) => [id, list])),
+    totals: () => Object.fromEntries(totalById),
+  };
   const body = el('div', {
     display: 'none', maxHeight: '50vh', overflow: 'auto', padding: '4px 10px 10px',
     borderTop: '1px solid #334155',

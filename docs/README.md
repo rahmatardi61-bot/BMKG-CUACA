@@ -23,7 +23,7 @@ dipakai / belum dipakai / tersedia versi resminya.
 | `api-reference.md` | Referensi teknis semua endpoint (internal scraped + resmi open data) + model auth/proxy | Implementasi / debugging |
 | `team-notes.md` | Keputusan penyesuaian satuan (§1), endpoint tanpa slot UI (§2), temuan teknis (§3), **smoke test checklist** (§4) | Diskusi tim / QA manual |
 | `pages-original.md` | Peta route & section→API web original | Meniru perilaku UI original |
-| `bmkg-api-mapping.xlsx` | **SATU file xlsx, 7 sheet**: `API Mapping` (endpoint + status + akses dev), `Temuan API Resmi` (list + contoh sample asli per endpoint), `Audit Content Card` (**per kartu: live / mock / estimasi + sumber**), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Ringkasan` | Presentasi/rapat tim |
+| `bmkg-api-mapping.xlsx` | **SATU file xlsx, 8 sheet**: `API Mapping` (endpoint + status + akses dev), `Temuan API Resmi` (list + contoh sample asli per endpoint), `Audit Content Card` (**per kartu: live / mock / estimasi + sumber**), `Audit Card + Screenshot` (per kartu + **gambar komponen** + API/query/sample), `Web`/`Mobile` (checklist fitur tim), `Official Open Data` (API resmi), `Ringkasan` | Presentasi/rapat tim |
 | `scrapping_cuaca-bmkg-go-id/` | Data: baseline JSON, screenshot, teks UI, report + tooling Playwright (`capture/probe/api_probe/diff.mjs`) | Butuh data mentah / re-scrape |
 | `artifacts/` | Proposal (docx/pdf), `comparison.html`, screenshot redesign, aset asli docx, + `scripts/` pembuatnya | Presentasi/rapat, regenerate artefak |
 

@@ -7,7 +7,7 @@
 
 | Fase | Isi | Status |
 |---|---|---|
-| 0 | Proxy dev (`vite.config.ts`) + Vercel function (`api/bmkg/[...path].ts`) + service client | ✅ |
+| 0 | Proxy dev (`vite.config.ts`) + Vercel function (`api/bmkg.ts`) + service client | ✅ |
 | 1 | `forecast/coord` + `presentwx/coord` → dashboard live | ✅ |
 | 2 | `warning` + `sunset/json` (+ `weekly-temperature`*) | ✅* |
 | 3 | `adm/coord` (ganti Nominatim, Nominatim jadi fallback) + `amandemen` (toast) + `video-latest` + `cyclone` | ✅ |
@@ -52,7 +52,10 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
 - `x-public-token` expire ±30 menit — proxy dev & function prod auto-refresh dengan cache 25 menit.
 - Endpoint `/api/public/*` menolak `Origin` asing (403) — makanya wajib proxy, bukan CORS biasa.
 - **Proxy dev tanpa alias**: path request = persis path upstream (`/api/df/...`, `/api/public/...`, `/api/v1/public/...`, `/blog/...`) sehingga devtools langsung terbaca; host asli hanya bisa tampil untuk endpoint direct (`presentwx`, `api/v1/*`) karena browser dilarang set header `Referer` kustom — itu batasan browser, bukan pilihan desain.
-- **Deploy nanti**: set `VITE_BMKG_PROXY=/api/bmkg` di env Vercel agar request lewat `api/bmkg/[...path].ts` (function sudah siap).
+- **Proxy prod tanpa env var**: base proxy di-set otomatis (`api.ts`: dev `''` path-style, prod `/api-bmkg?path=…`).
+  Function `api/bmkg.ts` = route polos — catch-all `[...path]` TIDAK dipakai karena saat tidak
+  terpasang request jatuh ke SPA rewrite (`vercel.json`) dan balik index.html (dokumen, bukan
+  JSON — bug yang pernah terjadi di deployment Vercel).
 - **Pemisahan LIVE vs MOCK**:
   - Data mock TIDAK PERNAH lewat network (import langsung dari `mockData.ts`) → apapun yang muncul di network tab adalah API BMKG asli.
   - Request `localhost:5173/api/df/...` di devtools = **data live BMKG via proxy** (bukan mock); endpoint direct (`presentwx`, `v1/*`) tampil dengan host asli.
@@ -116,7 +119,7 @@ Semua item di bawah sudah **jalan di dev** dan diverifikasi lewat browser otomat
 | A3 | **Berita**: `NewsSection` dipasang (sebelumnya data WP sudah di-fetch tapi prop `articles` tidak pernah dirender) | blog WP + video BMKG | `MainDashboard.vue` |
 | A4 | **Aktivitas Pelayaran**: pakai gelombang resmi perairan, bukan estimasi `0.3 + angin×0.04` | `/api/v1/public/maritim/nearest-location` → perairan | `WeatherActivity.vue` |
 | A5 | **AroundActivityPanel**: nilai cuaca per titik POI (comfort/hujan/UV/jam-an) diambil live dari `df/forecast/coord` per lat-lng POI; daftar POI tetap konten kurasi | internal `df/forecast/coord` | `AroundActivityPanel.vue` |
-| B6 | **Peringatan dini nowcast resmi** (RSS) menang atas `warning` internal, difilter per provinsi (feed-nya nasional). Proxy baru: dev `/alerts` → `www.bmkg.go.id`, prod lewat `api/bmkg/[...path].ts` | `https://www.bmkg.go.id/alerts/nowcast/id` | `services/bmkg/nowcast.ts`, `vite.config.ts`, `api/bmkg/[...path].ts` |
+| B6 | **Peringatan dini nowcast resmi** (RSS) menang atas `warning` internal, difilter per provinsi (feed-nya nasional). Proxy baru: dev `/alerts` → `www.bmkg.go.id`, prod lewat `api/bmkg.ts` | `https://www.bmkg.go.id/alerts/nowcast/id` | `services/bmkg/nowcast.ts`, `vite.config.ts`, `api/bmkg.ts` |
 | B7 | **Kartu baru "Pelabuhan & Pasut"** — pelabuhan terdekat + gelombang, suhu, kelembapan, angin, jarak pandang, pasang/surut (jam dikonversi ke WIB/WITA/WIT) | `/pelabuhan_list`, `/pelabuhan/{file}.json` | `PortTideCard.vue` |
 | B8 | **Fallback jalur resmi**: kalau `df/forecast/coord` kosong/gagal → `api.bmkg.go.id/publik/prakiraan-cuaca?adm4=` (bentuk item identik, adapter sama) | Open Data `prakiraan-cuaca` | `useBmkgWeather.ts`, `services/bmkg/api.ts` |
 | B9 | **WaveRadarMap**: bug properti diperbaiki (`WP_1`/`WP_IMM`, sebelumnya baca `code`/`kode` → semua zona kosong). **Tidak dipasang** — lihat §6.3 | overview + geojson | `WaveRadarMap.vue` |

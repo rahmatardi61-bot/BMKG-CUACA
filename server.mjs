@@ -1,13 +1,13 @@
 // Serve hasil `vite build` + proxy /api/bmkg/* ke handler yang sama dengan Vercel.
 // ponytail: satu proses Node (bukan nginx) karena proxy butuh header dinamis
-// (x-public-token segar) — lihat api/bmkg/[...path].ts.
+// (x-public-token segar) — lihat api/bmkg.ts.
 import { createServer } from 'node:http'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { pipeline } from 'node:stream/promises'
 import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
-import handler from './api/bmkg/[...path].ts'
+import handler from './api/bmkg.ts'
 
 const DIST = resolve('dist')
 const PORT = Number(process.env.PORT) || 8080
@@ -81,11 +81,8 @@ async function serveFile(req, res, pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
 
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/api-bmkg/')) {
-    // handler menuliskan prefix dirinya sebagai /api-bmkg/ (lihat regex di file-nya)
-    if (url.pathname.startsWith('/api/bmkg/')) {
-      url.pathname = `/api-bmkg/${url.pathname.slice('/api/bmkg/'.length)}`
-    }
+  if (url.pathname === '/api-bmkg') {
+    // handler membaca path upstream dari ?path= (lihat api/bmkg.ts)
     try {
       const out = await handler(new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())

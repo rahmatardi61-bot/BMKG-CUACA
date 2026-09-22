@@ -1,11 +1,18 @@
-// Vercel serverless: proxy /api-bmkg/* → https://cuaca.bmkg.go.id/*
-// Sama logikanya dengan proxy dev di vite.config.ts:
-// - inject Referer + Origin (wajib untuk /api/df/*)
+// Vercel serverless (edge): proxy same-origin → upstream BMKG.
+// Bentuk panggilan: /api-bmkg?path=<path-upstream>&<query-asli>
+//   contoh: /api-bmkg?path=api%2Fdf%2Fv1%2Fforecast%2Fcoord&lat=-6.2&lon=106.8
+//
+// Kenapa path lewat query, bukan /api-bmkg/<path>: catch-all [...path] tidak
+// reliabel di Vercel Functions — saat tidak terpasang, request jatuh ke SPA
+// rewrite (vercel.json) dan balik index.html (dokumen, bukan JSON). Route
+// polos "/api-bmkg" selalu terdeteksi dan lebih diutamakan dari rewrite.
+//
+// Logika sama dengan proxy dev di vite.config.ts:
+// - inject Referer + Origin (wajib untuk /api/df/* — header terlarang di browser)
 // - inject X-API-KEY (untuk /api/v1/*)
 // - inject x-public-token fresh (cache ~25 menit) untuk /api/public/*, /v1/public/*, /v1/user/*
 // - path `alerts/*` (nowcast RSS) diarahkan ke www.bmkg.go.id (tanpa CORS di sana)
-// Dipakai otomatis saat project di-deploy ke Vercel (folder api/ terdeteksi Vercel),
-// dan juga oleh server.mjs (Docker) — jadi perubahan di sini berlaku untuk keduanya.
+// Dipakai di Vercel (folder api/ terdeteksi otomatis) dan server.mjs (Docker).
 export const config = { runtime: 'edge' };
 
 const UPSTREAM = 'https://cuaca.bmkg.go.id';
@@ -14,6 +21,8 @@ const API_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFjNWFkZWUxYzY5MzM0NjY2N2EzZWM0MWRlMjBmZWZhNDcxOTNjYzcyZDgwMGRiN2ZmZmFlMWVhYjcxZGYyYjQiLCJpYXQiOjE3MDE1ODMzNzl9.D1VNpMoTUVFOUuQW0y2vSjttZwj0sKBX33KyrkaRMcQ';
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36';
+
+const JSON_HEADERS = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
 
 // ponytail: cache token global per-instance edge (cold start jarang, TTL 25m < exp 30m)
 const tokenState: { value: string; exp: number } = { value: '', exp: 0 };
@@ -33,9 +42,13 @@ async function getPubTok(): Promise<string> {
 
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  const path = url.pathname.replace(/^\/api-bmkg\/?/, ''); // "api/df/v1/forecast/coord" | "alerts/nowcast/id"
+  const path = url.searchParams.get('path') ?? '';
+  if (!path) return new Response(JSON.stringify({ error: 'parameter path wajib' }), { status: 400, headers: JSON_HEADERS });
+
   const isNowcast = path.startsWith('alerts/');
-  const target = `${isNowcast ? NOWCAST_UPSTREAM : UPSTREAM}/${path}${url.search}`;
+  const own = new URLSearchParams(url.search);
+  own.delete('path');
+  const target = `${isNowcast ? NOWCAST_UPSTREAM : UPSTREAM}/${path}${own.size ? `?${own}` : ''}`;
 
   const headers: Record<string, string> = isNowcast
     ? { 'User-Agent': UA, Accept: 'application/xml' }

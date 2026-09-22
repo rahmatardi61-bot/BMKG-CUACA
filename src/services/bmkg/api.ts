@@ -1,12 +1,15 @@
 // Klien API cuaca.bmkg.go.id
-// - /api/df/* + /api/public/* WAJIB lewat proxy (butuh Referer/Origin cuaca.bmkg.go.id
-//   yang tidak bisa di-set dari browser — lihat docs/api-mapping/IMPLEMENTATION-PLAN.md)
-// - /api/presentwx/* + /api/v1/* terbuka CORS (ACAO *) → direct, tapi tetap bisa lewat proxy
-// - /blog/wp-json/* → lewat proxy (tanpa CORS)
+// - /api/df/* WAJIB proxy: tanpa CORS (+butuh Referer yang terlarang di-set browser)
+// - /api/public/* + /api/v1/public/* WAJIB proxy: 401 tanpa x-public-token, dan token
+//   hanya bisa diekstrak server-side dari HTML upstream (diblok CORS di browser)
+// - /blog/wp-json/* + /alerts (RSS www.bmkg.go.id) WAJIB proxy: tanpa CORS
+// - /api/presentwx/*, /api/v1/sunset, /api/v1/tcwc/*, maritim.bmkg.go.id, api.bmkg.go.id
+//   → direct (ACAO *), sudah diverifikasi
 
-// dev: '' → path persis seperti upstream (/api/df/...) biar devtools mudah dibaca.
-// prod (Vercel): set VITE_BMKG_PROXY=/api/bmkg → lewat api/bmkg/[...path].ts
-const PROXY = import.meta.env.VITE_BMKG_PROXY || '';
+// dev: '' → path persis seperti upstream (/api/df/...) biar devtools mudah dibaca;
+//   Vite dev proxy (vite.config.ts) menangani.
+// prod (Vercel & Docker): '/api-bmkg?path=…' → api/bmkg.ts (edge) / server.mjs.
+const PROXY = import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? '' : '/api-bmkg');
 export const BMKG_BASE = 'https://cuaca.bmkg.go.id';
 
 /** Static client key (dari __NUXT_DATA__ baseline — publik milik situs BMKG) */
@@ -47,14 +50,24 @@ const qs = (params: Record<string, string | number | undefined>) =>
     .join('&');
 
 /**
- * Lewat proxy (`/api-bmkg/*`):
- * - dev   → Vite dev proxy (vite.config.ts) yang inject Referer + x-public-token
- * - prod  → Vercel function api/bmkg/[...path].ts yang setara
- * Dipakai untuk family yang butuh header khusus: /api/df/*, /api/public/*, /blog/wp-json/*
+ * URL lewat proxy.
+ * - dev   → path-style: `/api/df/...` (prefix vite proxy = segmen pertama path)
+ * - prod  → `/api-bmkg?path=<encoded>&<query>` → Vercel function api/bmkg.ts / server.mjs
+ *   (route polos, tanpa catch-all — lihat komentar di api/bmkg.ts)
+ */
+function proxiedUrl(path: string, params: Record<string, string | number | undefined> = {}): string {
+  const p = path.replace(/^\//, '');
+  const q = qs(params);
+  if (import.meta.env.DEV) return `${p}${q ? `?${q}` : ''}`;
+  return `${PROXY}?path=${encodeURIComponent(p)}${q ? `&${q}` : ''}`;
+}
+
+/**
+ * Lewat proxy — dipakai untuk family yang butuh header khusus:
+ * /api/df/*, /api/public/*, /api/v1/public/*, /blog/wp-json/*, /alerts
  */
 export function bmkgProxy<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
-  const q = qs(params);
-  return getJson<T>(`${PROXY}/${path.replace(/^\//, '')}${q ? `?${q}` : ''}`);
+  return getJson<T>(proxiedUrl(path, params));
 }
 
 /**
@@ -69,10 +82,10 @@ export function bmkgDirect<T>(path: string, params: Record<string, string | numb
 
 /**
  * Nowcast RSS (peringatan dini cuaca) — host `www.bmkg.go.id`, TIDAK punya header
- * CORS → tetap lewat proxy (dev: vite `/alerts`; prod: api/bmkg/[...path].ts).
+ * CORS → lewat proxy (dev: vite `/alerts`; prod: api/bmkg.ts?path=alerts/…).
  */
 export function bmkgNowcastRss(): Promise<string> {
-  return request(`${PROXY}/alerts/nowcast/id`).then(r => r.text());
+  return request(proxiedUrl('alerts/nowcast/id')).then(r => r.text());
 }
 
 /**

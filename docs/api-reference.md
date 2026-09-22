@@ -10,10 +10,12 @@ Sample: `baseline/api_probes/` (probe Node) & `baseline/<route>/` (capture brows
 
 UA wajib full browser string.
 
-> **Akses di redesign (dev)**: family dengan auth `Referer+Origin` (`/api/df/*`) dan
+> **Akses di redesign**: family dengan auth `Referer+Origin` (`/api/df/*`) dan
 > `x-public-token` (`/api/public/*`, `/api/v1/public/*`, `/api/v1/user/*`) **wajib lewat
-> proxy** (Vite dev / `api/bmkg/[...path].ts` di prod) — browser tidak bisa mengirim header
-> tersebut. Family `Terbuka` / `X-API-KEY` bisa **direct** dari browser (`ACAO: *`).
+> proxy** (Vite dev path-style; prod/Docker `/api-bmkg?path=…` → `api/bmkg.ts`) — browser
+> tidak bisa mengirim header tersebut, dan `x-public-token` hanya bisa diekstrak
+> server-side dari HTML upstream (tes direct: 401 tanpa token). Family `Terbuka` /
+> `X-API-KEY` bisa **direct** dari browser (`ACAO: *`).
 > Daftar per endpoint: kolom "Akses (dev)" di `bmkg-api-mapping.xlsx`.
 
 ## A. ISDP API — `https://cuaca.bmkg.go.id/api/v1/*` (auth: `X-API-KEY`)
@@ -323,8 +325,8 @@ Header CORS: TIDAK ADA  → request dari browser langsung akan diblokir
 
 - Jalur proxy yang dipakai redesign:
   - dev: Vite mem-proxy `/alerts/*` → `https://www.bmkg.go.id` (`vite.config.ts`, `NOWCAST_PROXY`).
-  - prod/Docker: `api/bmkg/[...path].ts` memetakan `alerts/*` → `https://www.bmkg.go.id/*`.
-    Handler edge ini juga dipakai `server.mjs`, jadi tidak ada perubahan terpisah.
+  - prod/Docker: `api/bmkg.ts` (edge, route polos `/api-bmkg?path=alerts%2F…`) memetakan
+    `alerts/*` → `https://www.bmkg.go.id/*`. Handler yang sama dipakai `server.mjs`.
 - Parser: `src/services/bmkg/nowcast.ts` (murni, tanpa `import.meta.env`, bisa dites Node) +
   self-check `nowcast.check.ts`:
   `node --experimental-strip-types src/services/bmkg/nowcast.check.ts`.

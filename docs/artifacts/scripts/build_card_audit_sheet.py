@@ -199,9 +199,11 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
         red = InlineFont(rFont='Courier New', sz=8, b=True, color='FFCC0000')
         rt = CellRichText()
         for i, (line, proxied) in enumerate(f_lines):
-            # newline WAJIB di dalam TextBlock — string '\n' polos ditrim Excel (baris menyatu)
-            if i: rt.append(TextBlock(fnt, '\n'))
-            rt.append(TextBlock(fnt, line))
+            # newline digabung ke awal teks baris berikutnya dalam run yang sama —
+            # run berisi '\n' saja di-drop Excel (baris menyatu); pola file Excel asli
+            # = '\n' menempel konten dalam <t xml:space="preserve">
+            text = line if i == 0 else '\n' + line
+            rt.append(TextBlock(fnt, text))
             if proxied:
                 rt.append(TextBlock(red, ' *(proxy)'))
         ws.cell(row=row, column=6, value=rt)

@@ -11,7 +11,11 @@ import {
   Thermometer,
   Cloud,
   Droplet,
-  Wind
+  Wind,
+  Layers,
+  Flame,
+  Mountain,
+  Sun
 } from 'lucide-vue-next';
 
 
@@ -23,10 +27,14 @@ const emit = defineEmits<{
 const activeTab = ref('suhu');
 
 const tabs = [
-  { id: 'suhu', label: 'Suhu Permukaan', icon: Thermometer },
-  { id: 'awan', label: 'Citra Awan', icon: Cloud },
-  { id: 'hujan', label: 'Curah Hujan', icon: Droplet },
-  { id: 'angin', label: 'Kec. Angin', icon: Wind }
+  { id: 'suhu', label: 'Suhu Awan · IR', icon: Thermometer },
+  { id: 'awan', label: 'Citra Awan · Visible', icon: Cloud },
+  { id: 'hujan', label: 'Potensi Hujan', icon: Droplet },
+  { id: 'angin', label: 'Uap Air · WV', icon: Wind },
+  { id: 'sandwich', label: 'Sandwich', icon: Layers },
+  { id: 'asap', label: 'Asap Kebakaran', icon: Flame },
+  { id: 'abu', label: 'Abu Vulkanik', icon: Mountain },
+  { id: 'visible', label: 'Visible 500m', icon: Sun }
 ];
 
 const isDropdownOpen = ref(false);
@@ -60,7 +68,35 @@ const handleClickOutside = (event: MouseEvent) => {
 // ── Tile API satellite.bmkg.go.id (CORS *, 18 frame, interval 10 menit) ──
 // docs: docs/satellite-himawari.md — tms:true wajib, maxZoom 8, 204 = di luar cakupan (skip)
 const SATELLITE = 'https://satellite.bmkg.go.id';
-const PARAM_BY_TAB: Record<string, string> = { suhu: 'EH', awan: 'NC', hujan: 'RP', angin: 'WV' };
+const PARAM_BY_TAB: Record<string, string> =
+  { suhu: 'EH', awan: 'NC', hujan: 'RP', angin: 'WV', sandwich: 'SW', asap: 'SM', abu: 'VA', visible: 'VS' };
+
+// nama channel utk badge — visible/natural memang gelap saat malam (fisika citra, bukan bug)
+const CHANNEL_NAME: Record<string, string> = {
+  suhu: 'Infrared Enhanced', awan: 'Natural Color (siang)', hujan: 'Rainfall Potential',
+  angin: 'Water Vapor', sandwich: 'Sandwich', asap: 'Smoke', abu: 'Volcanic Ash', visible: 'Visible (siang)'
+};
+const channelName = computed(() => CHANNEL_NAME[activeTab.value] ?? '');
+
+const speedMs = ref(300); // kecepatan animasi — default UI resmi BMKG
+
+// Select Area → flyTo (mengikuti pola 'Select Area' UI resmi)
+const AREAS: Record<string, { ll: [number, number]; z: number }> = {
+  Indonesia: { ll: [-2.5, 118], z: 5 },
+  Jakarta: { ll: [-6.2, 106.85], z: 7 },
+  Sumatera: { ll: [0, 101.5], z: 6 },
+  Jawa: { ll: [-7.3, 110], z: 6 },
+  Kalimantan: { ll: [-1, 114], z: 6 },
+  Sulawesi: { ll: [-2, 120.5], z: 6 },
+  'Bali–NTB': { ll: [-8.4, 117], z: 7 },
+  Maluku: { ll: [-3.3, 128.5], z: 6 },
+  Papua: { ll: [-4.1, 138.5], z: 6 }
+};
+const selArea = ref('Indonesia');
+watch(selArea, a => {
+  const cfg = AREAS[a];
+  if (map && cfg) map.flyTo(cfg.ll, cfg.z, { duration: 1.2 });
+});
 
 const frames = ref<string[]>([]);          // baserun ISO 8601 UTC, terbaru di index 0
 const frameIndex = ref(0);
@@ -96,7 +132,7 @@ const imageUrls: Record<string, string> = {
   angin: 'https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_WV_Indonesia.png'
 };
 
-const activeImageUrl = computed(() => imageUrls[activeTab.value]);
+const activeImageUrl = computed(() => imageUrls[activeTab.value] ?? imageUrls.suhu);
 
 // Fallback statis (inderaja <img>) bila Tile API gagal
 const mapBgStyle = computed(() => ({
@@ -138,8 +174,9 @@ const startPlayback = () => {
   stopPlayback();
   playIntervalId = setInterval(() => {
     frameIndex.value = frames.value.length ? (frameIndex.value + 1) % frames.value.length : 0;
-  }, 1500);
+  }, Math.max(100, speedMs.value));
 };
+watch(speedMs, () => { if (isPlaying.value) startPlayback(); });
 
 const stopPlayback = () => {
   if (playIntervalId) {
@@ -273,6 +310,16 @@ onUnmounted(() => {
         <div class="absolute top-2 left-2 z-20 bg-amber-500/90 text-slate-950 text-[8px] font-bold px-2 py-0.5 rounded-[4px]">MODE STATIS — Tile API tidak tersedia</div>
       </div>
 
+      <!-- Select Area → flyTo (pola UI resmi) -->
+      <div class="absolute top-2.5 left-12 z-20">
+        <select
+          v-model="selArea"
+          class="bg-slate-950/85 backdrop-blur-sm border border-slate-700/50 text-white text-[9px] font-bold rounded-[4px] px-2 py-1.5 outline-none cursor-pointer"
+        >
+          <option v-for="name in Object.keys(AREAS)" :key="name" :value="name">{{ name }}</option>
+        </select>
+      </div>
+
       <!-- Banner data tertunda (frame terakhir > 1 jam) -->
       <div
         v-if="!satError && isStale"
@@ -288,6 +335,7 @@ onUnmounted(() => {
         <div class="min-w-0">
           <p class="text-[8px] text-slate-400 font-bold tracking-widest uppercase leading-none">Satelit Aktif</p>
           <p class="text-[9px] font-black text-slate-100 mt-1 truncate">HIMAWARI-9 (AHI)</p>
+          <p class="text-[7px] text-brand-cyan font-bold leading-none mt-0.5 truncate">{{ channelName }}</p>
           <p class="text-[7px] text-slate-400 leading-none mt-0.5">{{ detectionText }}</p>
         </div>
       </div>
@@ -301,6 +349,17 @@ onUnmounted(() => {
         <span class="font-bold tracking-widest text-slate-300">
           {{ satError || frameIndex === 0 ? 'LIVE FEED' : 'PLAYBACK' }}
         </span>
+      </div>
+
+      <!-- Colorbar suhu awan (param EH) — skala IR UI resmi: -100..60 °C -->
+      <div
+        v-if="activeTab === 'suhu' && !satError"
+        class="absolute bottom-14 left-3 z-20 pointer-events-none bg-slate-950/70 backdrop-blur-sm border border-slate-800/40 rounded-[4px] px-2 py-1.5"
+      >
+        <div class="h-1.5 w-36 rounded-full" style="background: linear-gradient(to right, #7a0000, #ff3300, #ff9900, #ffe066, #b8e02e, #33cc33, #00b3b3, #0066cc, #000066)"></div>
+        <div class="flex justify-between w-36 text-[6.5px] font-bold text-slate-400 mt-0.5">
+          <span>-100°C</span><span>Suhu Puncak Awan</span><span>60°C</span>
+        </div>
       </div>
 
       <!-- Atribusi wajib -->
@@ -337,6 +396,15 @@ onUnmounted(() => {
           @input="selectTime(+($event.target as HTMLInputElement).value)"
           class="w-24 h-1 accent-blue-500 dark:accent-brand-cyan cursor-pointer"
         />
+        <input
+          v-model.number="speedMs"
+          type="number"
+          min="100"
+          step="100"
+          title="Kecepatan animasi (ms per frame)"
+          class="w-11 bg-slate-800/80 border border-slate-700/50 rounded text-[8px] text-slate-200 px-1 py-0.5 text-center outline-none"
+        />
+        <span class="text-[7px] font-bold text-slate-500">ms</span>
         <span class="text-[7.5px] font-bold tracking-wider text-slate-300 whitespace-nowrap tabular-nums">
           {{ frames.length ? `${frameLabel(frames[frameIndex])} · ${frames.length}fr` : 'memuat…' }}
         </span>

@@ -86,6 +86,43 @@ for (const id of Object.keys(dump.calls)) {
     return { ...c, url: d.url, proxied: d.proxied };
   });
 }
+
+// refill server-side: endpoint yang TIDAK terekam patch fetch (img/interaksi/belum dibuka)
+// di-fetch ulang langsung (node fetch — tanpa CORS) supaya sheet punya sample-nya juga
+const UA = { 'User-Agent': 'bmkg-redesign-capture/1.0 (docs)', Referer: 'https://cuaca.bmkg.go.id/' };
+const OVERPASS_Q = '[out:json][timeout:25];node(around:5000,-6.2088,106.8456)["amenity"="restaurant"];out 10;';
+const REFILL = [
+  ['tews', 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json'],
+  ['tews', 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'],
+  ['satelit', 'https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Indonesia.png'],
+  ['nominatim', 'https://nominatim.openstreetmap.org/search?format=json&q=Monumen%20Nasional&countrycodes=id&limit=8&addressdetails=1'],
+  ['overpass', 'https://overpass-api.de/api/interpreter', { method: 'POST', body: new URLSearchParams({ data: OVERPASS_Q }) }],
+  ['osrm', 'https://router.project-osrm.org/route/v1/driving/106.8456,-6.2088;106.8166,-6.1754?overview=full&geometries=geojson&alternatives=true&steps=true'],
+  ['official-forecast', 'https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=31.71.01.1001'],
+  ['maritim-wilayah', 'https://maritim.bmkg.go.id/public_api/static/wilayah_perairan.json'],
+  ['maritim-overview', 'https://maritim.bmkg.go.id/public_api/overview/gelombang.json'],
+];
+for (const [id, url, opts] of REFILL) {
+  const existing = (dump.calls[id] || []).filter(c => !(c.refill && c.status >= 400)); // buang refill lama yang gagal
+  if (existing.some(c => c.sample && c.sample.length > 2 && (c.status || 200) < 400)) continue; // sudah ada sample asli → jangan ganggu
+  const [u, init] = [url, opts || {}];
+  try {
+    const res = await fetch(u, { ...init, headers: { ...UA, ...(init.headers || {}) }, signal: AbortSignal.timeout(30000) });
+    const ct = res.headers.get('content-type') || '';
+    let sample;
+    if (ct.startsWith('image/')) {
+      const buf = await res.arrayBuffer();
+      sample = `[(binary ${ct} — ${(buf.byteLength / 1024).toFixed(1)} KB; gambar Himawari-9, bukan JSON)]`;
+    } else {
+      sample = await res.text();
+    }
+    existing.push({ url, method: init.method || 'GET', status: res.status, sample, at: new Date().toISOString(), proxied: false, refill: true });
+    dump.calls[id] = existing;
+    console.error(`refill ${id}: ${res.status} (${sample.length} char)`);
+  } catch (e) {
+    console.error(`refill ${id} GAGAL: ${String(e).slice(0, 80)}`);
+  }
+}
 fs.writeFileSync('docs/screenshots/cards/dump.json', JSON.stringify(dump, null, 1));
 console.log(JSON.stringify(status));
 await b.close();

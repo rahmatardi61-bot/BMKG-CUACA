@@ -6,12 +6,17 @@
 // - /api/presentwx/*, /api/v1/sunset, /api/v1/tcwc/*, maritim.bmkg.go.id, api.bmkg.go.id
 //   → direct (ACAO *), sudah diverifikasi
 
-// dev: '' → path persis seperti upstream (/api/df/...) biar devtools mudah dibaca;
-//   Vite dev proxy (vite.config.ts) menangani.
-// prod (Vercel & Docker): '/api/bmkg?path=…' → route function api/bmkg.ts / server.mjs.
-// PENTING: route-nya /api/bmkg (dari nama file) — bukan /api-bmkg (path itu tak
-// punya handler di Vercel → jatuh ke SPA rewrite → balik index.html).
-const PROXY = import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? '' : '/api/bmkg');
+// Mode akses via env VITE_BMKG_PROXY (build-time):
+//   (kosong)          → otomatis: dev = path-style (vite proxy), prod = '/api/bmkg' (function)
+//   '/api/bmkg' dsb.  → paksa base proxy tertentu
+//   'direct'          → TANPA proxy: langsung https://cuaca.bmkg.go.id/<path>
+//                       (host khusus tetap diarahkan: alerts→www., event→publik.
+//                        — sama seperti routing di api/bmkg.ts).
+//                       Catatan: df/public/blog/alerts tidak punya CORS / butuh header
+//                       khusus → gagal di browser → fallback mock (untuk eksperimen,
+//                       bukan produksi).
+const PROXY_MODE = (import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? 'dev' : 'proxy')).toLowerCase();
+const PROXY_BASE = PROXY_MODE === 'dev' || PROXY_MODE === 'direct' ? '' : PROXY_MODE;
 export const BMKG_BASE = 'https://cuaca.bmkg.go.id';
 
 /** Static client key (dari __NUXT_DATA__ baseline — publik milik situs BMKG) */
@@ -57,15 +62,25 @@ const qs = (params: Record<string, string | number | undefined>) =>
  * - prod  → `/api/bmkg?path=<encoded>&<query>` → Vercel function api/bmkg.ts / server.mjs
  *   (route polos sesuai nama file, tanpa catch-all)
  */
+/** Host upstream untuk sebuah path — cerminan routing di api/bmkg.ts. */
+function upstreamUrl(p: string): string {
+  const host = p.startsWith('alerts/') ? 'https://www.bmkg.go.id'
+    : p.startsWith('event/') ? 'https://publik.bmkg.go.id'
+    : 'https://cuaca.bmkg.go.id';
+  return `${host}/${p}`;
+}
+
 /**
- * URL same-origin yang difilter proxy BMKG.
- * dev: `/event/...` (prefix = segmen pertama path, ditangani vite proxy)
- * prod: `/api-bmkg?path=event%2F...` (api/bmkg.ts / server.mjs)
+ * URL untuk family yang butuh proxy.
+ * - 'dev'    → `/event/...` (prefix = segmen pertama path, ditangani vite proxy)
+ * - 'proxy'  → `/api/bmkg?path=<encoded>` (api/bmkg.ts di Vercel / server.mjs)
+ * - 'direct' → langsung upstream, tanpa header khusus (lihat komentar di atas)
  */
 export function bmkgProxied(path: string): string {
   const p = path.replace(/^\//, '');
-  if (import.meta.env.DEV) return `/${p}`;
-  return `${PROXY}?path=${encodeURIComponent(p)}`;
+  if (PROXY_MODE === 'direct') return upstreamUrl(p);
+  if (PROXY_MODE === 'dev') return `/${p}`;
+  return `${PROXY_BASE}?path=${encodeURIComponent(p)}`;
 }
 
 function proxiedUrl(path: string, params: Record<string, string | number | undefined> = {}): string {

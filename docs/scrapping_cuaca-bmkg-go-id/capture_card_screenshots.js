@@ -95,6 +95,7 @@ const REFILL = [
   ['tews', 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json'],
   ['tews', 'https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json'],
   ['satelit', 'https://inderaja.bmkg.go.id/IMAGE/HIMA/H08_EH_Indonesia.png'],
+  ['satellite-modelrun', 'https://satellite.bmkg.go.id/api22/modelrun'],
   ['nominatim', 'https://nominatim.openstreetmap.org/search?format=json&q=Monumen%20Nasional&countrycodes=id&limit=8&addressdetails=1'],
   ['overpass', 'https://overpass-api.de/api/interpreter', { method: 'POST', body: new URLSearchParams({ data: OVERPASS_Q }) }],
   ['osrm', 'https://router.project-osrm.org/route/v1/driving/106.8456,-6.2088;106.8166,-6.1754?overview=full&geometries=geojson&alternatives=true&steps=true'],

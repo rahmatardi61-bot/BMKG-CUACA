@@ -105,7 +105,9 @@ const isPlaying = ref(false);
 const cacheBuster = ref(Date.now());       // cache-killer untuk fallback statis inderaja
 
 let map: L.Map | null = null;
-let himaLayer: L.TileLayer | null = null;
+// 1 layer per frame, play = toggle opacity (setUrl per frame = buang+muat ulang tile → glitch)
+const HIMAWARI_OPACITY = 0.9;
+let frameLayers: L.TileLayer[] = [];
 let playIntervalId: any = null;
 let refreshId: any = null;
 
@@ -158,16 +160,28 @@ async function loadFrames() {
   }
 }
 
-function applyFrame() {
-  const baserun = frames.value[frameIndex.value];
-  if (!map || !himaLayer || !baserun) return;
-  himaLayer.setUrl(tileUrl(baserun)); // ganti frame tanpa flicker
+function buildFrameLayers() {
+  if (!map || !frames.value.length) return;
+  frameLayers.forEach(l => l.remove());
+  frameLayers = frames.value.map(fr =>
+    L.tileLayer(tileUrl(fr), {
+      tms: true,          // skema TMS — wajib
+      crossOrigin: true,  // canvas tidak tainted
+      opacity: 0,
+      maxNativeZoom: 8,
+      maxZoom: 8
+    }).addTo(map!)
+  );
+  applyFrame();
 }
 
-watch(activeTab, () => {
-  if (himaLayer) himaLayer.setUrl(tileUrl(frames.value[frameIndex.value] ?? ''));
-});
+function applyFrame() {
+  frameLayers.forEach((l, i) => l.setOpacity(i === frameIndex.value ? HIMAWARI_OPACITY : 0));
+}
+
+watch(activeTab, buildFrameLayers); // ganti param → rebuild layer dgn URL baru
 watch(frameIndex, applyFrame);
+watch(frames, buildFrameLayers);
 
 // Playback slider controls
 const startPlayback = () => {
@@ -201,24 +215,16 @@ const selectTime = (index: number) => {
 };
 
 onMounted(async () => {
-  await loadFrames();
-  if (!satError.value) {
-    await nextTick();
-    map = L.map('satellite-leaflet', {
-      center: [-2.5, 118],
-      zoom: 5,
-      maxZoom: 8, // data Himawari habis ~z=8 (docs/satellite-himawari.md)
-      attributionControl: false
-    });
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, attribution: '' }).addTo(map);
-    himaLayer = L.tileLayer(tileUrl(frames.value[frameIndex.value] ?? ''), {
-      tms: true,          // skema TMS — wajib
-      crossOrigin: true,  // canvas tidak tainted
-      opacity: 0.9,
-      maxNativeZoom: 8,
-      maxZoom: 8
-    }).addTo(map);
-  }
+  await nextTick();
+  map = L.map('satellite-leaflet', {
+    center: [-2.5, 118],
+    zoom: 5,
+    maxZoom: 8, // data Himawari habis ~z=8 (docs/satellite-himawari.md)
+    attributionControl: false
+  });
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, attribution: '' }).addTo(map);
+  await loadFrames(); // watch(frames) → buildFrameLayers (peta sudah siap)
+  if (satError.value) map.remove(), (map = null); // fallback statis → Leaflet tak dibutuhkan
 
   // polling modelrun — situs BMKG 30 detik; 60 detik cukup sopan
   refreshId = setInterval(loadFrames, 60_000);
@@ -230,9 +236,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (refreshId) clearInterval(refreshId);
+  frameLayers = [];
   map?.remove();
   map = null;
-  himaLayer = null;
   window.removeEventListener('click', handleClickOutside);
   stopPlayback();
 });

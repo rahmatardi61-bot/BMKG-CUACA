@@ -55,7 +55,7 @@ cards, defs, calls = dump['cards'], dump['defs'], dump['calls']
 # ── siapkan JPEG ter-resize untuk embed (PNG 2x terlalu berat) ──────────────
 tmp = os.path.join(CARD_DIR, '.sheet')
 os.makedirs(tmp, exist_ok=True)
-DISP_W = 720  # px tampilan
+DISP_W = 460  # px tampilan (kecil, cukup untuk mengenali komponen)
 for card_id in cards:
     src = os.path.join(CARD_DIR, f'{card_id}.png')
     if not os.path.exists(src):
@@ -136,6 +136,11 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     else:
         ws.cell(row=row, column=7, value='— (tidak ada response live)')
 
+    # estimasi tinggi teks kolom G (sample) — biar tinggi baris mengikuti konten terpanjang
+    txt = ws.cell(row=row, column=7).value or ''
+    est_lines = sum(max(1, -(-len(seg) // 112)) for seg in str(txt).split('\n'))
+    est_h = est_lines * 10.5 + 6
+
     note = m.get('note', '')
     parts = m.get('parts') or []
     h_lines = [note] if note else []
@@ -152,10 +157,11 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
             cell.font = Font(size=9)
         if c in (6, 7):
             cell.font = Font(size=8, name='Courier New')
-    ws.row_dimensions[row].height = max(120, img_h * 0.75 + 8) if img_h else 90
+    # batas tinggi baris Excel = 409,5 pt (teks lebih panjang tetap utuh di sel, tinggal di-klik)
+    ws.row_dimensions[row].height = min(409, max(90, est_h, img_h * 0.75 + 8)) if img_h else min(409, max(90, est_h))
     row += 1
 
-for col, w in {'A': 5, 'B': 30, 'C': 110, 'D': 14, 'E': 34, 'F': 52, 'G': 60, 'H': 44}.items():
+for col, w in {'A': 5, 'B': 30, 'C': 70, 'D': 14, 'E': 34, 'F': 52, 'G': 115, 'H': 44}.items():
     ws.column_dimensions[col].width = w
 ws.freeze_panes = 'A5'
 

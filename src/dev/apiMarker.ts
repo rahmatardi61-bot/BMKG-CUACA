@@ -350,10 +350,13 @@ export function initApiMarkerDevTools(): void {
   window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const res = await orig(input, init);
     let url = typeof input === 'string' ? input : input instanceof URL ? input.href : input?.url ?? '';
-    // prod: proxy path-style → /api-bmkg?path=api%2Fdf%2F… (ter-encode) — decode agar
-    // API_DEFS (regex path upstream) tetap match saat marker dipakai di deployment
+    // prod: proxy → /api/bmkg?path=api%2Fdf%2F… (ter-encode) — tampilkan sebagai
+    // /api/bmkg/api/df/…?<query> agar API_DEFS (regex path upstream) tetap match
     const m = /[?&]path=([^&]+)/.exec(url);
-    if (m) url = url.slice(0, m.index) + decodeURIComponent(m[1]) + url.slice(m.index + m[0].length);
+    if (m) {
+      const rest = url.slice(m.index + m[0].length).replace(/^&/, '');
+      url = `${url.slice(0, m.index)}/${decodeURIComponent(m[1])}${rest ? `?${rest}` : ''}`;
+    }
     res.clone().text()
       .then(body => recordApiCall(url, init?.method ?? 'GET', res.status, body))
       .catch(() => { /* opaque/stream body — abaikan */ });

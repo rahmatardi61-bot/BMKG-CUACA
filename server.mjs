@@ -1,4 +1,4 @@
-// Serve hasil `vite build` + proxy /api/bmkg/* ke handler yang sama dengan Vercel.
+// Serve hasil `vite build` + proxy /api/bmkg?path=… ke handler yang sama dengan Vercel.
 // ponytail: satu proses Node (bukan nginx) karena proxy butuh header dinamis
 // (x-public-token segar) — lihat api/bmkg.ts.
 import { createServer } from 'node:http'
@@ -81,8 +81,8 @@ async function serveFile(req, res, pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
 
-  if (url.pathname === '/api-bmkg') {
-    // handler membaca path upstream dari ?path= (lihat api/bmkg.ts)
+  if (url.pathname === '/api/bmkg' || url.pathname === '/api-bmkg') {
+    // handler membaca path upstream dari ?path= (lihat api/bmkg.ts); /api-bmkg = legacy
     try {
       const out = await handler(new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())

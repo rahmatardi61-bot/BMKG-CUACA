@@ -8,8 +8,10 @@
 
 // dev: '' → path persis seperti upstream (/api/df/...) biar devtools mudah dibaca;
 //   Vite dev proxy (vite.config.ts) menangani.
-// prod (Vercel & Docker): '/api-bmkg?path=…' → api/bmkg.ts (edge) / server.mjs.
-const PROXY = import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? '' : '/api-bmkg');
+// prod (Vercel & Docker): '/api/bmkg?path=…' → route function api/bmkg.ts / server.mjs.
+// PENTING: route-nya /api/bmkg (dari nama file) — bukan /api-bmkg (path itu tak
+// punya handler di Vercel → jatuh ke SPA rewrite → balik index.html).
+const PROXY = import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? '' : '/api/bmkg');
 export const BMKG_BASE = 'https://cuaca.bmkg.go.id';
 
 /** Static client key (dari __NUXT_DATA__ baseline — publik milik situs BMKG) */
@@ -52,8 +54,8 @@ const qs = (params: Record<string, string | number | undefined>) =>
 /**
  * URL lewat proxy.
  * - dev   → path-style: `/api/df/...` (prefix vite proxy = segmen pertama path)
- * - prod  → `/api-bmkg?path=<encoded>&<query>` → Vercel function api/bmkg.ts / server.mjs
- *   (route polos, tanpa catch-all — lihat komentar di api/bmkg.ts)
+ * - prod  → `/api/bmkg?path=<encoded>&<query>` → Vercel function api/bmkg.ts / server.mjs
+ *   (route polos sesuai nama file, tanpa catch-all)
  */
 /**
  * URL same-origin yang difilter proxy BMKG.

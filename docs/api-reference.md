@@ -12,7 +12,7 @@ UA wajib full browser string.
 
 > **Akses di redesign**: family dengan auth `Referer+Origin` (`/api/df/*`) dan
 > `x-public-token` (`/api/public/*`, `/api/v1/public/*`, `/api/v1/user/*`) **wajib lewat
-> proxy** (Vite dev path-style; prod/Docker `/api-bmkg?path=…` → `api/bmkg.ts`) — browser
+> proxy** (Vite dev path-style; prod/Docker `/api/bmkg?path=…` → `api/bmkg.ts`) — browser
 > tidak bisa mengirim header tersebut, dan `x-public-token` hanya bisa diekstrak
 > server-side dari HTML upstream (tes direct: 401 tanpa token). Family `Terbuka` /
 > `X-API-KEY` bisa **direct** dari browser (`ACAO: *`).

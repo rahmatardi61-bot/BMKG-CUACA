@@ -52,7 +52,7 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
 - `x-public-token` expire ±30 menit — proxy dev & function prod auto-refresh dengan cache 25 menit.
 - Endpoint `/api/public/*` menolak `Origin` asing (403) — makanya wajib proxy, bukan CORS biasa.
 - **Proxy dev tanpa alias**: path request = persis path upstream (`/api/df/...`, `/api/public/...`, `/api/v1/public/...`, `/blog/...`) sehingga devtools langsung terbaca; host asli hanya bisa tampil untuk endpoint direct (`presentwx`, `api/v1/*`) karena browser dilarang set header `Referer` kustom — itu batasan browser, bukan pilihan desain.
-- **Proxy prod tanpa env var**: base proxy di-set otomatis (`api.ts`: dev `''` path-style, prod `/api-bmkg?path=…`).
+- **Proxy prod tanpa env var**: base proxy di-set otomatis (`api.ts`: dev `''` path-style, prod `/api/bmkg?path=…`).
   Function `api/bmkg.ts` = route polos — catch-all `[...path]` TIDAK dipakai karena saat tidak
   terpasang request jatuh ke SPA rewrite (`vercel.json`) dan balik index.html (dokumen, bukan
   JSON — bug yang pernah terjadi di deployment Vercel).

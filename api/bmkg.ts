@@ -1,8 +1,8 @@
 // Vercel serverless (edge): proxy same-origin → upstream BMKG.
-// Bentuk panggilan: /api-bmkg?path=<path-upstream>&<query-asli>
+// Bentuk panggilan: /api/bmkg?path=<path-upstream>&<query-asli>
 //   contoh: /api-bmkg?path=api%2Fdf%2Fv1%2Fforecast%2Fcoord&lat=-6.2&lon=106.8
 //
-// Kenapa path lewat query, bukan /api-bmkg/<path>: catch-all [...path] tidak
+// Kenapa path lewat query, bukan /api/bmkg/<path>: catch-all [...path] tidak
 // reliabel di Vercel Functions — saat tidak terpasang, request jatuh ke SPA
 // rewrite (vercel.json) dan balik index.html (dokumen, bukan JSON). Route
 // polos "/api-bmkg" selalu terdeteksi dan lebih diutamakan dari rewrite.

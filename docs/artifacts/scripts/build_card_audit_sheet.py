@@ -24,7 +24,7 @@ BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')
 CARD_DIR = os.path.join(BASE, 'docs', 'screenshots', 'cards')
 XLSX = os.path.join(BASE, 'docs', 'bmkg-api-mapping.xlsx')
 SHEET = 'Audit Card + Screenshot'
-SAMPLE_MAX = 600  # per API (batas sel Excel 32.767; sample penuh tetap di dump.json)
+G_BUDGET = 32000  # budget isi kolom G per kartu (batas sel Excel 32.767; sisanya di sheet Sample Full)
 
 # Field response yang dipakai UI + penjelasannya (sumber kebenaran:
 # src/services/bmkg/adapters.ts, openData.ts, dan komponen terkait)
@@ -140,6 +140,7 @@ ws['A1'].font = Font(bold=True, size=13)
 ws.merge_cells('A2:I2')
 ws['A2'] = ('Screenshot diambil dari deployment prod (server.mjs + dist, data live) dengan API BOX MARKER aktif '
             '— border merah = live, amber = campuran, abu = mock (lihat kolom Status). '
+    'Kolom "Sample Response" = respons asli utuh selama muat dalam satu sel (batas Excel 32.767 char/kartu) — sisanya & salinan lengkap per API: sheet "Sample Full". '
     'Kolom "Field dipakai UI" = pemetaan response → nilai yang dirender (sumber: src/services/bmkg/adapters.ts). '
     '*(proxy) merah = API tidak bisa diakses langsung dari browser (CORS / header khusus) — harus lewat proxy/alias untuk ambil response-nya. ''live = respon asli API · estimasi = nilai turunan/konversi dari API · mock = data statis (endpoint belum tersedia). '
             'Sumber screenshot: docs/screenshots/cards/ · skrip: docs/scrapping_cuaca-bmkg-go-id/capture_card_screenshots.js')
@@ -148,7 +149,7 @@ ws.merge_cells('A3:I3')
 ws['A3'] = 'Status: ✅ LIVE = nilai kartu dari API live  |  ⚠️ CAMPURAN = sebagian live/sebagian mock  |  🔌 MOCK = statis/estimasi'
 ws['A3'].font = Font(size=9, bold=True, color='555555')
 
-headers = ['No', 'Komponen', 'Screenshot', 'Status', 'API dipakai', 'Query / URL terakhir', 'Sample Response (per API, dipotong)', 'Field dipakai UI + penjelasan', 'Catatan']
+headers = ['No', 'Komponen', 'Screenshot', 'Status', 'API dipakai', 'Query / URL terakhir', 'Sample Response (per API, utuh selama muat di sel)', 'Field dipakai UI + penjelasan', 'Catatan']
 for c, h in enumerate(headers, 1):
     cell = ws.cell(row=4, column=c, value=h)
     cell.fill, cell.font, cell.border = head_fill, head_font, thin
@@ -176,21 +177,42 @@ for no, (card_id, m) in enumerate(cards.items(), 1):
     sc.fill = PatternFill('solid', fgColor=fill)
     sc.alignment = Alignment(vertical='top')
 
-    # E: API dipakai — F: query/url — G: sample PER API — H: field dipakai UI + penjelasan
+    # E: API dipakai — F: query/url — G: sample PER API (utuh selama muat di sel) — H: field
     e_lines, f_lines, g_blocks, h_lines = [], [], [], []
+    names, raws = {}, {}
     for api_id in m['apis']:
         name = defs.get(api_id, {}).get('name', api_id)
+        names[api_id] = name
         e_lines.append(f'▸ {name}')
         call = (calls.get(api_id) or [{}])[-1]
         if call:
             f_lines.append((f'▸ [{call.get("status", "?")}] {call.get("url", "?")}', call.get('proxied', False)))
-            pot = ' '.join(call.get('sample', '')[:SAMPLE_MAX].split())  # pretty-print → 1 baris
-            g_blocks.append(f'▸ {name}\n{pot}{" …" if len(call.get("sample", "")) > SAMPLE_MAX else ""}')
+            raws[api_id] = ' '.join(call.get('sample', '').split())  # respons asli, dirapikan 1 baris
         else:
             f_lines.append((f'▸ {name} — (belum terekam saat capture)', False))
-            g_blocks.append(f'▸ {name}\n(tidak ada response live)')
+            raws[api_id] = ''
         fields, penjelasan = API_USAGE.get(api_id, ('(belum terpetakan)', ''))
         h_lines.append(f'▸ {name}\n  Dipakai: {fields}\n  → {penjelasan}')
+
+    # G diisi respons UTUH selama total muat dalam satu sel (batas Excel 32.767 char):
+    # pass 1 = preview 600 char per API, pass 2 = sisa budget mengalir ke API berurutan
+    shown = {aid: min(600, len(raws[aid])) for aid in raws}
+    used = sum(len(names[aid]) + shown[aid] + 8 for aid in raws)
+    room = G_BUDGET - used
+    for aid in raws:
+        if room <= 0:
+            break
+        take = min(len(raws[aid]) - shown[aid], room)
+        shown[aid] += take
+        room -= take
+    for aid in raws:
+        name, raw = names[aid], raws[aid]
+        if not raw:
+            g_blocks.append(f'▸ {name}\n(tidak ada response live)')
+            continue
+        pot = raw[:shown[aid]]
+        sisa = len(raw) - shown[aid]
+        g_blocks.append(f'▸ {name}\n{pot}' + (f' … [+{sisa} char — utuh di sheet "Sample Full"]' if sisa > 0 else ''))
     ws.cell(row=row, column=5, value='\n'.join(e_lines) if e_lines else '— (tanpa API live)')
     # kolom F: URL asli upstream; ' *(proxy)' merah tebal = API butuh proxy/alias
     # (CORS / header khusus) kalau mau ambil response-nya

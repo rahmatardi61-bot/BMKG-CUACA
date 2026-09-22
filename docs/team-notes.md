@@ -56,7 +56,9 @@ Semua ini **perlu konfirmasi tim** karena mengubah makna data API ke format mock
   kosong = otomatis (dev path-style, prod `/api/bmkg?path=…`); berawalan `/` = paksa base;
   **`direct`** = tanpa proxy, langsung `https://cuaca.bmkg.go.id/<path>` (alerts→www.,
   event→publik.) — df/public/blog/alerts pasti gagal CORS → fallback mock; untuk
-  eksperimen/verifikasi, bukan produksi.
+  eksperimen/verifikasi, bukan produksi. Tanpa sentuh env: override per-sesi via
+  URL `?direct=1` / `?proxy=1` (pola `?apimarker=1`) — komparasi dua tab di devtools:
+  mana yang kena blok origin vs aman lewat proxy.
   Function `api/bmkg.ts` = route polos — catch-all `[...path]` TIDAK dipakai karena saat tidak
   terpasang request jatuh ke SPA rewrite (`vercel.json`) dan balik index.html (dokumen, bukan
   JSON — bug yang pernah terjadi di deployment Vercel).

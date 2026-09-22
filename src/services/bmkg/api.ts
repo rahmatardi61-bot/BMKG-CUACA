@@ -15,7 +15,11 @@
 //                       Catatan: df/public/blog/alerts tidak punya CORS / butuh header
 //                       khusus → gagal di browser → fallback mock (untuk eksperimen,
 //                       bukan produksi).
-const PROXY_RAW = import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? 'dev' : '');
+// Override per-sesi via query (pola VITE_API_MARKER) — buat komparasi 2 tab di
+// devtools: tab normal (proxy) vs tab ?direct=1 (lihat mana yang kena blok CORS)
+const QUERY_MODE = /[?&]direct=1/.test(window.location.search) ? 'direct'
+  : /[?&]proxy=1/.test(window.location.search) ? 'proxy' : '';
+const PROXY_RAW = QUERY_MODE || import.meta.env.VITE_BMKG_PROXY || (import.meta.env.DEV ? 'dev' : '');
 const PROXY_MODE = PROXY_RAW.toLowerCase();
 // base default = route function /api/bmkg; env berawalan '/' dipakai apa adanya
 const PROXY_BASE = PROXY_MODE === 'dev' || PROXY_MODE === 'direct' ? ''
@@ -78,6 +82,7 @@ function upstreamUrl(p: string): string {
  * - 'dev'    → `/event/...` (prefix = segmen pertama path, ditangani vite proxy)
  * - 'proxy'  → `/api/bmkg?path=<encoded>` (api/bmkg.ts di Vercel / server.mjs)
  * - 'direct' → langsung upstream, tanpa header khusus (lihat komentar di atas)
+ * Prioritas: query (?direct=1/?proxy=1) > env VITE_BMKG_PROXY > otomatis.
  */
 export function bmkgProxied(path: string): string {
   const p = path.replace(/^\//, '');
@@ -85,6 +90,8 @@ export function bmkgProxied(path: string): string {
   if (PROXY_MODE === 'dev') return `/${p}`;
   return `${PROXY_BASE}?path=${encodeURIComponent(p)}`;
 }
+
+if (QUERY_MODE) console.info(`[BMKG API] mode override via query → ${PROXY_MODE}`);
 
 function proxiedUrl(path: string, params: Record<string, string | number | undefined> = {}): string {
   const base = bmkgProxied(path);

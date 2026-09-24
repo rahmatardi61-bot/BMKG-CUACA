@@ -1,0 +1,185 @@
+{
+ "total": 30,
+ "all": [
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6148
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff28fa3ad58823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 237878
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff28fa3ad58823/blv0BcLgjqEki.RpcjYLgB7UplOrb1YfE75zFS9XZGo-1790225340-1.2.1.1-L.IkuOCtb.jdg19KithkJyd77spm5Nn3gDHdY24w6e4Ui19ltC5YrAxyVKPZ4i0r",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106872
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/889a056d-01f0-48ac-a407-a7b2b26e3e07",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff28fa3ad58823/blv0BcLgjqEki.RpcjYLgB7UplOrb1YfE75zFS9XZGo-1790225340-1.2.1.1-L.IkuOCtb.jdg19KithkJyd77spm5Nn3gDHdY24w6e4Ui19ltC5YrAxyVKPZ4i0r",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  },
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6191
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff2929d86a8823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 237878
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2929d86a8823/ggoH_wY8yiPfo3AXeQI4BSjLKW5c.8Qd.lIdiAlJl5A-1790225348-1.2.1.1-jtW1I22ldOBLWFzOLf0O._8MnW.1vW6vWKN4bohPavZgAJHhx4FpggeyAmbbV3_f",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106876
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/baf0169d-2697-4a86-a1da-03a17c5fcd3c",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2929d86a8823/ggoH_wY8yiPfo3AXeQI4BSjLKW5c.8Qd.lIdiAlJl5A-1790225348-1.2.1.1-jtW1I22ldOBLWFzOLf0O._8MnW.1vW6vWKN4bohPavZgAJHhx4FpggeyAmbbV3_f",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  },
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6191
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff29585c968823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 237008
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff29585c968823/8S9doPQcDNpz8.nqN7NlRBBljGMPJj7TPM5iwiYeWf4-1790225355-1.2.1.1-8P5AhuwcCBUyyiO3BccpSFLu8.veOHRWGJkXF52JlCL5Tc3iRy5dwyBRiABEhCFm",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106876
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/8b32c944-d3d0-493a-a8f8-b701564d6dda",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff29585c968823/8S9doPQcDNpz8.nqN7NlRBBljGMPJj7TPM5iwiYeWf4-1790225355-1.2.1.1-8P5AhuwcCBUyyiO3BccpSFLu8.veOHRWGJkXF52JlCL5Tc3iRy5dwyBRiABEhCFm",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  },
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6191
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff29a778608823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 236904
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff29a778608823/kBzB8NnQMOshPDhE6aa9k5ewGeWXqvQN3iL6MUPcN68-1790225368-1.2.1.1-qmnWepzMcGftntV8FfPS.ijcLa_L0B2wH5ur68VDXrNiTo3IDXZPuCwQesd2FstR",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106876
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/928e956d-a359-4006-9b97-9b0143faf294",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff29a778608823/kBzB8NnQMOshPDhE6aa9k5ewGeWXqvQN3iL6MUPcN68-1790225368-1.2.1.1-qmnWepzMcGftntV8FfPS.ijcLa_L0B2wH5ur68VDXrNiTo3IDXZPuCwQesd2FstR",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  },
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6191
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff2a1e3b7f8823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 236937
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2a1e3b7f8823/d1KQ2Qr4TF6htTi2AE5wRgapeggpZAz7pMVqn4_JnG8-1790225387-1.2.1.1-KIY4ziwpm9yOSCwao1j1K0.eNI0XVDXWu7eOj5eHBT8BP1AbI.s0Erjw994xtjCi",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106876
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/f9e5dece-71f0-40b7-b84f-7c4d5c8ffde5",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2a1e3b7f8823/d1KQ2Qr4TF6htTi2AE5wRgapeggpZAz7pMVqn4_JnG8-1790225387-1.2.1.1-KIY4ziwpm9yOSCwao1j1K0.eNI0XVDXWu7eOj5eHBT8BP1AbI.s0Erjw994xtjCi",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  },
+  {
+   "url": "https://signature.bmkg.go.id/dwt/",
+   "status": 403,
+   "ct": "text/html",
+   "size": 6169
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a3ff2aa77d308823",
+   "status": 200,
+   "ct": "application/javascript",
+   "size": 241407
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2aa77d308823/yDEZ2d8Qw.H.a3rlTbPutKnnJgA9JGPOz2bqLIhcNpU-1790225409-1.2.1.1-VuqjgnEodPSIA.Gy3gu4QdU4r7uyzuV15FpcC6wmvSkuZf9XPakm5HTtGlM8y1vk",
+   "status": 200,
+   "ct": "text/plain",
+   "size": 106876
+  },
+  {
+   "url": "blob:https://signature.bmkg.go.id/f6e68956-6d64-41bf-9008-ccdd6c5f53b0",
+   "status": 200,
+   "ct": "text/javascript",
+   "size": 291
+  },
+  {
+   "url": "https://signature.bmkg.go.id/cdn-cgi/challenge-platform/h/b/fo/2931840103:1790222419:7nmyKze8hP9ZFVc38jn3RQ5kjp4-jqBYxr3Ja3OfMfw/a3ff2aa77d308823/yDEZ2d8Qw.H.a3rlTbPutKnnJgA9JGPOz2bqLIhcNpU-1790225409-1.2.1.1-VuqjgnEodPSIA.Gy3gu4QdU4r7uyzuV15FpcC6wmvSkuZf9XPakm5HTtGlM8y1vk",
+   "status": 200,
+   "ct": "text/html",
+   "size": 3488
+  }
+ ]
+}

@@ -9,38 +9,63 @@
 // Kota dibatasi daftar tertutup + fallback Jakarta: kota tak dikenal diabaikan
 // (jangan pernah tampil kosong/rusak di web orang lain).
 // ═══════════════════════════════════════════════════════════════════════════
-import { computed, defineAsyncComponent } from 'vue';
+import { defineAsyncComponent, ref, onMounted } from 'vue';
+import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
+import type { WarningAlert, NewsArticle } from '../types/weather';
 import { MapPin, Construction, ExternalLink } from 'lucide-vue-next';
 
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
+const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
+const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
 
 const params = new URLSearchParams(window.location.search);
 const widget = params.get('widget') || 'coming';
 
-// Hanya kota yang koordinatnya tersedia di app (composables/useBmkgWeather.ts:32)
-const CITIES = ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Batam', 'Pekanbaru', 'Denpasar'];
-const requestedCity = params.get('city') || 'Jakarta';
-const city = CITIES.find(c => c.toLowerCase() === requestedCity.toLowerCase()) ?? 'Jakarta';
+// Hanya kota yang koordinatnya tersedia (CITY_COORDS) — kunci resminya 'DKI Jakarta'
+const CITIES = Object.keys(CITY_COORDS).filter(c => !c.startsWith('Tamanan'));
+const ALIAS: Record<string, string> = { jakarta: 'DKI Jakarta', 'dki jakarta': 'DKI Jakarta' };
+const requestedCity = (params.get('city') || 'DKI Jakarta').trim();
+const city = ALIAS[requestedCity.toLowerCase()]
+  ?? CITIES.find(c => c.toLowerCase() === requestedCity.toLowerCase())
+  ?? 'DKI Jakarta';
 
-const title = computed(() => (widget === 'satellite' ? 'Citra Satelit Himawari-9' : 'Gempa Bumi Terkini'));
-
-// Kartu yang belum siap di-embed (jujur di UI, bukan error)
-const READY = ['satellite', 'earthquake'];
+// Kartu yang sudah siap di-embed
+const READY = ['satellite', 'earthquake', 'alerts', 'news'];
 const isReady = READY.includes(widget);
+const needCity = ['earthquake', 'alerts'].includes(widget);
+
+// Widget berbasis data (alerts/news) menyiapkan datanya sendiri — komponennya
+// murni presentasional (props), pola sama seperti dashboard.
+const bmkg = useBmkgWeather();
+const alerts = ref<WarningAlert[]>([]);
+const articles = ref<NewsArticle[]>([]);
+
+async function loadData() {
+  if (widget === 'news') {
+    await bmkg.loadNews();
+    articles.value = bmkg.liveNews.value;
+  } else if (widget === 'alerts') {
+    await bmkg.loadCity(city, CITY_COORDS[city]);
+    alerts.value = bmkg.liveAlerts.value;
+  }
+}
+onMounted(loadData); // city statis per page-load — tidak perlu watch
 </script>
 
 <template>
   <div class="min-h-full bg-[#070c19] text-white">
     <!-- Widget siap -->
     <template v-if="isReady">
-      <div v-if="widget === 'earthquake'" class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-800/60">
+      <div v-if="needCity" class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-800/60">
         <MapPin class="w-3 h-3 text-brand-cyan" />
-        <span class="text-[10px] font-bold text-slate-300">{{ city }}</span>
-        <span class="ml-auto text-[8px] font-bold tracking-wider text-slate-500">BMKG</span>
+        <span class="text-[11px] font-bold text-slate-300">{{ city }}</span>
+        <span class="ml-auto text-[9px] font-bold tracking-wider text-slate-500">BMKG</span>
       </div>
       <SatelliteMap v-if="widget === 'satellite'" />
-      <EarthquakeHistory v-else :selected-city="city" />
+      <AlertsPanel v-else-if="widget === 'alerts'" :alerts="alerts" />
+      <NewsSection v-else-if="widget === 'news'" :articles="articles" />
+      <EarthquakeHistory v-else-if="widget === 'earthquake'" :selected-city="city" />
     </template>
 
     <!-- Placeholder: kartu belum siap di-embed -->

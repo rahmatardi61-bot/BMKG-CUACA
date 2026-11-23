@@ -31,8 +31,8 @@ Fitur: kartu dashboard BMKG bisa ditempel di web pihak lain dengan **1 div + 1 t
 embed.html                     entry Vite terpisah
 src/embed/main.ts              mount + lapor tinggi ke parent via postMessage
 src/embed/EmbedApp.vue         whitelist widget+kota; terima token via postMessage
-lib/jwt.ts                verifikasi RS256 lewat JWKS (WebCrypto, tanpa dep)
-lib/embedSource.ts        isi script loader (dikirim hanya ke pemegang token)
+api/_lib/jwt.ts                verifikasi RS256 lewat JWKS (WebCrypto, tanpa dep)
+api/_lib/embedSource.ts        isi script loader (dikirim hanya ke pemegang token)
 api/embed-js.ts                kunci 1: kirim loader / 401
 api/embed-verify.ts            kunci 2: sah-tidaknya token
 api/bmkg.ts                    kunci 4: proxy data BMKG (wajib Bearer)
@@ -68,7 +68,7 @@ dipakai bersama, dimuat sekali). Yang bertambah hanya jumlah iframe dan request 
 
 Widget **tidak lagi terbuka untuk siapa saja**. Tanpa token Keycloak yang sah, tidak ada
 satu pun data yang keluar. Ada empat pintu, semuanya diperiksa dengan fungsi yang sama
-(`verifyJwt` di `lib/jwt.ts`, verifikasi tanda tangan RS256 + `exp` + `iss`):
+(`verifyJwt` di `api/_lib/jwt.ts`, verifikasi tanda tangan RS256 + `exp` + `iss`):
 
 | Kunci | Endpoint | Tanpa token sah |
 |---|---|---|
@@ -130,7 +130,7 @@ Satu token dipakai ulang oleh semua widget di halaman itu.
    // ambil key sesuai header.kid, importKey (RSASSA-PKCS1-v1_5/SHA-256), verify
    // lalu cek: signature cocok, exp belum lewat, iss = realm URL
    ```
-   Referensi kerja: `lib/jwt.ts` (WebCrypto, tanpa dependency).
+   Referensi kerja: `api/_lib/jwt.ts` (WebCrypto, tanpa dependency).
 
 4. **Pasang widget** — pilih salah satu:
 

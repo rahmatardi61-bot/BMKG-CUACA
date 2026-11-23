@@ -29,8 +29,8 @@ api/bmkg.ts          → /api/bmkg          (proxy data BMKG, wajib Bearer)
 api/embed-token.ts   → /api/embed-token   (keran token, same-origin only)
 api/embed-js.ts      → /api/embed-js      (script loader, wajib Bearer)
 api/embed-verify.ts  → /api/embed-verify  (cek token)
-lib/jwt.ts           → dipakai bersama (DI LUAR api/, bukan function)
-lib/embedSource.ts   → isi script yang dikirim /api/embed-js
+api/_lib/jwt.ts           → dipakai bersama (DI LUAR api/, bukan function)
+api/_lib/embedSource.ts   → isi script yang dikirim /api/embed-js
 ```
 
 Penting: helper **tidak** ditaruh di `api/_lib/`. Vercel membuat satu function per file

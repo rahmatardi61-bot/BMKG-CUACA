@@ -29,13 +29,28 @@ api/bmkg.ts          → /api/bmkg          (proxy data BMKG, wajib Bearer)
 api/embed-token.ts   → /api/embed-token   (keran token, same-origin only)
 api/embed-js.ts      → /api/embed-js      (script loader, wajib Bearer)
 api/embed-verify.ts  → /api/embed-verify  (cek token)
-api/_lib/jwt.ts           → dipakai bersama (DI LUAR api/, bukan function)
-api/_lib/embedSource.ts   → isi script yang dikirim /api/embed-js
+lib/jwt.js           → verifikasi JWKS   (JS asli, di LUAR api/)
+lib/embedSource.js   → isi script loader
 ```
 
-Penting: helper **tidak** ditaruh di `api/_lib/`. Vercel membuat satu function per file
-di `api/`, jadi helper di dalamnya berisiko ikut di-deploy sebagai endpoint tanpa
-`export default`. Sekarang di `lib/`.
+**Helper WAJIB `.js` dan diimpor dengan ekstensi `.js`.** Ini bukan selera — ini hasil
+empat kali build gagal, semuanya sudah dicoba:
+
+| Bentuk | Hasil |
+|---|---|
+| `api/_lib/jwt.ts`, runtime `edge` | gagal: `referencing unsupported modules: ./_lib/jwt.ts` |
+| `lib/jwt.ts`, runtime `edge` | gagal: `referencing unsupported modules: ../lib/jwt.ts` |
+| `api/_lib/jwt.ts`, runtime `nodejs` | **build lolos, tapi 500 saat request** |
+| `lib/jwt.js`, impor `.js`, `nodejs` | **jalan** |
+
+Sebabnya: function di `api/` dikompilasi, lalu import-nya dijalankan apa adanya.
+Specifier `.../jwt.ts` menunjuk file yang tidak ada di output → crash **sebelum** handler
+jalan, sehingga muncul 500 tanpa pesan. Karena itu helper ditulis sebagai `.js` asli
+(+ anotasi JSDoc agar tipe tetap terbaca `tsc`) dan diimpor dengan `.js`.
+
+Diverifikasi dua cara, bukan cuma "build hijau":
+`esbuild api/embed-verify.ts` **tanpa** `--bundle` → `import ... from "../lib/jwt.js"`
+resolve dan handler membalas 401.
 
 ## 4. Redeploy, lalu uji berurutan
 

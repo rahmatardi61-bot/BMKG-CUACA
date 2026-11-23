@@ -393,5 +393,10 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - Verifikasi `exp` (token kedaluwarsa) belum diuji dengan token asli ber-`exp` lampau —
   butuh private key Keycloak untuk membuatnya. Jalur kodenya: signature dulu, lalu `exp`.
 - jsDelivr/CDN tidak dipakai: script inti memang harus lewat server kita (itu gerbangnya).
+- **Uji dari halaman `https://` ke `http://localhost` selalu gagal** — bukan bug widget:
+  Chrome memblokir lewat *Private Network Access* (`blocked by CORS policy: Permission was
+  denied for this request to access the 'loopback' address space`) dan juga *mixed content*.
+  Uji dari halaman `http://` (localhost/`file://`), atau pakai tunnel (ngrok/cloudflared)
+  bila butuh https. Di produksi https→https tidak kena aturan ini.
 - Kalau klien minta "komponen React/Vue", jawabannya: bisa dipakai di framework apa pun,
   tetapi bukan npm package — itu fase terpisah (opsi migrasi), bukan versi ini.

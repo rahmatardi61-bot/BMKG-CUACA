@@ -62,9 +62,19 @@
         return true;
       })
       .catch(function (err) {
-        var msg = String(err && err.message === 'HTTP 401'
-          ? 'Token ditolak server — periksa masa berlaku token Anda.'
-          : 'Gagal memuat widget: ' + err);
+        var raw = String((err && err.message) || err);
+        var msg;
+        if (raw === 'HTTP 401' || raw === 'HTTP 403') {
+          msg = 'Token ditolak server (' + raw + ') — periksa masa berlaku token Anda.';
+        } else if (raw === 'Failed to fetch') {
+          // Penyebab tersering: (a) halaman https memanggil localhost → Chrome
+          // blokir "private network access"; (b) server mati; (c) CSP memblokir.
+          msg = 'Gagal memuat widget: Failed to fetch. Penyebab tersering: halaman https '
+            + 'memanggil server localhost (diblokir Chrome), server mati, atau CSP situs '
+            + 'memblokir. Uji dulu dari halaman http:// atau domain publik.';
+        } else {
+          msg = 'Gagal memuat widget: ' + raw;
+        }
         failAll(msg);
         return false;
       });

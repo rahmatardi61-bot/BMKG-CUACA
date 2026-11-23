@@ -30,6 +30,39 @@ Alur: klien tempel `<div data-bmkg-widget="…">` + `<script src="…/embed.js">
 loader membuat `<iframe src="/embed.html?widget=…">` → widget melaporkan tinggi aslinya
 lewat `postMessage` → loader menyesuaikan `iframe.height`.
 
+## 1 server, banyak widget
+
+Semua widget dilayani **satu aplikasi/domain** — pemisahnya hanya query `?widget=`.
+Klien yang butuh 4 widget di satu halaman cukup 4 `<div>` + **1 script** (loader
+dipakai bersama, dimuat sekali). Yang bertambah hanya jumlah iframe dan request API.
+
+```
+/embed.html?widget=satellite      ← halaman yang sama, parameter berbeda
+/embed.html?widget=earthquake&city=DKI%20Jakarta
+/embed.html?widget=alerts&city=Surabaya
+/embed.html?widget=news
+/embed.js                         ← 1 loader untuk semuanya
+```
+
+## Tema widget
+
+`?theme=dark|light|auto` (default `dark`). Komponen sudah punya varian `dark:`, jadi
+EmbedApp cukup toggle class `dark` di `<html>`. `auto` mengikuti `prefers-color-scheme`.
+Halaman `/widgets` meneruskan tema aktifnya ke setiap preview.
+
+## Format kode di dokumentasi
+
+Blok kode bergaya shell supaya bisa langsung dipakai:
+
+```sh
+# Citra Satelit Himawari-9
+curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
+
+# atau sematkan di website:
+<div data-bmkg-widget="satellite" data-height="420"></div>
+<script async src="https://DOMAIN/embed.js"></script>
+```
+
 ## Widget yang tersedia (4)
 
 | ID | Nama | Query | Tinggi | Sumber data |

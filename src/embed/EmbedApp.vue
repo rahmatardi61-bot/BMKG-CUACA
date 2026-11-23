@@ -88,23 +88,33 @@ const isMock = ref(false);
 const authState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle');
 const authMessage = ref('');
 const externalToken = params.get('token') || '';
+// Info ringkas untuk indikator: dari mana tokennya & berapa lama berlaku
+const authSource = ref<'' | 'partner' | 'server'>('')
+const authExpiresIn = ref(0);
+// ?debug=1 → tampilkan strip status auth (untuk dev/POC)
+const debugAuth = params.get('debug') === '1';
 
 async function ensureToken(): Promise<boolean> {
   if (externalToken) {
     authState.value = 'ready';
+    authSource.value = 'partner';
     return true;
   }
   authState.value = 'loading';
   try {
     const res = await fetch('/api/embed-token', { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = (await res.json()) as { token?: string };
+    const json = (await res.json()) as { token?: string; expires_in?: number };
     if (!json.token) throw new Error('token kosong');
     authState.value = 'ready';
+    authSource.value = 'server';
+    authExpiresIn.value = json.expires_in ?? 0;
+    console.log('[bmkg-widget] auth OK via server, token berlaku ~' + authExpiresIn.value + 's');
     return true;
   } catch (e) {
     authState.value = 'error';
     authMessage.value = String(e).slice(0, 120);
+    console.warn('[bmkg-widget] auth GAGAL:', authMessage.value);
     return false;
   }
 }
@@ -177,6 +187,22 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
 
     <!-- Widget siap -->
     <template v-else-if="isReady">
+      <!-- Indikator auth (?debug=1) — untuk memastikan token benar-benar didapat -->
+      <div
+        v-if="debugAuth"
+        :class="['flex items-center gap-1.5 px-3 py-1 font-mono text-[9.5px] border-b',
+          authState === 'ready' ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
+          : authState === 'error' ? 'bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-400'
+          : 'bg-slate-500/10 border-slate-500/25 text-slate-500']"
+      >
+        <span>auth:</span>
+        <span class="font-black">
+          {{ authState === 'ready' ? 'OK' : authState === 'error' ? 'GAGAL' : authState.toUpperCase() }}
+        </span>
+        <span v-if="authSource">· sumber={{ authSource }}</span>
+        <span v-if="authState === 'ready' && authSource === 'server'">· berlaku={{ authExpiresIn }}s</span>
+        <span v-if="authState === 'error'" class="truncate">· {{ authMessage }}</span>
+      </div>
       <div
         v-if="needCity"
         class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-800/60"

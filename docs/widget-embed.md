@@ -74,6 +74,39 @@ sendiri boleh mengirimkannya: `?token=<jwt>` dan widget langsung memakainya.
 ④ gagal → layar "Gagal menyiapkan widget" + alasan (bukan layar putih)
 ```
 
+### Indikator auth — cara tahu berhasil atau tidak
+
+Masalah sebelumnya: **gagal kelihatan, berhasil tidak kelihatan** (widget langsung
+tampil tanpa bukti token didapat). Sekarang ada tiga tempat memeriksanya:
+
+| Di mana | Cara | Artinya |
+|---|---|---|
+| Halaman `/widgets` (paling cepat) | Chip **"Token Keycloak: OK · berlaku N detik"** di bawah banner POC. Ada tombol **Periksa ulang** | Server berhasil menukar `client_credentials` → token diterima. Kalau merah **GAGAL**, muncul detail error + petunjuk periksa `KEYCLOAK_CLIENT_SECRET`/realm |
+| Di dalam widget | Tambahkan `&debug=1` pada URL embed | Strip tipis di atas widget: `auth: OK · sumber=server · berlaku=239s`, atau `auth: GAGAL · <pesan>` |
+| Konsol browser | Buka devtools | `[bmkg-widget] auth OK via server, token berlaku ~239s` atau `[bmkg-widget] auth GAGAL: …` |
+
+Arti tiap status:
+
+- **`sumber=server`** — widget meminta token ke `/api/embed-token` (alur normal).
+- **`sumber=partner`** — partner mengirim token sendiri lewat `?token=…`; server BMKG
+  tidak dipanggil, jadi **tidak ada yang diverifikasi** (POC).
+- **`berlaku=Ns`** — sisa umur token di cache server (`expires_in − 60s`), bukan umur
+  token asli. Token Keycloak sendiri berumur 300 detik.
+- **GAGAL** — widget **tidak** memuat data dan menampilkan layar "Gagal menyiapkan
+  widget" beserta pesan error. Ini disengaja: lebih baik kosong dengan penjelasan
+  daripada menampilkan widget yang seolah berjalan.
+
+Catatan penting: **"OK" hanya berarti token berhasil didapat.** Pada POC ini token belum
+dipakai untuk menggerbangi apa pun — widget tetap memanggil data BMKG lewat proxy yang
+sama. Jadi OK bukan jaminan data terjamin; ia hanya bukti jalur auth hidup.
+
+Kegagalan yang paling sering (sudah diuji):
+
+| Respons | Penyebab |
+|---|---|
+| `502` + `Keycloak 401: unauthorized_client` | `client_secret` salah / sudah dirotasi |
+| `502` + `KEYCLOAK_CLIENT_SECRET belum di-set` | env tidak terbaca di server (Vercel: set env lalu Redeploy) |
+
 ### Endpoint `api/embed-token.ts`
 
 - Cache token per-instance (TTL `expires_in − 60s`), permintaan bersamaan digabung

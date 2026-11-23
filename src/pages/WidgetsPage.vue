@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction } from 'lucide-vue-next';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction, KeyRound } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -10,6 +10,25 @@ const applyTheme = (dark: boolean) => {
   localStorage.setItem('bmkg-widget-theme', dark ? 'dark' : 'light');
 };
 onMounted(() => applyTheme(localStorage.getItem('bmkg-widget-theme') !== 'light'));
+
+// ── Indikator auth Keycloak ────────────────────────────────────────────────
+// Memastikan jalur token hidup SEBELUM orang mencoba memasang widget. Tanpa ini,
+// kegagalan auth baru terlihat dari dalam iframe (layar "Gagal menyiapkan widget").
+type TokenState = { state: 'idle' | 'checking' | 'ok' | 'fail'; expiresIn: number; detail: string };
+const token = ref<TokenState>({ state: 'idle', expiresIn: 0, detail: '' });
+
+async function checkToken() {
+  token.value = { state: 'checking', expiresIn: 0, detail: '' };
+  try {
+    const res = await fetch('/api/embed-token', { headers: { Accept: 'application/json' } });
+    const json = (await res.json().catch(() => ({}))) as { token?: string; expires_in?: number; error?: string; detail?: string };
+    if (!res.ok || !json.token) throw new Error(json.detail || json.error || `HTTP ${res.status}`);
+    token.value = { state: 'ok', expiresIn: json.expires_in ?? 0, detail: '' };
+  } catch (e) {
+    token.value = { state: 'fail', expiresIn: 0, detail: String(e).slice(0, 140) };
+  }
+}
+onMounted(checkToken);
 
 // Widget yang SUDAH siap embed (lihat src/embed/EmbedApp.vue → READY)
 type Widget = {
@@ -289,6 +308,30 @@ async function copy(text: string, key: string) {
           Dibuat untuk keperluan pengembangan internal, <strong class="font-bold">belum untuk konsumsi publik</strong>.
           Lihat bagian <em>Status &amp; batasan</em> di bawah.</span>
         </p>
+        <!-- Indikator auth: satu-satunya cara cepat tahu token Keycloak hidup atau tidak -->
+        <div
+          :class="['mt-2 flex items-start gap-2 rounded-md border px-2.5 py-1.5 text-[11px] leading-snug',
+            token.state === 'ok' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+            : token.state === 'fail' ? 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400'
+            : 'border-slate-300 dark:border-slate-700 bg-slate-500/10 text-slate-600 dark:text-slate-400']"
+        >
+          <KeyRound class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span class="flex-1">
+            <strong class="font-black">Token Keycloak:
+              {{ token.state === 'ok' ? 'OK' : token.state === 'fail' ? 'GAGAL' : token.state === 'checking' ? 'memeriksa…' : 'belum diperiksa' }}
+            </strong>
+            <span v-if="token.state === 'ok'"> · berlaku {{ token.expiresIn }} detik · diperbarui otomatis di server</span>
+            <span v-if="token.state === 'fail'"> · {{ token.detail }}</span>
+            <span v-if="token.state === 'fail'" class="block mt-0.5 opacity-80">
+              Widget tidak akan memuat data. Periksa <code class="font-mono">KEYCLOAK_CLIENT_SECRET</code> / realm di server.
+            </span>
+          </span>
+          <button
+            @click="checkToken"
+            class="shrink-0 font-bold underline decoration-dotted hover:no-underline"
+          >{{ token.state === 'checking' ? '…' : 'Periksa ulang' }}</button>
+        </div>
+
         <div class="flex flex-wrap gap-2 mt-3">
           <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <ShieldCheck class="w-2.5 h-2.5" /> Tanpa API key

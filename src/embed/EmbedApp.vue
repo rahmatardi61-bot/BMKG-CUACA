@@ -12,7 +12,8 @@
 import { defineAsyncComponent, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
 import type { WarningAlert, NewsArticle } from '../types/weather';
-import { MapPin, Construction, ExternalLink } from 'lucide-vue-next';
+import { newsArticles } from '../data/mockData';
+import { MapPin, Construction, ExternalLink, ShieldCheck } from 'lucide-vue-next';
 
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
@@ -49,14 +50,21 @@ const needCity = ['earthquake', 'alerts'].includes(widget);
 const bmkg = useBmkgWeather();
 const alerts = ref<WarningAlert[]>([]);
 const articles = ref<NewsArticle[]>([]);
+const loading = ref(false);
 
 async function loadData() {
-  if (widget === 'news') {
-    await bmkg.loadNews();
-    articles.value = bmkg.liveNews.value;
-  } else if (widget === 'alerts') {
-    await bmkg.loadCity(city, CITY_COORDS[city]);
-    alerts.value = bmkg.liveAlerts.value;
+  loading.value = true;
+  try {
+    if (widget === 'news') {
+      await bmkg.loadNews();
+      // WP BMKG sering 502 → pakai artikel mock seperti dashboard (App.vue activeArticles)
+      articles.value = bmkg.liveNews.value.length ? bmkg.liveNews.value : newsArticles.slice(0, 4);
+    } else if (widget === 'alerts') {
+      await bmkg.loadCity(city, CITY_COORDS[city]);
+      alerts.value = bmkg.liveAlerts.value;
+    }
+  } finally {
+    loading.value = false;
   }
 }
 onMounted(loadData); // city statis per page-load — tidak perlu watch
@@ -72,7 +80,18 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
         <span class="ml-auto text-[9px] font-bold tracking-wider text-slate-500">BMKG</span>
       </div>
       <SatelliteMap v-if="widget === 'satellite'" />
-      <AlertsPanel v-else-if="widget === 'alerts'" :alerts="alerts" />
+      <!-- alerts: sering kosong bila tak ada peringatan aktif → tampilkan status, bukan blank -->
+      <template v-else-if="widget === 'alerts'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat peringatan…</div>
+        <div v-else-if="!alerts.length" class="p-6 flex flex-col items-center text-center gap-1.5">
+          <ShieldCheck class="w-6 h-6 text-emerald-500" />
+          <p class="text-[13px] font-bold text-slate-800 dark:text-slate-200">Tidak ada peringatan dini aktif</p>
+          <p class="text-[11px] text-slate-500 leading-relaxed max-w-[260px]">
+            Wilayah {{ city }} saat ini tanpa peringatan cuaca ekstrem dari BMKG.
+          </p>
+        </div>
+        <AlertsPanel v-else :alerts="alerts" />
+      </template>
       <NewsSection v-else-if="widget === 'news'" :articles="articles" />
       <EarthquakeHistory v-else-if="widget === 'earthquake'" :selected-city="city" />
     </template>

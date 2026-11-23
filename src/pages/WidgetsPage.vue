@@ -78,19 +78,14 @@ function srcUrl(w: Widget) {
 }
 
 function snippet(w: Widget) {
+  const cityAttr = w.city ? ` data-city="${selCity.value}"` : '';
+  const hAttr = w.city ? '' : ` data-height="${w.height}"`;
+  if (mode.value === 'script') {
+    const close = '</' + 'script>';
+    return `<div data-bmkg-widget="${w.id}"${cityAttr}${hAttr}></div>\n<script async src="${origin}/embed.js">${close}`;
+  }
   const cityQ = w.city ? `&city=${encodeURIComponent(selCity.value)}` : '';
-  const url = `${origin}/embed.html?widget=${w.id}${cityQ}`;
-  // Gaya shell — bisa langsung ditempel di terminal, atau dijadikan komentar HTML
-  const embed = mode.value === 'script'
-    ? `<div data-bmkg-widget="${w.id}"${w.city ? ` data-city="${selCity.value}"` : ''}${w.city ? '' : ` data-height="${w.height}"`}></div>\n<script async src="${origin}/embed.js"><\/script>`
-    : `<iframe src="${url}" width="100%" height="${w.height}" style="border:0;border-radius:12px" title="BMKG ${w.name}" loading="lazy"></iframe>`;
-  return [
-    `# ${w.name}`,
-    `curl -s "${url}" > widget-${w.id}.html`,
-    ``,
-    `# atau sematkan di website:`,
-    embed
-  ].join('\n');
+  return `<iframe\n  src="${origin}/embed.html?widget=${w.id}${cityQ}&theme=${isDark.value ? 'dark' : 'light'}"\n  width="100%" height="${w.height}"\n  style="border:0;border-radius:12px"\n  title="BMKG ${w.name}"\n  loading="lazy"\n></iframe>`;
 }
 
 async function copy(text: string, key: string) {
@@ -205,14 +200,6 @@ async function copy(text: string, key: string) {
                 @click="previewKey++"
                 class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1"
               ><Eye class="w-2.5 h-2.5" /> Preview</button>
-              <button
-                @click="copy(snippet(w), w.id)"
-                class="text-[11px] font-bold px-2 py-1 rounded transition-colors flex items-center gap-1"
-                :class="copied === w.id ? 'bg-emerald-500 text-slate-950' : 'bg-brand-cyan text-slate-950 hover:bg-brand-cyan/90'"
-              >
-                <component :is="copied === w.id ? Check : Copy" class="w-2.5 h-2.5" />
-                {{ copied === w.id ? 'Tersalin' : 'Salin kode' }}
-              </button>
             </div>
           </div>
 
@@ -243,11 +230,23 @@ async function copy(text: string, key: string) {
                 loading="lazy"
               ></iframe>
             </div>
-
             <!-- Kode -->
             <div class="p-3 flex flex-col">
-              <p class="text-[13px] font-bold tracking-wider text-slate-500 mb-1.5">SALIN — SHELL / HTML</p>
-              <pre class="flex-1 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/60 rounded-lg p-2.5 overflow-x-auto text-[11px] leading-relaxed text-emerald-600 dark:text-emerald-300 font-mono"><code>{{ snippet(w) }}</code></pre>
+              <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">KODE SEMATKAN</p>
+              <div class="flex-1 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-[#0b1220]">
+                <div class="flex items-center justify-between px-3 py-1.5 bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700/80">
+                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">{{ mode === 'script' ? 'HTML' : 'HTML (iframe)' }}</span>
+                  <button
+                    @click="copy(snippet(w), w.id)"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                    :class="copied === w.id ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:border-brand-cyan hover:text-brand-cyan'"
+                  >
+                    <component :is="copied === w.id ? Check : Copy" class="w-2.5 h-2.5" />
+                    {{ copied === w.id ? 'Copied' : 'Copy' }}
+                  </button>
+                </div>
+                <pre class="p-3 overflow-x-auto text-[11px] leading-relaxed text-slate-800 dark:text-slate-100 font-mono whitespace-pre"><code>{{ snippet(w) }}</code></pre>
+              </div>
             </div>
           </div>
         </article>

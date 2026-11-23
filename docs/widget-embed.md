@@ -1,5 +1,11 @@
 # Widget Embed — sematkan kartu BMKG di website lain
 
+> **Status: POC (proof of concept) untuk pengembangan internal — belum untuk konsumsi publik.**
+> Keterbatasan terbesar bukan di tampilan, tapi di **akses data**: sebagian API BMKG menutup
+> CORS dan mewajibkan header khusus (diakali lewat proxy sendiri), sebagian lagi tidak punya
+> API sama sekali (scraping / data contoh). Tidak ada kontrak atau SLA yang bisa dipegang.
+> Rincian: lihat **§ Status & batasan** di bawah.
+
 Fitur: kartu dashboard BMKG bisa ditempel di web pihak lain dengan **1 div + 1 script**.
 Kode: branch `feature/widget-embed`. Halaman dokumentasi & demo: **`/widgets`**.
 
@@ -167,6 +173,63 @@ Bila `news` gagal:
 Widget lain **tidak** memakai mock: gagal = pesan jujur ("Prakiraan tidak tersedia",
 "Tidak ada peringatan dini aktif", "Data pasut tidak tersedia"). Ini disengaja — lebih baik kosong dengan penjelasan
 daripada menampilkan angka karangan di website pihak lain.
+
+## Status & batasan
+
+Angka ini juga tampil di halaman `/widgets` supaya bisa dipakai sebagai bahan diskusi.
+
+| | Jumlah |
+|---|---|
+| Widget siap di-embed | 12 |
+| Bisa dibuat, belum dikerjakan | 5 |
+| Butuh klik pengunjung (tidak mungkin jadi widget) | 4 |
+| Widget yang selalu MOCK | 2 (`air-quality`, `transport`) |
+
+### Asal data — seberapa resmi isinya
+
+| Jalur | Host | Konsekuensi | Dipakai widget |
+|---|---|---|---|
+| API internal BMKG (via proxy) | `cuaca.bmkg.go.id` | CORS ditutup → wajib proxy same-origin `/api/bmkg`; header `Referer`/`Origin`, `X-API-KEY`, dan `x-public-token` (diambil ulang tiap ~25 menit) | cuaca, prakiraan, peringatan |
+| Open Data BMKG (CORS terbuka) | `publik.bmkg.go.id`, `maritim.bmkg.go.id` | Bisa dipanggil langsung; dipakai sebagai fallback prakiraan dan sumber data maritim | pasut, gelombang, peta maritim |
+| Tile & gambar (tanpa CORS) | `satellite.bmkg.go.id`, `inderaja.bmkg.go.id` | Satelit = tile JSON (CORS `*`). inderaja tanpa CORS → hanya lewat `<img>`, tidak bisa dibaca sebagai data | satelit |
+| Scraping halaman publik | `www.bmkg.go.id`, situs berita | Tidak ada API resmi; rapuh — struktur halaman bisa berubah tanpa pemberitahuan | berita, gempa (TEWS) |
+| Data contoh (MOCK) | `src/data/mockData.ts` | Nilai dihitung sendiri/dari data contoh; widget SELALU berlabel MOCK | kualitas udara, transportasi |
+
+Konsekuensi: perubahan kecil di sisi BMKG (header, struktur halaman, CORS) bisa mematikan
+widget tanpa peringatan.
+
+### Bisa dibuat, belum dikerjakan (5)
+
+| Kartu | Alasan belum |
+|---|---|
+| Current Weather Overview | Isinya hampir sama dengan widget `current` → akan jadi duplikat |
+| Aktivitas & Rekomendasi | Narasi dihitung dari `cityAnalysisMap` (mock) → harus berlabel MOCK |
+| Radar Cuaca | Partikel angin & suhu stasiun dihitung di browser, bukan produk radar BMKG → MOCK |
+| Peta Angin | Sama: medan angin adalah animasi hasil hitungan, bukan observasi |
+| Around Activity | Daftar lapangan golf dari data contoh; komponennya sudah tidak dipakai di dashboard |
+
+### Butuh klik pengunjung — tidak akan pernah jadi widget (4)
+
+Semuanya drawer/modal dengan prop `isOpen`. Dibekukan di iframe hasilnya kotak kosong
+tanpa jalan masuk:
+
+| Komponen | Alasan |
+|---|---|
+| `LandBasedActivities` | Drawer `isOpen` — harus dibuka pengunjung |
+| `MaritimeAdvisorDrawer` | Drawer: pengunjung memilih sektor, narasi dihitung dari data contoh |
+| `AviationAdvisorDrawer` | Drawer: butuh input bandara/sektor |
+| `LocationSearch` | Sudah tercakup parameter `?city=` pada widget lain |
+
+### Yang dibutuhkan sebelum naik ke produksi
+
+1. **Akses API resmi + dokumentasi + sample data** — sekarang semuanya diakali lewat proxy
+   dan scraping, tanpa kontrak tertulis.
+2. **Kebijakan token per partner** — saat ini semua partner memakai satu `client_id`
+   (`partner-widget-service`), jadi tidak ada rate-limit maupun audit per partner.
+3. **Pendaftaran IP/domain partner** — supaya widget hanya bisa dipasang pihak resmi.
+4. **Token di header/cookie, bukan URL** — URL bocor lewat log akses, `Referer`, riwayat browser.
+5. **Pemantauan kegagalan upstream** — tanpa ini widget yang mati tidak ketahuan.
+6. **Kejelasan soal data MOCK** — pemasang perlu tahu ISPU/transportasi bukan data resmi BMKG.
 
 ## Integrasi framework
 

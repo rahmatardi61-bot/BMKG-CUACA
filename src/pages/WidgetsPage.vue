@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle } from 'lucide-vue-next';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -125,12 +125,89 @@ const WIDGETS: Widget[] = [
 // Kartu dashboard yang BELUM siap di-embed — ditampilkan jujur, bukan disembunyikan
 // Sengaja TIDAK dijadikan widget: isinya drawer interaktif / bergantung preferensi
 // pengguna, jadi tidak masuk akal dibekukan di dalam iframe.
+// Kartu dashboard yang BISA dijadikan widget, tapi belum dikerjakan (bahan diskusi)
 const SOON = [
-  { name: 'Aktivitas & Rekomendasi', reason: 'Butuh profil aktivitas pengunjung — tidak bisa dibekukan di iframe' },
-  { name: 'Penasihat Penerbangan', reason: 'Berupa drawer interaktif dengan input pengguna' },
-  { name: 'Penasihat Maritim', reason: 'Berupa drawer interaktif dengan input pengguna' },
-  { name: 'Pencarian Lokasi', reason: 'Sudah tercakup parameter ?city= pada widget lain' }
+  {
+    name: 'Current Weather Overview',
+    reason: 'Isinya hampir sama dengan widget "Kondisi Cuaca Saat Ini" — kalau dibuat, keduanya jadi duplikat.'
+  },
+  {
+    name: 'Aktivitas & Rekomendasi',
+    reason: 'Narasi aktivitas dihitung dari data contoh (cityAnalysisMap), bukan produk resmi. Bisa dibuat, tapi harus berlabel MOCK.'
+  },
+  {
+    name: 'Radar Cuaca',
+    reason: 'Partikel angin & suhu stasiun dihitung di browser — animasi hasil hitungan, bukan produk radar BMKG. Butuh label MOCK.'
+  },
+  {
+    name: 'Peta Angin',
+    reason: 'Sama seperti radar: medan angin adalah animasi hasil hitungan, bukan data observasi.'
+  },
+  {
+    name: 'Around Activity',
+    reason: 'Daftar lapangan golf berasal dari data contoh; komponennya kini sudah tidak dipakai di dashboard.'
+  }
 ];
+
+// Tidak mungkin jadi iframe: berupa drawer/modal yang menunggu klik pengunjung
+const NEEDS_CLICK = [
+  {
+    name: 'Land Based Activities',
+    reason: 'Drawer dengan prop isOpen. Harus dibuka pengunjung — dibekukan di iframe hasilnya kotak kosong.'
+  },
+  {
+    name: 'Penasihat Maritim',
+    reason: 'Drawer interaktif: pengunjung memilih sektor, narasinya lalu dihitung dari data contoh.'
+  },
+  {
+    name: 'Penasihat Penerbangan',
+    reason: 'Drawer interaktif: butuh input bandara/sektor dari pengunjung.'
+  },
+  {
+    name: 'Pencarian Lokasi',
+    reason: 'Sudah tercakup parameter ?city= pada widget lain, jadi tidak perlu widget sendiri.'
+  }
+];
+
+// Asal data tiap kelompok widget — ini yang menentukan seberapa "resmi" isinya
+const DATA_SOURCES = [
+  {
+    label: 'API internal BMKG (via proxy)',
+    tone: 'ok',
+    where: 'cuaca.bmkg.go.id',
+    detail: 'CORS ditutup, jadi diakses lewat proxy same-origin /api/bmkg. Butuh header Referer/Origin, X-API-KEY, dan x-public-token yang harus diambil ulang tiap ~25 menit.',
+    widgets: 'Cuaca saat ini, prakiraan per jam, peringatan dini'
+  },
+  {
+    label: 'Open Data BMKG (CORS terbuka)',
+    tone: 'ok',
+    where: 'publik.bmkg.go.id · maritim.bmkg.go.id',
+    detail: 'Bisa dipanggil langsung dari browser. Dipakai sebagai jalur cadangan bila API internal gagal, dan sebagai sumber utama data maritim/pasut.',
+    widgets: 'Pasang surut, gelombang, peta maritim'
+  },
+  {
+    label: 'Tile & gambar (tanpa CORS)',
+    tone: 'ok',
+    where: 'satellite.bmkg.go.id · inderaja.bmkg.go.id',
+    detail: 'Satelit memakai tile JSON (CORS *). inderaja tidak punya CORS sama sekali, jadi hanya bisa lewat <img> — tidak bisa dibaca sebagai data.',
+    widgets: 'Citra satelit Himawari-9'
+  },
+  {
+    label: 'Scraping halaman publik',
+    tone: 'warn',
+    where: 'www.bmkg.go.id · situs berita',
+    detail: 'Tidak ada API resmi untuk berita & gempa, jadi diambil dari halaman/RSS publik. Rapuh: struktur halaman bisa berubah kapan saja tanpa pemberitahuan.',
+    widgets: 'Berita, gempa (TEWS)'
+  },
+  {
+    label: 'Data contoh (MOCK)',
+    tone: 'bad',
+    where: 'data/mockData.ts',
+    detail: 'BMKG tidak menyediakan API-nya. Nilai dihitung sendiri atau diambil dari data contoh, dan widget SELALU memberi label MOCK.',
+    widgets: 'Kualitas udara (ISPU), transportasi'
+  }
+];
+
 
 const origin = window.location.origin;
 const mode = ref<'script' | 'iframe'>('script');
@@ -205,6 +282,12 @@ async function copy(text: string, key: string) {
           Pilih widget, salin satu baris kode, tempel di website Anda. Tidak perlu API key,
           tidak perlu instalasi. Widget tampil dengan gaya visual BMKG dan terisolasi penuh
           dari CSS website Anda.
+        </p>
+        <p class="mt-2 inline-flex items-start gap-1.5 text-[11.5px] leading-snug text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 rounded-md px-2.5 py-1.5">
+          <FlaskConical class="w-3 h-3 shrink-0 mt-0.5" />
+          <span><strong class="font-bold">Versi POC (proof of concept).</strong>
+          Dibuat untuk keperluan pengembangan internal, <strong class="font-bold">belum untuk konsumsi publik</strong>.
+          Lihat bagian <em>Status &amp; batasan</em> di bawah.</span>
         </p>
         <div class="flex flex-wrap gap-2 mt-3">
           <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -346,21 +429,126 @@ async function copy(text: string, key: string) {
         </ul>
       </section>
 
-      <!-- Widget dalam pengembangan -->
+      <!-- Status & batasan (bahan diskusi pengembangan lanjutan) -->
       <section class="space-y-3">
-        <h3 class="text-[13px] font-black">Dalam pengembangan</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">
-          Kartu berikut ada di dashboard BMKG tetapi belum disiapkan sebagai widget embed.
+        <h3 class="text-[13px] font-black">Status &amp; batasan</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed max-w-3xl">
+          Fitur ini masih <strong class="text-slate-800 dark:text-slate-200">POC untuk pengembangan</strong>,
+          bukan layanan produksi. Angka &amp; status di bawah ini sengaja ditulis apa adanya supaya
+          jadi bahan diskusi, bukan klaim siap pakai.
         </p>
-        <div class="grid sm:grid-cols-2 gap-2">
-          <div
-            v-for="s in SOON"
-            :key="s.name"
-            class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
-          >
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-300">{{ s.name }}</p>
-            <p class="text-[11px] text-slate-500 mt-1 leading-snug">{{ s.reason }}</p>
+
+        <!-- ringkasan angka -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">
+            <p class="text-lg font-black text-emerald-500 leading-none">{{ WIDGETS.length }}</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget siap di-embed</p>
           </div>
+          <div class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2">
+            <p class="text-lg font-black text-slate-500 leading-none">{{ SOON.length }}</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">belum dikerjakan</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2">
+            <p class="text-lg font-black text-slate-500 leading-none">{{ NEEDS_CLICK.length }}</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">butuh klik pengunjung</p>
+          </div>
+          <div class="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2">
+            <p class="text-lg font-black text-amber-500 leading-none">2</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget selalu MOCK</p>
+          </div>
+        </div>
+
+        <!-- asal data: seberapa resmi isinya -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4 space-y-2.5">
+          <h4 class="text-xs font-black flex items-center gap-1.5">
+            <Database class="w-3.5 h-3.5 text-brand-cyan" /> Asal data — seberapa resmi isinya
+          </h4>
+          <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            Keterbatasan terbesar fitur ini bukan di tampilan, tapi di <strong class="text-slate-800 dark:text-slate-200">akses data</strong>.
+            Sebagian API BMKG menutup CORS dan mewajibkan header khusus, sehingga harus dilewatkan
+            proxy sendiri; sebagian lagi tidak punya API sama sekali.
+          </p>
+          <div class="space-y-2">
+            <div
+              v-for="d in DATA_SOURCES"
+              :key="d.label"
+              class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
+            >
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span
+                  :class="['w-1.5 h-1.5 rounded-full shrink-0',
+                    d.tone === 'ok' ? 'bg-emerald-500' : d.tone === 'warn' ? 'bg-amber-500' : 'bg-rose-500']"
+                ></span>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ d.label }}</p>
+                <code class="text-[10px] font-mono text-slate-500 dark:text-slate-500">{{ d.where }}</code>
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">{{ d.detail }}</p>
+              <p class="text-[10.5px] text-slate-500 mt-1">
+                <span class="font-bold">Dipakai:</span> {{ d.widgets }}
+              </p>
+            </div>
+          </div>
+          <p class="text-[10.5px] text-slate-500 leading-relaxed pt-1">
+            Konsekuensinya: perubahan kecil di sisi BMKG (header, struktur halaman, CORS) bisa
+            mematikan widget tanpa peringatan. Tidak ada kontrak/SLA yang bisa dipegang.
+          </p>
+        </div>
+
+        <!-- belum dikerjakan -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4 space-y-2">
+          <h4 class="text-xs font-black flex items-center gap-1.5">
+            <Construction class="w-3.5 h-3.5 text-slate-400" /> Belum siap ({{ SOON.length }})
+          </h4>
+          <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            Bisa dibuat, tapi belum dikerjakan — bukan karena teknis mustahil.
+          </p>
+          <div class="grid sm:grid-cols-2 gap-2 pt-1">
+            <div
+              v-for="s in SOON"
+              :key="s.name"
+              class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
+            >
+              <p class="text-sm font-bold text-slate-800 dark:text-slate-300">{{ s.name }}</p>
+              <p class="text-[11px] text-slate-500 mt-1 leading-snug">{{ s.reason }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- butuh klik pengunjung -->
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4 space-y-2">
+          <h4 class="text-xs font-black flex items-center gap-1.5">
+            <MousePointerClick class="w-3.5 h-3.5 text-slate-400" /> Butuh klik pengunjung ({{ NEEDS_CLICK.length }})
+          </h4>
+          <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            Ini <strong class="text-slate-800 dark:text-slate-200">tidak akan pernah</strong> jadi widget embed.
+            Semuanya berupa drawer/modal: butuh pengunjung membuka panel dan memilih sesuatu.
+            Dibekukan di dalam iframe, hasilnya kotak kosong tanpa jalan masuk.
+          </p>
+          <div class="grid sm:grid-cols-2 gap-2 pt-1">
+            <div
+              v-for="s in NEEDS_CLICK"
+              :key="s.name"
+              class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
+            >
+              <p class="text-sm font-bold text-slate-800 dark:text-slate-300">{{ s.name }}</p>
+              <p class="text-[11px] text-slate-500 mt-1 leading-snug">{{ s.reason }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- yang dibutuhkan agar bisa naik ke produksi -->
+        <div class="rounded-xl border border-blue-500/25 bg-blue-500/5 p-4 space-y-2">
+          <h4 class="text-xs font-black flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+            <ListChecks class="w-3.5 h-3.5" /> Yang dibutuhkan sebelum naik ke produksi
+          </h4>
+          <ul class="text-[11.5px] text-slate-600 dark:text-slate-400 space-y-1.5 leading-relaxed">
+            <li><strong class="text-slate-800 dark:text-slate-200">Akses API resmi + dokumentasi + sample data</strong> — sekarang semuanya diakali lewat proxy dan scraping, tanpa kontrak tertulis.</li>
+            <li><strong class="text-slate-800 dark:text-slate-200">Kebijakan token per partner</strong> — saat ini semua partner memakai satu <code class="font-mono text-[10px]">client_id</code>, jadi tidak ada rate-limit maupun audit per partner.</li>
+            <li><strong class="text-slate-800 dark:text-slate-200">Pendaftaran IP/domain partner</strong> — supaya widget bisa dibatasi hanya untuk pemasang resmi, bukan ditempel di situs mana pun.</li>
+            <li><strong class="text-slate-800 dark:text-slate-200">Token di header/cookie, bukan URL</strong> — URL bocor lewat log akses, <code class="font-mono text-[10px]">Referer</code>, dan riwayat browser.</li>
+            <li><strong class="text-slate-800 dark:text-slate-200">Pemantauan kegagalan upstream</strong> — tanpa ini, widget yang mati tidak ketahuan sampai ada pengunjung yang mengeluh.</li>
+            <li><strong class="text-slate-800 dark:text-slate-200">Kejelasan soal data MOCK</strong> — instansi yang memasang perlu tahu bahwa ISPU/transportasi bukan data resmi BMKG.</li>
+          </ul>
         </div>
       </section>
 
@@ -435,7 +623,7 @@ ngAfterViewInit() {
         </div>
         <div>
           <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Apakah perlu API key atau pendaftaran?</p>
-          <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Tidak. Cukup tempel kode. Data diambil langsung dari layanan BMKG.</p>
+          <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Pada versi POC ini: tidak. Widget meminta token sendiri ke server BMKG (Keycloak), jadi pengunjung tidak melihat apa pun. Untuk integrasi resmi ke depan, partner perlu terdaftar dan IP/domain-nya didaftarkan manual.</p>
         </div>
         <div>
           <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Apakah widget bisa dipakai di React / WordPress / lainnya?</p>

@@ -172,7 +172,7 @@ Tombol Generate mensimulasikan **backend partner** (server kita yang memegang
 
 | Endpoint | Fungsi |
 |---|---|
-| `GET /api/embed-token` | **Simulasi backend partner** (POC): tukar `client_credentials` → `{token, expires_in, expires_at}`. Cache TTL `expires_in−60s`, permintaan bersamaan digabung |
+| `GET /api/embed-token` | **Simulasi backend partner** (POC): tukar `client_credentials` → `{token, expires_in, expires_at}`. Cache TTL `expires_in−60s`, permintaan bersamaan digabung. **Hanya boleh dipanggil dari origin sendiri** (403 untuk `Origin` lain) — kalau tidak, semua gerbang di atas sia-sia karena siapa pun bisa mengambil token |
 | `GET /api/embed-js` | Kirim script loader (200) atau `401` |
 | `GET /api/embed-verify` | `{valid, reason, azp, iss, exp, expires_in, roles}` |
 | `GET /api/bmkg` | Proxy BMKG — wajib `Authorization: Bearer` |
@@ -190,6 +190,7 @@ mematikan widget**, key lama masih bisa memverifikasi.
 | `401` + `tanda tangan tidak cocok` | payload token diubah orang lain — verifikasi bekerja |
 | `401` + `kid tidak ada di JWKS` | realm/URL JWKS salah |
 | Widget kosong, **tanpa** pesan | `embed.js` lama masih tertempel → ganti ke `bmkg-embed.js` |
+| `403` dari `/api/embed-token` | dipanggil dari origin lain — memang dilarang (keran token) |
 
 ### Shortcut yang disengaja (dan kapan harus diganti)
 
@@ -199,6 +200,7 @@ mematikan widget**, key lama masih bisa memverifikasi.
 | `eval` script loader | diblokir CSP ketat milik situs partner | kalau ada partner ber-CSP ketat: pindah ke endpoint verifikasi + loader lokal |
 | `?token=` di URL (mode iframe manual) | token tertinggal di log/Referer | jangan dipakai produksi — pakai `postMessage` (sudah jadi default) |
 | Verifikasi `exp` belum diuji dengan token kedaluwarsa asli | butuh token ber-`exp` lampau yang ditandatangani | saat ada tooling uji token |
+| `/api/embed-token` masih hidup di POC | keran token; dijaga same-origin saja, `curl` tetap lolos | **hapus endpoint ini saat produksi** — token hanya dari backend partner |
 
 Pencabutan akses masih manual: rotasi `client_secret` di Keycloak → semua token baru gagal.
 

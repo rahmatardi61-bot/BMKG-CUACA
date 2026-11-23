@@ -57,12 +57,34 @@ async function getToken(): Promise<string> {
   return inflight;
 }
 
+// Endpoint ini adalah KERAN TOKEN, jadi ia sendiri harus dijaga: kalau siapa pun
+// boleh memanggilnya, semua gerbang di atas jadi sia-sia.
+// Aturan POC: hanya boleh dipanggil dari origin kita sendiri (browser partner akan
+// ditolak karena mengirim Origin lain). Panggilan tanpa Origin (curl/server-ke-server)
+// tetap lolos — pencabutan untuk itu masih manual (rotasi secret).
+function sameOrigin(req: Request): boolean {
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? '';
+  const src = req.headers.get('origin') ?? req.headers.get('referer') ?? '';
+  if (!src || src === 'null') return true; // bukan dari browser
+  try {
+    return new URL(src).host === host;
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
       headers: { ...JSON_HEADERS, 'Access-Control-Allow-Methods': 'GET, OPTIONS' },
     });
+  }
+  if (!sameOrigin(req)) {
+    return new Response(
+      JSON.stringify({ error: 'Tidak diotorisasi', reason: 'endpoint token hanya untuk origin sendiri' }),
+      { status: 403, headers: JSON_HEADERS },
+    );
   }
   try {
     const token = await getToken();

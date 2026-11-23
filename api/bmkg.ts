@@ -15,7 +15,7 @@
 // Dipakai di Vercel (folder api/ terdeteksi otomatis) dan server.mjs (Docker).
 import { bearer, verifyJwt } from './_lib/jwt.ts';
 
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs' };
 
 const UPSTREAM = 'https://cuaca.bmkg.go.id';
 const NOWCAST_UPSTREAM = 'https://www.bmkg.go.id';

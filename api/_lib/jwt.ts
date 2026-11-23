@@ -14,6 +14,8 @@
 // masih bisa memverifikasi → widget tidak ikut mati.
 // ═══════════════════════════════════════════════════════════════════════════
 
+// NB: di Vercel Node runtime, process.env sudah terisi Environment Variables.
+// Di lokal, server.mjs memuat .env lewat load-env.mjs sebelum modul ini dievaluasi.
 export const REALM_URL =
   process.env.KEYCLOAK_REALM_URL ?? 'https://auth-dev-bmkg.vedata.online/realms/bmkg-partner';
 

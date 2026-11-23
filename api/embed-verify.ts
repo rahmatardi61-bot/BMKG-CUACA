@@ -10,7 +10,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { bearer, verifyJwt } from './_lib/jwt.ts';
 
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs' };
 
 const CORS: Record<string, string> = {
   'Content-Type': 'application/json',

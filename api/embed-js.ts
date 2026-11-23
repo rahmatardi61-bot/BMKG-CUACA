@@ -11,7 +11,7 @@
 import { bearer, verifyJwt } from './_lib/jwt.ts';
 import { EMBED_SOURCE } from './_lib/embedSource.ts';
 
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs' };
 
 const CORS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',

@@ -13,7 +13,7 @@
 // upgrade: kalau sudah produksi, ganti ke validasi JWT per-request + allowlist
 // IP/domain per partner (lihat docs/widget-embed.md).
 // ═══════════════════════════════════════════════════════════════════════════
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs' };
 
 const REALM_URL =
   process.env.KEYCLOAK_REALM_URL ??

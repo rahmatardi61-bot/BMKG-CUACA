@@ -44,6 +44,49 @@ dipakai bersama, dimuat sekali). Yang bertambah hanya jumlah iframe dan request 
 /embed.js                         ← 1 loader untuk semuanya
 ```
 
+## Autentikasi (POC — Keycloak)
+
+BE menyediakan Keycloak `client_credentials`:
+
+```
+POST {REALM_URL}/protocol/openid-connect/token
+grant_type=client_credentials & client_id=partner-widget-service & client_secret=***
+→ access_token (JWT, exp 300 detik)
+```
+
+**Keputusan POC:** widget meminta token ke **server kita** (`GET /api/embed-token`),
+bukan langsung ke Keycloak dari browser — karena grant `client_credentials` butuh
+`client_secret`, dan secret tidak boleh ada di browser. Partner yang sudah punya token
+sendiri boleh mengirimkannya: `?token=<jwt>` dan widget langsung memakainya.
+
+### Alur di widget
+
+```
+① iframe dimuat → animasi "Menyiapkan widget…" (spinner)
+② fetch /api/embed-token  → server ambil token Keycloak (cache 4 menit)
+③ token diterima → komponen memuat data BMKG
+④ gagal → layar "Gagal menyiapkan widget" + alasan (bukan layar putih)
+```
+
+### Endpoint `api/embed-token.ts`
+
+- Cache token per-instance (TTL `expires_in − 60s`), permintaan bersamaan digabung
+  (`inflight`) supaya tidak menembak Keycloak berkali-kali
+- Env: `KEYCLOAK_REALM_URL`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`
+  (secret **hanya** di server; `.env` gitignored)
+- Terdaftar di `server.mjs` (dev/Docker) dan folder `api/` (Vercel)
+
+### Batasan POC (disengaja, disepakati)
+
+Ini POC internal untuk dev, bukan gerbang keamanan produksi:
+
+- Token **tidak** divalidasi per-request; widget tetap jalan walau token tidak dikirim
+- `client_credentials` = satu identitas untuk semua partner → tak ada rate-limit per
+  partner, tak ada audit per partner
+- Kalau ada penyalahgunaan → **blok manual** (rotasi `client_secret`, hapus izin)
+- Ke depan: partner mendaftarkan IP/domain untuk di-allowlist manual; token sebaiknya
+  lewat header/cookie (bukan query string) agar tidak bocor via log/Referer
+
 ## Tema widget
 
 `?theme=dark|light|auto` (default `dark`). Komponen sudah punya varian `dark:`, jadi

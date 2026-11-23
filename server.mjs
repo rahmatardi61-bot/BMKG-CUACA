@@ -1,6 +1,7 @@
 // Serve hasil `vite build` + proxy /api/bmkg?path=… ke handler yang sama dengan Vercel.
 // ponytail: satu proses Node (bukan nginx) karena proxy butuh header dinamis
 // (x-public-token segar) — lihat api/bmkg.ts.
+import './load-env.mjs'
 import { createServer } from 'node:http'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
@@ -8,6 +9,7 @@ import { pipeline } from 'node:stream/promises'
 import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
 import handler from './api/bmkg.ts'
+import embedTokenHandler from './api/embed-token.ts'
 
 const DIST = resolve('dist')
 const PORT = Number(process.env.PORT) || 8080
@@ -80,6 +82,19 @@ async function serveFile(req, res, pathname) {
 
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
+
+  if (url.pathname === '/api/embed-token') {
+    try {
+      const out = await embedTokenHandler(new Request(url, { method: req.method, headers: req.headers }))
+      const body = Buffer.from(await out.arrayBuffer())
+      res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
+      res.end(req.method === 'HEAD' ? undefined : body)
+    } catch (e) {
+      res.writeHead(502, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: String(e) }))
+    }
+    return
+  }
 
   if (url.pathname === '/api/bmkg' || url.pathname === '/api-bmkg') {
     // handler membaca path upstream dari ?path= (lihat api/bmkg.ts); /api-bmkg = legacy

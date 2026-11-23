@@ -13,7 +13,7 @@ import { defineAsyncComponent, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
 import type { WarningAlert, NewsArticle, HourlyForecast } from '../types/weather';
 import { newsArticles } from '../data/mockData';
-import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical } from 'lucide-vue-next';
+import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical, ShieldAlert } from 'lucide-vue-next';
 
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
@@ -56,7 +56,36 @@ const loading = ref(false);
 // true bila widget menampilkan data MOCK/fallback — ditandai di UI (bukan disembunyikan)
 const isMock = ref(false);
 
+// ── Token Keycloak (POC) ───────────────────────────────────────────────────
+// Widget menunggu token dulu, baru memuat data. Kalau partner sudah mengirim
+// ?token=… (server-side mereka), pakai itu; kalau tidak, ambil ke server kita
+// (secret Keycloak tidak boleh ada di browser).
+const authState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle');
+const authMessage = ref('');
+const externalToken = params.get('token') || '';
+
+async function ensureToken(): Promise<boolean> {
+  if (externalToken) {
+    authState.value = 'ready';
+    return true;
+  }
+  authState.value = 'loading';
+  try {
+    const res = await fetch('/api/embed-token', { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = (await res.json()) as { token?: string };
+    if (!json.token) throw new Error('token kosong');
+    authState.value = 'ready';
+    return true;
+  } catch (e) {
+    authState.value = 'error';
+    authMessage.value = String(e).slice(0, 120);
+    return false;
+  }
+}
+
 async function loadData() {
+  if (!(await ensureToken())) return; // gagal token → tampilkan layar error, bukan data
   loading.value = true;
   try {
     if (widget === 'news') {
@@ -83,8 +112,34 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
 
 <template>
   <div class="min-h-full bg-[#eef5ff] dark:bg-[#070c19] text-slate-900 dark:text-white">
+    <!-- Menunggu token (Keycloak) — animasi, bukan layar kosong -->
+    <div
+      v-if="isReady && authState === 'loading'"
+      class="flex flex-col items-center justify-center gap-3 py-16"
+    >
+      <div class="relative w-9 h-9">
+        <div class="absolute inset-0 rounded-full border-2 border-slate-300 dark:border-slate-700"></div>
+        <div class="absolute inset-0 rounded-full border-2 border-transparent border-t-brand-cyan animate-spin"></div>
+      </div>
+      <p class="text-[11px] font-bold text-slate-500">Menyiapkan widget…</p>
+      <p class="text-[10px] text-slate-400">Menghubungkan ke layanan BMKG</p>
+    </div>
+
+    <!-- Token gagal → jelaskan, jangan tampil kosong -->
+    <div
+      v-else-if="isReady && authState === 'error'"
+      class="p-6 flex flex-col items-center text-center gap-2"
+    >
+      <ShieldAlert class="w-6 h-6 text-rose-500" />
+      <p class="text-[12px] font-bold text-slate-800 dark:text-slate-200">Gagal menyiapkan widget</p>
+      <p class="text-[10.5px] text-slate-500 leading-relaxed max-w-[260px]">
+        Token akses tidak dapat diperoleh. Hubungi penyedia layanan BMKG bila masalah berlanjut.
+      </p>
+      <code class="text-[9px] text-slate-400 break-all max-w-[260px]">{{ authMessage }}</code>
+    </div>
+
     <!-- Widget siap -->
-    <template v-if="isReady">
+    <template v-else-if="isReady">
       <div v-if="needCity" class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-800/60">
         <MapPin class="w-3 h-3 text-brand-cyan" />
         <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">{{ city }}</span>
@@ -111,7 +166,10 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
         </div>
         <AlertsPanel v-else :alerts="alerts" />
       </template>
-      <NewsSection v-else-if="widget === 'news'" :articles="articles" />
+      <template v-else-if="widget === 'news'">
+        <div v-if="loading || !articles.length" class="p-6 text-center text-[12px] text-slate-500">Memuat berita…</div>
+        <NewsSection v-else :articles="articles" />
+      </template>
       <template v-else-if="widget === 'forecast'">
         <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat prakiraan…</div>
         <div v-else-if="!forecasts.length" class="p-6 flex flex-col items-center text-center gap-1.5">

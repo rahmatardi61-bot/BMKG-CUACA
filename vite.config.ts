@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { resolve } from 'node:path'
 
 // ── BMKG proxy (dev) ────────────────────────────────────────────────────────
 // /api/df/* butuh Referer cuaca.bmkg.go.id, /api/public/* butuh Origin sama +
@@ -73,6 +74,11 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      // Dua entry: app utama (index.html) + widget embed (embed.html, dipakai iframe)
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        embed: resolve(__dirname, 'embed.html'),
+      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {

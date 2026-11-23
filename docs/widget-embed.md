@@ -5,9 +5,13 @@
 > CORS dan mewajibkan header khusus (diakali lewat proxy sendiri), sebagian lagi tidak punya
 > API sama sekali (scraping / data contoh). Tidak ada kontrak atau SLA yang bisa dipegang.
 > Rincian: lihat **§ Status & batasan** di bawah.
+>
+> **Sejak revisi terakhir, widget dijaga token Keycloak**: tanpa token sah, `/api/embed-js`
+> dan `/api/bmkg` menolak (401). Snippet lama "tempel script, langsung jalan" sudah tidak
+> berlaku — `public/embed.js` kini hanya stub pemberi tahu. Rincian: **§ Autentikasi**.
 
-Fitur: kartu dashboard BMKG bisa ditempel di web pihak lain dengan **1 div + 1 script**.
-Kode: branch `feature/widget-embed`. Halaman dokumentasi & demo: **`/widgets`**.
+Fitur: kartu dashboard BMKG bisa ditempel di web pihak lain dengan **1 div + 1 token**
+(+ loader). Kode: branch `feature/widget-embed`. Dokumentasi & demo: **`/widgets`**.
 
 ## Keputusan desain (dan alasannya)
 
@@ -16,25 +20,35 @@ Kode: branch `feature/widget-embed`. Halaman dokumentasi & demo: **`/widgets`**.
 | **iframe**, bukan inject DOM | Tailwind/Leaflet/z-index kita tidak bisa menabrak CSS host; CSS host juga tidak bisa merusak widget. Terbukti: halaman uji berlatar putih tetap putih setelah widget masuk. |
 | Semua opsi **statis** | UI tidak bisa di-kustom (tanpa variabel warna). Keinginan "komponen ala Kiwitaxi" tidak dipakai: kartu kita jauh lebih kompleks daripada form. |
 | Kota = **daftar tertutup** (10 kota) | Kota di luar `CITY_COORDS` tidak punya koordinat → bisa tampil kosong/pakai data mock. Widget tidak boleh menampilkan angka karangan di web orang lain. Kota tak dikenal → fallback `DKI Jakarta`. |
-| Tanpa API key / pendaftaran | Data diambil dari layanan BMKG via app kita. |
+| **Token Keycloak wajib** | Widget memuat data BMKG lewat proxy kita; tanpa gerbang, siapa pun bisa memakai kapasitas kita. Token dibuat backend partner, diverifikasi tanda tangannya (JWKS) di tiap pintu. |
+| Token iframe lewat **`postMessage`**, bukan URL | URL iframe terlihat di devtools & Referer; `postMessage` tidak meninggalkan jejak. `?token=` hanya disisakan untuk uji cepat. |
 | `/embed` **tanpa gate login** | Kalau di-gate, iframe di web klien akan menampilkan halaman login. |
 | apiMarker **tidak** dipasang di `/widgets` & `/embed` | Panel dev hanya jadi noise di materi presentasi. |
 
 ## Arsitektur
 
 ```
-embed.html                  entry Vite terpisah (bundle 2,7 kB)
-src/embed/main.ts           mount + lapor tinggi ke parent via postMessage
-src/embed/EmbedApp.vue      whitelist widget + kota; placeholder utk yang belum siap
-public/embed.js             loader 2,1 kB: pasang iframe + auto-resize
-src/pages/WidgetsPage.vue   dokumentasi /widgets (preview live + kode siap copy)
-src/main.ts                 route /widgets (publik) + /embed (tanpa login)
-vite.config.ts              dua entry (index.html + embed.html)
+embed.html                     entry Vite terpisah
+src/embed/main.ts              mount + lapor tinggi ke parent via postMessage
+src/embed/EmbedApp.vue         whitelist widget+kota; terima token via postMessage
+api/_lib/jwt.ts                verifikasi RS256 lewat JWKS (WebCrypto, tanpa dep)
+api/_lib/embedSource.ts        isi script loader (dikirim hanya ke pemegang token)
+api/embed-js.ts                kunci 1: kirim loader / 401
+api/embed-verify.ts            kunci 2: sah-tidaknya token
+api/bmkg.ts                    kunci 4: proxy data BMKG (wajib Bearer)
+api/embed-token.ts             simulasi backend partner (POC): mint token
+public/bmkg-embed.js           loader publik: fetch ber-token + eval (aman dibagikan)
+public/embed.js                stub: memberi tahu snippet lama sudah tidak dipakai
+src/services/embedToken.ts     getToken/decode/adopt (klien)
+src/pages/WidgetsPage.vue      dokumentasi /widgets (Generate token + preview)
+vite.config.ts                 dua entry (index.html + embed.html)
 ```
 
-Alur: klien tempel `<div data-bmkg-widget="…">` + `<script src="…/embed.js">` →
-loader membuat `<iframe src="/embed.html?widget=…">` → widget melaporkan tinggi aslinya
-lewat `postMessage` → loader menyesuaikan `iframe.height`.
+Alur: partner tempel `<div data-bmkg-widget="…">` → `BmkgWidget.init({token})` →
+loader fetch `/api/embed-js` dengan `Authorization` → script inti membuat
+`<iframe src="/embed.html?widget=…">` (tanpa token di URL) → iframe kirim
+`bmkg-embed-ready`, parent balas token → widget verifikasi ke server, ambil data,
+lapor tinggi lewat `postMessage` → loader menyesuaikan `iframe.height`.
 
 ## 1 server, banyak widget
 
@@ -47,84 +61,146 @@ dipakai bersama, dimuat sekali). Yang bertambah hanya jumlah iframe dan request 
 /embed.html?widget=earthquake&city=DKI%20Jakarta
 /embed.html?widget=alerts&city=Surabaya
 /embed.html?widget=news
-/embed.js                         ← 1 loader untuk semuanya
+/api/embed-js                     ← 1 script (butuh token) untuk semuanya
 ```
 
-## Autentikasi (POC — Keycloak)
+## Autentikasi — 4 kunci, 1 verifikator
 
-BE menyediakan Keycloak `client_credentials`:
+Widget **tidak lagi terbuka untuk siapa saja**. Tanpa token Keycloak yang sah, tidak ada
+satu pun data yang keluar. Ada empat pintu, semuanya diperiksa dengan fungsi yang sama
+(`verifyJwt` di `api/_lib/jwt.ts`, verifikasi tanda tangan RS256 + `exp` + `iss`):
+
+| Kunci | Endpoint | Tanpa token sah |
+|---|---|---|
+| 1 | `GET /api/embed-js` (script loader) | `401` — script inti tidak pernah diterima, tidak ada iframe dibuat |
+| 2 | `GET /api/embed-verify` (cek token) | `401` — widget menolak membuka |
+| 3 | `embed.html` (shell widget) | layar "Tidak diotorisasi" |
+| 4 | `GET /api/bmkg` (data BMKG) | `401` — data tidak bisa diambil |
+
+Kunci 4 yang paling penting: shell HTML statis tidak bisa dijaga tanpa SSR, tapi shell
+itu **tidak berisi data**. Yang dijaga adalah data.
+
+### Alur (dari sisi partner)
 
 ```
-POST {REALM_URL}/protocol/openid-connect/token
-grant_type=client_credentials & client_id=partner-widget-service & client_secret=***
-→ access_token (JWT, exp 300 detik)
+① backend partner  → POST Keycloak (client_credentials) → JWT 300 detik
+                      client_id/secret di .env server partner, TIDAK di browser
+② halaman partner  → fetch('/api/embed-js', {Authorization: Bearer <jwt>})
+③ server kita      → verifikasi tanda tangan dengan JWKS → 200 / 401
+④ loader           → <iframe src="/embed.html?widget=…">  (tanpa token di URL)
+⑤ iframe           → postMessage 'bmkg-embed-ready' → parent balas token
+⑥ widget           → fetch('/api/embed-verify') → sah? → ambil data /api/bmkg (Bearer)
 ```
 
-**Keputusan POC:** widget meminta token ke **server kita** (`GET /api/embed-token`),
-bukan langsung ke Keycloak dari browser — karena grant `client_credentials` butuh
-`client_secret`, dan secret tidak boleh ada di browser. Partner yang sudah punya token
-sendiri boleh mengirimkannya: `?token=<jwt>` dan widget langsung memakainya.
+Token **tidak** ditaruh di URL iframe (tidak muncul di log akses, Referer, atau riwayat).
+Satu token dipakai ulang oleh semua widget di halaman itu.
 
-### Alur di widget
+### Setup di sisi partner
 
-```
-① iframe dimuat → animasi "Menyiapkan widget…" (spinner)
-② fetch /api/embed-token  → server ambil token Keycloak (cache 4 menit)
-③ token diterima → komponen memuat data BMKG
-④ gagal → layar "Gagal menyiapkan widget" + alasan (bukan layar putih)
-```
+1. **Simpan kredensial di server**, bukan di browser:
 
-### Indikator auth — cara tahu berhasil atau tidak
+   ```bash
+   # .env server partner (bukan .env frontend)
+   KEYCLOAK_REALM_URL=https://auth-dev-bmkg.vedata.online/realms/bmkg-partner
+   KEYCLOAK_CLIENT_ID=partner-widget-service
+   KEYCLOAK_CLIENT_SECRET=<diberikan BMKG>
+   ```
 
-Masalah sebelumnya: **gagal kelihatan, berhasil tidak kelihatan** (widget langsung
-tampil tanpa bukti token didapat). Sekarang ada tiga tempat memeriksanya:
+2. **Mint token di backend** + cache sampai ~1 menit sebelum `exp`:
+
+   ```js
+   // GET /token  (endpoint milik partner, dipanggil halaman mereka)
+   const r = await fetch(`${process.env.KEYCLOAK_REALM_URL}/protocol/openid-connect/token`, {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+     body: new URLSearchParams({
+       grant_type: 'client_credentials',
+       client_id: process.env.KEYCLOAK_CLIENT_ID,
+       client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+     }),
+   })
+   const { access_token } = await r.json()
+   ```
+
+3. **Verifikasi tanda tangan dengan JWKS** sebelum token dipakai (decode saja tidak
+   cukup — payload bisa diubah siapa pun):
+
+   ```js
+   const jwks = await (await fetch(`${REALM}/protocol/openid-connect/certs`)).json()
+   // ambil key sesuai header.kid, importKey (RSASSA-PKCS1-v1_5/SHA-256), verify
+   // lalu cek: signature cocok, exp belum lewat, iss = realm URL
+   ```
+   Referensi kerja: `api/_lib/jwt.ts` (WebCrypto, tanpa dependency).
+
+4. **Pasang widget** — pilih salah satu:
+
+   ```html
+   <!-- A. loader publik (mudah) -->
+   <div data-bmkg-widget="current" data-city="Bandung"></div>
+   <script src="https://DOMAIN/bmkg-embed.js"></script>
+   <script>BmkgWidget.init({ token: '<JWT>' })</script>
+
+   <!-- B. fetch + eval manual -->
+   <script>
+     window.BMKG_EMBED_TOKEN = '<JWT>'
+     fetch('https://DOMAIN/api/embed-js', { headers: { Authorization: 'Bearer ' + window.BMKG_EMBED_TOKEN } })
+       .then(r => r.ok ? r.text() : Promise.reject('HTTP ' + r.status))
+       .then(code => (0, eval)(code))
+   </script>
+   ```
+
+   Var A memakai `fetch` + `eval` di dalam. **CSP ketat** (tanpa `'unsafe-eval'`)
+   memblokir keduanya — lihat catatan di bawah.
+
+### Indikator di `/widgets`
+
+Halaman dokumentasi **tidak** meminta token otomatis (berbeda dari dashboard `/`), supaya
+kelihatan bahwa token adalah urusan partner:
 
 | Di mana | Cara | Artinya |
 |---|---|---|
-| Halaman `/widgets` (paling cepat) | Chip **"Token Keycloak: OK · berlaku N detik"** di bawah banner POC. Ada tombol **Periksa ulang** | Server berhasil menukar `client_credentials` → token diterima. Kalau merah **GAGAL**, muncul detail error + petunjuk periksa `KEYCLOAK_CLIENT_SECRET`/realm |
-| Di dalam widget | Tambahkan `&debug=1` pada URL embed | Strip tipis di atas widget: `auth: OK · sumber=server · berlaku=239s`, atau `auth: GAGAL · <pesan>` |
-| Konsol browser | Buka devtools | `[bmkg-widget] auth OK via server, token berlaku ~239s` atau `[bmkg-widget] auth GAGAL: …` |
+| `/widgets` | Tombol **Generate token** → JWT tampil + panel decode (`alg`, `azp`, `iss`, `exp`, `roles`) + badge **VALID / KEDALUWARSA / DITOLAK** + hitung mundur | Decode = tampilan. Baris "Tanda tangan (JWKS server): cocok" = hasil verifikasi sebenarnya |
+| `/widgets` | Preview terkunci sebelum token ada | Sama seperti di situs partner: tanpa token, widget tidak tampil |
+| `/` (dashboard) | Badge `TOKEN OK 240s` kanan bawah | Halaman ini berperan sebagai "situs partner": mint saat load, semua `/api/bmkg` membawa token |
+| Widget | `&debug=1` | Strip: `auth: OK · sumber=parent · berlaku=278s` atau `auth: GAGAL · <sebab>` |
+| Konsol | devtools | `[bmkg-widget] auth OK (sumber=parent, berlaku=278s)` |
 
-Arti tiap status:
+Tombol Generate mensimulasikan **backend partner** (server kita yang memegang
+`client_secret`). Di produksi tombol itu tidak ada — token datang dari server partner.
 
-- **`sumber=server`** — widget meminta token ke `/api/embed-token` (alur normal).
-- **`sumber=partner`** — partner mengirim token sendiri lewat `?token=…`; server BMKG
-  tidak dipanggil, jadi **tidak ada yang diverifikasi** (POC).
-- **`berlaku=Ns`** — sisa umur token di cache server (`expires_in − 60s`), bukan umur
-  token asli. Token Keycloak sendiri berumur 300 detik.
-- **GAGAL** — widget **tidak** memuat data dan menampilkan layar "Gagal menyiapkan
-  widget" beserta pesan error. Ini disengaja: lebih baik kosong dengan penjelasan
-  daripada menampilkan widget yang seolah berjalan.
+### Endpoint
 
-Catatan penting: **"OK" hanya berarti token berhasil didapat.** Pada POC ini token belum
-dipakai untuk menggerbangi apa pun — widget tetap memanggil data BMKG lewat proxy yang
-sama. Jadi OK bukan jaminan data terjamin; ia hanya bukti jalur auth hidup.
+| Endpoint | Fungsi |
+|---|---|
+| `GET /api/embed-token` | **Simulasi backend partner** (POC): tukar `client_credentials` → `{token, expires_in, expires_at}`. Cache TTL `expires_in−60s`, permintaan bersamaan digabung |
+| `GET /api/embed-js` | Kirim script loader (200) atau `401` |
+| `GET /api/embed-verify` | `{valid, reason, azp, iss, exp, expires_in, roles}` |
+| `GET /api/bmkg` | Proxy BMKG — wajib `Authorization: Bearer` |
 
-Kegagalan yang paling sering (sudah diuji):
+Env server: `KEYCLOAK_REALM_URL`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`
+(`.env` gitignored). JWKS di-cache 10 menit per instance — **Keycloak mati tidak
+mematikan widget**, key lama masih bisa memverifikasi.
 
-| Respons | Penyebab |
+### Kegagalan yang sering (sudah diuji)
+
+| Gejala | Penyebab |
 |---|---|
 | `502` + `Keycloak 401: unauthorized_client` | `client_secret` salah / sudah dirotasi |
-| `502` + `KEYCLOAK_CLIENT_SECRET belum di-set` | env tidak terbaca di server (Vercel: set env lalu Redeploy) |
+| `502` + `KEYCLOAK_CLIENT_SECRET belum di-set` | env tidak terbaca (Vercel: set env lalu Redeploy) |
+| `401` + `tanda tangan tidak cocok` | payload token diubah orang lain — verifikasi bekerja |
+| `401` + `kid tidak ada di JWKS` | realm/URL JWKS salah |
+| Widget kosong, **tanpa** pesan | `embed.js` lama masih tertempel → ganti ke `bmkg-embed.js` |
 
-### Endpoint `api/embed-token.ts`
+### Shortcut yang disengaja (dan kapan harus diganti)
 
-- Cache token per-instance (TTL `expires_in − 60s`), permintaan bersamaan digabung
-  (`inflight`) supaya tidak menembak Keycloak berkali-kali
-- Env: `KEYCLOAK_REALM_URL`, `KEYCLOAK_CLIENT_ID`, `KEYCLOAK_CLIENT_SECRET`
-  (secret **hanya** di server; `.env` gitignored)
-- Terdaftar di `server.mjs` (dev/Docker) dan folder `api/` (Vercel)
+| Shortcut | Batasannya | Kapan diganti |
+|---|---|---|
+| `client_id` tunggal untuk semua partner | token partner A berlaku juga di B; tak bisa cabut/rate-limit per partner | sebelum produksi: 1 client per partner di Keycloak |
+| `eval` script loader | diblokir CSP ketat milik situs partner | kalau ada partner ber-CSP ketat: pindah ke endpoint verifikasi + loader lokal |
+| `?token=` di URL (mode iframe manual) | token tertinggal di log/Referer | jangan dipakai produksi — pakai `postMessage` (sudah jadi default) |
+| Verifikasi `exp` belum diuji dengan token kedaluwarsa asli | butuh token ber-`exp` lampau yang ditandatangani | saat ada tooling uji token |
 
-### Batasan POC (disengaja, disepakati)
-
-Ini POC internal untuk dev, bukan gerbang keamanan produksi:
-
-- Token **tidak** divalidasi per-request; widget tetap jalan walau token tidak dikirim
-- `client_credentials` = satu identitas untuk semua partner → tak ada rate-limit per
-  partner, tak ada audit per partner
-- Kalau ada penyalahgunaan → **blok manual** (rotasi `client_secret`, hapus izin)
-- Ke depan: partner mendaftarkan IP/domain untuk di-allowlist manual; token sebaiknya
-  lewat header/cookie (bukan query string) agar tidak bocor via log/Referer
+Pencabutan akses masih manual: rotasi `client_secret` di Keycloak → semua token baru gagal.
 
 ## Tema widget
 
@@ -283,15 +359,37 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - `transport` & `major-cities`: komponen aslinya tanpa padding (di dashboard dibungkus
   kolom) → dibungkus `p-4` di embed agar tidak menempel tepi iframe.
 - Tombol "Salin kode" diverifikasi menyalin teks yang benar ke clipboard.
+
+**Gerbang token (uji setelah revisi auth):**
+
+| Uji | Hasil |
+|---|---|
+| `<iframe src="/embed.html?widget=current">` tanpa token | layar "Tidak diotorisasi" |
+| `<script src="/embed.js">` (snippet lama) | stub kuning: "sudah tidak dipakai" |
+| `<script src="/api/embed-js">` tanpa header | 0 iframe (server balas 401 JSON) |
+| `BmkgWidget.init({})` tanpa token | kotak merah, 0 iframe, tanpa unhandled rejection |
+| `BmkgWidget.init({token})` token sah | 1 iframe, widget render, **token tidak muncul di URL** |
+| Token diubah 1 byte (payload tetap JSON valid) | `401 tanda tangan tidak cocok` — verifikasi nyata, bukan decode |
+| `/api/bmkg` tanpa token | 401, 0 request diteruskan ke upstream |
+| Dashboard `/` | mint otomatis saat load, badge `TOKEN OK <sisa>s`, 11 panggilan `/api/bmkg` 200, 0 request tanpa `Authorization` |
+| `/widgets` | 0 request token sebelum tombol diklik; setelah klik: 1 mint untuk 12 iframe (token di-`adopt`, tiap widget tidak mint sendiri) |
+| Preview `/widgets` sebelum token | terkunci (placeholder), setelah Generate → 12 iframe render |
 - Tema dark/light di `/widgets` persist via `localStorage` (`bmkg-widget-theme`).
 - `vue-tsc --noEmit` bersih.
 
 ## Catatan / risiko
 
-- Beban server: tiap iframe = request API kita. Untuk demo/staging aman; kalau dipakai
-  luas perlu rate-limit atau token.
-- `origin` di kode dokumentasi mengikuti domain saat runtime (localhost saat dev).
-- Belum diuji di domain publik/Vercel — `dist/embed.html` + `dist/embed.js` wajib ikut
-  ter-deploy, dan jangan ada middleware yang memblokir `/embed`.
+- Beban server: tiap iframe = request API kita + 1 verifikasi tanda tangan (murah, key
+  di-cache). Yang mahal hanya cold start JSKS (sekali per instance).
+- **Dev berbeda dari prod**: di dev, data BMKG lewat proxy path-style Vite
+  (`/api/df/...`) yang tidak dijaga token. Uji gerbang harus lewat `npm run build` +
+  `node server.mjs` (atau domain publik), bukan `npm run dev`.
+- Belum diuji di domain publik/Vercel — `dist/embed.html` wajib ikut ter-deploy,
+  `/api/embed-js` + `/api/embed-verify` harus terdeteksi sebagai function, dan jangan
+  ada middleware yang memblokir `/embed`. `vercel.json` rewrite catch-all ke
+  `index.html` **tidak** menimpa `/api/*`, tapi tolong dicek saat deploy.
+- Verifikasi `exp` (token kedaluwarsa) belum diuji dengan token asli ber-`exp` lampau —
+  butuh private key Keycloak untuk membuatnya. Jalur kodenya: signature dulu, lalu `exp`.
+- jsDelivr/CDN tidak dipakai: script inti memang harus lewat server kita (itu gerbangnya).
 - Kalau klien minta "komponen React/Vue", jawabannya: bisa dipakai di framework apa pun,
   tetapi bukan npm package — itu fase terpisah (opsi migrasi), bukan versi ini.

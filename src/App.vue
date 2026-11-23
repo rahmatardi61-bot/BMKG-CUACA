@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, defineAsyncComponent, watch } from 'vue';
+import { getToken, currentToken, secondsLeft } from './services/embedToken';
 import { X } from 'lucide-vue-next';
 
 // ── Skeleton (tiny, load synchronously) ───────────────────────────────────────
@@ -55,6 +56,23 @@ const { liveWeather, liveHourly, liveAlerts, liveNews, liveAdditional, livePort,
 /** indikator loading khusus kartu pelabuhan (fetch-nya terpisah dari data utama) */
 const portLoading = computed(() => bmkgWeather.status.value === 'loading' && !livePort.value);
 const isDev = import.meta.env.DEV;
+
+// ── Token akses (simulasi halaman partner) ──────────────────────────────────
+// Halaman publik/dashboard ini berperan sebagai "situs partner": minta token
+// sendiri saat load, lalu semua panggilan /api/bmkg membawa token itu.
+// Di produksi, minting dilakukan backend partner; client_secret tidak di browser.
+const tokenState = ref<'idle' | 'loading' | 'ok' | 'fail'>('idle');
+const tokenLeft = ref(0);
+async function warmToken() {
+  tokenState.value = 'loading';
+  try {
+    const t = await getToken();
+    tokenState.value = 'ok';
+    tokenLeft.value = secondsLeft(t);
+  } catch {
+    tokenState.value = 'fail';
+  }
+}
 // 'live' = data BMKG asli; 'mock' = fallback mockData.ts; 'loading' = sedang fetch
 const dataSource = computed(() => {
   if (bmkgWeather.status.value === 'loading') return 'loading';
@@ -567,6 +585,14 @@ const handleLogout = () => {
 onMounted(() => {
   // DWT angin REAL utk peta (WindMap/WeatherRadarMap) — fire & forget, fallback sintetis
   void initDwtWindStations();
+  // Token Keycloak: gerbang /api/bmkg → minta sekali saat halaman dibuka
+  void warmToken();
+  window.setInterval(() => {
+    if (tokenState.value !== 'ok') return;
+    const t = currentToken();
+    tokenLeft.value = secondsLeft(t);
+    if (!t) void warmToken(); // kedaluwarsa → mint ulang
+  }, 5000);
   // Load preferences from local storage or default to 'dark'
   const storedTheme = localStorage.getItem('bmkg-theme-v2');
   if (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') {
@@ -735,6 +761,20 @@ onMounted(() => {
         @login-success="handleLoginSuccess"
       />
     </template>
+
+    <!-- Token badge: bukti halaman ini sudah punya token sah (simulasi partner) -->
+    <div
+      class="fixed bottom-3 right-3 -translate-y-9 z-[100] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md border"
+      :class="tokenState === 'ok'
+        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+        : tokenState === 'fail'
+          ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30'
+          : 'bg-slate-500/15 text-slate-500 border-slate-500/30'"
+      :title="tokenState === 'ok' ? 'Token Keycloak sah — /api/bmkg terbuka' : tokenState === 'fail' ? 'Token gagal didapat — data BMKG akan ditolak 401' : 'Meminta token Keycloak…'"
+    >
+      TOKEN {{ tokenState === 'ok' ? 'OK' : tokenState === 'fail' ? 'GAGAL' : '…' }}
+      <span v-if="tokenState === 'ok'" class="font-mono opacity-70">{{ tokenLeft }}s</span>
+    </div>
 
     <!-- Data source badge (dev-only): pemisah visual LIVE vs MOCK -->
     <div

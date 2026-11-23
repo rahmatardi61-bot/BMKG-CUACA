@@ -15,6 +15,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { defineAsyncComponent, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
+import { adoptToken } from '../services/embedToken';
 import type { WarningAlert, NewsArticle, HourlyForecast } from '../types/weather';
 import { newsArticles, transportStatusesMap } from '../data/mockData';
 import type { WeatherData } from '../types/weather';
@@ -82,38 +83,75 @@ const loading = ref(false);
 const isMock = ref(false);
 
 // ── Token Keycloak (POC) ───────────────────────────────────────────────────
-// Widget menunggu token dulu, baru memuat data. Kalau partner sudah mengirim
-// ?token=… (server-side mereka), pakai itu; kalau tidak, ambil ke server kita
-// (secret Keycloak tidak boleh ada di browser).
+// ── TOKEN ─────────────────────────────────────────────────────────────────
+// Widget TIDAK lagi memintakan token untuk dirinya sendiri. Token harus datang
+// dari partner: dikirim lewat postMessage oleh script embed (jalur normal),
+// atau lewat ?token= (shortcut/demo — terlihat di URL, lihat docs).
+// Setelah dapat, token diverifikasi ke server (JWKS). Server tetap gerbang
+// sebenarnya: tanpa token sah, data BMKG tidak bisa diambil.
 const authState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle');
 const authMessage = ref('');
-const externalToken = params.get('token') || '';
-// Info ringkas untuk indikator: dari mana tokennya & berapa lama berlaku
-const authSource = ref<'' | 'partner' | 'server'>('')
+const urlToken = params.get('token') || '';
+const authSource = ref<'' | 'parent' | 'url'>('');
 const authExpiresIn = ref(0);
-// ?debug=1 → tampilkan strip status auth (untuk dev/POC)
 const debugAuth = params.get('debug') === '1';
+let receivedToken = '';
+
+// Buang token dari URL secepat mungkin supaya tidak tertinggal di riwayat/Referer
+if (urlToken) {
+  const clean = new URL(window.location.href);
+  clean.searchParams.delete('token');
+  history.replaceState(null, '', clean.toString());
+}
+
+function waitForParentToken(timeoutMs = 8000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      window.removeEventListener('message', onMessage);
+      reject(new Error('token tidak diterima dari halaman pemasang'));
+    }, timeoutMs);
+    function onMessage(ev: MessageEvent) {
+      const d = ev.data as { type?: string; token?: string } | null;
+      if (!d || d.type !== 'bmkg-embed-token' || typeof d.token !== 'string' || !d.token) return;
+      clearTimeout(timer);
+      window.removeEventListener('message', onMessage);
+      resolve(d.token);
+    }
+    window.addEventListener('message', onMessage);
+    // beri tahu parent bahwa widget siap menerima token
+    try {
+      window.parent.postMessage({ type: 'bmkg-embed-ready' }, '*');
+    } catch {
+      /* di luar iframe: tidak ada parent */
+    }
+  });
+}
 
 async function ensureToken(): Promise<boolean> {
-  if (externalToken) {
-    authState.value = 'ready';
-    authSource.value = 'partner';
-    return true;
-  }
   authState.value = 'loading';
   try {
-    const res = await fetch('/api/embed-token', { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = (await res.json()) as { token?: string; expires_in?: number };
-    if (!json.token) throw new Error('token kosong');
-    authState.value = 'ready';
-    authSource.value = 'server';
+    if (urlToken) {
+      receivedToken = urlToken;
+      authSource.value = 'url';
+    } else {
+      receivedToken = await waitForParentToken();
+      authSource.value = 'parent';
+    }
+    // Verifikasi ke server — decode di browser saja tidak cukup
+    const res = await fetch('/api/embed-verify', {
+      headers: { Authorization: `Bearer ${receivedToken}`, Accept: 'application/json' },
+    });
+    const json = (await res.json().catch(() => ({}))) as { valid?: boolean; reason?: string; expires_in?: number };
+    if (!res.ok || !json.valid) throw new Error(json.reason || `token ditolak (HTTP ${res.status})`);
     authExpiresIn.value = json.expires_in ?? 0;
-    console.log('[bmkg-widget] auth OK via server, token berlaku ~' + authExpiresIn.value + 's');
+    // semua fetch data di dalam widget memakai token ini (tidak mint sendiri)
+    adoptToken(receivedToken);
+    authState.value = 'ready';
+    console.log(`[bmkg-widget] auth OK (sumber=${authSource.value}, berlaku=${authExpiresIn.value}s)`);
     return true;
   } catch (e) {
     authState.value = 'error';
-    authMessage.value = String(e).slice(0, 120);
+    authMessage.value = String(e instanceof Error ? e.message : e).slice(0, 140);
     console.warn('[bmkg-widget] auth GAGAL:', authMessage.value);
     return false;
   }
@@ -178,9 +216,11 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
       class="p-6 flex flex-col items-center text-center gap-2"
     >
       <ShieldAlert class="w-6 h-6 text-rose-500" />
-      <p class="text-[12px] font-bold text-slate-800 dark:text-slate-200">Gagal menyiapkan widget</p>
+      <p class="text-[12px] font-bold text-slate-800 dark:text-slate-200">Tidak diotorisasi</p>
       <p class="text-[10.5px] text-slate-500 leading-relaxed max-w-[260px]">
-        Token akses tidak dapat diperoleh. Hubungi penyedia layanan BMKG bila masalah berlanjut.
+        Widget ini butuh token Keycloak yang sah. Muat lewat
+        <code class="font-mono">bmkg-embed.js</code> → <code class="font-mono">BmkgWidget.init({ token })</code>,
+        atau hubungi penyedia layanan BMKG.
       </p>
       <code class="text-[9px] text-slate-400 break-all max-w-[260px]">{{ authMessage }}</code>
     </div>
@@ -200,7 +240,7 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
           {{ authState === 'ready' ? 'OK' : authState === 'error' ? 'GAGAL' : authState.toUpperCase() }}
         </span>
         <span v-if="authSource">· sumber={{ authSource }}</span>
-        <span v-if="authState === 'ready' && authSource === 'server'">· berlaku={{ authExpiresIn }}s</span>
+        <span v-if="authState === 'ready'">· berlaku={{ authExpiresIn }}s</span>
         <span v-if="authState === 'error'" class="truncate">· {{ authMessage }}</span>
       </div>
       <div

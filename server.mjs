@@ -10,6 +10,8 @@ import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
 import handler from './api/bmkg.ts'
 import embedTokenHandler from './api/embed-token.ts'
+import embedJsHandler from './api/embed-js.ts'
+import embedVerifyHandler from './api/embed-verify.ts'
 
 const DIST = resolve('dist')
 const PORT = Number(process.env.PORT) || 8080
@@ -86,6 +88,23 @@ createServer(async (req, res) => {
   if (url.pathname === '/api/embed-token') {
     try {
       const out = await embedTokenHandler(new Request(url, { method: req.method, headers: req.headers }))
+      const body = Buffer.from(await out.arrayBuffer())
+      res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
+      res.end(req.method === 'HEAD' ? undefined : body)
+    } catch (e) {
+      res.writeHead(502, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: String(e) }))
+    }
+    return
+  }
+
+  const GATED = {
+    '/api/embed-js': embedJsHandler,
+    '/api/embed-verify': embedVerifyHandler,
+  };
+  if (GATED[url.pathname]) {
+    try {
+      const out = await GATED[url.pathname](new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())
       res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
       res.end(req.method === 'HEAD' ? undefined : body)

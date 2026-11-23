@@ -27,10 +27,20 @@ const PROXY_BASE = PROXY_MODE === 'dev' || PROXY_MODE === 'direct' ? ''
 export const BMKG_BASE = 'https://cuaca.bmkg.go.id';
 
 /** Static client key (dari __NUXT_DATA__ baseline — publik milik situs BMKG) */
+import { getToken } from '../embedToken';
+
 export const BMKG_API_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFjNWFkZWUxYzY5MzM0NjY2N2EzZWM0MWRlMjBmZWZhNDcxOTNjYzcyZDgwMGRiN2ZmZmFlMWVhYjcxZGYyYjQiLCJpYXQiOjE3MDE1ODMzNzl9.D1VNpMoTUVFOUuQW0y2vSjttZwj0sKBX33KyrkaRMcQ';
 
 const TIMEOUT_MS = 10000;
+
+/** Proxy /api/bmkg dijaga token Keycloak → sertakan Authorization hanya di jalur itu. */
+async function withAuth(url: string, headers: Record<string, string>): Promise<Record<string, string>> {
+  if (!url.startsWith('/api/bmkg')) return headers;
+  const token = await getToken().catch(() => '');
+  if (!token) throw new Error('Token akses tidak tersedia');
+  return { ...headers, Authorization: `Bearer ${token}` };
+}
 
 async function request(url: string, headers: Record<string, string> = {}): Promise<Response> {
   // dev-only: permudah membaca — request via proxy localhost dicetak sebagai URL upstream aslinya
@@ -40,12 +50,17 @@ async function request(url: string, headers: Record<string, string> = {}): Promi
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, { headers, signal: ctrl.signal });
+    const res = await fetch(url, { headers: await withAuth(url, headers), signal: ctrl.signal });
     if (!res.ok) throw new Error(`BMKG ${res.status} ${url}`);
     return res;
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** GET ke proxy dengan token (untuk pemanggil yang tidak memakai getJson). */
+export async function proxiedFetch(url: string): Promise<Response> {
+  return fetch(url, { headers: await withAuth(url, { Accept: 'application/json' }) });
 }
 
 /** GET dengan retry sekali (network flake) */

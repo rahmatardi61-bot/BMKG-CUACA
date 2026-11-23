@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction, KeyRound } from 'lucide-vue-next';
+import { ref, computed, onMounted } from 'vue';
+import { getToken, decodeJwt, verifyOnServer } from '../services/embedToken';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction, KeyRound, Lock } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -11,24 +12,54 @@ const applyTheme = (dark: boolean) => {
 };
 onMounted(() => applyTheme(localStorage.getItem('bmkg-widget-theme') !== 'light'));
 
-// ── Indikator auth Keycloak ────────────────────────────────────────────────
-// Memastikan jalur token hidup SEBELUM orang mencoba memasang widget. Tanpa ini,
-// kegagalan auth baru terlihat dari dalam iframe (layar "Gagal menyiapkan widget").
-type TokenState = { state: 'idle' | 'checking' | 'ok' | 'fail'; expiresIn: number; detail: string };
-const token = ref<TokenState>({ state: 'idle', expiresIn: 0, detail: '' });
+// ── Token akses (SIMULASI SISI PARTNER) ────────────────────────────────────
+// Halaman ini sengaja TIDAK meminta token otomatis: partner yang harus minta
+// sendiri. Tombol di bawah mensimulasikan backend partner yang menukar
+// client_credentials ke Keycloak lalu menyerahkan token ke halamannya.
+// Di produksi, token dibuat backend partner (client_secret di .env mereka),
+// tidak pernah di browser.
+const gen = ref({ loading: false, token: '', at: 0 });
+const genError = ref('');
+const verdict = ref<{ valid: boolean; reason: string | null; roles: string[] } | null>(null);
+const now = ref(Date.now());
+let ticker: number | undefined;
 
-async function checkToken() {
-  token.value = { state: 'checking', expiresIn: 0, detail: '' };
+const decoded = computed(() => (gen.value.token ? decodeJwt(gen.value.token) : null));
+const left = computed(() => {
+  const exp = decoded.value?.claims?.exp;
+  return typeof exp === 'number' ? Math.max(0, exp - Math.floor(now.value / 1000)) : 0;
+});
+const hasToken = computed(() => !!gen.value.token && left.value > 0);
+
+async function generateToken() {
+  gen.value = { loading: true, token: '', at: 0 };
+  genError.value = '';
+  verdict.value = null;
   try {
-    const res = await fetch('/api/embed-token', { headers: { Accept: 'application/json' } });
-    const json = (await res.json().catch(() => ({}))) as { token?: string; expires_in?: number; error?: string; detail?: string };
-    if (!res.ok || !json.token) throw new Error(json.detail || json.error || `HTTP ${res.status}`);
-    token.value = { state: 'ok', expiresIn: json.expires_in ?? 0, detail: '' };
+    const token = await getToken(true);
+    gen.value = { loading: false, token, at: Date.now() };
+    verdict.value = await verifyOnServer(token);
+    window.clearInterval(ticker);
+    ticker = window.setInterval(() => { now.value = Date.now(); }, 1000);
   } catch (e) {
-    token.value = { state: 'fail', expiresIn: 0, detail: String(e).slice(0, 140) };
+    gen.value = { loading: false, token: '', at: 0 };
+    genError.value = String(e instanceof Error ? e.message : e).slice(0, 160);
   }
 }
-onMounted(checkToken);
+
+// Serahkan token ke iframe lewat postMessage (bukan URL) — handshake:
+// iframe kirim 'bmkg-embed-ready', kita balas 'bmkg-embed-token'.
+function passToken(ev: Event) {
+  const frame = ev.target as HTMLIFrameElement;
+  if (!hasToken.value || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({ type: 'bmkg-embed-token', token: gen.value.token }, '*');
+}
+function onWidgetMessage(ev: MessageEvent) {
+  const d = ev.data as { type?: string } | null;
+  if (d?.type !== 'bmkg-embed-ready' || !hasToken.value) return;
+  (ev.source as Window | null)?.postMessage({ type: 'bmkg-embed-token', token: gen.value.token }, '*');
+}
+onMounted(() => window.addEventListener('message', onWidgetMessage));
 
 // Widget yang SUDAH siap embed (lihat src/embed/EmbedApp.vue → READY)
 type Widget = {
@@ -243,15 +274,23 @@ function srcUrl(w: Widget) {
   return `${origin}/embed.html?${q.toString()}`;
 }
 
+const TOKEN_PLACEHOLDER = 'TOKEN_KEYCLOAK_ANDA';
+
 function snippet(w: Widget) {
   const cityAttr = w.city ? ` data-city="${selCity.value}"` : '';
   const hAttr = w.city ? '' : ` data-height="${w.height}"`;
+  const close = '</' + 'script>';
   if (mode.value === 'script') {
-    const close = '</' + 'script>';
-    return `<div data-bmkg-widget="${w.id}"${cityAttr}${hAttr}></div>\n<script async src="${origin}/embed.js">${close}`;
+    // Skrip inti hanya bisa diambil bila header Authorization berisi token sah
+    return `<div data-bmkg-widget="${w.id}"${cityAttr}${hAttr}></div>
+<script src="${origin}/bmkg-embed.js">${close}
+<script>
+  // token dari backend Anda sendiri (client_secret TIDAK boleh di browser)
+  BmkgWidget.init({ token: '${TOKEN_PLACEHOLDER}' });
+${close}`;
   }
   const cityQ = w.city ? `&city=${encodeURIComponent(selCity.value)}` : '';
-  return `<iframe\n  src="${origin}/embed.html?widget=${w.id}${cityQ}&theme=${isDark.value ? 'dark' : 'light'}"\n  width="100%" height="${w.height}"\n  style="border:0;border-radius:12px"\n  title="BMKG ${w.name}"\n  loading="lazy"\n></iframe>`;
+  return `<iframe\n  src="${origin}/embed.html?widget=${w.id}${cityQ}&token=${TOKEN_PLACEHOLDER}&theme=${isDark.value ? 'dark' : 'light'}"\n  width="100%" height="${w.height}"\n  style="border:0;border-radius:12px"\n  title="BMKG ${w.name}"\n  loading="lazy"\n></iframe>`;
 }
 
 async function copy(text: string, key: string) {
@@ -298,9 +337,9 @@ async function copy(text: string, key: string) {
       <section>
         <h2 class="text-lg font-black">Dokumentasi Widget BMKG</h2>
         <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed max-w-2xl">
-          Pilih widget, salin satu baris kode, tempel di website Anda. Tidak perlu API key,
-          tidak perlu instalasi. Widget tampil dengan gaya visual BMKG dan terisolasi penuh
-          dari CSS website Anda.
+          Pilih widget, salin kodenya, tempel di website Anda. Satu hal yang wajib: <strong>token
+          Keycloak yang sah</strong> — tanpa itu widget menolak tampil. Widget terisolasi penuh dari
+          CSS website Anda (iframe), jadi tidak ada tabrakan gaya.
         </p>
         <p class="mt-2 inline-flex items-start gap-1.5 text-[11.5px] leading-snug text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 rounded-md px-2.5 py-1.5">
           <FlaskConical class="w-3 h-3 shrink-0 mt-0.5" />
@@ -308,33 +347,90 @@ async function copy(text: string, key: string) {
           Dibuat untuk keperluan pengembangan internal, <strong class="font-bold">belum untuk konsumsi publik</strong>.
           Lihat bagian <em>Status &amp; batasan</em> di bawah.</span>
         </p>
-        <!-- Indikator auth: satu-satunya cara cepat tahu token Keycloak hidup atau tidak -->
-        <div
-          :class="['mt-2 flex items-start gap-2 rounded-md border px-2.5 py-1.5 text-[11px] leading-snug',
-            token.state === 'ok' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-            : token.state === 'fail' ? 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400'
-            : 'border-slate-300 dark:border-slate-700 bg-slate-500/10 text-slate-600 dark:text-slate-400']"
-        >
-          <KeyRound class="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span class="flex-1">
-            <strong class="font-black">Token Keycloak:
-              {{ token.state === 'ok' ? 'OK' : token.state === 'fail' ? 'GAGAL' : token.state === 'checking' ? 'memeriksa…' : 'belum diperiksa' }}
-            </strong>
-            <span v-if="token.state === 'ok'"> · berlaku {{ token.expiresIn }} detik · diperbarui otomatis di server</span>
-            <span v-if="token.state === 'fail'"> · {{ token.detail }}</span>
-            <span v-if="token.state === 'fail'" class="block mt-0.5 opacity-80">
-              Widget tidak akan memuat data. Periksa <code class="font-mono">KEYCLOAK_CLIENT_SECRET</code> / realm di server.
-            </span>
-          </span>
-          <button
-            @click="checkToken"
-            class="shrink-0 font-bold underline decoration-dotted hover:no-underline"
-          >{{ token.state === 'checking' ? '…' : 'Periksa ulang' }}</button>
+        <!-- ═══ TOKEN AKSES — simulasi sisi partner ═══════════════════════════
+             Tidak auto-generate: partner yang harus minta token. Tombol ini
+             mensimulasikan backend partner (client_credentials ke Keycloak). -->
+        <div class="mt-3 rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-3.5">
+          <div class="flex items-start gap-2 flex-wrap">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-xs font-black flex items-center gap-1.5">
+                <KeyRound class="w-3.5 h-3.5 text-brand-cyan" /> Token akses widget
+                <span class="text-[10px] font-bold text-slate-500 px-1.5 py-0.5 rounded bg-slate-500/10 border border-slate-400/20">SIMULASI PARTNER</span>
+              </h3>
+              <p class="text-[11.5px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                Tanpa token sah, <code class="font-mono text-[10.5px]">/api/embed-js</code> dan <code class="font-mono text-[10.5px]">/api/bmkg</code> menolak (401).
+                Di produksi, token dibuat <strong>backend partner sendiri</strong> — <code class="font-mono text-[10.5px]">client_secret</code> ada di <code class="font-mono text-[10.5px]">.env</code> server mereka, lalu diverifikasi dengan JWKS realm ini.
+              </p>
+            </div>
+            <button
+              @click="generateToken"
+              :disabled="gen.loading"
+              class="shrink-0 text-[11px] font-black px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              :class="hasToken ? 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700' : 'bg-brand-cyan text-slate-950 hover:brightness-110'"
+            >
+              <KeyRound class="w-3 h-3" />
+              {{ gen.loading ? 'Meminta…' : hasToken ? 'Generate ulang' : 'Generate token' }}
+            </button>
+          </div>
+
+          <!-- Hasil: token + decode + verdict server -->
+          <div v-if="gen.token" class="mt-3 space-y-2">
+            <div class="rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/60 p-2">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="text-[10px] font-black tracking-wider text-slate-500">ACCESS TOKEN (JWT)</span>
+                <button @click="copy(gen.token, 'jwt')" class="text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-brand-cyan">
+                  {{ copied === 'jwt' ? 'tersalin' : 'salin' }}
+                </button>
+              </div>
+              <p class="font-mono text-[10px] leading-relaxed break-all max-h-16 overflow-y-auto text-emerald-700 dark:text-emerald-300">{{ gen.token }}</p>
+            </div>
+
+            <!-- Decode (bukan verifikasi) + hitung mundur -->
+            <div class="grid sm:grid-cols-2 gap-2">
+              <div class="rounded-md border border-slate-200 dark:border-slate-800 p-2 space-y-0.5">
+                <p class="text-[10px] font-black tracking-wider text-slate-500 mb-1">ISI TOKEN (decode saja)</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400"><span class="font-bold text-slate-800 dark:text-slate-200">alg</span> {{ decoded?.header?.alg }}</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400"><span class="font-bold text-slate-800 dark:text-slate-200">azp</span> {{ decoded?.claims?.azp }}</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400"><span class="font-bold text-slate-800 dark:text-slate-200">iss</span> realm bmkg-partner</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400"><span class="font-bold text-slate-800 dark:text-slate-200">exp</span> {{ decoded?.claims?.exp ? new Date(decoded.claims.exp * 1000).toLocaleTimeString('id-ID') : '—' }}</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400"><span class="font-bold text-slate-800 dark:text-slate-200">roles</span> {{ (decoded?.claims?.realm_access?.roles || []).join(', ') || '—' }}</p>
+              </div>
+
+              <!-- Indikator sah/tidak: decode + verifikasi tanda tangan server -->
+              <div class="rounded-md border p-2 space-y-1"
+                :class="verdict?.valid && left > 0 ? 'border-emerald-500/35 bg-emerald-500/8' : 'border-rose-500/35 bg-rose-500/8'">
+                <p class="text-[10px] font-black tracking-wider text-slate-500">STATUS</p>
+                <p class="text-[12px] font-black flex items-center gap-1.5"
+                  :class="verdict?.valid && left > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'">
+                  <ShieldCheck v-if="verdict?.valid && left > 0" class="w-3.5 h-3.5" />
+                  <AlertTriangle v-else class="w-3.5 h-3.5" />
+                  {{ verdict?.valid ? (left > 0 ? 'VALID' : 'KEDALUWARSA') : 'DITOLAK' }}
+                  <span class="font-mono text-[11px] font-bold opacity-80">{{ left }}s</span>
+                </p>
+                <p class="text-[10.5px] leading-snug text-slate-600 dark:text-slate-400">
+                  <span class="font-bold">Tanda tangan (JWKS server):</span>
+                  {{ verdict?.valid ? 'cocok' : verdict?.reason || 'gagal' }}
+                </p>
+                <p class="text-[10.5px] leading-snug text-slate-500">
+                  Decode di browser hanya tampilan — yang menentukan sah/tidak adalah verifikasi tanda tangan di server.
+                </p>
+              </div>
+            </div>
+
+            <p class="text-[10.5px] text-slate-500 leading-snug">
+              Token yang sama dipakai preview di bawah (dikirim lewat
+              <code class="font-mono">postMessage</code>, tidak lewat URL). Berlaku {{ decoded?.claims?.exp && decoded?.claims?.iat ? (decoded.claims.exp - decoded.claims.iat) : '±300' }} detik.
+            </p>
+          </div>
+
+          <p v-if="genError" class="mt-2 text-[11px] text-rose-600 dark:text-rose-400 font-mono leading-snug">
+            {{ genError }}
+          </p>
         </div>
 
         <div class="flex flex-wrap gap-2 mt-3">
           <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <ShieldCheck class="w-2.5 h-2.5" /> Tanpa API key
+            <ShieldCheck class="w-2.5 h-2.5" /> Token wajib
           </span>
           <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <Code2 class="w-2.5 h-2.5" /> 1 baris kode
@@ -349,9 +445,10 @@ async function copy(text: string, key: string) {
       <section class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4">
         <h3 class="text-xs font-black mb-1">Cara pakai</h3>
         <ol class="text-xs text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed list-decimal list-inside">
-          <li>Pilih widget yang diinginkan di bawah, lalu tekan <strong class="text-slate-800 dark:text-slate-200">Salin kode</strong>.</li>
-          <li>Tempel kode tersebut di mana saja di dalam <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">&lt;body&gt;</code> website Anda.</li>
-          <li>Selesai. Widget menyesuaikan lebar container-nya secara otomatis.</li>
+          <li><strong class="text-slate-800 dark:text-slate-200">Minta token</strong> ke backend Anda sendiri: <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">client_credentials</code> ke realm BMKG, lalu kirim ke halaman. (<em>Tombol Generate di atas hanya simulasi.</em>)</li>
+          <li>Verifikasi tanda tangannya dengan <strong class="text-slate-800 dark:text-slate-200">JWKS</strong> realm — decode saja tidak cukup.</li>
+          <li>Pilih widget di bawah, salin kodenya, ganti <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">TOKEN_KEYCLOAK_ANDA</code> dengan token tadi.</li>
+          <li>Tempel di dalam <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">&lt;body&gt;</code> website Anda. Widget menyesuaikan lebar container-nya otomatis.</li>
         </ol>
       </section>
 
@@ -367,10 +464,13 @@ async function copy(text: string, key: string) {
           @click="mode = 'iframe'"
           :class="['px-2.5 py-1 rounded-md text-sm font-bold transition-colors border',
             mode === 'iframe' ? 'bg-brand-cyan text-slate-950 border-brand-cyan' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700']"
-        >iframe manual (tanpa JS)</button>
+        >iframe manual (token di URL)</button>
         <p class="text-[11px] text-slate-500 dark:text-slate-500 ml-auto max-w-md leading-relaxed">
-          Mode <strong class="text-slate-800 dark:text-slate-300">script</strong> memasang iframe untuk Anda secara otomatis.
-          Mode <strong class="text-slate-800 dark:text-slate-300">iframe</strong> dipakai bila Anda tidak ingin memuat JavaScript tambahan.
+          Mode <strong class="text-slate-800 dark:text-slate-300">script</strong>: loader mengambil script inti dengan header
+          <code class="font-mono">Authorization</code>, lalu memasang iframe dan mengirim token lewat
+          <code class="font-mono">postMessage</code> (token tidak muncul di URL).
+          Mode <strong class="text-slate-800 dark:text-slate-300">iframe</strong> tanpa JS: token terpaksa ditaruh di URL
+          — <span class="text-amber-600 dark:text-amber-400 font-bold">tertinggal di log &amp; Referer</span>, pakai hanya untuk uji cepat.
         </p>
       </section>
 
@@ -422,14 +522,27 @@ async function copy(text: string, key: string) {
             <div class="p-3">
               <p class="text-[13px] font-bold tracking-wider text-slate-500 mb-1.5">PREVIEW LANGSUNG</p>
               <iframe
-                :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}`"
+                v-if="hasToken"
+                :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}-${gen.at}`"
                 :src="srcUrl(w)"
                 :height="w.height"
                 width="100%"
                 style="border:0;border-radius:8px;display:block"
                 :title="`Preview ${w.name}`"
                 loading="lazy"
+                @load="passToken"
               ></iframe>
+              <div
+                v-else
+                :style="{ height: `${w.height}px` }"
+                class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center gap-1.5 px-4 text-center"
+              >
+                <Lock class="w-4 h-4 text-slate-400" />
+                <p class="text-[11.5px] font-bold text-slate-500">Preview terkunci</p>
+                <p class="text-[10.5px] text-slate-500 leading-snug max-w-[260px]">
+                  Tekan <strong>Generate token</strong> di atas. Tanpa token sah, widget menolak tampil — sama seperti di website partner.
+                </p>
+              </div>
             </div>
             <!-- Kode -->
             <div class="p-3 flex flex-col">
@@ -666,11 +779,15 @@ ngAfterViewInit() {
         </div>
         <div>
           <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Apakah perlu API key atau pendaftaran?</p>
-          <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Pada versi POC ini: tidak. Widget meminta token sendiri ke server BMKG (Keycloak), jadi pengunjung tidak melihat apa pun. Untuk integrasi resmi ke depan, partner perlu terdaftar dan IP/domain-nya didaftarkan manual.</p>
+          <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Ya — <strong class="text-slate-800 dark:text-slate-300">token Keycloak wajib</strong>. Pada POC ini token dibuat server BMKG sebagai simulasi; di produksi partner mendapat <code class="font-mono text-[11px]">client_id</code>/<code class="font-mono text-[11px]">client_secret</code> dari kami, menyimpannya di <code class="font-mono text-[11px]">.env</code> backend sendiri, lalu membuat token di sana. Warisan lama ("tempel script, langsung jalan" tanpa token) sudah dihapus.</p>
         </div>
         <div>
           <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Apakah widget bisa dipakai di React / WordPress / lainnya?</p>
           <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Bisa. Widget berupa HTML biasa — berjalan di semua framework, CMS, maupun HTML statis.</p>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Apa yang terjadi kalau token kedaluwarsa?</p>
+          <p class="text-sm text-slate-600 dark:text-slate-500 leading-relaxed">Widget berhenti memuat dan menampilkan layar "Tidak diotorisasi". Token Keycloak berumur 300 detik, jadi backend partner harus memperbaruinya — jangan menempel token mati di HTML.</p>
         </div>
         <div>
           <p class="text-sm font-bold text-slate-800 dark:text-slate-300">Berapa ukuran widget?</p>

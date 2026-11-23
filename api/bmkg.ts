@@ -13,6 +13,8 @@
 // - inject x-public-token fresh (cache ~25 menit) untuk /api/public/*, /v1/public/*, /v1/user/*
 // - path `alerts/*` (nowcast RSS) diarahkan ke www.bmkg.go.id (tanpa CORS di sana)
 // Dipakai di Vercel (folder api/ terdeteksi otomatis) dan server.mjs (Docker).
+import { bearer, verifyJwt } from './_lib/jwt.ts';
+
 export const config = { runtime: 'edge' };
 
 const UPSTREAM = 'https://cuaca.bmkg.go.id';
@@ -43,6 +45,24 @@ async function getPubTok(): Promise<string> {
 
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
+
+  // Gerbang: hanya pemegang token Keycloak sah yang boleh memakai proxy ini.
+  // Diletakkan SEBELUM apa pun supaya request tanpa token tidak membebani upstream.
+  const token = bearer(req) || url.searchParams.get('token') || '';
+  if (!token) {
+    return new Response(
+      JSON.stringify({ error: 'Tidak diotorisasi', reason: 'header Authorization: Bearer <jwt> wajib' }),
+      { status: 401, headers: JSON_HEADERS },
+    );
+  }
+  const verdict = await verifyJwt(token);
+  if (!verdict.ok) {
+    return new Response(
+      JSON.stringify({ error: 'Token tidak sah', reason: verdict.reason ?? 'ditolak' }),
+      { status: 401, headers: JSON_HEADERS },
+    );
+  }
+
   const path = url.searchParams.get('path') ?? '';
   if (!path) return new Response(JSON.stringify({ error: 'parameter path wajib' }), { status: 400, headers: JSON_HEADERS });
 

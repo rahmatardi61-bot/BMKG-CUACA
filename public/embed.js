@@ -1,53 +1,28 @@
-/*! BMKG widget embed loader — tempel 1 script, widget muncul.
- * Pemakaian:
- *   <div data-bmkg-widget="satellite"></div>
- *   <div data-bmkg-widget="earthquake" data-city="Jakarta" data-height="480"></div>
- *   <script async src="https://DOMAIN/embed.js"></script>
- * Script ini hanya memasang <iframe> ke /embed.html — supaya CSS/JS situs host
- * tidak menabrak widget (Tailwind, Leaflet, z-index), dan sebaliknya.
+/*! BMKG widget embed loader — LAMA, sudah tidak dipakai.
+ *
+ * Sejak fitur embed dijaga token Keycloak, /embed.js tidak lagi bisa memuat
+ * widget: script inti sekarang hanya bisa diambil lewat
+ *   GET /api/embed-js   dengan header  Authorization: Bearer <jwt>
+ *
+ * File ini sengaja ditinggal sebagai stub supaya snippet lama tidak mati
+ * senyap — pemasang langsung diberi tahu apa yang harus diganti.
+ *
+ * Ganti dengan:
+ *   <script src="https://DOMAIN/bmkg-embed.js"></script>
+ *   <script>BmkgWidget.init({ token: '<JWT>' })</script>
+ * Lihat /widgets untuk panduan lengkap.
  */
 (function () {
-  var ORIGIN = (document.currentScript && document.currentScript.src
-    ? document.currentScript.src.replace(/\/embed\.js.*$/, '')
-    : window.location.origin) || '';
+  var msg = 'Script embed.js sudah tidak dipakai. Pakai bmkg-embed.js + '
+    + 'BmkgWidget.init({ token }) — lihat /widgets.';
 
-  function mount(el) {
-    var widget = el.getAttribute('data-bmkg-widget');
-    if (!widget || el.dataset.bmkgMounted) return;
-    el.dataset.bmkgMounted = '1';
-
-    var qs = new URLSearchParams({ widget: widget });
-    var city = el.getAttribute('data-city');
-    if (city) qs.set('city', city);
-
-    var h = parseInt(el.getAttribute('data-height'), 10) || 420;
-
-    var frame = document.createElement('iframe');
-    frame.src = ORIGIN + '/embed.html?' + qs.toString();
-    frame.title = 'BMKG ' + widget;
-    frame.loading = 'lazy';
-    frame.style.cssText = 'width:100%;height:' + h + 'px;border:0;border-radius:12px;display:block;overflow:hidden';
-    frame.setAttribute('scrolling', 'no');
-    el.appendChild(frame);
-
-    // Auto-resize: widget melaporkan tinggi aslinya lewat postMessage
-    if (!el.getAttribute('data-height')) {
-      window.addEventListener('message', function (ev) {
-        if (ev.source !== frame.contentWindow) return;
-        var d = ev.data || {};
-        if (d.type === 'bmkg-widget-height' && d.height > 0) {
-          frame.style.height = Math.min(Math.max(d.height, 200), 1400) + 'px';
-        }
-      });
-    }
+  function paint(el, text) {
+    el.innerHTML = '<div style="padding:14px 16px;border:1px dashed #f59e0b;border-radius:12px;'
+      + 'background:rgba(245,158,11,.08);color:#b45309;font:600 12px/1.5 system-ui,sans-serif">'
+      + text + '</div>';
   }
 
-  function scan() {
-    var nodes = document.querySelectorAll('[data-bmkg-widget]');
-    for (var i = 0; i < nodes.length; i++) mount(nodes[i]);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
-  else scan();
-  window.BMKGWidgets = { scan: scan }; // untuk konten yang dimuat dinamis (SPA)
+  if (typeof console !== 'undefined') console.warn('[BMKG] ' + msg);
+  var nodes = document.querySelectorAll('[data-bmkg-widget]');
+  for (var i = 0; i < nodes.length; i++) paint(nodes[i], msg);
 })();

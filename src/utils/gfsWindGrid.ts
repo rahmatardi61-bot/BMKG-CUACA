@@ -122,6 +122,7 @@ export function windLetterToDeg(letter: string): number {
 }
 
 let dwtStations: WindStationRef[] = [];
+import { bmkgProxied, proxiedFetch } from '../services/bmkg/api';
 export function getDwtStations(): WindStationRef[] { return dwtStations; }
 
 /**
@@ -132,10 +133,10 @@ export function getDwtStations(): WindStationRef[] { return dwtStations; }
 export async function initDwtWindStations(): Promise<number> {
   if (dwtStations.length) return dwtStations.length;
   try {
-    const manifest = await (await fetch('/event/source/dwt/apiDF_Darat/manifest_times.json')).json();
+    const manifest = await (await proxiedFetch(bmkgProxied('event/source/dwt/apiDF_Darat/manifest_times.json'))).json();
     const file = (manifest.files || []).at(-1) as string | undefined;
     if (!file) return 0;
-    const rows = await (await fetch(`/event/source/dwt/apiDF_Darat/${file}`)).json();
+    const rows = await (await proxiedFetch(bmkgProxied(`event/source/dwt/apiDF_Darat/${file}`))).json();
     dwtStations = (rows as unknown[][])
       .filter((r: unknown[]) => typeof r[3] === 'number' && typeof r[4] === 'number' && Array.isArray(r[7]))
       .map((r: unknown[]) => ({

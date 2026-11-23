@@ -84,19 +84,27 @@ try {
 const apiRoutes: Plugin = {
   name: 'vercel-api-dev',
   configureServer(server) {
-    server.middlewares.use('/api/embed-token', async (req, res) => {
-      try {
-        const { default: handler } = await server.ssrLoadModule('/api/embed-token.ts');
-        const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
-        const out = await handler(new Request(url, { method: req.method, headers: req.headers as Record<string, string> }));
-        const body = Buffer.from(await out.arrayBuffer());
-        res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) });
-        res.end(body);
-      } catch (e) {
-        res.writeHead(502, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Gagal mendapatkan token', detail: String(e).slice(0, 300) }));
-      }
-    });
+    // Semua handler di api/*.ts bisa dipanggil di dev (5173) sama seperti di
+    // Vercel/server.mjs — supaya perilaku token & proxy tidak berbeda.
+    const ROUTES = ['/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/bmkg'];
+    for (const route of ROUTES) {
+      server.middlewares.use(route, async (req, res) => {
+        try {
+          const file = route === '/api/bmkg' ? '/api/bmkg.ts' : `${route}.ts`;
+          const { default: handler } = await server.ssrLoadModule(file);
+          const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
+          const out = await handler(
+            new Request(url, { method: req.method, headers: req.headers as Record<string, string> }),
+          );
+          const body = Buffer.from(await out.arrayBuffer());
+          res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) });
+          res.end(req.method === 'HEAD' ? undefined : body);
+        } catch (e) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Handler gagal', detail: String(e).slice(0, 300) }));
+        }
+      });
+    }
   },
 };
 

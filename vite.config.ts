@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { resolve } from 'node:path'
 
 // ── BMKG proxy (dev) ────────────────────────────────────────────────────────
 // /api/df/* butuh Referer cuaca.bmkg.go.id, /api/public/* butuh Origin sama +
@@ -65,14 +66,53 @@ const bmkgProxy = Object.fromEntries(PROXY_ENTRIES.map(([prefix, flags]) => [pre
   },
 }]));
 
+// .env dibaca Vite untuk variabel VITE_*, tapi handler server (api/*.ts) butuh
+// variabel non-VITE (KEYCLOAK_*). Muat manual supaya dev server setara runtime.
+import { readFileSync } from 'node:fs'
+try {
+  for (const line of readFileSync('.env', 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/)
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+  }
+} catch {
+  /* .env tidak ada — pakai env platform (Vercel) */
+}
+
+// Route function Vercel (/api/*.ts) tidak otomatis jalan di `vite dev`.
+// Plugin kecil ini meneruskan /api/embed-token ke handler yang sama, supaya
+// dev server (5173) & server.mjs (8080) berperilaku identik.
+const apiRoutes: Plugin = {
+  name: 'vercel-api-dev',
+  configureServer(server) {
+    server.middlewares.use('/api/embed-token', async (req, res) => {
+      try {
+        const { default: handler } = await server.ssrLoadModule('/api/embed-token.ts');
+        const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
+        const out = await handler(new Request(url, { method: req.method, headers: req.headers as Record<string, string> }));
+        const body = Buffer.from(await out.arrayBuffer());
+        res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) });
+        res.end(body);
+      } catch (e) {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Gagal mendapatkan token', detail: String(e).slice(0, 300) }));
+      }
+    });
+  },
+};
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), apiRoutes],
   server: {
     proxy: { ...bmkgProxy, '/event': DWT_PROXY[1], '/alerts': NOWCAST_PROXY[1] },
   },
   build: {
     rollupOptions: {
+      // Dua entry: app utama (index.html) + widget embed (embed.html, dipakai iframe)
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        embed: resolve(__dirname, 'embed.html'),
+      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {

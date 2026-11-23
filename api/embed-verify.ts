@@ -23,7 +23,7 @@ const CORS: Record<string, string> = {
 const reply = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: CORS });
 
-export default async function handler(req: Request): Promise<Response> {
+async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
   const url = new URL(req.url);
@@ -49,3 +49,6 @@ export default async function handler(req: Request): Promise<Response> {
     res.ok ? 200 : 401,
   );
 }
+
+// Vercel: web handler (semua method masuk ke sini). Bentuk resmi di Node runtime.
+export default { fetch: handle };

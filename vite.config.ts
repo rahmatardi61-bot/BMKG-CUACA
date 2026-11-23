@@ -91,7 +91,9 @@ const apiRoutes: Plugin = {
       server.middlewares.use(route, async (req, res) => {
         try {
           const file = route === '/api/bmkg' ? '/api/bmkg.ts' : `${route}.ts`;
-          const { default: handler } = await server.ssrLoadModule(file);
+          const { default: mod } = await server.ssrLoadModule(file);
+          // Vercel: `export default { fetch }`; dukung juga fungsi polos
+          const handler = typeof mod === 'function' ? mod : mod.fetch;
           const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
           const out = await handler(
             new Request(url, { method: req.method, headers: req.headers as Record<string, string> }),

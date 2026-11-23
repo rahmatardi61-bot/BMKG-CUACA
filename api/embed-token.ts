@@ -73,7 +73,7 @@ function sameOrigin(req: Request): boolean {
   }
 }
 
-export default async function handler(req: Request): Promise<Response> {
+async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -99,3 +99,6 @@ export default async function handler(req: Request): Promise<Response> {
     );
   }
 }
+
+// Vercel: web handler (semua method masuk ke sini). Bentuk resmi di Node runtime.
+export default { fetch: handle };

@@ -43,7 +43,7 @@ async function getPubTok(): Promise<string> {
   return tokenState.value;
 }
 
-export default async function handler(req: Request): Promise<Response> {
+async function handle(req: Request): Promise<Response> {
   const url = new URL(req.url);
 
   // Gerbang: hanya pemegang token Keycloak sah yang boleh memakai proxy ini.
@@ -98,3 +98,6 @@ export default async function handler(req: Request): Promise<Response> {
     });
   }
 }
+
+// Vercel: web handler (semua method masuk ke sini). Bentuk resmi di Node runtime.
+export default { fetch: handle };

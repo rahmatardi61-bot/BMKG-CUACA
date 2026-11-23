@@ -8,10 +8,13 @@ import { stat } from 'node:fs/promises'
 import { pipeline } from 'node:stream/promises'
 import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
-import handler from './api/bmkg.ts'
-import embedTokenHandler from './api/embed-token.ts'
-import embedJsHandler from './api/embed-js.ts'
-import embedVerifyHandler from './api/embed-verify.ts'
+import bmkgMod from './api/bmkg.ts'
+import embedTokenMod from './api/embed-token.ts'
+import embedJsMod from './api/embed-js.ts'
+import embedVerifyMod from './api/embed-verify.ts'
+
+// Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
+const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
 
 const DIST = resolve('dist')
 const PORT = Number(process.env.PORT) || 8080
@@ -87,7 +90,7 @@ createServer(async (req, res) => {
 
   if (url.pathname === '/api/embed-token') {
     try {
-      const out = await embedTokenHandler(new Request(url, { method: req.method, headers: req.headers }))
+      const out = await asFetch(embedTokenMod)(new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())
       res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
       res.end(req.method === 'HEAD' ? undefined : body)
@@ -99,8 +102,8 @@ createServer(async (req, res) => {
   }
 
   const GATED = {
-    '/api/embed-js': embedJsHandler,
-    '/api/embed-verify': embedVerifyHandler,
+    '/api/embed-js': asFetch(embedJsMod),
+    '/api/embed-verify': asFetch(embedVerifyMod),
   };
   if (GATED[url.pathname]) {
     try {
@@ -118,7 +121,7 @@ createServer(async (req, res) => {
   if (url.pathname === '/api/bmkg' || url.pathname === '/api-bmkg') {
     // handler membaca path upstream dari ?path= (lihat api/bmkg.ts); /api-bmkg = legacy
     try {
-      const out = await handler(new Request(url, { method: req.method, headers: req.headers }))
+      const out = await asFetch(bmkgMod)(new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())
       res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
       res.end(req.method === 'HEAD' ? undefined : body)

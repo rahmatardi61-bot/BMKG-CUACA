@@ -8,7 +8,7 @@
 // Ini gerbang resmi: yang menentukan boleh/tidaknya sebuah token adalah
 // verifikasi tanda tangan (JWKS), bukan decode di browser.
 // ═══════════════════════════════════════════════════════════════════════════
-import { bearer, verifyJwt } from './_lib/jwt.ts';
+import { bearer, verifyJwt } from '../lib/jwt.js';
 
 export const config = { runtime: 'nodejs' };
 

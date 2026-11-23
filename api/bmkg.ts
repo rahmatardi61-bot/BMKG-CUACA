@@ -13,7 +13,7 @@
 // - inject x-public-token fresh (cache ~25 menit) untuk /api/public/*, /v1/public/*, /v1/user/*
 // - path `alerts/*` (nowcast RSS) diarahkan ke www.bmkg.go.id (tanpa CORS di sana)
 // Dipakai di Vercel (folder api/ terdeteksi otomatis) dan server.mjs (Docker).
-import { bearer, verifyJwt } from './_lib/jwt.ts';
+import { bearer, verifyJwt } from '../lib/jwt.js';
 
 export const config = { runtime: 'nodejs' };
 

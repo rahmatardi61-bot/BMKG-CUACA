@@ -13,7 +13,9 @@
     "lib": [
       "ES2022",
       "DOM"
-    ]
+    ],
+    "allowJs": true,
+    "checkJs": false
   },
   "include": [
     "api/**/*.ts"

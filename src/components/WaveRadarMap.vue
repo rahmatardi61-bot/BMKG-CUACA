@@ -153,10 +153,11 @@ function initMap() {
     minZoom: 4,
     maxZoom: 10,
   });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO • Data: cuaca.bmkg.go.id/map#Maritim',
-    subdomains: 'abcd',
-    maxZoom: 19,
+  // CARTO butuh API key sejak 2025 (tile muncul watermark "API KEY REQUIRED"),
+  // jadi pakai Esri Dark Gray seperti peta angin/radar — gratis & tanpa key.
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; Esri &copy; OpenStreetMap • Data: cuaca.bmkg.go.id/map#Maritim',
+    maxZoom: 18,
   }).addTo(map);
   map.setView([selectedZone.value.lat, selectedZone.value.lng], 6);
   zoneLayer = L.layerGroup().addTo(map);

@@ -213,6 +213,7 @@ export function useBmkgWeather() {
     status,
     loadCity,
     loadNews,
+    loadPort, // widget embed pasut perlu menunggu (loadCity hanya fire & forget)
     resolveAddress,
   };
 }

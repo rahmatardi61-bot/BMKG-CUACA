@@ -62,15 +62,74 @@ const WIDGETS: Widget[] = [
     city: true,
     height: 540,
     live: true
+  },
+  {
+    id: 'current',
+    name: 'Kondisi Cuaca Saat Ini',
+    desc: 'Kartu utama dashboard: suhu, kondisi langit, angin, kelembapan, plus ringkasan 7 hari.',
+    city: true,
+    height: 520,
+    live: true
+  },
+  {
+    id: 'port-tide',
+    name: 'Pasang Surut Pelabuhan',
+    desc: 'Jadwal pasut pelabuhan terdekat dari Open Data resmi BMKG.',
+    city: true,
+    height: 380,
+    live: true
+  },
+  {
+    id: 'wave',
+    name: 'Radar Tinggi Gelombang',
+    desc: 'Peta perairan Indonesia dengan tinggi gelombang per wilayah laut (live BMKG).',
+    city: true,
+    height: 480,
+    live: true
+  },
+  {
+    id: 'marine',
+    name: 'Peta Meteorologi Maritim',
+    desc: 'Peta INAWAVES: prakiraan gelombang & cuaca perairan, lengkap dengan layer.',
+    city: true,
+    height: 600,
+    live: true
+  },
+  {
+    id: 'air-quality',
+    name: 'Kualitas Udara (ISPU)',
+    desc: 'Indeks kualitas udara per polutan (PM2.5, PM10, O₃, NO₂, CO, SO₂).',
+    city: true,
+    height: 420,
+    live: false,
+    mockFallback: 'BMKG tidak menyediakan API ISPU publik. Nilai dihitung deterministik per kota (bukan pengukuran resmi), jadi widget SELALU menampilkan label MOCK.'
+  },
+  {
+    id: 'transport',
+    name: 'Transportasi & Rute',
+    desc: 'Status moda transportasi (jalan, kereta, laut, udara) di kota terpilih.',
+    city: true,
+    height: 360,
+    live: false,
+    mockFallback: 'Status transportasi tidak tersedia lewat API publik BMKG. Data pada widget ini adalah contoh, selalu berlabel MOCK.'
+  },
+  {
+    id: 'major-cities',
+    name: 'Kota-Kota Besar',
+    desc: 'Kartu 10 kota besar Indonesia dengan landmark. Statis — tidak memuat data apa pun.',
+    height: 400,
+    live: false
   }
 ];
 
 // Kartu dashboard yang BELUM siap di-embed — ditampilkan jujur, bukan disembunyikan
+// Sengaja TIDAK dijadikan widget: isinya drawer interaktif / bergantung preferensi
+// pengguna, jadi tidak masuk akal dibekukan di dalam iframe.
 const SOON = [
-  { name: 'Peta Maritim', reason: 'Terlalu besar (Leaflet + 232 wilayah), sedang dipertimbangkan' },
-  { name: 'Transportasi & Rute', reason: 'Punya beberapa mode (jalan/kereta/laut/penerbangan)' },
-  { name: 'Aktivitas & Rekomendasi', reason: 'Bergantung pada profil aktivitas pengguna' },
-  { name: 'Prakiraan 7 Hari', reason: 'Butuh adapter data dari dashboard' }
+  { name: 'Aktivitas & Rekomendasi', reason: 'Butuh profil aktivitas pengunjung — tidak bisa dibekukan di iframe' },
+  { name: 'Penasihat Penerbangan', reason: 'Berupa drawer interaktif dengan input pengguna' },
+  { name: 'Penasihat Maritim', reason: 'Berupa drawer interaktif dengan input pengguna' },
+  { name: 'Pencarian Lokasi', reason: 'Sudah tercakup parameter ?city= pada widget lain' }
 ];
 
 const origin = window.location.origin;

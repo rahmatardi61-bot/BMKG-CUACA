@@ -106,27 +106,56 @@ curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
 <script async src="https://DOMAIN/embed.js"></script>
 ```
 
-## Widget yang tersedia (5)
+## Widget yang tersedia (12)
 
 | ID | Nama | Query | Tinggi | Sumber data | Fallback MOCK |
 |---|---|---|---|---|---|
 | `satellite` | Citra Satelit Himawari-9 | — | 420 | Tile API (mandiri, nol props) | ❌ |
 | `earthquake` | Gempa Bumi Terkini | `&city=` | 520 | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
-| `alerts` | Peringatan Dini Cuaca | `&city=` | 340 | `useBmkgWeather().loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → pesan "tidak ada peringatan") |
-| `news` | Berita & Pengumuman | — | 420 | `useBmkgWeather().loadNews()` → `NewsSection :articles` | ✅ artikel mock |
+| `alerts` | Peringatan Dini Cuaca | `&city=` | 340 | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
+| `news` | Berita & Pengumuman | — | 420 | `loadNews()` → `NewsSection :articles` | ✅ artikel mock |
 | `forecast` | Prakiraan Cuaca Per Jam | `&city=` | 540 | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
+| `current` | Kondisi Cuaca Saat Ini | `&city=` | 520 | `loadCity()` → `HeroWeatherCard` | ❌ |
+| `port-tide` | Pasang Surut Pelabuhan | `&city=` | 380 | Open Data `getNearestPelabuhan()` → `PortTideCard` | ❌ (upstream down → pesan jujur) |
+| `air-quality` | Kualitas Udara (ISPU) | `&city=` | 420 | `AirQualityCard` (nilai deterministik per kota) | ✅ **selalu** MOCK |
+| `transport` | Transportasi & Rute | `&city=` | 360 | `TransportWeather :statuses` (`transportStatusesMap`) | ✅ **selalu** MOCK |
+| `major-cities` | Kota-Kota Besar | `&city=` | 400 | `MajorCitiesCarousel` (landmark statis) | ➖ tanpa data |
+| `wave` | Radar Tinggi Gelombang | `&city=` | 480 | `WaveRadarMap` (zona live BMKG) | ❌ |
+| `marine` | Peta Meteorologi Maritim | `&city=` | 600 | `MarineMap` (INAWAVES / Open Data live) | ❌ |
 
-`alerts`/`news`/`forecast` = komponen **presentasional** (props), jadi EmbedApp menyiapkan
-datanya sendiri — pola sama seperti dashboard, tanpa mengubah komponen aslinya.
+`alerts`/`news`/`forecast`/`current`/`port-tide`/`air-quality`/`transport` = komponen
+**presentasional** (props), jadi EmbedApp menyiapkan datanya sendiri — pola sama seperti
+dashboard, tanpa mengubah komponen aslinya. `satellite`/`earthquake`/`wave`/`marine`
+mengambil datanya sendiri (dan `earthquake`/`wave`/`marine` butuh kota untuk titik peta).
 
-Belum siap (jujur ditampilkan di `/widgets`): Peta Maritim, Transportasi & Rute,
-Aktivitas & Rekomendasi, Prakiraan 7 Hari. Widget tak dikenal → placeholder
-"Widget belum tersedia", bukan error.
+Catatan teknis:
+- `port-tide` menunggu `loadPort()` (di `loadCity()` hanya fire & forget), jadi datanya
+  tidak kosong saat widget dibuka.
+- `wave`/`marine` memakai Leaflet, dimuat lewat `defineAsyncComponent` — widget teks
+  tidak ikut menanggung bundle peta.
+- Basemap `wave` memakai Esri Dark Gray. CARTO (yang lama) sekarang minta API key dan
+  menampilkan watermark "API KEY REQUIRED".
+
+Belum dijadikan widget (jujur ditampilkan di `/widgets`): Aktivitas & Rekomendasi,
+Penasihat Penerbangan, Penasihat Maritim, Pencarian Lokasi — semuanya drawer interaktif
+atau bergantung input pengunjung, sehingga tidak masuk akal dibekukan di iframe.
+Widget tak dikenal → placeholder "Widget belum tersedia", bukan error.
 
 ### Kebijakan data MOCK (penting untuk transparansi)
 
-Hanya **`news`** yang punya fallback mock, karena endpoint WordPress BMKG cukup sering
-gagal (502). Bila itu terjadi:
+Tiga widget memakai data MOCK, dengan alasan berbeda:
+
+| Widget | Kenapa MOCK |
+|---|---|
+| `news` | Endpoint WordPress BMKG sering 502 → fallback artikel contoh |
+| `air-quality` | BMKG tidak punya API ISPU publik; nilai dihitung deterministik per kota |
+| `transport` | Tidak ada API status transportasi publik |
+
+`air-quality` dan `transport` **selalu** memberi label MOCK karena datanya memang bukan
+pengukuran resmi — bukan fallback saat gagal. Untuk `air-quality`, waktu "Dilukur pukul
+…" juga hasil hitungan, bukan jam pengukuran sungguhan.
+
+Bila `news` gagal:
 
 - widget tetap tampil (tidak kosong) dengan artikel contoh dari `data/mockData.ts`
 - muncul **badge kuning "Data contoh (MOCK) — layanan BMKG sedang tidak tersedia"** di
@@ -136,7 +165,7 @@ gagal (502). Bila itu terjadi:
   yang bisa mock dan mana yang tidak
 
 Widget lain **tidak** memakai mock: gagal = pesan jujur ("Prakiraan tidak tersedia",
-"Tidak ada peringatan dini aktif"). Ini disengaja — lebih baik kosong dengan penjelasan
+"Tidak ada peringatan dini aktif", "Data pasut tidak tersedia"). Ini disengaja — lebih baik kosong dengan penjelasan
 daripada menampilkan angka karangan di website pihak lain.
 
 ## Integrasi framework
@@ -150,7 +179,13 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - Halaman host tiruan (`file://`, CSS putih, font beda): 2 iframe terpasang,
   tinggi auto (420/888 px), **CSS host tidak terpengaruh**, 0 error.
 - `/embed` tanpa login; `city=Atlantis` → fallback `DKI Jakarta`.
-- 4 widget embed semua render data live (satelit 188 tile, gempa, alerts Surabaya, news).
+- **12 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 12/12 render tanpa
+  error JS, tanpa "Gagal menyiapkan widget", tanpa watermark API key.
+- `port-tide` sempat tampil "Data pasut tidak tersedia" — **bukan bug**: saat diuji
+  `maritim.bmkg.go.id/public_api` memang 503. Empty state jujur.
+- `wave`: basemap CARTO memunculkan watermark "API KEY REQUIRED" → diganti Esri Dark Gray.
+- `transport` & `major-cities`: komponen aslinya tanpa padding (di dashboard dibungkus
+  kolom) → dibungkus `p-4` di embed agar tidak menempel tepi iframe.
 - Tombol "Salin kode" diverifikasi menyalin teks yang benar ke clipboard.
 - Tema dark/light di `/widgets` persist via `localStorage` (`bmkg-widget-theme`).
 - `vue-tsc --noEmit` bersih.

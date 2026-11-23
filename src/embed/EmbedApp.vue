@@ -5,6 +5,10 @@
 // Semua opsi STATIS (keputusan: tidak ada kustom warna/UI, tidak ada kota bebas):
 //   ?widget=satellite                → peta satelit Himawari-9 (mandiri, nol props)
 //   ?widget=earthquake&city=Jakarta  → gempa live TEWS (kota = penentu "terdekat")
+//   ?widget=current&city=Bandung     → kartu cuaca saat ini (suhu, angin, kelembapan)
+//   ?widget=forecast|alerts|air-quality|transport|port-tide  → data per kota
+//   ?widget=wave|marine              → peta maritim (Leaflet, live BMKG)
+//   ?widget=major-cities             → 10 kota besar (statis, tanpa fetch)
 //   ?widget=coming                   → placeholder resmi utk kartu yang belum siap
 // Kota dibatasi daftar tertutup + fallback Jakarta: kota tak dikenal diabaikan
 // (jangan pernah tampil kosong/rusak di web orang lain).
@@ -12,7 +16,8 @@
 import { defineAsyncComponent, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
 import type { WarningAlert, NewsArticle, HourlyForecast } from '../types/weather';
-import { newsArticles } from '../data/mockData';
+import { newsArticles, transportStatusesMap } from '../data/mockData';
+import type { WeatherData } from '../types/weather';
 import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical, ShieldAlert } from 'lucide-vue-next';
 
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
@@ -20,6 +25,14 @@ const EarthquakeHistory = defineAsyncComponent(() => import('../components/Earth
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
 const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
 const ForecastPanel = defineAsyncComponent(() => import('../components/ForecastPanel.vue'));
+const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWeatherCard.vue'));
+const PortTideCard = defineAsyncComponent(() => import('../components/PortTideCard.vue'));
+const AirQualityCard = defineAsyncComponent(() => import('../components/AirQualityCard.vue'));
+const TransportWeather = defineAsyncComponent(() => import('../components/TransportWeather.vue'));
+const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
+// Leaflet dimuat hanya bila widget peta dipilih (jangan bebankan widget teks)
+const WaveRadarMap = defineAsyncComponent(() => import('../components/WaveRadarMap.vue'));
+const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
 
 const params = new URLSearchParams(window.location.search);
 const widget = params.get('widget') || 'coming';
@@ -42,9 +55,20 @@ const city = ALIAS[requestedCity.toLowerCase()]
   ?? 'DKI Jakarta';
 
 // Kartu yang sudah siap di-embed
-const READY = ['satellite', 'earthquake', 'alerts', 'news', 'forecast'];
+const READY = [
+  'satellite', 'earthquake', 'alerts', 'news', 'forecast',
+  'current', 'port-tide', 'air-quality', 'transport', 'major-cities',
+  'wave', 'marine',
+];
 const isReady = READY.includes(widget);
-const needCity = ['earthquake', 'alerts', 'forecast'].includes(widget);
+// Widget yang butuh kota: semua yang menampilkan nama/titik wilayah
+const CITY_WIDGETS = [
+  'earthquake', 'alerts', 'forecast', 'current', 'port-tide',
+  'air-quality', 'transport', 'wave', 'marine',
+];
+const needCity = CITY_WIDGETS.includes(widget);
+// Widget yang datanya bergantung pada loadCity (satu fetch dipakai bersama)
+const FETCH_WIDGETS = ['alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport'];
 
 // Widget berbasis data (alerts/news) menyiapkan datanya sendiri — komponennya
 // murni presentasional (props), pola sama seperti dashboard.
@@ -52,6 +76,7 @@ const bmkg = useBmkgWeather();
 const alerts = ref<WarningAlert[]>([]);
 const articles = ref<NewsArticle[]>([]);
 const forecasts = ref<HourlyForecast[]>([]);
+const weather = ref<WeatherData | null>(null);
 const loading = ref(false);
 // true bila widget menampilkan data MOCK/fallback — ditandai di UI (bukan disembunyikan)
 const isMock = ref(false);
@@ -93,14 +118,26 @@ async function loadData() {
       // WP BMKG sering 502 → pakai artikel mock seperti dashboard (App.vue activeArticles)
       isMock.value = !bmkg.liveNews.value.length;
       articles.value = isMock.value ? newsArticles.slice(0, 4) : bmkg.liveNews.value;
-    } else if (widget === 'alerts' || widget === 'forecast') {
-      await bmkg.loadCity(city, CITY_COORDS[city]);
+    } else if (FETCH_WIDGETS.includes(widget)) {
+      const coords = CITY_COORDS[city];
+      await bmkg.loadCity(city, coords);
       if (widget === 'alerts') {
         alerts.value = bmkg.liveAlerts.value;
-      } else {
+      } else if (widget === 'forecast') {
         forecasts.value = bmkg.liveHourly.value.slice(0, 12);
-        // prakiraan kosong → tidak ada fallback mock: tampilkan pesan jujur
-        isMock.value = false;
+        isMock.value = false; // prakiraan kosong → pesan jujur, bukan angka karangan
+      } else if (widget === 'current') {
+        weather.value = bmkg.liveWeather.value;
+      } else if (widget === 'port-tide') {
+        // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
+        await bmkg.loadPort(coords.lat, coords.lon);
+      } else if (widget === 'air-quality') {
+        weather.value = bmkg.liveWeather.value;
+        // kartu ISPU menghitung nilai deterministik per kota (bukan data resmi) → selalu MOCK
+        isMock.value = true;
+      } else if (widget === 'transport') {
+        weather.value = bmkg.liveWeather.value;
+        isMock.value = true; // status transportasi BMKG tidak tersedia via API publik
       }
     }
   } finally {
@@ -140,7 +177,10 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
 
     <!-- Widget siap -->
     <template v-else-if="isReady">
-      <div v-if="needCity" class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-800/60">
+      <div
+        v-if="needCity"
+        class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-800/60"
+      >
         <MapPin class="w-3 h-3 text-brand-cyan" />
         <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">{{ city }}</span>
         <span class="ml-auto text-[9px] font-bold tracking-wider text-slate-500">BMKG</span>
@@ -182,6 +222,64 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
         <ForecastPanel v-else :forecasts="forecasts" />
       </template>
       <EarthquakeHistory v-else-if="widget === 'earthquake'" :selected-city="city" />
+
+      <!-- Cuaca saat ini: kartu hero dashboard, tanpa dropdown kota (1 kota per widget) -->
+      <template v-else-if="widget === 'current'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat cuaca…</div>
+        <HeroWeatherCard
+          v-else-if="weather"
+          :weather-data="weather"
+          :cities="[city]"
+          :selected-city="city"
+          :additional-info="bmkg.liveAdditional.value ?? undefined"
+          :forecasts="bmkg.liveHourly.value"
+        />
+        <div v-else class="p-6 flex flex-col items-center text-center gap-1.5">
+          <ShieldCheck class="w-6 h-6 text-slate-400" />
+          <p class="text-[13px] font-bold text-slate-800 dark:text-slate-200">Cuaca tidak tersedia</p>
+          <p class="text-[11px] text-slate-500 leading-relaxed max-w-[260px]">
+            Data cuaca terkini untuk {{ city }} belum dapat dimuat.
+          </p>
+        </div>
+      </template>
+
+      <!-- Pasut pelabuhan: data resmi Open Data, tidak pernah mock -->
+      <template v-else-if="widget === 'port-tide'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat data pasut…</div>
+        <div v-else-if="!bmkg.livePort.value" class="p-6 flex flex-col items-center text-center gap-1.5">
+          <ShieldCheck class="w-6 h-6 text-slate-400" />
+          <p class="text-[13px] font-bold text-slate-800 dark:text-slate-200">Data pasut tidak tersedia</p>
+          <p class="text-[11px] text-slate-500 leading-relaxed max-w-[260px]">
+            Tidak ada pelabuhan terdekat dengan data pasut untuk {{ city }}.
+          </p>
+        </div>
+        <PortTideCard v-else :port="bmkg.livePort.value" :selected-city="city" />
+      </template>
+
+      <!-- Kualitas udara: nilai dihitung deterministik per kota → selalu berlabel MOCK -->
+      <template v-else-if="widget === 'air-quality'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat kualitas udara…</div>
+        <AirQualityCard v-else-if="weather" :weather-data="weather" :selected-city="city" />
+        <div v-else class="p-6 text-center text-[11px] text-slate-500">Data cuaca kota {{ city }} belum tersedia.</div>
+      </template>
+
+      <!-- Transportasi: status contoh (tidak ada API resmi) → selalu berlabel MOCK -->
+      <template v-else-if="widget === 'transport'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat status transportasi…</div>
+        <div v-else class="p-4">
+          <TransportWeather :statuses="transportStatusesMap[city] ?? transportStatusesMap['DKI Jakarta']" />
+        </div>
+      </template>
+
+      <!-- 10 kota besar: kartu statis (landmark + nama), tanpa fetch -->
+      <div v-else-if="widget === 'major-cities'" class="p-4 overflow-hidden">
+        <MajorCitiesCarousel :selected-city="city" :show-activities="false" />
+      </div>
+
+      <!-- Peta maritim: Leaflet + data wilayah perairan resmi BMKG -->
+      <!-- Peta memuat datanya sendiri (live BMKG) + tinggi tetap, jadi render langsung -->
+      <WaveRadarMap v-else-if="widget === 'wave'" :selected-city="city" />
+      <MarineMap v-else-if="widget === 'marine'" :selected-city="city" />
     </template>
 
     <!-- Placeholder: kartu belum siap di-embed -->

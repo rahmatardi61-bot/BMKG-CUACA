@@ -63,21 +63,38 @@ curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
 <script async src="https://DOMAIN/embed.js"></script>
 ```
 
-## Widget yang tersedia (4)
+## Widget yang tersedia (5)
 
-| ID | Nama | Query | Tinggi | Sumber data |
-|---|---|---|---|---|
-| `satellite` | Citra Satelit Himawari-9 | — | 420 | Tile API (mandiri, nol props) |
-| `earthquake` | Gempa Bumi Terkini | `&city=` | 520 | TEWS (`EarthquakeHistory` fetch sendiri) |
-| `alerts` | Peringatan Dini Cuaca | `&city=` | 340 | `useBmkgWeather().loadCity()` → `AlertsPanel :alerts` |
-| `news` | Berita & Pengumuman | — | 420 | `useBmkgWeather().loadNews()` → `NewsSection :articles` |
+| ID | Nama | Query | Tinggi | Sumber data | Fallback MOCK |
+|---|---|---|---|---|---|
+| `satellite` | Citra Satelit Himawari-9 | — | 420 | Tile API (mandiri, nol props) | ❌ |
+| `earthquake` | Gempa Bumi Terkini | `&city=` | 520 | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
+| `alerts` | Peringatan Dini Cuaca | `&city=` | 340 | `useBmkgWeather().loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → pesan "tidak ada peringatan") |
+| `news` | Berita & Pengumuman | — | 420 | `useBmkgWeather().loadNews()` → `NewsSection :articles` | ✅ artikel mock |
+| `forecast` | Prakiraan Cuaca Per Jam | `&city=` | 540 | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
 
-`alerts`/`news` = komponen **presentasional** (props), jadi EmbedApp menyiapkan datanya
-sendiri — pola sama seperti dashboard, tanpa mengubah komponen aslinya.
+`alerts`/`news`/`forecast` = komponen **presentasional** (props), jadi EmbedApp menyiapkan
+datanya sendiri — pola sama seperti dashboard, tanpa mengubah komponen aslinya.
 
 Belum siap (jujur ditampilkan di `/widgets`): Peta Maritim, Transportasi & Rute,
 Aktivitas & Rekomendasi, Prakiraan 7 Hari. Widget tak dikenal → placeholder
 "Widget belum tersedia", bukan error.
+
+### Kebijakan data MOCK (penting untuk transparansi)
+
+Hanya **`news`** yang punya fallback mock, karena endpoint WordPress BMKG cukup sering
+gagal (502). Bila itu terjadi:
+
+- widget tetap tampil (tidak kosong) dengan artikel contoh dari `data/mockData.ts`
+- muncul **badge kuning "Data contoh (MOCK) — layanan BMKG sedang tidak tersedia"** di
+  atas widget (`isMock` + ikon `FlaskConical`)
+- di halaman `/widgets`, kartu Berita diberi badge **"MOCK fallback"** + catatan
+  penjelasan, dan ada panel **"Tentang data contoh (MOCK)"** yang merinci widget mana
+  yang bisa mock dan mana yang tidak
+
+Widget lain **tidak** memakai mock: gagal = pesan jujur ("Prakiraan tidak tersedia",
+"Tidak ada peringatan dini aktif"). Ini disengaja — lebih baik kosong dengan penjelasan
+daripada menampilkan angka karangan di website pihak lain.
 
 ## Integrasi framework
 

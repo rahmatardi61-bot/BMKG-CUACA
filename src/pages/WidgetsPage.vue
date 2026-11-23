@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun } from 'lucide-vue-next';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -19,6 +19,8 @@ type Widget = {
   city?: boolean;
   height: number;
   live: boolean;
+  /** widget bisa jatuh ke data contoh bila layanan BMKG gagal */
+  mockFallback?: string;
 };
 
 const WIDGETS: Widget[] = [
@@ -50,6 +52,15 @@ const WIDGETS: Widget[] = [
     name: 'Berita & Pengumuman BMKG',
     desc: 'Artikel dan video terbaru dari kanal resmi BMKG.',
     height: 420,
+    live: true,
+    mockFallback: 'Layanan berita BMKG (WordPress) cukup sering gagal (502). Bila itu terjadi, widget menampilkan artikel contoh dan menandainya dengan label MOCK.'
+  },
+  {
+    id: 'forecast',
+    name: 'Prakiraan Cuaca Per Jam',
+    desc: 'Prakiraan suhu, kelembapan, dan peluang hujan per jam untuk wilayah terpilih.',
+    city: true,
+    height: 540,
     live: true
   }
 ];
@@ -196,6 +207,11 @@ async function copy(text: string, key: string) {
               <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{{ w.desc }}</p>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
+              <span
+                v-if="w.mockFallback"
+                class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                title="Widget ini bisa menampilkan data contoh (MOCK)"
+              >MOCK fallback</span>
               <button
                 @click="previewKey++"
                 class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1"
@@ -250,6 +266,25 @@ async function copy(text: string, key: string) {
             </div>
           </div>
         </article>
+      </section>
+
+      <!-- Penjelasan fallback MOCK -->
+      <section class="rounded-xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 p-4 space-y-2">
+        <h3 class="text-xs font-black flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+          <AlertTriangle class="w-3.5 h-3.5" /> Tentang data contoh (MOCK)
+        </h3>
+        <p class="text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed">
+          Sebagian widget mengambil data langsung dari layanan BMKG. Bila layanan tersebut
+          sedang tidak tersedia, widget tetap tampil agar tidak kosong — tetapi menampilkan
+          <strong class="font-bold">data contoh</strong> dan memberi label
+          <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">MOCK</span>
+          di bagian atas widget.
+        </p>
+        <ul class="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed list-disc list-inside">
+          <li><strong class="text-slate-800 dark:text-slate-200">Berita &amp; Pengumuman</strong> — layanan berita BMKG (WordPress) sering gagal; artikel contoh dipakai sebagai cadangan.</li>
+          <li><strong class="text-slate-800 dark:text-slate-200">Peringatan Dini Cuaca</strong> — tidak memakai data contoh. Bila tidak ada peringatan aktif, widget menampilkan pesan "Tidak ada peringatan dini aktif" (data tetap asli).</li>
+          <li><strong class="text-slate-800 dark:text-slate-200">Prakiraan Cuaca, Gempa, Satelit</strong> — tanpa data contoh. Bila gagal, widget menampilkan pesan bahwa data belum tersedia.</li>
+        </ul>
       </section>
 
       <!-- Widget dalam pengembangan -->

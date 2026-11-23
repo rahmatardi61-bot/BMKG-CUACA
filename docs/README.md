@@ -23,6 +23,7 @@ dipakai / belum dipakai / tersedia versi resminya.
 | `api-reference.md` | Referensi teknis semua endpoint (internal scraped + resmi open data) + model auth/proxy | Implementasi / debugging |
 | `satellite-himawari.md` | **Citra satelit Himawari**: Tile API `satellite.bmkg.go.id` (CORS `*`, TMS, 18 frame) + gambar statis `inderaja` (tanpa CORS → `<img>` saja) + endpoint mati/stale | Integrasi peta satelit / animasi |
 - **`signature-dwt.md`** — Signature DWT "Digital Weather for Traffic" (Cesium, kereta/pesawat/kapal): Cloudflare memblokir scraping otomatis; backend ArcGIS `datacuaca.bmkg.go.id/arcgis/rest/services/production` terbuka (nowcasting_public & signature_bmkg_forecast terbukti kosong → penjelasan toast "Data terkini tidak tersedia").
+- **`deploy-vercel-embed.md`** — Checklist deploy widget embed ke Vercel: env Keycloak, struktur `api/` vs `lib/`, perintah `curl` verifikasi, tabel gejala gagal.
 - **`widget-embed.md`** — Fitur widget embed: kartu BMKG disematkan di web lain (iframe + loader `embed.js`), **12 widget siap**, halaman dokumentasi `/widgets`, token Keycloak (POC), **status & batasan** (asal data, yang belum siap, komponen yang butuh klik pengunjung, syarat naik ke produksi).
 | `team-notes.md` | Keputusan penyesuaian satuan (§1), endpoint tanpa slot UI (§2), temuan teknis (§3), **smoke test checklist** (§4) | Diskusi tim / QA manual |
 | `pages-original.md` | Peta route & section→API web original | Meniru perilaku UI original |

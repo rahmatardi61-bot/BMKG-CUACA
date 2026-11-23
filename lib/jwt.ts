@@ -26,11 +26,11 @@ export type VerifyResult = {
 type Jwks = { keys: Record<string, CryptoKey>; exp: number };
 const jwks: Jwks = { keys: {}, exp: 0 };
 
-function b64ToBytes(input: string): Uint8Array {
+function b64ToBytes(input: string): Uint8Array<ArrayBuffer> {
   const s = input.replace(/-/g, '+').replace(/_/g, '/');
   const padded = s + '='.repeat((4 - (s.length % 4)) % 4);
   const bin = atob(padded);
-  const out = new Uint8Array(bin.length);
+  const out = new Uint8Array(new ArrayBuffer(bin.length));
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }

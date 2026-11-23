@@ -8,8 +8,8 @@
 // Tanpa token yang sah, script ini tidak bisa didapat. Itu kunci pertama:
 // `<script src=".../embed.js">` polos tidak akan pernah menghasilkan widget.
 // ═══════════════════════════════════════════════════════════════════════════
-import { bearer, verifyJwt } from './_lib/jwt.ts';
-import { EMBED_SOURCE } from './_lib/embedSource.ts';
+import { bearer, verifyJwt } from '../lib/jwt.ts';
+import { EMBED_SOURCE } from '../lib/embedSource.ts';
 
 export const config = { runtime: 'edge' };
 

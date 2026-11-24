@@ -12,6 +12,7 @@ import bmkgMod from './api/bmkg.ts'
 import embedTokenMod from './api/embed-token.ts'
 import embedJsMod from './api/embed-js.ts'
 import embedVerifyMod from './api/embed-verify.ts'
+import embedPanelMod from './api/embed-panel.js'
 
 // Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
 const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
@@ -101,9 +102,11 @@ createServer(async (req, res) => {
     return
   }
 
+  // embed-panel publik: loader + panel token untuk halaman contoh (tanpa Bearer)
   const GATED = {
     '/api/embed-js': asFetch(embedJsMod),
     '/api/embed-verify': asFetch(embedVerifyMod),
+    '/api/embed-panel.js': asFetch(embedPanelMod),
   };
   if (GATED[url.pathname]) {
     try {

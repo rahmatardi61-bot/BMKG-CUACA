@@ -400,3 +400,21 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
   bila butuh https. Di produksi https→https tidak kena aturan ini.
 - Kalau klien minta "komponen React/Vue", jawabannya: bisa dipakai di framework apa pun,
   tetapi bukan npm package — itu fase terpisah (opsi migrasi), bukan versi ini.
+
+---
+
+## Loader publik `embed-panel.js` (khusus demo)
+
+`/api/embed-panel.js` adalah **satu file publik** yang menggabungkan "minta token" +
+"muat script inti" + "tampilkan status token". Dipakai halaman contoh di
+`../bmkg-embed-examples`, bukan oleh partner produksi.
+
+- Publik & tanpa token — isinya tidak berisi rahasia, hanya panggilan ke endpoint kita
+- Meminta token ke `/api/embed-token` (server yang pegang `client_secret`)
+- Menyegarkan 60 detik sebelum `exp` JWT, plus saat tab kembali aktif bila sisa < 60 detik
+- Meneruskan token baru ke semua iframe lewat `postMessage` (bukan reload)
+- Status disiarkan lewat `BMKGPanel.onStatus(cb)` — dipakai badge di Vue/React/Angular
+
+**Untuk produksi:** partner mengambil token dari backend mereka sendiri dan memakai
+`/api/embed-js` + `eval` (lihat bagian autentikasi di atas). `/api/embed-token` dihapus,
+dan `embed-panel.js` tidak perlu dipakai.

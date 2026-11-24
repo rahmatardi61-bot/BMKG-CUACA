@@ -73,6 +73,31 @@ function sameOrigin(req: Request): boolean {
   }
 }
 
+// Origin yang boleh meminta token lewat `?origin=` (browser lintas-origin).
+// Hanya untuk halaman contoh: perkakas demo memanggil endpoint ini dari
+// localhost:<port lain>. Tanpa ini sample embed di port berbeda kena 403.
+// upgrade: produksi → hapus default & isi lewat env EMBED_ALLOWED_ORIGINS,
+//          satu domain per partner (lihat docs/widget-embed.md).
+const ALLOWED_ORIGINS = new Set(
+  (process.env.EMBED_ALLOWED_ORIGINS ??
+    'http://localhost:8099,http://127.0.0.1:8099,http://localhost:8098,http://127.0.0.1:8098')
+    .split(',')
+    .map((s) => s.trim().replace(/\/$/, ''))
+    .filter(Boolean),
+);
+
+/**
+ * true bila pemanggil boleh memakai keran token.
+ * `?origin=` TIDAK dipakai sebagai izin — itu bisa dikarang siapa pun lewat curl.
+ * Yang dipercaya hanya header Origin yang dikirim browser.
+ */
+function originAllowed(req: Request): boolean {
+  if (sameOrigin(req)) return true;
+  const from = (req.headers.get('origin') ?? req.headers.get('referer') ?? '').replace(/\/$/, '');
+  if (!from || from === 'null') return true; // bukan dari browser (curl/server)
+  return ALLOWED_ORIGINS.has(from) || ALLOWED_ORIGINS.has(new URL(from).origin);
+}
+
 async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -80,9 +105,13 @@ async function handle(req: Request): Promise<Response> {
       headers: { ...JSON_HEADERS, 'Access-Control-Allow-Methods': 'GET, OPTIONS' },
     });
   }
-  if (!sameOrigin(req)) {
+  if (!originAllowed(req)) {
     return new Response(
-      JSON.stringify({ error: 'Tidak diotorisasi', reason: 'endpoint token hanya untuk origin sendiri' }),
+      JSON.stringify({
+        error: 'Tidak diotorisasi',
+        reason:
+          'endpoint token hanya untuk origin sendiri atau origin di EMBED_ALLOWED_ORIGINS',
+      }),
       { status: 403, headers: JSON_HEADERS },
     );
   }

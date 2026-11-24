@@ -193,6 +193,22 @@ async function loadData() {
   }
 }
 onMounted(loadData); // city statis per page-load — tidak perlu watch
+
+// ── REFRESH TOKEN (induk memperbarui) ─────────────────────────────────────
+// Halaman pemasang menyegarkan token sebelum kedaluwarsa lalu mengirim
+// `{type:'bmkg-embed-token'}` lagi. Widget memakai token baru untuk semua fetch
+// berikutnya — tanpa reload, tanpa kehilangan tampilan yang sudah ada.
+window.addEventListener('message', (ev: MessageEvent) => {
+  const d = ev.data as { type?: string; token?: string } | null;
+  if (!d || d.type !== 'bmkg-embed-token' || typeof d.token !== 'string' || !d.token) return;
+  if (d.token === receivedToken) return; // sama → abaikan
+  receivedToken = d.token;
+  adoptToken(d.token);
+  console.log('[bmkg-widget] token diperbarui induk');
+  // Hanya widget yang sedang error yang perlu memuat ulang; yang sudah tampil
+  // cukup memakai token baru untuk fetch berikutnya (tidak berkedip).
+  if (authState.value === 'error') loadData();
+});
 </script>
 
 <template>

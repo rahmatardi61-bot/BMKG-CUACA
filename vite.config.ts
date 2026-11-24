@@ -86,11 +86,13 @@ const apiRoutes: Plugin = {
   configureServer(server) {
     // Semua handler di api/*.ts bisa dipanggil di dev (5173) sama seperti di
     // Vercel/server.mjs — supaya perilaku token & proxy tidak berbeda.
-    const ROUTES = ['/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/bmkg'];
+    const ROUTES = ['/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/embed-panel.js', '/api/bmkg'];
     for (const route of ROUTES) {
       server.middlewares.use(route, async (req, res) => {
         try {
-          const file = route === '/api/bmkg' ? '/api/bmkg.ts' : `${route}.ts`;
+          // embed-panel.js sudah JS murni (tanpa tipe) → dimuat apa adanya
+          const file =
+            route === '/api/bmkg' ? '/api/bmkg.ts' : route.endsWith('.js') ? route : `${route}.ts`;
           const { default: mod } = await server.ssrLoadModule(file);
           // Vercel: `export default { fetch }`; dukung juga fungsi polos
           const handler = typeof mod === 'function' ? mod : mod.fetch;
@@ -114,6 +116,11 @@ const apiRoutes: Plugin = {
 export default defineConfig({
   plugins: [vue(), apiRoutes],
   server: {
+    // Port dipin jauh dari 5173 supaya tidak tertukar dengan proyek lain
+    // (bmkg-embed-examples berjalan di 4477). strictPort: gagal terang-terangan
+    // kalau bentrok, bukan diam-diam pindah ke port lain.
+    port: 5173,
+    strictPort: true,
     proxy: { ...bmkgProxy, '/event': DWT_PROXY[1], '/alerts': NOWCAST_PROXY[1] },
   },
   build: {

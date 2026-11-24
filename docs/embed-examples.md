@@ -46,6 +46,30 @@ penerusan pesan. Framework hanya perlu memanggil `rescan()` setelah render:
 | React 18 | `useEffect` | `src/App.tsx` |
 | Angular 22 | `ngAfterViewInit` | `src/app/bmkg-widget.component.ts` |
 
+## Struktur repo Angular (bukan satu file raksasa)
+
+`angular-dashboard/` sengaja dipecah seperti project Angular biasa:
+
+```
+src/app/
+├── app.component.ts/.html        kerangka halaman: header + search + grid
+├── core/bmkg.service.ts          token, katalog, pencarian, pindah lokasi (signal)
+├── components/
+│   ├── site-header.component.*   brand + status token
+│   ├── place-search.component.*  input + chip kota (output placePicked)
+│   └── widget-card.component.*   satu kartu: judul + [data-bmkg-widget]
+└── bmkg-embed.ts                 loader (salinan, lihat catatan di bawah)
+```
+
+Tanpa `ChangeDetectorRef` manual: status memakai signal, jadi OnPush tetap otomatis
+render ulang. `app.component.ts` tidak menyentuh token maupun `fetch` — hanya menyusun
+halaman.
+
+**Jebakan yang sempat terjadi:** `styles` dihapus dari `angular.json` (untuk membuang
+peringatan stylesheet) sehingga seluruh CSS tidak dimuat — halaman tampil tanpa gaya,
+tanpa error di console. Kalau tampilan Angular tiba-tiba "polos", periksa
+`architect.build.options.styles` dan pastikan `src/styles.css` terdaftar.
+
 ## Query widget yang tersedia
 
 | Endpoint | Isi |

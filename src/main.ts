@@ -7,14 +7,20 @@ import { isAuthenticated } from './services/auth'
 import { apiMarkerDirective, initApiMarkerDevTools } from './dev/apiMarker'
 
 // Route berbasis path (tanpa vue-router — cuma 2 halaman tambahan):
-//   /widgets → dokumentasi embed (publik, ini materi presentasi ke klien)
+//   /widgets → dokumentasi embed (DI-GATE login yang sama dengan dashboard,
+//              supaya materi presentasi tidak terbuka untuk publik)
 //   /embed   → halaman widget (dipakai embed.js; TIDAK di-gate login,
 //              kalau di-gate iframe di web klien akan tampil halaman login)
 const path = window.location.pathname.replace(/\/+$/, '')
 const isWidgetDocs = path === '/widgets'
 const isEmbed = path === '/embed' || path === '/embed.html'
 
-const app = createApp(isWidgetDocs ? WidgetsPage : isEmbed ? () => null : isAuthenticated() ? App : LoginPage)
+// Satu gerbang untuk semua halaman non-embed: belum login → LoginPage.
+// LoginPage memakai location.reload() sehingga URL asal (/widgets) terbuka lagi.
+const gate = () => (isAuthenticated() ? null : LoginPage)
+const app = createApp(
+  isEmbed ? () => null : (isWidgetDocs ? (gate() ?? WidgetsPage) : (gate() ?? App)),
+)
 
 // API BOX MARKER — alat dev (branch api-box-marker). No-op di build prod
 // (guard import.meta.env.DEV ada di dalam modul). Tidak dipasang di /widgets:

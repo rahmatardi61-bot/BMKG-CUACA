@@ -13,6 +13,8 @@ import embedTokenMod from './api/embed-token.ts'
 import embedJsMod from './api/embed-js.ts'
 import embedVerifyMod from './api/embed-verify.ts'
 import embedPanelMod from './api/embed-panel.js'
+import widgetCatalogMod from './api/widget-catalog.js'
+import widgetSearchMod from './api/widget-search.js'
 
 // Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
 const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
@@ -107,6 +109,8 @@ createServer(async (req, res) => {
     '/api/embed-js': asFetch(embedJsMod),
     '/api/embed-verify': asFetch(embedVerifyMod),
     '/api/embed-panel.js': asFetch(embedPanelMod),
+    '/api/widget-catalog': asFetch(widgetCatalogMod),
+    '/api/widget-search': asFetch(widgetSearchMod),
   };
   if (GATED[url.pathname]) {
     try {

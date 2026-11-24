@@ -30,17 +30,12 @@ export interface PortInfo {
 }
 
 // koordinat kota bawaan (dipakai kalau tidak ada GPS) — sama dengan citiesList mockData
+// Sumber tunggal: lib/cities.js (dipakai juga oleh api/widget-catalog.js).
+// 'Tamanan' tetap di sini karena hanya relevan untuk dashboard, tidak untuk widget.
+import { CITY_COORDS as BASE_CITY_COORDS } from '../../lib/cities.js';
+
 export const CITY_COORDS: Record<string, { lat: number; lon: number }> = {
-  'DKI Jakarta': { lat: -6.2, lon: 106.816666 },
-  Surabaya: { lat: -7.257472, lon: 112.752083 },
-  Bandung: { lat: -6.917464, lon: 107.619123 },
-  Medan: { lat: 3.595196, lon: 98.672226 },
-  Semarang: { lat: -6.966667, lon: 110.416664 },
-  Makassar: { lat: -5.147665, lon: 119.432731 },
-  Palembang: { lat: -2.976073, lon: 104.775427 },
-  Batam: { lat: 1.130102, lon: 104.05304 },
-  Pekanbaru: { lat: 0.507068, lon: 101.447777 },
-  Denpasar: { lat: -8.65, lon: 115.216667 },
+  ...BASE_CITY_COORDS,
   'Tamanan, Kec. Bantul, Banguntapan, Daerah Istimewa Yogyakarta': { lat: -7.888, lon: 110.388 },
 };
 

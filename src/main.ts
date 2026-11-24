@@ -3,6 +3,7 @@ import './style.css'
 import App from './App.vue'
 import LoginPage from './pages/LoginPage.vue'
 import WidgetsPage from './pages/WidgetsPage.vue'
+import ComparePage from './pages/ComparePage.vue'
 import { isAuthenticated } from './services/auth'
 import { apiMarkerDirective, initApiMarkerDevTools } from './dev/apiMarker'
 
@@ -13,19 +14,24 @@ import { apiMarkerDirective, initApiMarkerDevTools } from './dev/apiMarker'
 //              kalau di-gate iframe di web klien akan tampil halaman login)
 const path = window.location.pathname.replace(/\/+$/, '')
 const isWidgetDocs = path === '/widgets'
+const isCompare = path === '/compare'
 const isEmbed = path === '/embed' || path === '/embed.html'
 
 // Satu gerbang untuk semua halaman non-embed: belum login → LoginPage.
 // LoginPage memakai location.reload() sehingga URL asal (/widgets) terbuka lagi.
 const gate = () => (isAuthenticated() ? null : LoginPage)
 const app = createApp(
-  isEmbed ? () => null : (isWidgetDocs ? (gate() ?? WidgetsPage) : (gate() ?? App)),
+  isEmbed
+    ? () => null
+    : isWidgetDocs ? (gate() ?? WidgetsPage)
+    : isCompare ? (gate() ?? ComparePage)
+    : (gate() ?? App),
 )
 
 // API BOX MARKER — alat dev (branch api-box-marker). No-op di build prod
 // (guard import.meta.env.DEV ada di dalam modul). Tidak dipasang di /widgets:
 // halaman itu materi presentasi publik — panel dev hanya jadi noise.
-if (!isEmbed && !isWidgetDocs) {
+if (!isEmbed && !isWidgetDocs && !isCompare) {
   initApiMarkerDevTools()
   app.directive('api-marker', apiMarkerDirective)
 }

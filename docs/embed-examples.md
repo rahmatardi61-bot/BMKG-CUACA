@@ -30,6 +30,58 @@ Framework yang merender elemen **setelah** loader memindai halaman butuh satu ta
 | React 18 | `useEffect` | `react/index.html` |
 | Angular 22 | `ngAfterViewInit` | `angular/src/app/bmkg-widget.component.ts` |
 
+## Fungsi pendukung juga di-expose
+
+Widget yang menampilkan wilayah butuh pilihan lokasi. Itu bukan tugas framework partner,
+jadi servernya yang menyediakan — dan tiap halaman contoh memanggilnya **dari kodenya
+sendiri**, bukan lewat iframe:
+
+| Endpoint | Isi |
+|---|---|
+| `GET /api/widget-catalog` (Bearer) | 13 widget (id, nama, `needsCity`, `live`, catatan MOCK) + 10 kota + petunjuk pakai |
+| `GET /api/widget-search?q=…` (Bearer) | kota kita + kelurahan/kecamatan via OpenStreetMap, dinormalisasi `{name, region, lat, lon}` |
+
+Cara memanggilnya per stack (semuanya ± 10 baris): vanilla `addEventListener`, Vue
+`watch`, React `useEffect`, Angular `onQuery()` + `ChangeDetectorRef`.
+
+Pilihan lokasi lalu dipindahkan ke widget dengan **satu pesan**:
+
+```js
+window.postMessage({ type: 'bmkg-widget-place', label, lat, lon }, '*')
+```
+
+Loader meneruskannya ke semua iframe; widget memakai `?lat=&lon=` (bukan hanya 10 kota),
+jadi kelurahan hasil pencarian juga bisa. Terbukti: pilih "Cibiru" → semua widget pindah
+ke `-6.9145, 107.7230`.
+
+### Kenapa `lat/lon`, bukan cuma `city`
+
+Daftar kota kita hanya 10. Kalau widget hanya menerima nama kota, pencarian jadi sia-sia
+(partner bisa memilih kelurahan tapi widget tidak bisa menampilkannya). `loadCity()` di
+`useBmkgWeather` sudah menerima `coords` arbitrer, jadi ini hanya soal meneruskan
+parameter — bukan perubahan arsitektur.
+
+## Halaman /compare — bukti berdampingan
+
+`/compare` (perlu login) menampilkan kartu yang **sama** dua kali:
+
+- **kiri**: impor komponen Vue langsung (`<CurrentWeather :weather-data=…>`)
+- **kanan**: iframe hasil embed (`/embed.html?widget=current&city=…`)
+
+Satu pemilih kota menggerakkan keduanya, jadi perbedaan visual (kalau ada) bukan karena
+sumber data berbeda. Token ke iframe dikirim lewat `postMessage`, bukan URL.
+
+**Dua race yang sempat muncul dan sudah diperbaiki** (keduanya soal urutan waktu, bukan
+logika):
+
+1. Token dikirim saat `@load` → iframe belum memasang listener → hilang. Perbaikan:
+   tunggu pesan `bmkg-embed-ready` dari iframe (jalur normal), `@load` jadi jaring pengaman.
+2. Iframe minta token sebelum `getToken()` selesai → permintaan hilang. Perbaikan:
+   `watch(token)` mengirim ulang ke semua iframe begitu token siap.
+
+Gejalanya khas: 2 dari 3 iframe tampil, satu menulis "token tidak diterima dari halaman
+pemasang". Kalau muncul lagi, curigai urutan, bukan isinya.
+
 ## Yang sengaja TIDAK dilakukan
 
 Contoh di `bmkg_cuaca` mengimpor komponen langsung (`import CurrentWeather from

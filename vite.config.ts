@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'node:path'
+import { resolve, join } from 'node:path'
+import { existsSync } from 'node:fs'
 
 // ── BMKG proxy (dev) ────────────────────────────────────────────────────────
 // /api/df/* butuh Referer cuaca.bmkg.go.id, /api/public/* butuh Origin sama +
@@ -86,13 +87,17 @@ const apiRoutes: Plugin = {
   configureServer(server) {
     // Semua handler di api/*.ts bisa dipanggil di dev (5173) sama seperti di
     // Vercel/server.mjs — supaya perilaku token & proxy tidak berbeda.
-    const ROUTES = ['/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/embed-panel.js', '/api/bmkg'];
+    const ROUTES = [
+    '/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/embed-panel.js',
+    '/api/widget-catalog', '/api/widget-search', '/api/bmkg',
+  ];
     for (const route of ROUTES) {
       server.middlewares.use(route, async (req, res) => {
         try {
-          // embed-panel.js sudah JS murni (tanpa tipe) → dimuat apa adanya
-          const file =
-            route === '/api/bmkg' ? '/api/bmkg.ts' : route.endsWith('.js') ? route : `${route}.ts`;
+          // Beberapa handler ditulis JS murni (tanpa tipe): *.js / embed-panel.js.
+          // Sisanya TS. Dicari berurutan, bukan ditebak dari nama route.
+          const candidates = route.endsWith('.js') ? [route] : [`${route}.ts`, `${route}.js`];
+          const file = candidates.find((f) => existsSync(join(__dirname, f))) ?? candidates[0];
           const { default: mod } = await server.ssrLoadModule(file);
           // Vercel: `export default { fetch }`; dukung juga fungsi polos
           const handler = typeof mod === 'function' ? mod : mod.fetch;

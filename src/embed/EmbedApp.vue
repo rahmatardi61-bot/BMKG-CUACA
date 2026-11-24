@@ -34,6 +34,7 @@ const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/Maj
 // Leaflet dimuat hanya bila widget peta dipilih (jangan bebankan widget teks)
 const WaveRadarMap = defineAsyncComponent(() => import('../components/WaveRadarMap.vue'));
 const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
+const EmbedSearch = defineAsyncComponent(() => import('./EmbedSearch.vue'));
 
 const params = new URLSearchParams(window.location.search);
 const widget = params.get('widget') || 'coming';
@@ -47,19 +48,38 @@ const wantsDark = themeParam === 'auto'
 document.documentElement.classList.toggle('dark', wantsDark);
 document.body.style.background = wantsDark ? '#070c19' : '#eef5ff';
 
-// Hanya kota yang koordinatnya tersedia (CITY_COORDS) — kunci resminya 'DKI Jakarta'
+// ── LOKASI ────────────────────────────────────────────────────────────────
+// Widget menerima dua bentuk lokasi:
+//   ?city=Bandung            → nama dari daftar kota (paling umum, pendek)
+//   ?lat=-6.9&lon=107.6&label=Bandung  → titik arbitrer (hasil /api/widget-search)
+// Kota/koordinat dibuat reaktif karena halaman pemasang bisa memindahkan widget
+// saat pengunjung memilih lokasi lain (pesan `bmkg-widget-place`).
 const CITIES = Object.keys(CITY_COORDS).filter(c => !c.startsWith('Tamanan'));
 const ALIAS: Record<string, string> = { jakarta: 'DKI Jakarta', 'dki jakarta': 'DKI Jakarta' };
-const requestedCity = (params.get('city') || 'DKI Jakarta').trim();
-const city = ALIAS[requestedCity.toLowerCase()]
-  ?? CITIES.find(c => c.toLowerCase() === requestedCity.toLowerCase())
-  ?? 'DKI Jakarta';
+
+function resolvePlace(search: URLSearchParams): { label: string; coords?: { lat: number; lon: number } } {
+  const label = (search.get('label') || '').trim();
+  const lat = Number(search.get('lat'));
+  const lon = Number(search.get('lon'));
+  if (Number.isFinite(lat) && Number.isFinite(lon) && search.get('lat') !== null && search.get('lon') !== null) {
+    return { label: label || `${lat.toFixed(3)}, ${lon.toFixed(3)}`, coords: { lat, lon } };
+  }
+  const asked = (search.get('city') || 'DKI Jakarta').trim();
+  const name = ALIAS[asked.toLowerCase()]
+    ?? CITIES.find(c => c.toLowerCase() === asked.toLowerCase())
+    ?? 'DKI Jakarta';
+  return { label: name, coords: undefined };
+}
+
+const initialPlace = resolvePlace(params);
+const city = ref(initialPlace.label);
+const placeCoords = ref<{ lat: number; lon: number } | undefined>(initialPlace.coords);
 
 // Kartu yang sudah siap di-embed
 const READY = [
   'satellite', 'earthquake', 'alerts', 'news', 'forecast',
   'current', 'port-tide', 'air-quality', 'transport', 'major-cities',
-  'wave', 'marine',
+  'wave', 'marine', 'search',
 ];
 const isReady = READY.includes(widget);
 // Widget yang butuh kota: semua yang menampilkan nama/titik wilayah
@@ -167,8 +187,8 @@ async function loadData() {
       isMock.value = !bmkg.liveNews.value.length;
       articles.value = isMock.value ? newsArticles.slice(0, 4) : bmkg.liveNews.value;
     } else if (FETCH_WIDGETS.includes(widget)) {
-      const coords = CITY_COORDS[city];
-      await bmkg.loadCity(city, coords);
+      // coords dari ?lat/?lon bila ada; kalau tidak, loadCity memakai CITY_COORDS
+      await bmkg.loadCity(city.value, placeCoords.value);
       if (widget === 'alerts') {
         alerts.value = bmkg.liveAlerts.value;
       } else if (widget === 'forecast') {
@@ -178,7 +198,8 @@ async function loadData() {
         weather.value = bmkg.liveWeather.value;
       } else if (widget === 'port-tide') {
         // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
-        await bmkg.loadPort(coords.lat, coords.lon);
+        const c = placeCoords.value ?? CITY_COORDS[city.value];
+        await bmkg.loadPort(c.lat, c.lon);
       } else if (widget === 'air-quality') {
         weather.value = bmkg.liveWeather.value;
         // kartu ISPU menghitung nilai deterministik per kota (bukan data resmi) → selalu MOCK
@@ -198,6 +219,18 @@ onMounted(loadData); // city statis per page-load — tidak perlu watch
 // Halaman pemasang menyegarkan token sebelum kedaluwarsa lalu mengirim
 // `{type:'bmkg-embed-token'}` lagi. Widget memakai token baru untuk semua fetch
 // berikutnya — tanpa reload, tanpa kehilangan tampilan yang sudah ada.
+// Halaman pemasang memindahkan widget: {type:'bmkg-widget-place', label, lat, lon}
+window.addEventListener('message', (ev: MessageEvent) => {
+  const d = ev.data as { type?: string; label?: string; lat?: number; lon?: number } | null;
+  if (!d || d.type !== 'bmkg-widget-place') return;
+  const lat = Number(d.lat);
+  const lon = Number(d.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+  city.value = d.label || `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+  placeCoords.value = { lat, lon };
+  if (needCity && authState.value === 'ready') void loadData(); // muat ulang data lokasi baru
+});
+
 window.addEventListener('message', (ev: MessageEvent) => {
   const d = ev.data as { type?: string; token?: string } | null;
   if (!d || d.type !== 'bmkg-embed-token' || typeof d.token !== 'string' || !d.token) return;
@@ -275,7 +308,8 @@ window.addEventListener('message', (ev: MessageEvent) => {
         <FlaskConical class="w-3 h-3 shrink-0" />
         <span class="text-[9.5px] font-bold leading-snug">Data contoh (MOCK) — layanan BMKG sedang tidak tersedia</span>
       </div>
-      <SatelliteMap v-if="widget === 'satellite'" />
+      <EmbedSearch v-if="widget === 'search'" />
+    <SatelliteMap v-else-if="widget === 'satellite'" />
       <!-- alerts: sering kosong bila tak ada peringatan aktif → tampilkan status, bukan blank -->
       <template v-else-if="widget === 'alerts'">
         <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat peringatan…</div>

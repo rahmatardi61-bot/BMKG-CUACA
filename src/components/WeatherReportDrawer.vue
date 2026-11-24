@@ -18,6 +18,8 @@ const props = defineProps<{
   otherConditionsList: Array<{ name: string; label: string; icon: Component }>
   getConditionIconBg: (label: string) => string
   getConditionIconColor: (label: string) => string
+  /** true = dirender di dalam halaman (widget embed), bukan overlay penuh */
+  inline?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -43,12 +45,13 @@ function setComment(e: Event) {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-hidden flex flex-col justify-end md:flex-row md:justify-end">
+  <Teleport to="body" :disabled="inline">
+    <div v-if="isOpen"
+      :class="[inline ? 'relative w-full' : 'fixed inset-0 z-[9999]', 'overflow-hidden flex flex-col justify-end md:flex-row md:justify-end']">
 
       <!-- Backdrop -->
       <Transition name="drawer-fade" appear>
-        <div v-if="isOpen"
+        <div v-if="!inline && isOpen"
           class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm cursor-default"
           @click="emit('close')" />
       </Transition>
@@ -56,14 +59,14 @@ function setComment(e: Event) {
       <!-- Drawer Panel -->
       <Transition name="drawer-slide" appear>
         <div v-if="isOpen"
-          class="relative w-full h-full md:max-w-[480px] bg-white/95 dark:bg-brand-navy-950/95 md:border-l border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+16px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col overflow-hidden rounded-none"
+          :class="[inline ? 'md:max-w-none md:border-none' : 'md:max-w-[480px] md:border-l', 'relative w-full h-full bg-white/95 dark:bg-brand-navy-950/95 border-none shadow-2xl text-slate-800 dark:text-slate-100 pt-[calc(env(safe-area-inset-top,0px)+16px)] px-5 pb-safe md:pt-6 md:px-6 md:pb-0 flex flex-col overflow-hidden rounded-none']"
         >
           <!-- Ambient glow -->
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
           <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-indigo-500/8 blur-3xl pointer-events-none" />
 
           <!-- Close button -->
-          <button @click="emit('close')"
+          <button v-if="!inline" @click="emit('close')"
             class="absolute top-[calc(env(safe-area-inset-top,16px)+4px)] right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer z-10 md:top-4">
             <X class="w-4 h-4" />
           </button>

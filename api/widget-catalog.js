@@ -43,6 +43,15 @@ const WIDGETS = [
   { id: 'transport', name: 'Transportasi & Rute', needsCity: true, live: false, mock: 'selalu MOCK' },
   { id: 'major-cities', name: 'Kota-Kota Besar', needsCity: false, live: false, mock: 'statis, tidak memuat data' },
   { id: 'search', name: 'Pencarian Lokasi', needsCity: false, live: true, mock: null, helper: true },
+  { id: 'activity', name: 'Aktivitas & Rekomendasi', needsCity: true, live: true, mock: 'angka live, narasi dari data yang sama' },
+  { id: 'current-detail', name: 'Rincian Kondisi Cuaca', needsCity: true, live: true, mock: null },
+  { id: 'app-download', name: 'Unduh Aplikasi BMKG', needsCity: false, live: false, mock: 'statis, tanpa data' },
+  { id: 'radar', name: 'Radar & Dinamika Atmosfer', needsCity: true, live: false, mock: 'medan angin/suhu sintetis, bukan radar BMKG' },
+  { id: 'maritime-advisor', name: 'Saran Maritim (per sektor)', needsCity: true, live: true, mock: 'sektor default: shipping' },
+  { id: 'aviation-advisor', name: 'Saran Penerbangan (per sektor)', needsCity: true, live: true, mock: 'sektor default: commercial' },
+  { id: 'land-activity', name: 'Aktivitas Darat & Rute', needsCity: true, live: false, mock: 'destinasi contoh (Monas); peta live' },
+  { id: 'around', name: 'Detail Aktivitas Sekitar', needsCity: true, live: false, mock: 'satu aktivitas contoh (taman kota)' },
+  { id: 'report', name: 'Lapor Cuaca (form + riwayat)', needsCity: true, live: false, mock: 'laporan tidak dikirim ke server' },
 ];
 
 async function handle(req) {

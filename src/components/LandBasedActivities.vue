@@ -43,6 +43,8 @@ const props = defineProps<{
   isOpen: boolean;
   selectedCity: string;
   initialDestination?: { name: string; lat: number; lng: number; location: string } | null;
+  /** true = dirender di dalam halaman (widget embed), bukan overlay penuh */
+  inline?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -1989,9 +1991,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="body" :disabled="inline">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between fullscreen-map-container" v-api-marker:land-based>
+      <div v-if="isOpen"
+        :class="[inline ? 'relative w-full h-[640px] rounded-[4px]' : 'fixed inset-0 z-[9999] fullscreen-map-container', 'bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between']"
+        v-api-marker:land-based>
         
         <!-- The Background Map -->
         <div ref="desktopSlot" class="absolute inset-0 w-full h-full z-0 bg-slate-800">
@@ -2000,7 +2004,7 @@ onUnmounted(() => {
 
         <!-- Floating Close X Button on Map -->
         <div
-          v-if="currentStep !== 'search'"
+          v-if="!inline && currentStep !== 'search'"
           class="premium-tooltip-container absolute right-4 top-4 z-50"
         >
           <button 

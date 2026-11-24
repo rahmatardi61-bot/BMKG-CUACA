@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { getToken, decodeJwt, verifyOnServer } from '../services/embedToken';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, MousePointerClick, ListChecks, Construction, KeyRound, Lock } from 'lucide-vue-next';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, ListChecks, KeyRound, Lock } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -72,6 +72,9 @@ type Widget = {
   /** widget bisa jatuh ke data contoh bila layanan BMKG gagal */
   mockFallback?: string;
 };
+
+/** Widget yang tidak punya sumber data resmi — selalu berlabel MOCK. */
+const alwaysMock = computed(() => WIDGETS.filter(w => !w.live));
 
 const WIDGETS: Widget[] = [
   {
@@ -169,56 +172,90 @@ const WIDGETS: Widget[] = [
     desc: 'Kartu 10 kota besar Indonesia dengan landmark. Statis — tidak memuat data apa pun.',
     height: 400,
     live: false
+  },
+  {
+    id: 'activity',
+    name: 'Aktivitas & Rekomendasi',
+    desc: 'Rekomendasi aktivitas luar ruang, indeks kenyamanan panas, dan saran pakaian untuk kota terpilih.',
+    city: true,
+    height: 620,
+    live: true,
+    mockFallback: 'Angka suhu/angin/kelembapan live dari BMKG. Narasi saran dihitung dari angka itu dengan aturan kami sendiri — bukan produk resmi BMKG.'
+  },
+  {
+    id: 'current-detail',
+    name: 'Rincian Kondisi Cuaca',
+    desc: 'Grid rincian: suhu, angin, arah angin, kelembapan, visibilitas, tekanan, dan titik embun.',
+    city: true,
+    height: 420,
+    live: true
+  },
+  {
+    id: 'app-download',
+    name: 'Unduh Aplikasi BMKG',
+    desc: 'Kartu ajakan mengunduh Info BMKG (Google Play + App Store). Murni statis, tanpa token.',
+    height: 260,
+    live: false
+  },
+  {
+    id: 'radar',
+    name: 'Radar & Dinamika Atmosfer',
+    desc: 'Peta animasi lapisan radar, satelit, dan angin dengan kontrol waktu, ketinggian, dan model.',
+    city: true,
+    height: 700,
+    live: false,
+    mockFallback: 'Medan angin & suhu dihitung sintetis di browser dari jangkar kota. Ini BUKAN produk radar BMKG — widget selalu berlabel MOCK.'
+  },
+  {
+    id: 'maritime-advisor',
+    name: 'Saran Maritim',
+    desc: 'Saran keselamatan pelayaran per sektor (pelayaran, perikanan, migas, wisata, publik) beserta SOP dan kontak mitigasi.',
+    city: true,
+    height: 640,
+    live: true,
+    mockFallback: 'Widget tidak punya jalur untuk mengoper pilihan sektor dari halaman pemasang, jadi selalu memakai sektor default (shipping).'
+  },
+  {
+    id: 'aviation-advisor',
+    name: 'Saran Penerbangan',
+    desc: 'Saran operasi penerbangan per sektor (komersial, kargo, SIGMET, PIREP) untuk bandara terdekat.',
+    city: true,
+    height: 640,
+    live: true,
+    mockFallback: 'Sektor default: commercial. Pilihan sektor oleh pengunjung belum bisa dioper dari halaman pemasang.'
+  },
+  {
+    id: 'land-activity',
+    name: 'Aktivitas Darat & Rute',
+    desc: 'Peta rute menuju destinasi, transportasi publik terdekat, dan kondisi cuaca di sepanjang perjalanan.',
+    city: true,
+    height: 640,
+    live: false,
+    mockFallback: 'Tujuan perjalanan masih contoh tetap (Monumen Nasional) — partner belum bisa mengoper destinasi sendiri.'
+  },
+  {
+    id: 'around',
+    name: 'Detail Aktivitas Sekitar',
+    desc: 'Detail satu aktivitas di sekitar kota: peta lokasi, indeks kenyamanan, dan prakiraan 4 jam ke depan.',
+    city: true,
+    height: 640,
+    live: false,
+    mockFallback: 'Aktivitas yang ditampilkan adalah contoh (taman kota). Di dashboard, kartu ini terbuka dari klik pengunjung.'
+  },
+  {
+    id: 'report',
+    name: 'Lapor Cuaca',
+    desc: 'Formulir laporan kondisi cuaca oleh pengunjung: kondisi umum, rasa suhu, kondisi tambahan, dan riwayat laporan.',
+    city: true,
+    height: 700,
+    live: false,
+    mockFallback: 'Laporan tidak dikirim ke server mana pun — murni demo interaksi. Riwayat awal berisi dua contoh.'
   }
 ];
 
 // Kartu dashboard yang BELUM siap di-embed — ditampilkan jujur, bukan disembunyikan
 // Sengaja TIDAK dijadikan widget: isinya drawer interaktif / bergantung preferensi
 // pengguna, jadi tidak masuk akal dibekukan di dalam iframe.
-// Kartu dashboard yang BISA dijadikan widget, tapi belum dikerjakan (bahan diskusi)
-const SOON = [
-  {
-    name: 'Current Weather Overview',
-    reason: 'Isinya hampir sama dengan widget "Kondisi Cuaca Saat Ini" — kalau dibuat, keduanya jadi duplikat.'
-  },
-  {
-    name: 'Aktivitas & Rekomendasi',
-    reason: 'Narasi aktivitas dihitung dari data contoh (cityAnalysisMap), bukan produk resmi. Bisa dibuat, tapi harus berlabel MOCK.'
-  },
-  {
-    name: 'Radar Cuaca',
-    reason: 'Partikel angin & suhu stasiun dihitung di browser — animasi hasil hitungan, bukan produk radar BMKG. Butuh label MOCK.'
-  },
-  {
-    name: 'Peta Angin',
-    reason: 'Sama seperti radar: medan angin adalah animasi hasil hitungan, bukan data observasi.'
-  },
-  {
-    name: 'Around Activity',
-    reason: 'Daftar lapangan golf berasal dari data contoh; komponennya kini sudah tidak dipakai di dashboard.'
-  }
-];
-
-// Tidak mungkin jadi iframe: berupa drawer/modal yang menunggu klik pengunjung
-const NEEDS_CLICK = [
-  {
-    name: 'Land Based Activities',
-    reason: 'Drawer dengan prop isOpen. Harus dibuka pengunjung — dibekukan di iframe hasilnya kotak kosong.'
-  },
-  {
-    name: 'Penasihat Maritim',
-    reason: 'Drawer interaktif: pengunjung memilih sektor, narasinya lalu dihitung dari data contoh.'
-  },
-  {
-    name: 'Penasihat Penerbangan',
-    reason: 'Drawer interaktif: butuh input bandara/sektor dari pengunjung.'
-  },
-  {
-    name: 'Pencarian Lokasi',
-    reason: 'Sudah tercakup parameter ?city= pada widget lain, jadi tidak perlu widget sendiri.'
-  }
-];
-
 // Asal data tiap kelompok widget — ini yang menentukan seberapa "resmi" isinya
 const DATA_SOURCES = [
   {
@@ -600,16 +637,8 @@ async function copy(text: string, key: string) {
             <p class="text-lg font-black text-emerald-500 leading-none">{{ WIDGETS.length }}</p>
             <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget siap di-embed</p>
           </div>
-          <div class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2">
-            <p class="text-lg font-black text-slate-500 leading-none">{{ SOON.length }}</p>
-            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">belum dikerjakan</p>
-          </div>
-          <div class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2">
-            <p class="text-lg font-black text-slate-500 leading-none">{{ NEEDS_CLICK.length }}</p>
-            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">butuh klik pengunjung</p>
-          </div>
           <div class="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2">
-            <p class="text-lg font-black text-amber-500 leading-none">2</p>
+            <p class="text-lg font-black text-amber-500 leading-none">{{ alwaysMock.length }}</p>
             <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget selalu MOCK</p>
           </div>
         </div>
@@ -648,48 +677,6 @@ async function copy(text: string, key: string) {
             Konsekuensinya: perubahan kecil di sisi BMKG (header, struktur halaman, CORS) bisa
             mematikan widget tanpa peringatan. Tidak ada kontrak/SLA yang bisa dipegang.
           </p>
-        </div>
-
-        <!-- belum dikerjakan -->
-        <div class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4 space-y-2">
-          <h4 class="text-xs font-black flex items-center gap-1.5">
-            <Construction class="w-3.5 h-3.5 text-slate-400" /> Belum siap ({{ SOON.length }})
-          </h4>
-          <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
-            Bisa dibuat, tapi belum dikerjakan — bukan karena teknis mustahil.
-          </p>
-          <div class="grid sm:grid-cols-2 gap-2 pt-1">
-            <div
-              v-for="s in SOON"
-              :key="s.name"
-              class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
-            >
-              <p class="text-sm font-bold text-slate-800 dark:text-slate-300">{{ s.name }}</p>
-              <p class="text-[11px] text-slate-500 mt-1 leading-snug">{{ s.reason }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- butuh klik pengunjung -->
-        <div class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4 space-y-2">
-          <h4 class="text-xs font-black flex items-center gap-1.5">
-            <MousePointerClick class="w-3.5 h-3.5 text-slate-400" /> Butuh klik pengunjung ({{ NEEDS_CLICK.length }})
-          </h4>
-          <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
-            Ini <strong class="text-slate-800 dark:text-slate-200">tidak akan pernah</strong> jadi widget embed.
-            Semuanya berupa drawer/modal: butuh pengunjung membuka panel dan memilih sesuatu.
-            Dibekukan di dalam iframe, hasilnya kotak kosong tanpa jalan masuk.
-          </p>
-          <div class="grid sm:grid-cols-2 gap-2 pt-1">
-            <div
-              v-for="s in NEEDS_CLICK"
-              :key="s.name"
-              class="rounded-lg border border-slate-200 dark:border-slate-800/40 bg-slate-50 dark:bg-slate-900/20 px-3 py-2"
-            >
-              <p class="text-sm font-bold text-slate-800 dark:text-slate-300">{{ s.name }}</p>
-              <p class="text-[11px] text-slate-500 mt-1 leading-snug">{{ s.reason }}</p>
-            </div>
-          </div>
         </div>
 
         <!-- yang dibutuhkan agar bisa naik ke produksi -->

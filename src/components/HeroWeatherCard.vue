@@ -2,7 +2,6 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { 
   Droplets, 
-  Wind,
   Sun, 
   SunDim,
   Cloudy,
@@ -23,6 +22,7 @@ import {
 } from '../data/weatherHelpers';
 import { hourlyForecastsMap } from '../data/mockData';
 import WeatherReportDrawer from './WeatherReportDrawer.vue';
+import { useWeatherReport } from '../composables/useWeatherReport';
 
 const props = defineProps<{
   weatherData: WeatherData;
@@ -335,81 +335,20 @@ const getSnowStyle = (n: number) => {
 
 // ── Lapor Cuaca Modal Drawer State & Logic ────────────────────────────────────
 const isReportModalOpen = ref(false);
-const reportSubmitting = ref(false);
-const reportSuccess = ref(false);
-const reportActiveTab = ref<'feedback' | 'history'>('feedback');
-
-const reportForm = ref({
-  condition: 'Cerah Berawan',
-  tempFeeling: 'Nyaman / Pas',
-  otherConditions: [] as string[],
-  comment: ''
-});
-
-interface WeatherReportEntry {
-  id: string;
-  city: string;
-  time: string;
-  condition: string;
-  tempFeeling: string;
-  otherConditions: string[];
-  comment: string;
-}
-
-const reportHistory = ref<WeatherReportEntry[]>([
-  {
-    id: 'rep-1',
-    city: 'DKI Jakarta',
-    time: '14:20 WIB',
-    condition: 'Hujan Deras',
-    tempFeeling: 'Dingin',
-    otherConditions: ['Angin Kencang', 'Jalan Tergenang / Banjir'],
-    comment: 'Wilayah Kemang hujan sangat deras disertai angin kencang. Hati-hati berkendara.'
-  },
-  {
-    id: 'rep-2',
-    city: 'DKI Jakarta',
-    time: '13:45 WIB',
-    condition: 'Berawan Tebal',
-    tempFeeling: 'Lembap / Gerah',
-    otherConditions: ['Langit Gelap', 'Mendung'],
-    comment: 'Awan hitam tebal sudah menutupi area Jakarta Selatan.'
-  }
-]);
-
-const overallConditions = [
-  { name: 'sunny', label: 'Cerah', icon: Sun },
-  { name: 'partly-cloudy', label: 'Cerah Berawan', icon: SunDim },
-  { name: 'cloudy', label: 'Berawan Tebal', icon: Cloudy },
-  { name: 'light-rain', label: 'Hujan Gerimis', icon: CloudRain },
-  { name: 'heavy-rain', label: 'Hujan Deras', icon: CloudRain },
-  { name: 'thunderstorm', label: 'Badai Petir', icon: CloudLightning }
-];
-
-const tempFeelings = [
-  { name: 'hot', label: 'Panas Menyengat', range: '>33°C' },
-  { name: 'humid', label: 'Gerah / Lembap', range: '29-33°C' },
-  { name: 'comfy', label: 'Nyaman / Pas', range: '24-28°C' },
-  { name: 'cool', label: 'Sejuk', range: '20-23°C' },
-  { name: 'cold', label: 'Dingin', range: '<20°C' }
-];
-
-const otherConditionsList = [
-  { name: 'windy', label: 'Angin Kencang', icon: Wind },
-  { name: 'foggy', label: 'Kabut Tebal', icon: Cloud },
-  { name: 'flood', label: 'Jalan Tergenang / Banjir', icon: CloudRain },
-  { name: 'slippery', label: 'Jalan Licin', icon: CloudRain },
-  { name: 'dark', label: 'Langit Gelap', icon: Cloudy },
-  { name: 'lightning', label: 'Kilat / Petir Menyambar', icon: CloudLightning }
-];
-
-const getConditionIconBg = (_condName?: string) => {
-  return 'bg-blue-500/10 dark:bg-blue-400/15';
-};
-
-const getConditionIconColor = (_condName?: string) => {
-  return 'text-blue-600 dark:text-blue-400';
-};
+const {
+  submitting: reportSubmitting,
+  success: reportSuccess,
+  activeTab: reportActiveTab,
+  form: reportForm,
+  history: reportHistory,
+  toggleOtherCondition,
+  submit: submitReport,
+  overallConditions,
+  tempFeelings,
+  otherConditionsList,
+  getConditionIconBg,
+  getConditionIconColor,
+} = useWeatherReport(() => props.selectedCity);
 
 const openReportModal = () => {
   isReportModalOpen.value = true;
@@ -423,38 +362,7 @@ const closeReportModal = () => {
   document.body.classList.remove('drawer-open');
 };
 
-const toggleOtherCondition = (condLabel: string) => {
-  const idx = reportForm.value.otherConditions.indexOf(condLabel);
-  if (idx > -1) {
-    reportForm.value.otherConditions.splice(idx, 1);
-  } else {
-    reportForm.value.otherConditions.push(condLabel);
-  }
-};
 
-const submitReport = () => {
-  reportSubmitting.value = true;
-  setTimeout(() => {
-    reportSubmitting.value = false;
-    reportSuccess.value = true;
-
-    const newEntry: WeatherReportEntry = {
-      id: `rep-${Date.now()}`,
-      city: props.selectedCity,
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
-      condition: reportForm.value.condition,
-      tempFeeling: reportForm.value.tempFeeling,
-      otherConditions: [...reportForm.value.otherConditions],
-      comment: reportForm.value.comment
-    };
-    reportHistory.value.unshift(newEntry);
-
-    setTimeout(() => {
-      reportSuccess.value = false;
-      reportActiveTab.value = 'history';
-    }, 1800);
-  }, 900);
-};
 </script>
 
 <template>

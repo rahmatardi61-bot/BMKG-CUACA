@@ -19,6 +19,8 @@ const props = defineProps<{
   isOpen: boolean;
   activity: any | null;
   selectedCity: string;
+  /** true = dirender di dalam halaman (widget embed), bukan overlay penuh */
+  inline?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -161,9 +163,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="body" :disabled="inline">
     <Transition name="map-fade" appear>
-      <div v-if="isOpen && activity" class="fixed inset-0 z-[9999] bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between fullscreen-map-container">
+      <div v-if="isOpen && activity"
+        :class="[inline ? 'relative w-full h-[640px] rounded-[4px]' : 'fixed inset-0 z-[9999] fullscreen-map-container', 'bg-slate-900 overflow-hidden text-slate-100 font-sans flex flex-col justify-between']">
         <!-- Background Map -->
         <div class="absolute inset-0 w-full h-full z-0 bg-slate-800">
           <div ref="mapEl" class="w-full h-full"></div>
@@ -171,6 +174,7 @@ onUnmounted(() => {
 
         <!-- Floating Close button top right on map -->
         <button
+          v-if="!inline"
           type="button"
           @click="emit('close')"
           class="absolute right-4 top-4 z-50 w-10 h-10 rounded-full bg-slate-900/95 text-white flex items-center justify-center border border-slate-700/40 backdrop-blur-md shadow-lg hover:bg-slate-850 active:scale-95 transition-all cursor-pointer map-close-btn"

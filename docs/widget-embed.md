@@ -223,7 +223,7 @@ curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
 <script async src="https://DOMAIN/embed.js"></script>
 ```
 
-## Widget yang tersedia (12)
+## Widget yang tersedia (22)
 
 | ID | Nama | Query | Tinggi | Sumber data | Fallback MOCK |
 |---|---|---|---|---|---|
@@ -239,6 +239,30 @@ curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
 | `major-cities` | Kota-Kota Besar | `&city=` | 400 | `MajorCitiesCarousel` (landmark statis) | ➖ tanpa data |
 | `wave` | Radar Tinggi Gelombang | `&city=` | 480 | `WaveRadarMap` (zona live BMKG) | ❌ |
 | `marine` | Peta Meteorologi Maritim | `&city=` | 600 | `MarineMap` (INAWAVES / Open Data live) | ❌ |
+| `search` | Pencarian Lokasi | — | auto | `EmbedSearch` + `/api/widget-search` (OSM) | ❌ |
+| `activity` | Aktivitas & Rekomendasi | `&city=` | auto | `loadCity()` → `WeatherActivity` + `buildCityAnalysis` | ➖ narasi dihitung sendiri |
+| `current-detail` | Rincian Kondisi Cuaca | `&city=` | auto | `loadCity()` → `CurrentWeather` | ❌ |
+| `app-download` | Unduh Aplikasi BMKG | — | auto | statis (`AppDownloadCTA`) | ➖ tanpa data |
+| `radar` | Radar & Dinamika Atmosfer | `&city=` | 700 | `WeatherRadarMap` (medan sintetis) | ✅ **selalu** MOCK |
+| `maritime-advisor` | Saran Maritim | `&city=&sector=` | auto | `MaritimeAdvisorDrawer` (inline) | ➖ sektor default `shipping` |
+| `aviation-advisor` | Saran Penerbangan | `&city=&sector=` | auto | `AviationAdvisorDrawer` (inline) | ➖ sektor default `commercial` |
+| `land-activity` | Aktivitas Darat & Rute | `&city=&destLat=&destLng=` | 640 | `LandBasedActivities` (inline) | ➖ tujuan contoh |
+| `around` | Detail Aktivitas Sekitar | `&city=` | 640 | `AroundActivityDrawer` (inline) | ➖ satu aktivitas contoh |
+| `report` | Lapor Cuaca | `&city=` | auto | `EmbedWeatherReport` + `useWeatherReport` | ➖ laporan tidak dikirim |
+
+### Kartu yang butuh pilihan pengunjung → pakai default
+
+`maritime-advisor`, `aviation-advisor`, `land-activity`, `around` dan `report` di
+dashboard hanya terbuka setelah pengunjung mengklik sesuatu (pilih sektor, pilih
+destinasi, buka form). Di embed belum ada jalur untuk mengoper pilihan itu, jadi
+dipakai nilai default yang paling wajar. Keterbatasan ini **dicatat di katalog**
+(`mock`) dan di halaman `/widgets`, bukan disembunyikan.
+
+Solusi "drawer di dalam iframe": komponen diberi prop `inline`. Saat `true`:
+Teleport dimatikan, `fixed inset-0` diganti blok `relative`, backdrop dan tombol
+tutup disembunyikan, dan `fullscreen-map-container` (yang memaksa `100vh`) tidak
+dipakai. Tanpa ini, drawer muncul sebagai overlay setinggi iframe dengan latar gelap
+dan tombol X yang tidak melakukan apa pun.
 
 `alerts`/`news`/`forecast`/`current`/`port-tide`/`air-quality`/`transport` = komponen
 **presentasional** (props), jadi EmbedApp menyiapkan datanya sendiri — pola sama seperti
@@ -353,8 +377,11 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - Halaman host tiruan (`file://`, CSS putih, font beda): 2 iframe terpasang,
   tinggi auto (420/888 px), **CSS host tidak terpengaruh**, 0 error.
 - `/embed` tanpa login; `city=Atlantis` → fallback `DKI Jakarta`.
-- **12 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 12/12 render tanpa
-  error JS, tanpa "Gagal menyiapkan widget", tanpa watermark API key.
+- **22 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 22/22 render tanpa
+  error JS, tanpa "Gagal menyiapkan widget", tanpa watermark API key. Tinggi hasil
+  ukur berkisar 98 px (`alerts` tanpa peringatan) sampai 1327 px (`activity`).
+- `/widgets`: 21 kartu preview (semua kecuali `search`) — seluruh iframe terisi
+  setelah di-scroll (iframe di bawah fold dimuat saat masuk viewport).
 - `port-tide` sempat tampil "Data pasut tidak tersedia" — **bukan bug**: saat diuji
   `maritim.bmkg.go.id/public_api` memang 503. Empty state jujur.
 - `wave`: basemap CARTO memunculkan watermark "API KEY REQUIRED" → diganti Esri Dark Gray.

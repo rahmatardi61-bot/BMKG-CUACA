@@ -9,17 +9,31 @@
 //   ?widget=forecast|alerts|air-quality|transport|port-tide  → data per kota
 //   ?widget=wave|marine              → peta maritim (Leaflet, live BMKG)
 //   ?widget=major-cities             → 10 kota besar (statis, tanpa fetch)
+//   ?widget=activity                 → aktivitas & rekomendasi per kota
+//   ?widget=current-detail           → rincian kondisi (angin, lembap, visibilitas)
+//   ?widget=app-download             → kartu ajakan unduh aplikasi (statis)
+//   ?widget=radar                    → peta lapisan radar/satelit/angin (MOCK sintetis)
+//   ?widget=maritime-advisor&sector=shipping   → saran maritim (default: shipping)
+//   ?widget=aviation-advisor&sector=commercial → saran penerbangan (default: commercial)
+//   ?widget=land-activity&dest=…     → aktivitas darat (default: destinasi contoh)
+//   ?widget=around                   → detail aktivitas sekitar (contoh: taman kota)
+//   ?widget=report                   → form laporan cuaca pengunjung
+// Kartu yang butuh pilihan pengunjung (sector, destinasi) memakai DEFAULT di atas:
+// partner belum bisa mengoper pilihannya, jadi ditampilkan versi paling wajar.
 //   ?widget=coming                   → placeholder resmi utk kartu yang belum siap
 // Kota dibatasi daftar tertutup + fallback Jakarta: kota tak dikenal diabaikan
 // (jangan pernah tampil kosong/rusak di web orang lain).
 // ═══════════════════════════════════════════════════════════════════════════
-import { defineAsyncComponent, ref, onMounted } from 'vue';
+import { defineAsyncComponent, computed, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
 import { adoptToken } from '../services/embedToken';
 import type { WarningAlert, NewsArticle, HourlyForecast } from '../types/weather';
 import { newsArticles, transportStatusesMap } from '../data/mockData';
 import type { WeatherData } from '../types/weather';
-import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical, ShieldAlert } from 'lucide-vue-next';
+import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical, ShieldAlert, Sun, Cloud, CloudRain, CloudSun, Wind } from 'lucide-vue-next';
+import { buildCityAnalysis } from '../services/analysisNarrative';
+import { cityLandmarks } from '../data/cityLandmarks';
+import { getAdditionalWeatherData } from '../data/weatherHelpers';
 
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
@@ -35,6 +49,15 @@ const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/Maj
 const WaveRadarMap = defineAsyncComponent(() => import('../components/WaveRadarMap.vue'));
 const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue'));
 const EmbedSearch = defineAsyncComponent(() => import('./EmbedSearch.vue'));
+const WeatherActivity = defineAsyncComponent(() => import('../components/WeatherActivity.vue'));
+const CurrentWeather = defineAsyncComponent(() => import('../components/CurrentWeather.vue'));
+const AppDownloadCTA = defineAsyncComponent(() => import('../components/AppDownloadCTA.vue'));
+const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
+const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
+const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
+const LandBasedActivities = defineAsyncComponent(() => import('../components/LandBasedActivities.vue'));
+const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const EmbedWeatherReport = defineAsyncComponent(() => import('./EmbedWeatherReport.vue'));
 
 const params = new URLSearchParams(window.location.search);
 const widget = params.get('widget') || 'coming';
@@ -80,16 +103,23 @@ const READY = [
   'satellite', 'earthquake', 'alerts', 'news', 'forecast',
   'current', 'port-tide', 'air-quality', 'transport', 'major-cities',
   'wave', 'marine', 'search',
+  'activity', 'current-detail', 'app-download', 'radar',
+  'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
 const isReady = READY.includes(widget);
 // Widget yang butuh kota: semua yang menampilkan nama/titik wilayah
 const CITY_WIDGETS = [
   'earthquake', 'alerts', 'forecast', 'current', 'port-tide',
   'air-quality', 'transport', 'wave', 'marine',
+  'activity', 'current-detail', 'radar',
+  'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
 const needCity = CITY_WIDGETS.includes(widget);
 // Widget yang datanya bergantung pada loadCity (satu fetch dipakai bersama)
-const FETCH_WIDGETS = ['alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport'];
+const FETCH_WIDGETS = [
+  'alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport',
+  'activity', 'current-detail',
+];
 
 // Widget berbasis data (alerts/news) menyiapkan datanya sendiri — komponennya
 // murni presentasional (props), pola sama seperti dashboard.
@@ -100,7 +130,17 @@ const forecasts = ref<HourlyForecast[]>([]);
 const weather = ref<WeatherData | null>(null);
 const loading = ref(false);
 // true bila widget menampilkan data MOCK/fallback — ditandai di UI (bukan disembunyikan)
-const isMock = ref(false);
+const isMock = ref(widget === 'radar'); // peta layer memakai field sintetis
+
+// Alasan MOCK berbeda per widget — jangan menyalahkan "layanan mati" untuk data
+// yang memang tidak pernah ada (ISPU, status transportasi, medan sintetis).
+const MOCK_NOTE: Record<string, string> = {
+  radar: 'Data contoh (MOCK) — medan angin & suhu dihitung sintetis, bukan radar BMKG',
+  'air-quality': 'Data contoh (MOCK) — BMKG tidak menyediakan API ISPU',
+  transport: 'Data contoh (MOCK) — status transportasi tidak tersedia resmi',
+  news: 'Data contoh (MOCK) — berita BMKG sedang tidak dapat dimuat',
+};
+const mockNote = computed(() => MOCK_NOTE[widget] ?? 'Data contoh (MOCK)');
 
 // ── Token Keycloak (POC) ───────────────────────────────────────────────────
 // ── TOKEN ─────────────────────────────────────────────────────────────────
@@ -194,7 +234,7 @@ async function loadData() {
       } else if (widget === 'forecast') {
         forecasts.value = bmkg.liveHourly.value.slice(0, 12);
         isMock.value = false; // prakiraan kosong → pesan jujur, bukan angka karangan
-      } else if (widget === 'current') {
+      } else if (widget === 'current' || widget === 'current-detail' || widget === 'activity') {
         weather.value = bmkg.liveWeather.value;
       } else if (widget === 'port-tide') {
         // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
@@ -213,6 +253,73 @@ async function loadData() {
     loading.value = false;
   }
 }
+// ── PILIHAN DEFAULT UNTUK KARTU INTERAKTIF ────────────────────────────────
+// Di dashboard, kartu ini dibuka dari klik (pilih sektor, pilih destinasi).
+// Di embed belum ada jalur untuk mengoper pilihan itu, jadi dipakai default
+// paling wajar. Nanti bisa ditambah `?sector=` / `?dest=` tanpa ubah kontrak.
+const SECTOR_MARITIM = params.get('sector') || 'shipping';
+const SECTOR_AVIASI = params.get('sector') || 'commercial';
+
+// Destinasi contoh untuk aktivitas darat: titik dekat kota terpilih (±4 km),
+// supaya rutenya masuk akal. Partner belum bisa mengoper destinasi sendiri;
+// `?destLat=&destLng=` disediakan kalau nanti dibutuhkan.
+const DEST_OVERRIDE = {
+  lat: Number(params.get('destLat')),
+  lng: Number(params.get('destLng')),
+};
+
+// Satu aktivitas sekitar contoh (taman kota) — AroundActivityDrawer butuh objek
+// lengkap: koordinat, indeks kenyamanan, dan prakiraan 4 jam.
+const AROUND_ACTIVITY = {
+  id: 1,
+  name: 'Taman Kota',
+  distance: '1,2 km',
+  location: 'Pusat kota',
+  lat: 0,
+  lng: 0,
+  comfortEmoji: '🙂',
+  comfortIndex: 'Nyaman',
+  rainWarning: 'Risiko hujan rendah.',
+  uvWarning: 'UV sedang, gunakan tabir surya.',
+  colorKey: 'emerald',
+  category: 'park',
+  tags: ['keluarga', 'jalan kaki'],
+  hourly: [
+    { time: 'Sekarang', isCurrent: true, temp: 29, windSpeed: 8, windDirIcon: Wind, rain: 0.1, icon: CloudSun },
+    { time: '+1 j', temp: 30, windSpeed: 10, windDirIcon: Wind, rain: 0.2, icon: Sun },
+    { time: '+2 j', temp: 29, windSpeed: 9, windDirIcon: Wind, rain: 0.3, icon: Cloud },
+    { time: '+3 j', temp: 27, windSpeed: 12, windDirIcon: Wind, rain: 0.6, icon: CloudRain },
+  ],
+};
+
+// ── TURUNAN UNTUK KARTU YANG BUTUH ANALISIS ───────────────────────────────
+// MainDashboard menghitung ini di halamannya. Di embed dihitung di sini supaya
+// komponen tetap presentasional (props masuk, tidak fetch sendiri).
+const activityAdditional = computed(() =>
+  bmkg.liveAdditional.value ?? getAdditionalWeatherData(city.value),
+);
+const activityAnalysis = computed(() =>
+  buildCityAnalysis(weather.value as WeatherData, city.value, bmkg.liveHourly.value, activityAdditional.value),
+);
+const activityLandmark = computed(() => {
+  const match = cityLandmarks.find(
+    l => l.fullName === city.value || l.name === city.value.split(',')[0].trim(),
+  );
+  return match?.svg ?? '';
+});
+const activityShortName = computed(() => city.value.split(',')[0].trim());
+const landDestination = computed(() => {
+  const c = placeCoords.value ?? CITY_COORDS[city.value] ?? CITY_COORDS['DKI Jakarta'];
+  const lat = Number.isFinite(DEST_OVERRIDE.lat) && DEST_OVERRIDE.lat !== 0 ? DEST_OVERRIDE.lat : c.lat + 0.03;
+  const lng = Number.isFinite(DEST_OVERRIDE.lng) && DEST_OVERRIDE.lng !== 0 ? DEST_OVERRIDE.lng : c.lon + 0.03;
+  return { name: 'Taman Kota', lat, lng, location: city.value };
+});
+
+const aroundActivity = computed(() => {
+  const c = placeCoords.value ?? CITY_COORDS[city.value] ?? CITY_COORDS['DKI Jakarta'];
+  return { ...AROUND_ACTIVITY, location: city.value, lat: c.lat + 0.01, lng: c.lon + 0.01 };
+});
+
 onMounted(loadData); // city statis per page-load — tidak perlu watch
 
 // ── REFRESH TOKEN (induk memperbarui) ─────────────────────────────────────
@@ -306,7 +413,7 @@ window.addEventListener('message', (ev: MessageEvent) => {
         class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border-b border-amber-500/25 text-amber-600 dark:text-amber-400"
       >
         <FlaskConical class="w-3 h-3 shrink-0" />
-        <span class="text-[9.5px] font-bold leading-snug">Data contoh (MOCK) — layanan BMKG sedang tidak tersedia</span>
+        <span class="text-[9.5px] font-bold leading-snug">{{ mockNote }}</span>
       </div>
       <EmbedSearch v-if="widget === 'search'" />
     <SatelliteMap v-else-if="widget === 'satellite'" />
@@ -386,6 +493,98 @@ window.addEventListener('message', (ev: MessageEvent) => {
           <TransportWeather :statuses="transportStatusesMap[city] ?? transportStatusesMap['DKI Jakarta']" />
         </div>
       </template>
+
+      <!-- Aktivitas & rekomendasi: angka live, narasi dihitung dari data yang sama -->
+      <template v-else-if="widget === 'activity'">
+        <div v-if="loading || !weather" class="p-6 text-center text-[12px] text-slate-500">
+          Memuat rekomendasi aktivitas…
+        </div>
+        <WeatherActivity
+          v-else
+          :weather-data="weather"
+          :current-analysis="activityAnalysis"
+          :additional-info="activityAdditional"
+          :selected-city="city"
+          slide-direction="slide-right"
+          :current-city-landmark-svg="activityLandmark"
+          :current-city-short-name="activityShortName"
+          :maritim-live="null"
+        />
+      </template>
+
+      <!-- Rincian kondisi: angin, kelembapan, visibilitas, tekanan, dst. -->
+      <template v-else-if="widget === 'current-detail'">
+        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat rincian cuaca…</div>
+        <CurrentWeather
+          v-else-if="weather"
+          :weather-data="weather"
+          :cities="[city]"
+          :selected-city="city"
+          :additional-info="bmkg.liveAdditional.value ?? undefined"
+        />
+        <div v-else class="p-6 text-center text-[11px] text-slate-500">
+          Rincian cuaca {{ city }} belum tersedia.
+        </div>
+      </template>
+
+      <!-- Kartu unduh aplikasi: murni statis, tanpa token & tanpa kota -->
+      <div v-else-if="widget === 'app-download'" class="p-4">
+        <AppDownloadCTA class="h-full" />
+      </div>
+
+      <!-- Peta lapisan (radar/satelit/angin): data field SINTETIS → selalu MOCK -->
+      <WeatherRadarMap
+        v-else-if="widget === 'radar'"
+        :selected-city="city"
+        :weather-data="weather ?? undefined"
+      />
+
+      <!-- Saran maritim: inline + sektor default (partner belum bisa memilih) -->
+      <MaritimeAdvisorDrawer
+        v-else-if="widget === 'maritime-advisor'"
+        inline
+        :is-open="true"
+        :initial-sector-id="SECTOR_MARITIM as 'shipping' | 'fishery' | 'oilgas' | 'tourism' | 'public'"
+        :selected-city="city"
+        @close="() => {}"
+      />
+
+      <!-- Saran penerbangan: inline + sektor default -->
+      <AviationAdvisorDrawer
+        v-else-if="widget === 'aviation-advisor'"
+        inline
+        :is-open="true"
+        :initial-sector-id="SECTOR_AVIASI as 'commercial' | 'cargo' | 'sigmet' | 'pirep'"
+        :selected-city="city"
+        @close="() => {}"
+      />
+
+      <!-- Aktivitas darat: rute ke destinasi contoh (Monas) -->
+      <LandBasedActivities
+        v-else-if="widget === 'land-activity'"
+        inline
+        :is-open="true"
+        :selected-city="city"
+        :initial-destination="landDestination"
+        @close="() => {}"
+      />
+
+      <!-- Detail aktivitas sekitar: contoh taman kota -->
+      <AroundActivityDrawer
+        v-else-if="widget === 'around'"
+        inline
+        :is-open="true"
+        :activity="aroundActivity"
+        :selected-city="city"
+        @close="() => {}"
+      />
+
+      <!-- Lapor cuaca: form + riwayat, dirender inline -->
+      <EmbedWeatherReport
+        v-else-if="widget === 'report'"
+        :selected-city="city"
+        :weather-temp="weather?.temp"
+      />
 
       <!-- 10 kota besar: kartu statis (landmark + nama), tanpa fetch -->
       <div v-else-if="widget === 'major-cities'" class="p-4 overflow-hidden">

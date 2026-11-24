@@ -1,125 +1,94 @@
-# Contoh pemasangan widget (evidence demo)
+# Contoh dashboard per framework (bukti embed bisa dipakai siapa saja)
 
-Halaman contoh untuk presentasi: memasang widget BMKG di **empat stack** dengan kontrak
-yang sama. Dipakai untuk menunjukkan bahwa integrasi tidak bergantung pada Vue, dan tidak
-memerlukan akses ke kode kita.
+Empat repo contoh di `../bmkg-embed-examples/`, **masing-masing berdiri sendiri** — tidak ada
+file yang dipakai bersama. Kalau partner meminta sample React, kirim folder
+`react-dashboard/` saja; mereka `npm install`, isi `.env`, `npm run dev`.
 
-| Yang ingin ditunjukkan | Di mana |
-|---|---|
-| Integrasi cuma 2 baris | `vanilla/` |
-| Framework modern pun polanya sama | `vue/`, `react/`, `angular/` |
-| Token diambil & disegarkan otomatis | badge token di kanan atas, Network → `embed-token` |
-| Token tidak ada di HTML | View Source semua halaman contoh |
-| Tanpa token sah tidak ada data | buka `/embed.html` langsung → "Tidak diotorisasi" |
-| Gerbang benar-benar menolak | ganti port halaman contoh → badge merah, 403 |
+| Repo | Stack | Port web | Port backend stub |
+|---|---|---|---|
+| `vanilla-dashboard/` | HTML + TypeScript | 8101 | 8201 |
+| `vue-dashboard/` | Vue 3 + Vite | 8102 | 8202 |
+| `react-dashboard/` | React 18 + Vite | 8103 | 8203 |
+| `angular-dashboard/` | Angular 22 | 8104 | 8204 |
 
-## Satu kontrak, empat stack
+## Kenapa tiap repo punya backend sendiri
+
+Token Keycloak butuh `client_credentials` + `client_secret`. Itu **tidak boleh** ada di
+browser. Jadi tiap repo membawa `server.mjs` kecil yang berperan sebagai "backend partner":
+
+```
+browser → GET /api/token                     backend partner (client_secret di .env)
+browser → GET <server>/api/embed-js          Bearer token → script widget
+        → eval(script)                       membuat iframe di tiap [data-bmkg-widget]
+        → postMessage                        token ke iframe (bukan URL)
+```
+
+Penting: sample **tidak memakai** `/api/embed-token` milik kita. Itu keran khusus POC
+internal, dan tidak akan ada di produksi. Yang dipakai hanya `/api/embed-js`,
+`/api/widget-catalog`, `/api/widget-search` — semuanya dijaga Bearer dan `CORS: *`.
+
+Konsekuensi: `EMBED_ALLOWED_ORIGINS` tidak lagi relevan untuk sample (hanya untuk
+`/api/embed-token`). Sample boleh jalan di port berapa pun.
+
+## Satu kontrak, empat framework
 
 ```html
 <div data-bmkg-widget="current" data-city="Bandung"></div>
-<script src="http://HOST:5173/api/embed-panel.js"></script>
 ```
 
-Framework yang merender elemen **setelah** loader memindai halaman butuh satu tambahan:
-`window.BMKGWidgets.scan()` setelah mount.
+Loader (`bmkg-embed.ts`, disalin di tiap repo) mengurus token, `eval`, refresh, dan
+penerusan pesan. Framework hanya perlu memanggil `rescan()` setelah render:
 
-| Stack | Pemicu `scan()` | Lokasi kode |
+| Stack | Pemicu | Lokasi |
 |---|---|---|
-| Vanilla | tidak perlu (HTML sudah ada saat loader jalan) | `vanilla/index.html` |
-| Vue 3 | `onMounted` | `vue/index.html` |
-| React 18 | `useEffect` | `react/index.html` |
-| Angular 22 | `ngAfterViewInit` | `angular/src/app/bmkg-widget.component.ts` |
+| Vanilla | langsung (DOM sudah ada) | `src/main.ts` |
+| Vue 3 | `onMounted` | `src/App.vue` |
+| React 18 | `useEffect` | `src/App.tsx` |
+| Angular 22 | `ngAfterViewInit` | `src/app/bmkg-widget.component.ts` |
 
-## Fungsi pendukung juga di-expose
-
-Widget yang menampilkan wilayah butuh pilihan lokasi. Itu bukan tugas framework partner,
-jadi servernya yang menyediakan — dan tiap halaman contoh memanggilnya **dari kodenya
-sendiri**, bukan lewat iframe:
+## Query widget yang tersedia
 
 | Endpoint | Isi |
 |---|---|
-| `GET /api/widget-catalog` (Bearer) | 13 widget (id, nama, `needsCity`, `live`, catatan MOCK) + 10 kota + petunjuk pakai |
-| `GET /api/widget-search?q=…` (Bearer) | kota kita + kelurahan/kecamatan via OpenStreetMap, dinormalisasi `{name, region, lat, lon}` |
+| `GET /api/widget-catalog` | 13 widget (id, `needsCity`, `live`, catatan MOCK) + 10 kota |
+| `GET /api/widget-search?q=…` | kota kita + kelurahan via OpenStreetMap |
 
-Cara memanggilnya per stack (semuanya ± 10 baris): vanilla `addEventListener`, Vue
-`watch`, React `useEffect`, Angular `onQuery()` + `ChangeDetectorRef`.
-
-Pilihan lokasi lalu dipindahkan ke widget dengan **satu pesan**:
+Pilihan lokasi diteruskan dengan satu pesan:
 
 ```js
 window.postMessage({ type: 'bmkg-widget-place', label, lat, lon }, '*')
 ```
 
-Loader meneruskannya ke semua iframe; widget memakai `?lat=&lon=` (bukan hanya 10 kota),
-jadi kelurahan hasil pencarian juga bisa. Terbukti: pilih "Cibiru" → semua widget pindah
-ke `-6.9145, 107.7230`.
+Widget menerima `?city=Nama` **atau** `?lat=&lon=` (hasil pencarian), jadi kelurahan juga
+bisa ditampilkan.
 
-### Kenapa `lat/lon`, bukan cuma `city`
+## Biaya yang disengaja
 
-Daftar kota kita hanya 10. Kalau widget hanya menerima nama kota, pencarian jadi sia-sia
-(partner bisa memilih kelurahan tapi widget tidak bisa menampilkannya). `loadCity()` di
-`useBmkgWeather` sudah menerima `coords` arbitrer, jadi ini hanya soal meneruskan
-parameter — bukan perubahan arsitektur.
+`src/bmkg-embed.ts` (±170 baris) **disalin ke empat repo**. Itu harga standalone: tiap repo
+harus bisa dikirim dan dijalankan tanpa folder lain. Perbaikan loader harus dilakukan di
+keempatnya — dicatat di README masing-masing.
 
-## Halaman /compare — bukti berdampingan
+Yang **tidak** diduplikasi: daftar widget dan daftar kota. Keduanya diambil dari server,
+supaya tidak pernah basi.
 
-`/compare` (perlu login) menampilkan kartu yang **sama** dua kali:
+## Bug nyata yang ditemukan saat membangun ini
 
-- **kiri**: impor komponen Vue langsung (`<CurrentWeather :weather-data=…>`)
-- **kanan**: iframe hasil embed (`/embed.html?widget=current&city=…`)
+1. **`window.BMKG_EMBED_TOKEN` lupa di-set** sebelum `eval` → script jalan tapi tidak
+   membuat iframe (0 iframe, tanpa error). Token harus diserahkan lewat variabel global
+   karena script hasil `eval` tidak punya `document.currentScript`.
+2. **`data-height` mematikan auto-resize** → kartu tinggi kosong. Cukup hilangkan atribut
+   itu; loader mengukur sendiri dari isi iframe.
+3. **Kelas Tailwind di repo tanpa Tailwind** (React) → layout berantakan tanpa error. Repo
+   contoh memakai CSS biasa.
+4. **`style="..."` berupa string di React** → React error #62, halaman kosong. Di React
+   `style` harus objek.
+5. **Angular tanpa `import.meta.env`** → build gagal. Di repo Angular alamat server jadi
+   konstanta `BMKG_ORIGIN`.
+6. **Vanilla: tombol kota tanpa `class="chip"`** → tampil tanpa gaya.
 
-Satu pemilih kota menggerakkan keduanya, jadi perbedaan visual (kalau ada) bukan karena
-sumber data berbeda. Token ke iframe dikirim lewat `postMessage`, bukan URL.
+Semua di atas lolos `tsc`/build; hanya ketahuan dengan menjalankan halamannya.
 
-**Dua race yang sempat muncul dan sudah diperbaiki** (keduanya soal urutan waktu, bukan
-logika):
+## Status
 
-1. Token dikirim saat `@load` → iframe belum memasang listener → hilang. Perbaikan:
-   tunggu pesan `bmkg-embed-ready` dari iframe (jalur normal), `@load` jadi jaring pengaman.
-2. Iframe minta token sebelum `getToken()` selesai → permintaan hilang. Perbaikan:
-   `watch(token)` mengirim ulang ke semua iframe begitu token siap.
-
-Gejalanya khas: 2 dari 3 iframe tampil, satu menulis "token tidak diterima dari halaman
-pemasang". Kalau muncul lagi, curigai urutan, bukan isinya.
-
-## Yang sengaja TIDAK dilakukan
-
-Contoh di `bmkg_cuaca` mengimpor komponen langsung (`import CurrentWeather from
-'.../components'`) dan itu **dibiarkan apa adanya** — itu aplikasi kita sendiri, bukan pola
-yang dijual ke partner. Kalau sample embed memakai impor komponen, demo-nya menyesatkan:
-partner tidak punya akses ke folder `components` kita.
-
-## Alur token di halaman contoh
-
-```
-GET /api/embed-panel.js          publik, tanpa token (aman: tak ada rahasia di dalamnya)
-  └─ GET /api/embed-token        server → Keycloak (client_secret hanya di server)
-  └─ GET /api/embed-js?token=…   script inti, WAJIB token sah
-  └─ eval(script)                buat iframe per [data-bmkg-widget]
-  └─ postMessage                 token ke iframe (bukan URL)
-```
-
-Refresh: 60 detik sebelum `exp` (klaim JWT), plus saat tab kembali aktif bila sisa < 60
-detik. Token baru diteruskan ke semua iframe; widget memakainya untuk fetch berikutnya
-tanpa reload.
-
-**Acuan kedaluwarsa adalah `exp` di dalam JWT, bukan `expires_at` dari `/api/embed-token`.**
-Server memberi token dari cache, jadi `expires_at` bisa lebih panjang daripada umur token
-sebenarnya — memakai yang optimistis membuat refresh datang terlambat (sempat 401).
-
-## Origin gate
-
-`/api/embed-token` memeriksa **header Origin** terhadap `EMBED_ALLOWED_ORIGINS`
-(`api/embed-token.ts`), default:
-
-```
-http://localhost:8099, http://127.0.0.1:8099, http://localhost:8098, http://127.0.0.1:8098
-```
-
-Ganti port halaman contoh → harus ditambahkan di sana. Parameter `?origin=` **tidak**
-dipakai sebagai izin: itu bisa dikarang lewat curl. Yang dipercaya hanya header yang
-dikirim browser.
-
-## Menjalankan
-
-Lihat `bmkg-embed-examples/README.md`.
+Sudah diuji: keempat repo hidup bersamaan, masing-masing 6 iframe terisi, 10 chip kota,
+pencarian "cibiru" memindahkan semua widget ke `-6.9145, 107.7230`, badge `Token OK`.

@@ -244,14 +244,16 @@ berarti token ditolak dan partner perlu minta token baru.
 ## Widget yang tersedia (25)
 
 Urutan tabel = urutan render `src/pages/MainDashboard.vue`, supaya membandingkan
-`/widgets` dengan `/dashboard` gampang. Urutan yang sama dipakai
+`/widgets` dengan `/dashboard` gampang. `search` ditaruh paling atas karena di
+dashboard kolom pencarian memang ada di header; tinggi awalnya 400 px supaya
+daftar hasil (maks 256 px, bisa di-scroll) langsung terlihat. Urutan yang sama dipakai
 `api/widget-catalog.js` dan daftar di `/widgets`.
 
 | ID | Nama | Query | Sumber data | Fallback MOCK |
 |---|---|---|---|---|
+| `search` | Pencarian Lokasi | — | `EmbedSearch` + `/api/widget-search` → **API BMKG** | ❌ |
 | `alerts` | Peringatan Dini Cuaca | `&city=` | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
 | `current` | Kondisi Cuaca Saat Ini | `&city=` | `loadCity()` → `HeroWeatherCard` | ❌ |
-| `search` | Pencarian Lokasi | — | `EmbedSearch` + `/api/widget-search` → **API BMKG** | ❌ |
 | `major-cities` | Kondisi Terkini + Aktivitas Sekitar | — | `MajorCitiesCarousel` + `AroundActivityPanel` (carousel tempat) | ➖ konten contoh |
 | `current-detail` | Rincian Kondisi Cuaca | `&city=` | `loadCity()` → `CurrentWeather` | ❌ |
 | `forecast` | Prakiraan Cuaca Per Jam | `&city=` | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |

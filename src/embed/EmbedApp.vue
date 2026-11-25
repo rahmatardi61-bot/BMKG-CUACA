@@ -100,7 +100,7 @@ const placeCoords = ref<{ lat: number; lon: number } | undefined>(initialPlace.c
 // Urutan di sini mengikuti urutan render dashboard (MainDashboard.vue), supaya
 // membandingkan /widgets dengan /dashboard gampang.
 const READY = [
-  'alerts', 'current', 'search', 'major-cities', 'current-detail', 'forecast',
+  'search', 'alerts', 'current', 'major-cities', 'current-detail', 'forecast',
   'satellite', 'marine', 'radar', 'earthquake',
   'activity-comfort', 'activity-air', 'air-quality',
   'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',

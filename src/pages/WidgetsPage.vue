@@ -90,21 +90,31 @@ onUnmounted(() => {
 // iframe kirim 'bmkg-embed-ready', kita balas 'bmkg-embed-token'.
 /**
  * Samakan tinggi iframe dengan tinggi isinya. Preview satu origin dengan
- * halaman ini, jadi bisa diukur langsung. Diukur beberapa kali setelah load
- * karena widget baru tahu tingginya setelah datanya datang.
+ * halaman ini, jadi bisa diukur langsung — termasuk saat isinya berubah
+ * (kolom pencarian memunculkan daftar hasil, tab kota berganti, dst).
+ * Tanpa pengamatan berkelanjutan, tinggi hanya benar sekali setelah load.
  */
+const frameDocs = new Map<Element, HTMLIFrameElement>();
+const docObserver = new ResizeObserver((entries) => {
+  for (const e of entries) {
+    const frame = frameDocs.get(e.target);
+    const h = (e.target as HTMLElement).scrollHeight;
+    if (frame && h > 0) frame.style.height = `${Math.min(Math.max(h, 120), 2400)}px`;
+  }
+});
+
 function fitPreview(ev: Event) {
   passToken(ev);
   const frame = ev.target as HTMLIFrameElement;
-  const measure = () => {
-    try {
-      const h = frame.contentDocument?.documentElement?.scrollHeight ?? 0;
-      if (h > 0) frame.style.height = `${Math.min(Math.max(h, 120), 2400)}px`;
-    } catch {
-      /* lintas origin: biarkan tinggi awal */
-    }
-  };
-  [600, 1800, 4000].forEach((ms) => window.setTimeout(measure, ms));
+  let docEl: HTMLElement | null = null;
+  try {
+    docEl = frame.contentDocument?.documentElement ?? null;
+  } catch {
+    return; // lintas origin: biarkan tinggi awal
+  }
+  if (!docEl) return;
+  frameDocs.set(docEl, frame);
+  docObserver.observe(docEl);
 }
 
 function passToken(ev: Event) {
@@ -137,6 +147,15 @@ const alwaysMock = computed(() => WIDGETS.filter(w => !w.live));
 
 const WIDGETS: Widget[] = [
   // ── Urutan mengikuti render dashboard (MainDashboard.vue), atas → bawah ──
+  // Pencarian ditaruh paling atas: di dashboard ia memang ada di header.
+  {
+    id: 'search',
+    name: 'Pencarian Lokasi',
+    desc: 'Kolom pencarian desa/kelurahan dari API BMKG. Pilihan pengunjung memindahkan semua widget di halaman pemasang.',
+    // 120 px hanya cukup untuk kotak input; daftar hasil butuh ruang
+    height: 400,
+    live: true
+  },
   {
     id: 'alerts',
     name: 'Peringatan Dini Cuaca',
@@ -151,13 +170,6 @@ const WIDGETS: Widget[] = [
     desc: 'Kartu utama: suhu, kondisi langit, suhu terasa, min/max harian, angin, kelembapan. Termasuk tombol Lapor Cuaca.',
     city: true,
     height: 520,
-    live: true
-  },
-  {
-    id: 'search',
-    name: 'Pencarian Lokasi',
-    desc: 'Kolom pencarian desa/kelurahan dari API BMKG. Pilihan pengunjung memindahkan semua widget di halaman pemasang.',
-    height: 120,
     live: true
   },
   {

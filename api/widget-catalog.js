@@ -31,9 +31,9 @@ const json = (body, status = 200) =>
 // halaman pemasang. `needsCity` = menerima ?city= atau ?lat=&lon=.
 const WIDGETS = [
   // Urutan mengikuti render dashboard (src/pages/MainDashboard.vue), atas → bawah.
+  { id: 'search', name: 'Pencarian Lokasi', needsCity: false, live: true, mock: null },
   { id: 'alerts', name: 'Peringatan Dini Cuaca', needsCity: true, live: true, mock: null },
   { id: 'current', name: 'Kondisi Cuaca Saat Ini', needsCity: true, live: true, mock: null },
-  { id: 'search', name: 'Pencarian Lokasi', needsCity: false, live: true, mock: null },
   { id: 'major-cities', name: 'Kota-Kota Besar', needsCity: false, live: false, mock: 'landmark statis, tanpa data' },
   { id: 'current-detail', name: 'Rincian Kondisi Cuaca', needsCity: true, live: true, mock: null },
   { id: 'forecast', name: 'Prakiraan Cuaca Per Jam', needsCity: true, live: true, mock: null },

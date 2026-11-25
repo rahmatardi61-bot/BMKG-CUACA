@@ -23,7 +23,8 @@ WORKDIR /app
 
 COPY --from=build-stage /app/dist ./dist
 COPY --from=build-stage /app/api ./api
-COPY server.mjs ./
+COPY --from=build-stage /app/lib ./lib
+COPY server.mjs load-env.mjs ./
 
 ENV NODE_ENV=production PORT=4021
 EXPOSE 4021

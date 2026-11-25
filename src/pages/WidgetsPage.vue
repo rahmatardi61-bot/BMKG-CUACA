@@ -485,11 +485,11 @@ async function copy(text: string, key: string) {
         >
           <component :is="isDark ? Sun : Moon" class="w-4 h-4" />
         </button>
-        <a
-          href="/"
-          class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors flex items-center gap-1"
-        >
-          Buka dashboard <ExternalLink class="w-3 h-3" />
+        <a href="/" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors flex items-center gap-1">
+          Dashboard <ExternalLink class="w-3 h-3" />
+        </a>
+        <a href="/api-docs" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors">
+          Dokumentasi API
         </a>
       </div>
     </header>

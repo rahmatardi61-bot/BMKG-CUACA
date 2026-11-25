@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { getToken, decodeJwt, verifyOnServer } from '../services/embedToken';
-import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, ListChecks, KeyRound, Lock } from 'lucide-vue-next';
+import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, ListChecks, KeyRound, Lock, ArrowUp } from 'lucide-vue-next';
 
 // Tema dark/light — pola sama dengan app utama (class 'dark' di <html>, kunci localStorage)
 const isDark = ref(true);
@@ -313,21 +313,34 @@ function srcUrl(w: Widget) {
 
 const TOKEN_PLACEHOLDER = 'TOKEN_KEYCLOAK_ANDA';
 
-function snippet(w: Widget) {
-  const cityAttr = w.city ? ` data-city="${selCity.value}"` : '';
-  const hAttr = w.city ? '' : ` data-height="${w.height}"`;
+// Setup sekali per halaman: loader + token. Tanpa dua baris ini, tag div
+// widget mana pun di bawah tidak akan melakukan apa pun.
+const SETUP_SNIPPET = computed(() => {
   const close = '</' + 'script>';
-  if (mode.value === 'script') {
-    // Skrip inti hanya bisa diambil bila header Authorization berisi token sah
-    return `<div data-bmkg-widget="${w.id}"${cityAttr}${hAttr}></div>
-<script src="${origin}/bmkg-embed.js">${close}
+  return `<script src="${origin}/bmkg-embed.js">${close}
 <script>
   // token dari backend Anda sendiri (client_secret TIDAK boleh di browser)
   BmkgWidget.init({ token: '${TOKEN_PLACEHOLDER}' });
 ${close}`;
+});
+
+function snippet(w: Widget) {
+  const cityAttr = w.city ? ` data-city="${selCity.value}"` : '';
+  const hAttr = w.city ? '' : ` data-height="${w.height}"`;
+  if (mode.value === 'script') {
+    // Loader + token sudah dipasang di bagian "Setup awal" — cukup tag ini.
+    return `<div data-bmkg-widget="${w.id}"${cityAttr}${hAttr}></div>`;
   }
   const cityQ = w.city ? `&city=${encodeURIComponent(selCity.value)}` : '';
   return `<iframe\n  src="${origin}/embed.html?widget=${w.id}${cityQ}&token=${TOKEN_PLACEHOLDER}&theme=${isDark.value ? 'dark' : 'light'}"\n  width="100%" height="${w.height}"\n  style="border:0;border-radius:12px"\n  title="BMKG ${w.name}"\n  loading="lazy"\n></iframe>`;
+}
+
+function jumpTo(id: string) {
+  if (id === 'top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function copy(text: string, key: string) {
@@ -478,19 +491,63 @@ async function copy(text: string, key: string) {
         </div>
       </section>
 
-      <!-- Cara pakai -->
-      <section class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4">
-        <h3 class="text-xs font-black mb-1">Cara pakai</h3>
-        <ol class="text-xs text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed list-decimal list-inside">
-          <li><strong class="text-slate-800 dark:text-slate-200">Minta token</strong> ke backend Anda sendiri: <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">client_credentials</code> ke realm BMKG, lalu kirim ke halaman. (<em>Tombol Generate di atas hanya simulasi.</em>)</li>
-          <li>Verifikasi tanda tangannya dengan <strong class="text-slate-800 dark:text-slate-200">JWKS</strong> realm — decode saja tidak cukup.</li>
-          <li>Pilih widget di bawah, salin kodenya, ganti <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">TOKEN_KEYCLOAK_ANDA</code> dengan token tadi.</li>
-          <li>Tempel di dalam <code class="px-1 rounded bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-mono text-[11px]">&lt;body&gt;</code> website Anda. Widget menyesuaikan lebar container-nya otomatis.</li>
-        </ol>
+      <!-- ═══ 1. SETUP AWAL — wajib, sekali per halaman ═══════════════════ -->
+      <section id="setup" class="rounded-xl border border-brand-cyan/35 bg-white dark:bg-slate-900/40 overflow-hidden scroll-mt-20">
+        <div class="px-4 py-3 flex items-start gap-3 flex-wrap border-b border-slate-200 dark:border-slate-800/60">
+          <div class="flex-1 min-w-0">
+            <h3 class="text-[13px] font-black flex items-center gap-2">
+              <span class="w-5 h-5 rounded-md bg-brand-cyan text-slate-950 text-[11px] font-black flex items-center justify-center shrink-0">1</span>
+              Setup awal — pasang sekali, sebelum widget apa pun
+            </h3>
+            <p class="text-[12px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed max-w-2xl">
+              Dua tag di bawah adalah <strong class="text-slate-800 dark:text-slate-200">syarat semua widget</strong>:
+              mengambil loader lalu menyerahkan token. Tanpa keduanya, tag div widget di bagian
+              berikutnya tidak melakukan apa pun. Tempel sebelum <code class="font-mono text-[11px]">&lt;/body&gt;</code>.
+            </p>
+          </div>
+          <button
+            @click="copy(SETUP_SNIPPET, 'setup')"
+            class="shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5"
+            :class="copied === 'setup' ? 'bg-emerald-500 text-white' : 'bg-brand-cyan text-slate-950 hover:brightness-110'"
+          >
+            <component :is="copied === 'setup' ? Check : Copy" class="w-3 h-3" />
+            {{ copied === 'setup' ? 'Tersalin' : 'Copy setup' }}
+          </button>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-[#0b1220]">
+          <pre class="p-4 overflow-x-auto text-[11.5px] leading-relaxed text-slate-800 dark:text-slate-100 font-mono whitespace-pre"><code>{{ SETUP_SNIPPET }}</code></pre>
+        </div>
+
+        <div class="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800/60 border-t border-slate-200 dark:border-slate-800/60">
+          <div class="px-3.5 py-2.5">
+            <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Token dari backend Anda</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+              <code class="font-mono">client_credentials</code> ke realm BMKG. <code class="font-mono">client_secret</code>
+              tidak boleh ada di browser.
+            </p>
+          </div>
+          <div class="px-3.5 py-2.5">
+            <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Cukup sekali</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+              Mau 1 widget atau 10, setup ini tetap satu kali. Token diperbarui loader sendiri.
+            </p>
+          </div>
+          <div class="px-3.5 py-2.5">
+            <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Urutan penting</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+              Setup dulu, baru tag div. Kalau dibalik, widget tidak terpasang.
+            </p>
+          </div>
+        </div>
       </section>
 
-      <!-- Pilihan mode kode -->
+      <!-- ═══ 2. SEMATKAN WIDGET ══════════════════════════════════════════ -->
       <section class="flex items-center gap-2 flex-wrap">
+        <h3 class="text-[13px] font-black flex items-center gap-2 mr-auto">
+          <span class="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-black flex items-center justify-center shrink-0">2</span>
+          Sematkan widget
+        </h3>
         <span class="text-sm font-bold text-slate-500">CARA SEMATKAN:</span>
         <button
           @click="mode = 'script'"
@@ -520,8 +577,9 @@ async function copy(text: string, key: string) {
 
         <article
           v-for="w in WIDGETS"
+          :id="`widget-${w.id}`"
           :key="w.id"
-          class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 overflow-hidden"
+          class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 overflow-hidden scroll-mt-20"
         >
           <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/60 flex items-start gap-3">
             <div class="flex-1 min-w-0">
@@ -554,50 +612,52 @@ async function copy(text: string, key: string) {
             >{{ c }}</button>
           </div>
 
-          <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800/60">
-            <!-- Preview iframe live -->
-            <div class="p-3">
-              <p class="text-[13px] font-bold tracking-wider text-slate-500 mb-1.5">PREVIEW LANGSUNG</p>
-              <iframe
-                v-if="hasToken"
-                :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}-${gen.at}`"
-                :src="srcUrl(w)"
-                :height="w.height"
-                width="100%"
-                style="border:0;border-radius:8px;display:block"
-                :title="`Preview ${w.name}`"
-                loading="lazy"
-                @load="passToken"
-              ></iframe>
-              <div
-                v-else
-                :style="{ height: `${w.height}px` }"
-                class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center gap-1.5 px-4 text-center"
-              >
-                <Lock class="w-4 h-4 text-slate-400" />
-                <p class="text-[11.5px] font-bold text-slate-500">Preview terkunci</p>
-                <p class="text-[10.5px] text-slate-500 leading-snug max-w-[260px]">
-                  Tekan <strong>Generate token</strong> di atas. Tanpa token sah, widget menolak tampil — sama seperti di website partner.
-                </p>
+          <!-- Kode sematkan — full width, karena potongannya pendek -->
+          <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/60">
+            <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">
+              KODE SEMATKAN
+              <span class="font-normal normal-case tracking-normal text-slate-400">— setelah setup di bagian 1</span>
+            </p>
+            <div class="rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-[#0b1220]">
+              <div class="flex items-center justify-between px-3 py-1.5 bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700/80">
+                <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">{{ mode === 'script' ? 'HTML' : 'HTML (iframe)' }}</span>
+                <button
+                  @click="copy(snippet(w), w.id)"
+                  class="text-[10px] font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                  :class="copied === w.id ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:border-brand-cyan hover:text-brand-cyan'"
+                >
+                  <component :is="copied === w.id ? Check : Copy" class="w-2.5 h-2.5" />
+                  {{ copied === w.id ? 'Copied' : 'Copy' }}
+                </button>
               </div>
+              <pre class="px-3 py-2.5 overflow-x-auto text-[11.5px] leading-relaxed text-slate-800 dark:text-slate-100 font-mono whitespace-pre"><code>{{ snippet(w) }}</code></pre>
             </div>
-            <!-- Kode -->
-            <div class="p-3 flex flex-col">
-              <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">KODE SEMATKAN</p>
-              <div class="flex-1 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700/80 bg-white dark:bg-[#0b1220]">
-                <div class="flex items-center justify-between px-3 py-1.5 bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700/80">
-                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">{{ mode === 'script' ? 'HTML' : 'HTML (iframe)' }}</span>
-                  <button
-                    @click="copy(snippet(w), w.id)"
-                    class="text-[10px] font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1"
-                    :class="copied === w.id ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:border-brand-cyan hover:text-brand-cyan'"
-                  >
-                    <component :is="copied === w.id ? Check : Copy" class="w-2.5 h-2.5" />
-                    {{ copied === w.id ? 'Copied' : 'Copy' }}
-                  </button>
-                </div>
-                <pre class="p-3 overflow-x-auto text-[11px] leading-relaxed text-slate-800 dark:text-slate-100 font-mono whitespace-pre"><code>{{ snippet(w) }}</code></pre>
-              </div>
+          </div>
+
+          <!-- Preview live — full width di bawah kode -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-950/30">
+            <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">PREVIEW LANGSUNG</p>
+            <iframe
+              v-if="hasToken"
+              :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}-${gen.at}`"
+              :src="srcUrl(w)"
+              :height="w.height"
+              width="100%"
+              style="border:0;border-radius:8px;display:block;background:#fff"
+              :title="`Preview ${w.name}`"
+              loading="lazy"
+              @load="passToken"
+            ></iframe>
+            <div
+              v-else
+              :style="{ height: `${Math.min(w.height, 260)}px` }"
+              class="rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 flex flex-col items-center justify-center gap-1.5 px-4 text-center"
+            >
+              <Lock class="w-4 h-4 text-slate-400" />
+              <p class="text-[11.5px] font-bold text-slate-500">Preview terkunci</p>
+              <p class="text-[10.5px] text-slate-500 leading-snug max-w-[320px]">
+                Tekan <strong>Generate token</strong> di atas. Tanpa token sah, widget menolak tampil — sama seperti di website partner.
+              </p>
             </div>
           </div>
         </article>
@@ -787,5 +847,33 @@ ngAfterViewInit() {
         <span class="text-slate-500">Widget versi 1 · {{ origin }}</span>
       </footer>
     </main>
+
+    <!-- Navigasi cepat. Bulat: klik = ke atas. Hover/fokus = daftar widget untuk lompat. -->
+    <div class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 group/rail">
+      <div
+        class="invisible opacity-0 translate-y-1 group-hover/rail:visible group-hover/rail:opacity-100 group-hover/rail:translate-y-0 group-focus-within/rail:visible group-focus-within/rail:opacity-100 group-focus-within/rail:translate-y-0 transition-all duration-150 w-60 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-900/20 p-1.5"
+      >
+        <p class="px-2 pt-1 pb-1.5 text-[10px] font-black tracking-wider text-slate-500">LOMPAT KE WIDGET ({{ WIDGETS.length }})</p>
+        <button
+          v-for="w in WIDGETS"
+          :key="`rail-${w.id}`"
+          @click="jumpTo(`widget-${w.id}`)"
+          class="w-full text-left px-2 py-1.5 rounded-md text-[11.5px] font-bold text-slate-600 dark:text-slate-300 hover:bg-brand-cyan hover:text-slate-950 transition-colors truncate"
+          :title="w.name"
+        >{{ w.name }}</button>
+        <button
+          @click="jumpTo('setup')"
+          class="w-full text-left px-2 py-1.5 mt-1 rounded-md text-[11.5px] font-bold text-brand-cyan hover:bg-brand-cyan hover:text-slate-950 transition-colors border-t border-slate-200 dark:border-slate-700 pt-2"
+        >↑ Setup awal</button>
+      </div>
+      <button
+        @click="jumpTo('top')"
+        class="w-11 h-11 rounded-full bg-brand-cyan text-slate-950 shadow-lg shadow-brand-cyan/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center"
+        title="Kembali ke atas / daftar widget"
+        aria-label="Kembali ke atas"
+      >
+        <ArrowUp class="w-5 h-5" />
+      </button>
+    </div>
   </div>
 </template>

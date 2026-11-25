@@ -40,8 +40,10 @@ scanApi()
 const modCache = new Map()
 /** @returns {Promise<Function|null>} */
 async function apiHandler(pathname) {
-  // legacy: /api-bmkg → api/bmkg
-  const file = API_MAP.get(pathname) ?? (pathname === '/api-bmkg' ? API_MAP.get('/api/bmkg') : null)
+  // legacy: /api-bmkg → api/bmkg ; '/api' & '/api/' → katalog
+  // '/api' & '/api/' → api/index.js (dipetakan sebagai '/api' oleh scanApi)
+  const norm = pathname === '/api/' ? '/api' : pathname
+  const file = API_MAP.get(norm) ?? (pathname === '/api-bmkg' ? API_MAP.get('/api/bmkg') : null)
   if (!file) return null
   if (!modCache.has(file)) modCache.set(file, import(pathToFileURL(file).href))
   return asFetch((await modCache.get(file)).default)
@@ -119,7 +121,7 @@ async function serveFile(req, res, pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
 
-  if (url.pathname.startsWith('/api/') || url.pathname === '/api-bmkg') {
+  if (url.pathname === '/api' || url.pathname.startsWith('/api/') || url.pathname === '/api-bmkg') {
     const handler = await apiHandler(url.pathname)
     if (!handler) {
       res.writeHead(404, { 'Content-Type': 'application/json' })

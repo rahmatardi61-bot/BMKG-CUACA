@@ -101,11 +101,12 @@ const apiRoutes: Plugin = {
 
     server.middlewares.use(async (req, res, next) => {
       const pathname = (req.originalUrl ?? req.url ?? '').split('?')[0];
-      const isApi = pathname.startsWith('/api/') || pathname === '/api-bmkg';
+      const isApi = pathname === '/api' || pathname.startsWith('/api/') || pathname === '/api-bmkg';
       if (!isApi) return next();
 
-      // legacy /api-bmkg → api/bmkg
-      const file = fileFor(pathname === '/api-bmkg' ? 'bmkg' : pathname.slice('/api/'.length));
+      // '/api' → katalog (api/index.js); legacy '/api-bmkg' → api/bmkg
+      const rel = pathname === '/api-bmkg' ? 'bmkg' : pathname === '/api' ? 'index' : pathname.slice('/api/'.length);
+      const file = fileFor(rel.replace(/\/$/, 'index'));
       // Bukan file handler? Bisa jadi path upstream BMKG yang diteruskan ke
       // server.proxy di bawah (/api/df/*, /api/public/*, …). Jangan ditelan di sini,
       // kalau ditelan widget kehilangan datanya (regresi: 404 untuk semua widget).

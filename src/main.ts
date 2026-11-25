@@ -4,6 +4,7 @@ import App from './App.vue'
 import LoginPage from './pages/LoginPage.vue'
 import WidgetsPage from './pages/WidgetsPage.vue'
 import ComparePage from './pages/ComparePage.vue'
+import ApiDocsPage from './pages/ApiDocsPage.vue'
 import { isAuthenticated } from './services/auth'
 import { apiMarkerDirective, initApiMarkerDevTools } from './dev/apiMarker'
 
@@ -15,6 +16,7 @@ import { apiMarkerDirective, initApiMarkerDevTools } from './dev/apiMarker'
 const path = window.location.pathname.replace(/\/+$/, '')
 const isWidgetDocs = path === '/widgets'
 const isCompare = path === '/compare'
+const isApiDocs = path === '/api-docs'
 const isEmbed = path === '/embed' || path === '/embed.html'
 
 // Satu gerbang untuk semua halaman non-embed: belum login → LoginPage.
@@ -25,13 +27,14 @@ const app = createApp(
     ? () => null
     : isWidgetDocs ? (gate() ?? WidgetsPage)
     : isCompare ? (gate() ?? ComparePage)
+    : isApiDocs ? (gate() ?? ApiDocsPage)
     : (gate() ?? App),
 )
 
 // API BOX MARKER — alat dev (branch api-box-marker). No-op di build prod
 // (guard import.meta.env.DEV ada di dalam modul). Tidak dipasang di /widgets:
 // halaman itu materi presentasi publik — panel dev hanya jadi noise.
-if (!isEmbed && !isWidgetDocs && !isCompare) {
+if (!isEmbed && !isWidgetDocs && !isCompare && !isApiDocs) {
   initApiMarkerDevTools()
   app.directive('api-marker', apiMarkerDirective)
 }

@@ -241,7 +241,7 @@ Ini hanya untuk halaman dokumentasi (simulasi sisi partner). Loader
 backend partner. `BmkgWidget.init()` mengembalikan `Promise<boolean>`; `false`
 berarti token ditolak dan partner perlu minta token baru.
 
-## Widget yang tersedia (23)
+## Widget yang tersedia (25)
 
 Urutan tabel = urutan render `src/pages/MainDashboard.vue`, supaya membandingkan
 `/widgets` dengan `/dashboard` gampang. Urutan yang sama dipakai
@@ -259,7 +259,9 @@ Urutan tabel = urutan render `src/pages/MainDashboard.vue`, supaya membandingkan
 | `marine` | Peta Meteorologi Maritim | `&city=` | `MarineMap` (INAWAVES / Open Data live) | ❌ |
 | `radar` | Radar & Dinamika Atmosfer | `&city=` | `WeatherRadarMap` (medan sintetis) | ✅ **selalu** MOCK |
 | `earthquake` | Gempa Bumi Terkini | `&city=` | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
-| `activity` | Aktivitas & Rekomendasi (semua) | `&city=` | `WeatherActivity` (semua kartu) | ➖ narasi dihitung sendiri |
+| `activity-comfort` | Indeks Kenyamanan | `&city=` | `WeatherActivity section="comfort"` | ➖ narasi dihitung sendiri |
+| `activity-air` | Kualitas Udara (ringkasan) | `&city=` | `WeatherActivity section="air"` | ✅ **selalu** MOCK |
+| `air-quality` | Kualitas Udara (ISPU) | `&city=` | `AirQualityCard` — kartu mandiri | ✅ **selalu** MOCK |
 | `activity-land` | Aktivitas Darat | `&city=` | `WeatherActivity section="land"` | ➖ narasi dihitung sendiri |
 | `activity-coastal` | Aktivitas Pesisir & Laut | `&city=` | `WeatherActivity section="coastal"` | ➖ idem |
 | `activity-shipping` | Aktivitas Pelayaran | `&city=` | `WeatherActivity section="shipping"` | ➖ idem |
@@ -279,14 +281,30 @@ di `/widgets` sebagai tinggi awal preview.
 
 ### Section aktivitas dipecah per kartu
 
-Di dashboard, `WeatherActivity` adalah **satu kolom berisi 6 kartu** (indeks
-kenyamanan, ringkasan kualitas udara, lalu darat / pesisir & laut / pelayaran /
-penerbangan). Supaya bisa dipasang terpisah, empat kartu aktivitas diberi
-widget sendiri.
+Di dashboard, `WeatherActivity` adalah **satu kolom berisi 6 kartu**. Semua
+kartu itu kini jadi widget sendiri — **tidak ada lagi widget paketan**:
+
+| Kartu dashboard | Widget |
+|---|---|
+| Indeks Kenyamanan | `activity-comfort` |
+| Kualitas Udara (AQI) | `activity-air` |
+| Aktivitas Darat | `activity-land` |
+| Aktivitas Pesisir & Laut | `activity-coastal` |
+| Aktivitas Pelayaran | `activity-shipping` |
+| Aktivitas Penerbangan | `activity-aviation` |
+
+`air-quality` (kartu ISPU mandiri, `AirQualityCard`) **tidak** dirender di
+dashboard — hanya tersedia sebagai widget. Bedanya dengan `activity-air`:
+`activity-air` kartu ringkas milik section aktivitas, `air-quality` kartu ISPU
+lebih besar dengan meter AQI dan ambang PM2.5/PM10.
 
 Caranya bukan menduplikasi 500 baris markup: `WeatherActivity` menerima prop
-`section` (`land` / `coastal` / `shipping` / `aviation`) dan memberi `v-if` pada
-tiap kartu. `activity` tanpa prop = semua kartu, sama seperti dashboard.
+`section` (`comfort` / `air` / `land` / `coastal` / `shipping` / `aviation`) dan
+memberi `v-if` pada tiap kartu. Tanpa prop = semua kartu (dipakai dashboard).
+
+Kartu-kartu ini didesain untuk kolom sidebar dashboard (~380 px), jadi di embed
+lebarnya dibatasi `max-w-[400px]` dan ditengahkan. Kalau dibiarkan selebar
+iframe, ilustrasi latarnya menumpuk teks dan terlihat terpotong.
 
 ### Kartu yang butuh pilihan pengunjung → pakai default
 
@@ -415,10 +433,10 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - Halaman host tiruan (`file://`, CSS putih, font beda): 2 iframe terpasang,
   tinggi auto (420/888 px), **CSS host tidak terpengaruh**, 0 error.
 - `/embed` tanpa login; `city=Atlantis` → fallback `DKI Jakarta`.
-- **23 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 23/23 render tanpa
+- **25 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 25/25 render tanpa
   error JS, tanpa "Gagal menyiapkan widget", tanpa watermark API key. Tinggi hasil
   ukur berkisar 98 px (`alerts` tanpa peringatan) sampai 1327 px (`activity`).
-- `/widgets`: 23 kartu preview — seluruh iframe terisi setelah di-scroll (iframe
+- `/widgets`: 25 kartu preview — seluruh iframe terisi setelah di-scroll (iframe
   di bawah fold dimuat saat masuk viewport).
 - Pencarian lokasi diuji dengan sumber baru: `q=sleman` → hasil BMKG asli
   (`Trimulyo`, `Pandowoharjo`, `Tridadi`, `Triharjo`) di dashboard **dan** di

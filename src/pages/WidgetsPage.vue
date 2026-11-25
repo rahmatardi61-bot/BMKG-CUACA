@@ -215,15 +215,33 @@ const WIDGETS: Widget[] = [
     height: 520,
     live: true
   },
-  // ── Section aktivitas dipecah per kartu (dashboard: satu kolom berisi 4 kartu) ──
+  // ── Section aktivitas: tiap kartu jadi widget sendiri (tidak ada paketan) ──
   {
-    id: 'activity',
-    name: 'Aktivitas & Rekomendasi (semua)',
-    desc: 'Seluruh section seperti di dashboard: indeks kenyamanan, ringkasan kualitas udara, plus kartu darat, pesisir, pelayaran, penerbangan.',
+    id: 'activity-comfort',
+    name: 'Indeks Kenyamanan',
+    desc: 'Analisis paparan panas: heat index, kategori kenyamanan, dan dua saran aktivitas luar ruang.',
     city: true,
-    height: 620,
+    height: 300,
     live: true,
-    mockFallback: 'Angka suhu/angin/kelembapan live dari BMKG. Narasi saran dihitung dari angka itu dengan aturan kami sendiri — bukan produk resmi BMKG.'
+    mockFallback: 'Angka suhu/kelembapan live dari BMKG. Kategori & saran dihitung dari angka itu memakai aturan kami sendiri.'
+  },
+  {
+    id: 'activity-air',
+    name: 'Kualitas Udara (ringkasan)',
+    desc: 'Ringkasan ISPU: AQI, PM2.5, PM10, skala, dan saran untuk kelompok sensitif. Kartu seperti di dashboard.',
+    city: true,
+    height: 300,
+    live: false,
+    mockFallback: 'BMKG tidak menyediakan API ISPU. Angka dihitung deterministik dari cuaca kota — estimasi, bukan pengukuran.'
+  },
+  {
+    id: 'air-quality',
+    name: 'Kualitas Udara (ISPU)',
+    desc: 'Kartu ISPU mandiri: meter AQI lebih besar, ambang PM2.5/PM10, dan penjelasan status. Tidak dirender di dashboard — hanya tersedia sebagai widget.',
+    city: true,
+    height: 420,
+    live: false,
+    mockFallback: 'BMKG tidak menyediakan API ISPU. Angka dihitung deterministik dari cuaca kota — estimasi, bukan pengukuran.'
   },
   {
     id: 'activity-land',

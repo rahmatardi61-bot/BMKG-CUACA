@@ -102,7 +102,8 @@ const placeCoords = ref<{ lat: number; lon: number } | undefined>(initialPlace.c
 const READY = [
   'alerts', 'current', 'search', 'major-cities', 'current-detail', 'forecast',
   'satellite', 'marine', 'radar', 'earthquake',
-  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
+  'activity-comfort', 'activity-air', 'air-quality',
+  'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
   'transport', 'port-tide', 'wave',
   'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
@@ -111,16 +112,16 @@ const isReady = READY.includes(widget);
 const CITY_WIDGETS = [
   'earthquake', 'alerts', 'forecast', 'current', 'port-tide',
   'air-quality', 'transport', 'wave', 'marine',
-  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
-  'current-detail', 'radar',
+  'activity-comfort', 'activity-air', 'activity-land', 'activity-coastal',
+  'activity-shipping', 'activity-aviation', 'current-detail', 'radar',
   'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
 const needCity = CITY_WIDGETS.includes(widget);
 // Widget yang datanya bergantung pada loadCity (satu fetch dipakai bersama)
 const FETCH_WIDGETS = [
   'alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport',
-  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
-  'current-detail',
+  'activity-comfort', 'activity-air', 'activity-land', 'activity-coastal',
+  'activity-shipping', 'activity-aviation', 'current-detail',
 ];
 
 // Widget berbasis data (alerts/news) menyiapkan datanya sendiri — komponennya
@@ -230,9 +231,7 @@ async function loadData() {
       } else if (widget === 'forecast') {
         forecasts.value = bmkg.liveHourly.value.slice(0, 12);
         isMock.value = false; // prakiraan kosong → pesan jujur, bukan angka karangan
-      } else if (widget === 'current' || widget === 'current-detail' || widget === 'activity'
-        || widget === 'activity-land' || widget === 'activity-coastal'
-        || widget === 'activity-shipping' || widget === 'activity-aviation') {
+      } else if (widget === 'current' || widget === 'current-detail' || activitySection) {
         weather.value = bmkg.liveWeather.value;
       } else if (widget === 'port-tide') {
         // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
@@ -308,7 +307,9 @@ const activityLandmark = computed(() => {
 const activityShortName = computed(() => city.value.split(',')[0].trim());
 /** Widget section aktivitas → hanya satu kartu yang dirender. */
 const activitySection = computed(() => {
-  const map: Record<string, 'land' | 'coastal' | 'shipping' | 'aviation'> = {
+  const map: Record<string, 'comfort' | 'air' | 'land' | 'coastal' | 'shipping' | 'aviation'> = {
+    'activity-comfort': 'comfort',
+    'activity-air': 'air',
     'activity-land': 'land',
     'activity-coastal': 'coastal',
     'activity-shipping': 'shipping',
@@ -499,8 +500,8 @@ window.addEventListener('message', (ev: MessageEvent) => {
         </div>
       </template>
 
-      <!-- Aktivitas & rekomendasi: angka live, narasi dihitung dari data yang sama -->
-      <template v-else-if="widget === 'activity' || activitySection">
+      <!-- Section aktivitas: tiap kartu jadi widget sendiri (tidak ada versi paketan) -->
+      <template v-else-if="activitySection">
         <div v-if="loading || !weather" class="p-6 text-center text-[12px] text-slate-500">
           Memuat rekomendasi aktivitas…
         </div>

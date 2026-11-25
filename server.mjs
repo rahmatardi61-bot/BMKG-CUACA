@@ -8,7 +8,7 @@ import { stat } from 'node:fs/promises'
 import { pipeline } from 'node:stream/promises'
 import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
 // Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
@@ -18,6 +18,7 @@ const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
 // Dulu tiap endpoint diimpor statis. Sekarang dipindai dari folder api/:
 // menambah endpoint = menambah file, tanpa menyentuh server ini. Bentuk URL
 // sama dengan Vercel: api/weather/forecast.js → /api/weather/forecast.
+const ROOT = resolve(import.meta.dirname)
 const API_DIR = resolve('api')
 const API_MAP = new Map() // '/api/weather/forecast' → '/abs/path/api/weather/forecast.js'
 
@@ -36,6 +37,14 @@ function scanApi(dir = API_DIR, prefix = '/api') {
   }
 }
 scanApi()
+
+// Alias: /v3/api-docs → handler yang sama dengan /api/v3/api-docs.
+// Filenya tetap di dalam api/ supaya Vercel ikut mengenalinya sebagai function;
+// URL publiknya mengikuti gaya springdoc (/v3/api-docs).
+for (const [pub, file] of [['/v3/api-docs', '/api/v3/api-docs']]) {
+  const target = API_MAP.get(file)
+  if (target) API_MAP.set(pub, target)
+}
 
 const modCache = new Map()
 /** @returns {Promise<Function|null>} */
@@ -121,7 +130,8 @@ async function serveFile(req, res, pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
 
-  if (url.pathname === '/api' || url.pathname.startsWith('/api/') || url.pathname === '/api-bmkg') {
+  const isHandler = url.pathname === '/api' || url.pathname.startsWith('/api/') || url.pathname === '/api-bmkg' || url.pathname.startsWith('/v3/')
+  if (isHandler) {
     const handler = await apiHandler(url.pathname)
     if (!handler) {
       res.writeHead(404, { 'Content-Type': 'application/json' })
@@ -129,7 +139,10 @@ createServer(async (req, res) => {
       return
     }
     try {
-      const out = await handler(new Request(url, { method: req.method, headers: req.headers }))
+      // URL diteruskan dengan Host asli: handler yang membaca .origin (mis.
+      // /v3/api-docs) harus melihat port yang benar, bukan http://localhost
+      const abs = new URL(url.pathname + url.search, `http://${req.headers.host ?? 'localhost'}`)
+      const out = await handler(new Request(abs, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())
       res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
       res.end(req.method === 'HEAD' ? undefined : body)

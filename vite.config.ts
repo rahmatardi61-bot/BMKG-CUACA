@@ -89,10 +89,17 @@ const apiRoutes: Plugin = {
     // Vercel/server.mjs. Rutenya DIPINDAI dari folder api/, bukan daftar
     // hardcoded — menambah endpoint cukup menambah file.
     const API_DIR = resolve(__dirname, 'api');
+    // Folder handler tingkat-atas lain (bukan /api/*): sekarang /v3 — supaya
+    // OpenAPI bisa dipasang di URL yang biasa dibuka orang (/v3/api-docs),
+    // bukan /api/v3/api-docs yang aneh.
+    // '/v3/api-docs' → api/v3/api-docs.js (nama file di api/ supaya Vercel
+    // mengenalinya sebagai function; URL-nya gaya springdoc)
+    const EXTRA_DIRS = ['v3'];
+    const extra = new Map(EXTRA_DIRS.map((d) => [`/${d}`, resolve(__dirname, 'api', d)]));
 
-    function fileFor(rel: string): string | null {
-      const base = resolve(API_DIR, rel);
-      if (!base.startsWith(API_DIR)) return null; // tolak path traversal
+    function fileFor(rel: string, dir = API_DIR): string | null {
+      const base = resolve(dir, rel);
+      if (!base.startsWith(dir)) return null; // tolak path traversal
       const candidates = /\.[jt]s$/.test(rel)
         ? [base]
         : [`${base}.js`, `${base}.ts`, `${base}/index.js`, `${base}/index.ts`];
@@ -101,12 +108,17 @@ const apiRoutes: Plugin = {
 
     server.middlewares.use(async (req, res, next) => {
       const pathname = (req.originalUrl ?? req.url ?? '').split('?')[0];
-      const isApi = pathname === '/api' || pathname.startsWith('/api/') || pathname === '/api-bmkg';
+      const extraKey = EXTRA_DIRS.map((d) => `/${d}`).find((p) => pathname === p || pathname.startsWith(`${p}/`));
+      const isApi = pathname === '/api' || pathname.startsWith('/api/') || pathname === '/api-bmkg' || extraKey;
       if (!isApi) return next();
 
       // '/api' → katalog (api/index.js); legacy '/api-bmkg' → api/bmkg
-      const rel = pathname === '/api-bmkg' ? 'bmkg' : pathname === '/api' ? 'index' : pathname.slice('/api/'.length);
-      const file = fileFor(rel.replace(/\/$/, 'index'));
+      // '/v3/...' → v3/<rel>
+      const rel = pathname === '/api-bmkg' ? 'bmkg'
+        : pathname === '/api' ? 'index'
+        : extraKey ? pathname.slice(extraKey.length + 1)
+        : pathname.slice('/api/'.length);
+      const file = fileFor(rel.replace(/\/$/, 'index'), extraKey ? extra.get(extraKey)! : API_DIR);
       // Bukan file handler? Bisa jadi path upstream BMKG yang diteruskan ke
       // server.proxy di bawah (/api/df/*, /api/public/*, …). Jangan ditelan di sini,
       // kalau ditelan widget kehilangan datanya (regresi: 404 untuk semua widget).
@@ -116,7 +128,12 @@ const apiRoutes: Plugin = {
         // ssrLoadModule memakai path relatif root (bukan absolut di Windows/mac)
         const { default: mod } = await server.ssrLoadModule(`/${relative(__dirname, file)}`);
         const handler = typeof mod === 'function' ? mod : mod.fetch;
-        const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
+        // Base URL memakai Host asli, bukan 'http://localhost': handler yang
+        // membaca new URL(req.url).origin (mis. /v3/api-docs) harus melihat
+        // http://localhost:5173, bukan http://localhost tanpa port.
+        const host = req.headers.host ?? 'localhost';
+        const proto = (req.headers['x-forwarded-proto'] as string) ?? 'http';
+        const url = new URL(req.originalUrl ?? req.url ?? '/', `${proto}://${host}`);
         const out = await handler(
           new Request(url, { method: req.method, headers: req.headers as Record<string, string> }),
         );

@@ -13,7 +13,7 @@ const ENDPOINTS = [
   { path: '/api/weather/forecast', query: ['lat', 'lon'], returns: '{ region, hours[] }', live: true, note: 'hours diratakan dari cuaca[][] dan diurutkan' },
   { path: '/api/weather/alerts', query: ['lat', 'lon'], returns: '{ alerts[] }', live: true, note: 'sering kosong = memang tak ada peringatan' },
   { path: '/api/weather/nowcast', query: ['province?'], returns: '{ total, alerts[] }', live: true, note: 'dari RSS; severity dipetakan dari judul' },
-  { path: '/api/weather/weekly-temperature', query: ['lat', 'lon'], returns: '{ daily[], weekly[] }', live: true },
+  { path: '/api/weather/weekly-temperature', query: ['lat', 'lon'], returns: '{ daily[], weekly[] }', live: true, note: 'lat & lon WAJIB — tanpa itu upstream menjawab HTTP 500' },
   { path: '/api/weather/cyclones', query: [], returns: '{ cyclones[] }', live: true, note: 'kosong = tidak ada siklon aktif' },
   { path: '/api/weather/amendment', query: ['lat', 'lon'], returns: '{ region, count }', live: true, note: 'count 0 = tidak ada perubahan prakiraan' },
   { path: '/api/weather/forecast-official', query: ['adm4'], returns: '{ region, hours[] }', live: true, note: 'jalur cadangan dari api.bmkg.go.id' },

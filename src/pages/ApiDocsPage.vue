@@ -21,6 +21,10 @@ onMounted(() => applyTheme(localStorage.getItem('bmkg-widget-theme') !== 'light'
 // Jangan tulis 'https://' + origin: origin sudah memuat skema, hasilnya
 // https://http://localhost:5173 — contoh curl yang tidak bisa dijalankan.
 const origin = window.location.origin;
+// Swagger UI publik (petstore) memuat spesifikasi dari URL apa pun yang bisa
+// diakses publik. Di dev (localhost) itu mustahil dari luar — tautannya tetap
+// ada supaya jelas di mana JSON-nya, tapi baru berguna setelah di-deploy.
+const swaggerUrl = `${origin}/v3/api-docs`;
 const copied = ref('');
 async function copy(text: string, key: string) {
   try {
@@ -107,6 +111,12 @@ function curlFor(e: EndpointDoc) {
         >
           <component :is="isDark ? Sun : Moon" class="w-4 h-4" />
         </button>
+        <a href="/v3/api-docs" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors flex items-center gap-1">
+          OpenAPI JSON <ExternalLink class="w-3 h-3" />
+        </a>
+        <a :href="`https://petstore.swagger.io/?url=${swaggerUrl}`" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors flex items-center gap-1">
+          Buka di Swagger UI <ExternalLink class="w-3 h-3" />
+        </a>
         <a href="/widgets" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors flex items-center gap-1">
           Dokumentasi widget <ExternalLink class="w-3 h-3" />
         </a>

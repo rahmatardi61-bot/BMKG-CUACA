@@ -146,6 +146,41 @@ oleh proxy mentah `/api/bmkg`.
 
 ---
 
+## Spesifikasi OpenAPI
+
+Selain dokumen ini dan halaman `/api-docs`, tersedia spesifikasi mesin:
+
+| URL | Isi | Auth |
+|---|---|---|
+| `GET /v3/api-docs` | OpenAPI 3.0.3 (JSON) | tidak — dokumentasi harus bisa dibaca sebelum punya token |
+| `GET /api` | katalog ringkas | tidak |
+
+URL `/v3/api-docs` sengaja meniru springdoc supaya tim yang biasa membuka
+Swagger langsung mengenalinya. Bisa ditempel ke Swagger UI, Postman, atau
+dipakai `openapi-generator` untuk membuat klien Android.
+
+Spesifikasinya ditulis di `lib/openapi.js` — **bukan** hasil generate dari kode,
+karena endpoint kita tidak memakai decorator. Konsekuensinya: kalau endpoint
+berubah, file itu yang harus diperbarui. Yang menjaga agar tidak basi:
+
+```bash
+# 1. sah menurut aturan OpenAPI (validator resmi)
+curl -s localhost:5173/v3/api-docs > /tmp/openapi.json
+npx @redocly/cli lint /tmp/openapi.json
+
+# 2. daftar path cocok dengan katalog GET /api (tidak ada yang tertinggal)
+
+# 3. contoh respons benar-benar cocok dengan respons sungguhan
+```
+
+Pemeriksaan ketiga penting: dokumentasi yang menyebut field yang tidak pernah
+dikirim server adalah kebohongan yang lebih halus daripada salah ketik biasa.
+Empat endpoint sengaja **tanpa contoh** (`marine/ports`, `marine/waves`,
+`geo/district-weather`, `/api`) karena jalur suksesnya belum pernah teramati —
+lebih baik kosong daripada dikarang.
+
+---
+
 ## Siapa yang memakai kontrak ini
 
 **Dashboard dan 25 widget embed memakai endpoint di atas** — bukan jalur mentah

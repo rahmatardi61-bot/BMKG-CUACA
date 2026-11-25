@@ -504,8 +504,11 @@ window.addEventListener('message', (ev: MessageEvent) => {
         <div v-if="loading || !weather" class="p-6 text-center text-[12px] text-slate-500">
           Memuat rekomendasi aktivitas…
         </div>
+        <!-- Kartu-kartu ini didesain untuk kolom sidebar dashboard (±400 px).
+             Dibiarkan selebar iframe, ilustrasi latarnya menumpuk teks dan
+             terlihat terpotong. Jadi lebarnya dibatasi seperti aslinya. -->
+        <div v-else class="max-w-[400px] mx-auto pb-2">
         <WeatherActivity
-          v-else
           :weather-data="weather"
           :current-analysis="activityAnalysis"
           :additional-info="activityAdditional"
@@ -516,6 +519,7 @@ window.addEventListener('message', (ev: MessageEvent) => {
           :maritim-live="null"
           :section="activitySection"
         />
+        </div>
       </template>
 
       <!-- Rincian kondisi: angin, kelembapan, visibilitas, tekanan, dst. -->

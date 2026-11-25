@@ -88,13 +88,33 @@ onUnmounted(() => {
 
 // Serahkan token ke iframe lewat postMessage (bukan URL) — handshake:
 // iframe kirim 'bmkg-embed-ready', kita balas 'bmkg-embed-token'.
+/**
+ * Samakan tinggi iframe dengan tinggi isinya. Preview satu origin dengan
+ * halaman ini, jadi bisa diukur langsung. Diukur beberapa kali setelah load
+ * karena widget baru tahu tingginya setelah datanya datang.
+ */
+function fitPreview(ev: Event) {
+  passToken(ev);
+  const frame = ev.target as HTMLIFrameElement;
+  const measure = () => {
+    try {
+      const h = frame.contentDocument?.documentElement?.scrollHeight ?? 0;
+      if (h > 0) frame.style.height = `${Math.min(Math.max(h, 120), 2400)}px`;
+    } catch {
+      /* lintas origin: biarkan tinggi awal */
+    }
+  };
+  [600, 1800, 4000].forEach((ms) => window.setTimeout(measure, ms));
+}
+
 function passToken(ev: Event) {
   const frame = ev.target as HTMLIFrameElement;
   if (!hasToken.value || !frame.contentWindow) return;
   frame.contentWindow.postMessage({ type: 'bmkg-embed-token', token: gen.value.token }, '*');
 }
 function onWidgetMessage(ev: MessageEvent) {
-  const d = ev.data as { type?: string } | null;
+  const d = ev.data as { type?: string; height?: number } | null;
+
   if (d?.type !== 'bmkg-embed-ready' || !hasToken.value) return;
   (ev.source as Window | null)?.postMessage({ type: 'bmkg-embed-token', token: gen.value.token }, '*');
 }
@@ -709,7 +729,7 @@ async function copy(text: string, key: string) {
               :title="`Preview ${w.name}`"
               data-embed-preview
               loading="lazy"
-              @load="passToken"
+              @load="fitPreview"
             ></iframe>
             <div
               v-else

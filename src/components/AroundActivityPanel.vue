@@ -7,7 +7,7 @@ import {
 } from 'lucide-vue-next';
 import { cityAnalysisMap } from '../data/mockData';
 import { buildCityAnalysis } from '../services/analysisNarrative';
-import { bmkg } from '../services/bmkg/api';
+import { api } from '../services/bmkg/api';
 import { forecastToHourly } from '../services/bmkg/adapters';
 import type { WeatherData } from '../types/weather';
 
@@ -315,7 +315,7 @@ const loadLivePoiWeather = async (pois: GolfCourse[]) => {
   const out: Record<number, Partial<GolfCourse>> = {};
   await Promise.all(targets.map(async (p) => {
     try {
-      const res = await bmkg.forecast(p.lat, p.lng);
+      const res = await api.forecast(p.lat, p.lng);
       const hourly = forecastToHourly(res);
       if (!hourly.length) return;
       // slot pertama grup hari ini = jam terdekat (aturan sama dgn strip web asli)

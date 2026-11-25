@@ -1,0 +1,681 @@
+{
+ "hourly": [
+  {
+   "time": "15:00",
+   "date": "2026-11-25",
+   "temp": 28,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 52,
+   "humidity": 81,
+   "windSpeed": 4.5
+  },
+  {
+   "time": "16:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 40,
+   "humidity": 85,
+   "windSpeed": 4.5
+  },
+  {
+   "time": "17:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 40,
+   "humidity": 88,
+   "windSpeed": 0.8
+  },
+  {
+   "time": "18:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 40,
+   "humidity": 88,
+   "windSpeed": 0.8
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 89,
+   "windSpeed": 0.8
+  },
+  {
+   "time": "20:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 0,
+   "humidity": 89,
+   "windSpeed": 1.2
+  },
+  {
+   "time": "21:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 90,
+   "windSpeed": 1.2
+  },
+  {
+   "time": "22:00",
+   "date": "2026-11-25",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 90,
+   "windSpeed": 1.2
+  },
+  {
+   "time": "23:00",
+   "date": "2026-11-25",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 91,
+   "windSpeed": 1
+  },
+  {
+   "time": "00:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 93,
+   "windSpeed": 1
+  },
+  {
+   "time": "01:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 2,
+   "humidity": 93,
+   "windSpeed": 1
+  },
+  {
+   "time": "02:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 2,
+   "humidity": 92,
+   "windSpeed": 3.6
+  },
+  {
+   "time": "03:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 2,
+   "humidity": 92,
+   "windSpeed": 3.6
+  },
+  {
+   "time": "04:00",
+   "date": "2026-11-26",
+   "temp": 25,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 26,
+   "humidity": 92,
+   "windSpeed": 3.6
+  },
+  {
+   "time": "05:00",
+   "date": "2026-11-26",
+   "temp": 25,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 26,
+   "humidity": 94,
+   "windSpeed": 4.5
+  },
+  {
+   "time": "06:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 26,
+   "humidity": 92,
+   "windSpeed": 4.5
+  },
+  {
+   "time": "07:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 87,
+   "windSpeed": 4.5
+  },
+  {
+   "time": "10:00",
+   "date": "2026-11-26",
+   "temp": 29,
+   "status": "Cerah Berawan",
+   "icon": "CloudSun",
+   "precipitation": 4,
+   "humidity": 75,
+   "windSpeed": 6.5
+  },
+  {
+   "time": "13:00",
+   "date": "2026-11-26",
+   "temp": 30,
+   "status": "Cerah Berawan",
+   "icon": "CloudSun",
+   "precipitation": 2,
+   "humidity": 72,
+   "windSpeed": 5.6
+  },
+  {
+   "time": "16:00",
+   "date": "2026-11-26",
+   "temp": 28,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 44,
+   "humidity": 80,
+   "windSpeed": 4.3
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-26",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 16,
+   "humidity": 96,
+   "windSpeed": 6
+  },
+  {
+   "time": "22:00",
+   "date": "2026-11-26",
+   "temp": 25,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 10,
+   "humidity": 94,
+   "windSpeed": 3.8
+  },
+  {
+   "time": "01:00",
+   "date": "2026-11-27",
+   "temp": 25,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 4,
+   "humidity": 97,
+   "windSpeed": 2.2
+  },
+  {
+   "time": "04:00",
+   "date": "2026-11-27",
+   "temp": 25,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 2,
+   "humidity": 95,
+   "windSpeed": 1.4
+  },
+  {
+   "time": "07:00",
+   "date": "2026-11-27",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 4,
+   "humidity": 87,
+   "windSpeed": 3
+  },
+  {
+   "time": "10:00",
+   "date": "2026-11-27",
+   "temp": 30,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 4,
+   "humidity": 74,
+   "windSpeed": 7.4
+  },
+  {
+   "time": "13:00",
+   "date": "2026-11-27",
+   "temp": 28,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 30,
+   "humidity": 81,
+   "windSpeed": 7.4
+  },
+  {
+   "time": "16:00",
+   "date": "2026-11-27",
+   "temp": 27,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 30,
+   "humidity": 85,
+   "windSpeed": 1.7
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-27",
+   "temp": 25,
+   "status": "Udara Kabur",
+   "icon": "CloudFog",
+   "precipitation": 6,
+   "humidity": 96,
+   "windSpeed": 1.7
+  },
+  {
+   "time": "22:00",
+   "date": "2026-11-27",
+   "temp": 25,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 6,
+   "humidity": 95,
+   "windSpeed": 0.5
+  },
+  {
+   "time": "01:00",
+   "date": "2026-11-28",
+   "temp": 25,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 0,
+   "humidity": 94,
+   "windSpeed": 0.5
+  },
+  {
+   "time": "04:00",
+   "date": "2026-11-28",
+   "temp": 25,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 0,
+   "humidity": 94,
+   "windSpeed": 2.9
+  },
+  {
+   "time": "07:00",
+   "date": "2026-11-28",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 4,
+   "humidity": 85,
+   "windSpeed": 2.9
+  },
+  {
+   "time": "10:00",
+   "date": "2026-11-28",
+   "temp": 29,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 4,
+   "humidity": 74,
+   "windSpeed": 5.3
+  },
+  {
+   "time": "13:00",
+   "date": "2026-11-28",
+   "temp": 29,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 26,
+   "humidity": 77,
+   "windSpeed": 5.3
+  },
+  {
+   "time": "16:00",
+   "date": "2026-11-28",
+   "temp": 27,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 26,
+   "humidity": 84,
+   "windSpeed": 2.3
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-28",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 14,
+   "humidity": 90,
+   "windSpeed": 2.3
+  },
+  {
+   "time": "22:00",
+   "date": "2026-11-28",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 14,
+   "humidity": 93,
+   "windSpeed": 3.9
+  },
+  {
+   "time": "01:00",
+   "date": "2026-11-29",
+   "temp": 24,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 96,
+   "windSpeed": 3.9
+  },
+  {
+   "time": "04:00",
+   "date": "2026-11-29",
+   "temp": 24,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 94,
+   "windSpeed": 1.2
+  },
+  {
+   "time": "07:00",
+   "date": "2026-11-29",
+   "temp": 25,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 10,
+   "humidity": 93,
+   "windSpeed": 1.2
+  },
+  {
+   "time": "13:00",
+   "date": "2026-11-29",
+   "temp": 31,
+   "status": "Cerah Berawan",
+   "icon": "CloudSun",
+   "precipitation": 10,
+   "humidity": 72,
+   "windSpeed": 3.2
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-29",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 89,
+   "windSpeed": 3.2
+  },
+  {
+   "time": "01:00",
+   "date": "2026-11-30",
+   "temp": 25,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 94,
+   "windSpeed": 0.9
+  },
+  {
+   "time": "07:00",
+   "date": "2026-11-30",
+   "temp": 25,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 12,
+   "humidity": 93,
+   "windSpeed": 0.9
+  },
+  {
+   "time": "13:00",
+   "date": "2026-11-30",
+   "temp": 29,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 12,
+   "humidity": 77,
+   "windSpeed": 3.4
+  },
+  {
+   "time": "19:00",
+   "date": "2026-11-30",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 6,
+   "humidity": 91,
+   "windSpeed": 3.4
+  },
+  {
+   "time": "01:00",
+   "date": "2026-12-01",
+   "temp": 26,
+   "status": "Udara Kabur",
+   "icon": "CloudFog",
+   "precipitation": 6,
+   "humidity": 94,
+   "windSpeed": 4.2
+  },
+  {
+   "time": "07:00",
+   "date": "2026-12-01",
+   "temp": 25,
+   "status": "Udara Kabur",
+   "icon": "CloudFog",
+   "precipitation": 8,
+   "humidity": 96,
+   "windSpeed": 4.2
+  },
+  {
+   "time": "13:00",
+   "date": "2026-12-01",
+   "temp": 31,
+   "status": "Cerah",
+   "icon": "Sun",
+   "precipitation": 8,
+   "humidity": 73,
+   "windSpeed": 3
+  },
+  {
+   "time": "19:00",
+   "date": "2026-12-01",
+   "temp": 27,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 2,
+   "humidity": 88,
+   "windSpeed": 3
+  },
+  {
+   "time": "01:00",
+   "date": "2026-12-02",
+   "temp": 26,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 2,
+   "humidity": 94,
+   "windSpeed": 3
+  },
+  {
+   "time": "07:00",
+   "date": "2026-12-02",
+   "temp": 26,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 30,
+   "humidity": 90,
+   "windSpeed": 3
+  },
+  {
+   "time": "13:00",
+   "date": "2026-12-02",
+   "temp": 32,
+   "status": "Hujan Ringan",
+   "icon": "CloudRain",
+   "precipitation": 30,
+   "humidity": 69,
+   "windSpeed": 1.3
+  },
+  {
+   "time": "19:00",
+   "date": "2026-12-02",
+   "temp": 27,
+   "status": "Cerah",
+   "icon": "Moon",
+   "precipitation": 2,
+   "humidity": 94,
+   "windSpeed": 1.3
+  },
+  {
+   "time": "01:00",
+   "date": "2026-12-03",
+   "temp": 26,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 2,
+   "humidity": 98,
+   "windSpeed": 3.9
+  },
+  {
+   "time": "07:00",
+   "date": "2026-12-03",
+   "temp": 26,
+   "status": "Berawan",
+   "icon": "Cloud",
+   "precipitation": 4,
+   "humidity": 92,
+   "windSpeed": 3.9
+  },
+  {
+   "time": "13:00",
+   "date": "2026-12-03",
+   "temp": 31,
+   "status": "Cerah",
+   "icon": "Sun",
+   "precipitation": 4,
+   "humidity": 66,
+   "windSpeed": 4.9
+  },
+  {
+   "time": "19:00",
+   "date": "2026-12-03",
+   "temp": 28,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 6,
+   "humidity": 81,
+   "windSpeed": 4.9
+  },
+  {
+   "time": "01:00",
+   "date": "2026-12-04",
+   "temp": 25,
+   "status": "Cerah Berawan",
+   "icon": "CloudMoon",
+   "precipitation": 6,
+   "humidity": 96,
+   "windSpeed": 2.8
+  },
+  {
+   "time": "07:00",
+   "date": "2026-12-04",
+   "temp": 26,
+   "status": "Cerah",
+   "icon": "Sun",
+   "precipitation": 6,
+   "humidity": 90,
+   "windSpeed": 2.8
+  }
+ ],
+ "weather": {
+  "city": "Kota Adm. Jakarta Barat",
+  "temp": 30,
+  "status": "Cerah Berawan",
+  "feelLike": 32,
+  "tempMin": 26,
+  "tempMax": 28,
+  "humidity": 72,
+  "windSpeed": 4.5,
+  "uvIndex": 2,
+  "visibility": 0,
+  "icon": "CloudSun"
+ },
+ "alerts": [],
+ "additional": {
+  "windDir": "W",
+  "windAngle": 280,
+  "sunrise": "05:26",
+  "sunset": "17:53",
+  "moonPhase": "Full Moon",
+  "moonIllumination": "99.31",
+  "moonrise": "18:43",
+  "moonset": "05:42"
+ },
+ "videos": [
+  {
+   "id": "bmkg-video-0",
+   "category": "Video BMKG",
+   "title": "Prakiraan Cuaca Esok Hari - Edisi khusus wilayah Maluku Utara",
+   "summary": "Video prakiraan cuaca resmi BMKG.",
+   "date": "2026-11-25",
+   "imageUrl": "https://i.ytimg.com/vi/MjRMG2UATuU/hqdefault.jpg"
+  },
+  {
+   "id": "bmkg-video-1",
+   "category": "Video BMKG",
+   "title": "Berikut disampaikan tayangan update Prakiraan Cuaca Esok Hari, Rabu, 25 November 2026",
+   "summary": "Video prakiraan cuaca resmi BMKG.",
+   "date": "2026-11-25",
+   "imageUrl": "https://i.ytimg.com/vi/4eRZTeUZk6I/hqdefault.jpg"
+  },
+  {
+   "id": "bmkg-video-2",
+   "category": "Video BMKG",
+   "title": "Prakiraan Cuaca Esok Hari, Selasa, 24 November 2026.",
+   "summary": "Video prakiraan cuaca resmi BMKG.",
+   "date": "2026-11-25",
+   "imageUrl": "https://i.ytimg.com/vi/25FolvUKmag/hqdefault.jpg"
+  },
+  {
+   "id": "bmkg-video-3",
+   "category": "Video BMKG",
+   "title": "Prakiraan Cuaca Esok Hari, Senin, 23 November 2026",
+   "summary": "Video prakiraan cuaca resmi BMKG.",
+   "date": "2026-11-25",
+   "imageUrl": "https://i.ytimg.com/vi/AAvIFXliRxY/hqdefault.jpg"
+  },
+  {
+   "id": "bmkg-video-4",
+   "category": "Video BMKG",
+   "title": "Prakiraan Cuaca Esok Hari, Minggu, 22 November 2026.",
+   "summary": "Video prakiraan cuaca resmi BMKG.",
+   "date": "2026-11-25",
+   "imageUrl": "https://i.ytimg.com/vi/iLLz9o4nvr0/hqdefault.jpg"
+  }
+ ],
+ "address": "Slipi, Kec. Pal Merah, Kota Adm. Jakarta Barat, DKI Jakarta"
+}

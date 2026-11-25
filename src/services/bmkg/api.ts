@@ -140,48 +140,53 @@ export function bmkgNowcastRss(): Promise<string> {
   return request(bmkgProxied('alerts/nowcast/id')).then(r => r.text());
 }
 
-/**
- * BMKG Open Data RESMI (ACAO `*` → direct, tanpa proxy).
- * Bentuk item-nya identik dengan `forecast/coord` internal → `forecastToHourly` bisa dipakai ulang.
- */
-export const bmkgOfficial = {
-  prakiraanCuacaAdm4: (adm4: string) =>
-    getJson<BmkgForecastResponse>(
-      `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${encodeURIComponent(adm4)}`,
-    ),
-};
-
-// ── Endpoint helpers (typed) ──────────────────────────────────────────────────
+// ── Endpoint berbentuk normal ────────────────────────────────────────────────
+// Dashboard & widget TIDAK lagi memanggil path upstream BMKG. Nama & bentuk
+// field di sini sama dengan kontrak partner (docs/api-contract.md), jadi kalau
+// kontrak berubah, produk kita ikut berubah — itu yang membuat kontrak teruji
+// oleh pemakaian sendiri, bukan cuma janji di dokumen.
 import type {
-  BmkgAdmResponse,
-  BmkgAmandemenResponse,
-  BmkgCycloneResponse,
-  BmkgForecastResponse,
-  BmkgMaritimNearestResponse,
-  BmkgPresentWxResponse,
-  BmkgSunsetResponse,
-  BmkgVideoItem,
-  BmkgWarningResponse,
-  BmkgWeeklyTempResponse,
-} from '../../types/bmkg';
+  ApiAlerts, ApiAmendment, ApiCurrent, ApiCyclones, ApiForecast, ApiMarineNearest,
+  ApiNews, ApiNowcast, ApiSunTimes, ApiWeeklyTemp,
+} from '../../types/api';
 
-export const bmkg = {
-  forecast: (lat: number, lon: number) =>
-    bmkgProxy<BmkgForecastResponse>('api/df/v1/forecast/coord', { lat, lon }),
-  adm: (lat: number, lon: number) => bmkgProxy<BmkgAdmResponse>('api/df/v1/adm/coord', { lat, lon }),
-  amandemen: (lat: number, lon: number) =>
-    bmkgProxy<BmkgAmandemenResponse>('api/df/v1/amandemen/coord', { lat, lon }),
-  warning: (lat: number, lon: number) =>
-    bmkgProxy<BmkgWarningResponse>('api/public/weather/warning', { lat, long: lon }),
-  weeklyTemp: (lat: number, lon: number) =>
-    bmkgProxy<BmkgWeeklyTempResponse>('api/public/weather/weekly-temperature', { lat, long: lon }),
-  maritimNearest: (lat: number, lon: number) =>
-    bmkgProxy<BmkgMaritimNearestResponse>('api/v1/public/maritim/nearest-location', { lat, long: lon }),
-  blogPosts: (perPage = 4) =>
-    bmkgProxy<unknown[]>('blog/wp-json/wp/v2/posts', { per_page: perPage, _embed: 1 }),
-  presentWx: (lat: number, lon: number) => bmkgDirect<BmkgPresentWxResponse>('api/presentwx/coord', { lat, lon }),
-  sunset: (lat: number, lon: number) => bmkgDirect<BmkgSunsetResponse>('api/v1/sunset/json', { lat, lng: lon }),
-  cyclone: () => bmkgDirect<BmkgCycloneResponse>('api/v1/tcwc/cyclone/all'),
-  videos: (hashtag = 'infobmkgpws') =>
-    bmkgProxy<BmkgVideoItem[]>('api/public/weather/video-latest', { hashtag }),
+/** GET ke endpoint /api/* dengan token (gerbangnya sama dengan proxy lama). */
+async function apiGet<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
+  const q = qs(params);
+  const url = `${path}${q ? `?${q}` : ''}`;
+  const token = await getToken().catch(() => '');
+  if (!token) throw new Error('Token akses tidak tersedia');
+  if (import.meta.env.DEV) console.info(`[BMKG API] ${url}`);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }, signal: ctrl.signal });
+    if (!res.ok) throw new Error(`API ${res.status} ${path}`);
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export const api = {
+  forecast: (lat: number, lon: number) => apiGet<ApiForecast>('/api/weather/forecast', { lat, lon }),
+  current: (lat: number, lon: number) => apiGet<ApiCurrent>('/api/weather/current', { lat, lon }),
+  region: (lat: number, lon: number) => apiGet<{ region: ApiForecast['region'] }>('/api/geo/region', { lat, lon }),
+  alerts: (lat: number, lon: number) => apiGet<ApiAlerts>('/api/weather/alerts', { lat, lon }),
+  nowcast: (province: string) => apiGet<ApiNowcast>('/api/weather/nowcast', { province }),
+  weeklyTemp: (lat: number, lon: number) => apiGet<ApiWeeklyTemp>('/api/weather/weekly-temperature', { lat, lon }),
+  cyclones: () => apiGet<ApiCyclones>('/api/weather/cyclones'),
+  amendment: (lat: number, lon: number) => apiGet<ApiAmendment>('/api/weather/amendment', { lat, lon }),
+  sunTimes: (lat: number, lon: number) => apiGet<ApiSunTimes>('/api/sky/sun-times', { lat, lon }),
+  marineNearest: (lat: number, lon: number) => apiGet<ApiMarineNearest>('/api/marine/nearest', { lat, lon }),
+  news: () => apiGet<ApiNews>('/api/news'),
+  forecastOfficial: (adm4: string) => apiGet<ApiForecast>('/api/weather/forecast-official', { adm4 }),
+  districtWeather: (kind: 'darat' | 'kereta' = 'darat') =>
+    apiGet<{
+      file: string;
+      stations: Array<{
+        province: string; wilayah: string; district: string; lat: number; lon: number;
+        observation: { humidity: number; temp: number; conditionCode: string; windDirection: string; windSpeed: number };
+      }>;
+    }>('/api/geo/district-weather', { kind }),
 };

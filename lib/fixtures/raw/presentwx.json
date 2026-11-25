@@ -1,0 +1,35 @@
+{
+ "status": 200,
+ "data": {
+  "lokasi": {
+   "lon": 106.80137659256415,
+   "lat": -6.193992548834864,
+   "adm1": "31",
+   "adm2": "31.73",
+   "adm3": "31.73.07",
+   "adm4": "31.73.07.1002",
+   "provinsi": "DKI Jakarta",
+   "kotkab": "Kota Adm. Jakarta Barat",
+   "kecamatan": "Pal Merah",
+   "desa": "Slipi",
+   "distance": 0
+  },
+  "cuaca": {
+   "weather": 2,
+   "weather_desc": "Cerah Berawan",
+   "weather_desc_en": "Partly Cloudy",
+   "image": "https://api-apps.bmkg.go.id/storage/icon/cuaca/cerah berawan-am.svg",
+   "datetime": "2026-11-25T07:10:00.000Z",
+   "local_datetime": "2026-11-25 14:10:00",
+   "t": 30,
+   "tcc": 98,
+   "wd_deg": 280,
+   "wd": "W",
+   "wd_to": "E",
+   "ws": 4.5,
+   "hu": 72,
+   "vs": null,
+   "vs_text": null
+  }
+ }
+}

@@ -15,6 +15,8 @@ const ENDPOINTS = [
   { path: '/api/weather/nowcast', query: ['province?'], returns: '{ total, alerts[] }', live: true, note: 'dari RSS; severity dipetakan dari judul' },
   { path: '/api/weather/weekly-temperature', query: ['lat', 'lon'], returns: '{ daily[], weekly[] }', live: true },
   { path: '/api/weather/cyclones', query: [], returns: '{ cyclones[] }', live: true, note: 'kosong = tidak ada siklon aktif' },
+  { path: '/api/weather/amendment', query: ['lat', 'lon'], returns: '{ region, count }', live: true, note: 'count 0 = tidak ada perubahan prakiraan' },
+  { path: '/api/weather/forecast-official', query: ['adm4'], returns: '{ region, hours[] }', live: true, note: 'jalur cadangan dari api.bmkg.go.id' },
   { path: '/api/sky/sun-times', query: ['lat', 'lon'], returns: '{ sunrise, sunset, moonPhase, … }', live: true, note: 'waktu 24 jam' },
   { path: '/api/marine/nearest', query: ['lat', 'lon'], returns: '{ marine }', live: true },
   { path: '/api/marine/ports', query: ['lat?', 'lon?'], returns: '{ ports[] } atau { port }', live: false, note: 'maritim.bmkg.go.id sedang 503' },

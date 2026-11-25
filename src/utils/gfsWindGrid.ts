@@ -122,28 +122,25 @@ export function windLetterToDeg(letter: string): number {
 }
 
 let dwtStations: WindStationRef[] = [];
-import { bmkgProxied, proxiedFetch } from '../services/bmkg/api';
+import { api } from '../services/bmkg/api';
 export function getDwtStations(): WindStationRef[] { return dwtStations; }
 
 /**
- * Muat grid angin REAL dari DWT jalur darat (1234 kecamatan per jam UTC).
- * Dev: lewat proxy vite (/event/...). Dipanggil sekali dari App.vue; jika
- * gagal (CORS prod/offline) grid tetap pakai field sintetis.
+ * Muat grid angin REAL dari DWT jalur darat (~1234 kecamatan per jam UTC) lewat
+ * gateway /api/geo/district-weather. Dipanggil sekali dari App.vue; jika gagal,
+ * grid tetap memakai field sintetis.
  */
 export async function initDwtWindStations(): Promise<number> {
   if (dwtStations.length) return dwtStations.length;
   try {
-    const manifest = await (await proxiedFetch(bmkgProxied('event/source/dwt/apiDF_Darat/manifest_times.json'))).json();
-    const file = (manifest.files || []).at(-1) as string | undefined;
-    if (!file) return 0;
-    const rows = await (await proxiedFetch(bmkgProxied(`event/source/dwt/apiDF_Darat/${file}`))).json();
-    dwtStations = (rows as unknown[][])
-      .filter((r: unknown[]) => typeof r[3] === 'number' && typeof r[4] === 'number' && Array.isArray(r[7]))
-      .map((r: unknown[]) => ({
-        lat: r[3] as number,
-        lng: r[4] as number,
-        windSpeed: parseFloat(String((r[7] as string[])[4])) || 0,
-        windDeg: windLetterToDeg(String((r[7] as string[])[3])),
+    const { file, stations } = await api.districtWeather('darat');
+    dwtStations = stations
+      .filter((s) => typeof s.lat === 'number' && typeof s.lon === 'number')
+      .map((s) => ({
+        lat: s.lat,
+        lng: s.lon,
+        windSpeed: Number(s.observation.windSpeed) || 0,
+        windDeg: windLetterToDeg(s.observation.windDirection),
       }));
     if (import.meta.env.DEV) console.info(`[DWT] ${dwtStations.length} stasiun angin dimuat dari ${file}`);
     return dwtStations.length;

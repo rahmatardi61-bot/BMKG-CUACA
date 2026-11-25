@@ -76,12 +76,14 @@ jangan dipakai untuk klaim resmi.
 | `GET /api/weather/nowcast` | `province?` | `{ total, alerts[] }` |
 | `GET /api/weather/weekly-temperature` | `lat`, `lon` | `{ daily[], weekly[] }` |
 | `GET /api/weather/cyclones` | — | `{ cyclones[] }` |
+| `GET /api/weather/amendment` | `lat`, `lon` | `{ region, count, items[] }` |
+| `GET /api/weather/forecast-official` | `adm4` | `{ region, hours[] }` (jalur cadangan) |
 | `GET /api/sky/sun-times` | `lat`, `lon` | `{ sunrise, sunset, moonPhase, … }` |
 | `GET /api/marine/nearest` | `lat`, `lon` | `{ marine }` |
 | `GET /api/marine/ports` | `lat?`, `lon?` | `{ ports[] }` atau `{ port, distanceKm }` |
 | `GET /api/marine/waves` | — | `{ zones[] }` |
 | `GET /api/geo/region` | `lat`, `lon` | `{ region }` |
-| `GET /api/geo/district-weather` | `lat?`, `lon?` | `{ file, stations[] }` atau `{ file, station }` |
+| `GET /api/geo/district-weather` | `lat?`, `lon?`, `kind?` | `{ file, stations[] }` atau `{ file, station }` |
 | `GET /api/news` | — | `{ videos[], posts[], warnings[] }` |
 | `GET /api` | — | katalog endpoint (tanpa auth) |
 
@@ -133,12 +135,32 @@ Di sini sudah diratakan jadi `hours[]` dan diurutkan naik menurut `date`+`time`.
 | `marine/ports` | `maritim.bmkg.go.id/public_api/pelabuhan_list` |
 | `marine/waves` | `maritim.bmkg.go.id/public_api/overview/gelombang.json` |
 | `geo/region` | `cuaca.bmkg.go.id/api/df/v1/adm/coord` |
-| `geo/district-weather` | `publik.bmkg.go.id/event/source/dwt/apiDF_Darat/…` |
+| `geo/district-weather` | `publik.bmkg.go.id/event/source/dwt/apiDF_Darat\|Kereta/…` |
+| `weather/amendment` | `cuaca.bmkg.go.id/api/df/v1/amandemen/coord` |
+| `weather/forecast-official` | `api.bmkg.go.id/publik/prakiraan-cuaca?adm4=` |
 | `news` | `…/blog/wp-json/wp/v2/posts` + `…/api/public/weather/video-latest` |
 
 Header yang tidak bisa dilakukan browser (`Referer`, `Origin`, `X-API-KEY`,
 `x-public-token`) disuntik di `lib/upstream.js` — satu tempat, dipakai juga
 oleh proxy mentah `/api/bmkg`.
+
+---
+
+## Siapa yang memakai kontrak ini
+
+**Dashboard dan 25 widget embed memakai endpoint di atas** — bukan jalur mentah
+BMKG lagi. Konsekuensinya disengaja: kalau kontrak berubah, produk kita sendiri
+ikut rusak lebih dulu, jadi kontrak tidak bisa basi diam-diam.
+
+Yang masih memanggil di luar gateway, beserta alasannya:
+
+| Pemanggil | Masih memanggil | Alasan |
+|---|---|---|
+| `openData.ts` (maritim) | `maritim.bmkg.go.id/public_api/*` langsung | detail perairan + polygon belum diekspos (`/api/marine/{waves,ports}` sudah ada, tapi upstream 503) |
+| `satellite.bmkg.go.id`, `inderaja.bmkg.go.id` | langsung dari widget | tile gambar publik, tanpa token, tanpa CORS — bukan data yang perlu dinormalkan |
+
+Semua ke `cuaca.bmkg.go.id`, `www.bmkg.go.id`, `publik.bmkg.go.id`, dan
+`api.bmkg.go.id` sudah lewat gateway.
 
 ---
 
@@ -168,9 +190,14 @@ TOKEN=$(curl -s http://localhost:5173/api/embed-token | python3 -c "import sys,j
 curl -H "Authorization: Bearer $TOKEN" \
   "http://localhost:5173/api/weather/forecast?lat=-6.2&lon=106.8"
 
-# 3. kesetaraan bentuk normal vs adapters.ts (437 pemeriksaan)
+# 3. kesetaraan perilaku: normalize + adapters vs patokan sebelum refactor
 node lib/normalize.check.js
 ```
+
+`lib/fixtures/raw/*.json` = respons mentah BMKG yang direkam sekali.
+`lib/fixtures/expected.json` = hasil `adapters.ts` **sebelum** dashboard
+dipindah ke `/api/*`. Uji membandingkan keduanya, jadi memindahkan sumber data
+tidak boleh mengubah satu angka pun yang dilihat pengguna.
 
 `lib/normalize.check.js` membandingkan `lib/normalize.js` dengan
 `src/services/bmkg/adapters.ts` yang selama ini dipakai 22 widget: `temp`,
@@ -185,6 +212,7 @@ diubah memakai `normalize*`.
 | Tanggal | Perubahan |
 |---|---|
 | 25 Nov 2026 | 13 endpoint pertama. `visibility` → `null` (dulu `0` saat upstream kosong). `feelLike`/`uvIndex` dipindah ke `derived`. |
+| 25 Nov 2026 | `weather/amendment` + `weather/forecast-official`; `geo/district-weather` menerima `kind=kereta`. Dashboard & widget pindah memakai endpoint ini. |
 
 Kalau arti sebuah field berubah, **wajib** menambah baris di sini — tidak ada
 nomor versi di URL yang bisa menyelamatkan pemanggil lama.

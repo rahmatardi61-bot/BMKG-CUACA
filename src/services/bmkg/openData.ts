@@ -4,10 +4,12 @@
 //     prod /api-bmkg?path=event%2F… — lihat bmkgProxied di api.ts)
 // Semua fetch module-cached; dipakai TransportWeather/LandBased/WaveRadar/MarineMap/Advisor.
 
-import { bmkgProxied, proxiedFetch } from './api';
+import { api } from './api';
 
+// Maritim masih direct ke maritim.bmkg.go.id (CORS `*`): endpoint gateway-nya
+// (/api/marine/waves, /api/marine/ports) sudah ada, tapi detail perairan +
+// polygon belum diekspos. DWT sudah lewat /api/geo/district-weather.
 const MARITIM = 'https://maritim.bmkg.go.id/public_api';
-const DWT = (rest: string): string => bmkgProxied(`event/source/dwt/${rest}`);
 
 const CACHE_TTL = 30 * 60 * 1000; // 30 menit (slot maritim per 3 jam, DWT per jam)
 const cache = new Map<string, { data: unknown; at: number }>();
@@ -210,44 +212,51 @@ export async function getNearestPelabuhan(lat: number, lon: number): Promise<Pel
 
 // ── DWT (angin/cuaca per kecamatan & stasiun kereta) ────────────────────────
 
-type DwtRow = unknown[]; // [prov, wilayah, kecamatan, lat, lon, kode, waktu, [hu,temp,kode,arah,ws], flag]
-
+/** satu stasiun DWT dari bentuk normal /api/geo/district-weather */
 export interface DwtWeather {
   lat: number; lng: number; kecamatan: string; wilayah: string;
   humidity: number; temp: number; kodeCuaca: string; windSpeed: number; windDir: string;
 }
 
-async function fetchDwtRows(kind: 'Darat' | 'Kereta'): Promise<DwtRow[] | null> {
-  return cached(`dwt-${kind}-${new Date().toISOString().slice(0, 13)}`, async () => {
-    const manifest = await (await proxiedFetch(DWT(`apiDF_${kind}/manifest_times.json`))).json();
-    const file = (manifest.files || []).at(-1) as string | undefined;
-    if (!file) throw new Error('manifest kosong');
-    const rows = await (await proxiedFetch(DWT(`apiDF_${kind}/${file}`))).json();
-    return rows as DwtRow[];
+/** satu stasiun dari /api/geo/district-weather */
+type ApiStation = {
+  province: string; wilayah: string; district: string; lat: number; lon: number;
+  observation: { humidity: number; temp: number; conditionCode: string; windDirection: string; windSpeed: number };
+};
+
+/** Stasiun DWT terbaru lewat gateway (/api/geo/district-weather). */
+async function fetchDwtStations(kind: 'Darat' | 'Kereta'): Promise<ApiStation[]> {
+  const rows = await cached<ApiStation[]>(`dwt-${kind}-${new Date().toISOString().slice(0, 13)}`, async () => {
+    const res = await api.districtWeather(kind === 'Kereta' ? 'kereta' : 'darat');
+    return res.stations ?? [];
   });
+  return rows ?? [];
+}
+
+/** stasiun terdekat dari sebuah titik; `maxDeg` membatasi jarak (derajat) */
+async function nearestStation(kind: 'Darat' | 'Kereta', lat: number, lng: number, maxDeg: number): Promise<DwtWeather | null> {
+  const stations = await fetchDwtStations(kind);
+  if (!stations.length) return null;
+  let best: { s: ApiStation; d: number } | null = null;
+  for (const s of stations) {
+    if (typeof s.lat !== 'number' || typeof s.lon !== 'number') continue;
+    const d = (s.lat - lat) ** 2 + (s.lon - lng) ** 2;
+    if (!best || d < best.d) best = { s, d };
+  }
+  if (!best || best.d > maxDeg ** 2) return null;
+  const st = best.s;
+  return {
+    lat: st.lat, lng: st.lon,
+    kecamatan: st.district, wilayah: st.wilayah,
+    humidity: st.observation.humidity, temp: st.observation.temp,
+    kodeCuaca: st.observation.conditionCode,
+    windSpeed: st.observation.windSpeed, windDir: st.observation.windDirection,
+  };
 }
 
 /** cuaca DWT stasiun terdekat dari titik (jarak maks 2°) */
 export async function dwtWeatherAt(lat: number, lng: number): Promise<DwtWeather | null> {
-  const rows = await fetchDwtRows('Darat');
-  if (!rows?.length) return null;
-  let best: { row: DwtRow; d: number } | null = null;
-  for (const row of rows) {
-    const rLat = row[3] as number, rLng = row[4] as number;
-    if (typeof rLat !== 'number' || typeof rLng !== 'number' || !Array.isArray(row[7])) continue;
-    const d = (rLat - lat) ** 2 + (rLng - lng) ** 2;
-    if (!best || d < best.d) best = { row, d };
-  }
-  if (!best || best.d > 4) return null;
-  const r = best.row;
-  const slot = r[7] as string[];
-  return {
-    lat: r[3] as number, lng: r[4] as number,
-    kecamatan: String(r[2] ?? ''), wilayah: String(r[1] ?? ''),
-    humidity: parseFloat(slot[0]) || 0, temp: parseFloat(slot[1]) || 0,
-    kodeCuaca: String(slot[2] ?? ''),
-    windSpeed: parseFloat(slot[4]) || 0, windDir: String(slot[3] ?? ''),
-  };
+  return nearestStation('Darat', lat, lng, 2);
 }
 
 /** status transport dari kode cuaca DWT */
@@ -259,26 +268,9 @@ export function kodeToStatus(kode: string): 'Aman' | 'Waspada' | 'Awas' {
 }
 
 /** doc perairan stasiun kereta terdekat (178 stasiun, hanya Jawa) */
+/** stasiun kereta terdekat (hanya Jawa, jarak maks 0.5°) */
 export async function dwtKeretaAt(lat: number, lng: number): Promise<DwtWeather | null> {
-  const rows = await fetchDwtRows('Kereta');
-  if (!rows?.length) return null;
-  let best: { row: DwtRow; d: number } | null = null;
-  for (const row of rows) {
-    const rLat = row[3] as number, rLng = row[4] as number;
-    if (typeof rLat !== 'number' || typeof rLng !== 'number' || !Array.isArray(row[7])) continue;
-    const d = (rLat - lat) ** 2 + (rLng - lng) ** 2;
-    if (!best || d < best.d) best = { row, d };
-  }
-  if (!best || best.d > 0.3) return null; // stasiun kereta jarak maks ~0.5°
-  const r = best.row;
-  const slot = r[7] as string[];
-  return {
-    lat: r[3] as number, lng: r[4] as number,
-    kecamatan: String(r[2] ?? ''), wilayah: String(r[1] ?? ''),
-    humidity: parseFloat(slot[0]) || 0, temp: parseFloat(slot[1]) || 0,
-    kodeCuaca: String(slot[2] ?? ''),
-    windSpeed: parseFloat(slot[4]) || 0, windDir: String(slot[3] ?? ''),
-  };
+  return nearestStation('Kereta', lat, lng, 0.5);
 }
 
 /** centroid polygon geojson (rata-rata titik ring pertama) — cukup untuk peta zona */

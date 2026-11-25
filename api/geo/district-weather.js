@@ -1,5 +1,9 @@
-// GET /api/geo/district-weather            → { file, stations[] }  semua stasiun terbaru
-// GET /api/geo/district-weather?lat=&lon=  → stasiun terdekat saja (+ distanceKm)
+// GET /api/geo/district-weather                → { file, stations[] }  semua stasiun terbaru
+// GET /api/geo/district-weather?lat=&lon=      → stasiun terdekat saja (+ distanceKm)
+// GET /api/geo/district-weather?kind=kereta    → stasiun kereta (default: darat)
+//
+// Dua kumpulan data berbeda: apiDF_Darat (kecamatan, ~7000 titik) dan
+// apiDF_Kereta (~178 stasiun, hanya Jawa). Dashboard memakai keduanya.
 //
 // Sumber: publik.bmkg.go.id/event/source/dwt/apiDF_Darat/manifest_times.json
 //         lalu apiDF_Darat/<file terbaru>
@@ -15,14 +19,16 @@ export const config = { runtime: 'nodejs' };
 
 export default defineEndpoint({
   coordsOptional: true,
-  async run({ lat, lon }) {
-    const manifest = await bmkgFetch('event/source/dwt/apiDF_Darat/manifest_times.json');
+  async run({ lat, lon, query }) {
+    const kind = query.get('kind') === 'kereta' ? 'Kereta' : 'Darat';
+    const base = `event/source/dwt/apiDF_${kind}`;
+    const manifest = await bmkgFetch(`${base}/manifest_times.json`);
     if (!manifest.ok) throw upstreamFail('Open Data DWT tidak tersedia', `HTTP ${manifest.status}`);
 
     const file = (JSON.parse(manifest.body)?.files ?? []).at(-1);
     if (!file) throw upstreamFail('Manifest DWT kosong', 'files[] kosong');
 
-    const rows = await bmkgFetch(`event/source/dwt/apiDF_Darat/${encodeURIComponent(file)}`);
+    const rows = await bmkgFetch(`${base}/${encodeURIComponent(file)}`);
     if (!rows.ok) throw upstreamFail('Data DWT tidak tersedia', `HTTP ${rows.status}`);
 
     const { stations } = normalizeDistrictRows(JSON.parse(rows.body));

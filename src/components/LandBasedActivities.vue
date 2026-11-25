@@ -34,7 +34,7 @@ import {
   routesCoordinates,
 } from '../data/landBasedActivitiesData';
 import { hourlyForecastsMap } from '../data/mockData';
-import { bmkg } from '../services/bmkg/api';
+import { api } from '../services/bmkg/api';
 import { forecastToHourly } from '../services/bmkg/adapters';
 import type { HourlyForecast } from '../types/weather';
 import { getCityCoordinates } from '../data/earthquakeData';
@@ -91,7 +91,7 @@ watch(activeWeatherLocation, async (loc) => {
   if (key === liveRouteKey.value) return;
   liveRouteKey.value = key;
   try {
-    const res = await bmkg.forecast(loc.lat, loc.lng);
+    const res = await api.forecast(loc.lat, loc.lng);
     const hourly = forecastToHourly(res);
     if (hourly.length) liveRouteForecast.value = hourly;
   } catch {

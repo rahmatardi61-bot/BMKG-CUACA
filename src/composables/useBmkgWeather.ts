@@ -2,23 +2,22 @@
 // Prinsip: tiap endpoint fetch independen — yang gagal tidak menjatuhkan yang lain,
 // dan UI selalu punya data (fallback mock di App.vue).
 import { ref, type Ref } from 'vue';
-import { bmkg, bmkgNowcastRss, bmkgOfficial } from '../services/bmkg/api';
+import { api } from '../services/bmkg/api';
 import {
+  alertsToPanel,
+  currentToWeatherData,
   forecastToHourly,
-  presentWxToWeatherData,
-  sunsetToAdditional,
-  videosToNews,
-  warningToAlerts,
-  wpPostsToNews,
+  newsToArticles,
+  nowcastToAlerts,
+  regionToAddress,
+  sunTimesToAdditional,
 } from '../services/bmkg/adapters';
-import { parseNowcastRss } from '../services/bmkg/nowcast';
 import {
   getNearestPelabuhan,
   type PelabuhanSlot,
 } from '../services/bmkg/openData';
 import type { HourlyForecast, NewsArticle, WarningAlert, WeatherData } from '../types/weather';
 import type { AdditionalWeatherInfo } from '../data/weatherHelpers';
-import type { BmkgLocation, BmkgVideoItem } from '../types/bmkg';
 
 /** pelabuhan terdekat + slot prakiraan resmi (termasuk pasut) */
 export interface PortInfo {
@@ -67,11 +66,9 @@ export function useBmkgWeather() {
 
   async function loadNews() {
     try {
-      const [posts, videos] = await Promise.all([
-        bmkg.blogPosts(4).catch(() => []),
-        bmkg.videos().catch((): BmkgVideoItem[] => []),
-      ]);
-      const merged = [...wpPostsToNews(posts), ...videosToNews(videos)];
+      // satu endpoint: video + artikel, dengan warnings[] kalau salah satu mati
+      const res = await api.news();
+      const merged = newsToArticles(res);
       if (merged.length) liveNews.value = merged;
     } catch {
       /* fallback mock di App.vue */
@@ -80,14 +77,14 @@ export function useBmkgWeather() {
 
   async function loadCyclone(region: string, into: WarningAlert[]) {
     try {
-      const cyc = await bmkg.cyclone();
-      const doc = cyc.data?.docs?.[0];
+      const cyc = await api.cyclones();
+      const doc = cyc.cyclones?.[0];
       if (doc) {
         into.unshift({
-          id: `bmkg-cyclone-${doc._id ?? 'tcwc'}`,
+          id: `bmkg-cyclone-${doc.id ?? 'tcwc'}`,
           severity: 'Waspada',
           title: 'Sirkulasi Siklon TCWC Jakarta',
-          description: `Ada sirkulasi siklon aktif. Area gelombang tinggi terdampak: ${(doc.ocean_gale || []).slice(0, 3).join('; ') || '-'}.`,
+          description: `Ada sirkulasi siklon aktif. Area gelombang tinggi terdampak: ${(doc.gale || []).slice(0, 3).join('; ') || '-'}.`,
           region,
           date: new Date().toISOString().slice(0, 10),
         });
@@ -133,42 +130,47 @@ export function useBmkgWeather() {
     }
 
     status.value = 'loading';
-    // nowcast resmi (RSS, selalu terisi) jalan paralel; difilter setelah provinsi diketahui
-    const nowcastP = bmkgNowcastRss().catch(() => '');
-    const [forecast, present, sunset, warning, amandemen, maritim, adm] = await Promise.all([
-      bmkg.forecast(c.lat, c.lon).catch(() => null),
-      bmkg.presentWx(c.lat, c.lon).catch(() => null),
-      bmkg.sunset(c.lat, c.lon).catch(() => null),
-      bmkg.warning(c.lat, c.lon).catch(() => null),
-      bmkg.amandemen(c.lat, c.lon).catch(() => null),
-      bmkg.maritimNearest(c.lat, c.lon).catch(() => null),
-      bmkg.adm(c.lat, c.lon).catch(() => null),
+    // Semua lewat endpoint berbentuk normal (/api/*). nowcast tidak ikut di sini:
+    // penyaringan provinsi dilakukan server, dan provinsinya baru diketahui
+    // setelah /api/geo/region menjawab.
+    const [forecast, present, sun, warning, amandemen, marine, region] = await Promise.all([
+      api.forecast(c.lat, c.lon).catch(() => null),
+      api.current(c.lat, c.lon).catch(() => null),
+      api.sunTimes(c.lat, c.lon).catch(() => null),
+      api.alerts(c.lat, c.lon).catch(() => null),
+      api.amendment(c.lat, c.lon).catch(() => null),
+      api.marineNearest(c.lat, c.lon).catch(() => null),
+      api.region(c.lat, c.lon).catch(() => null),
     ]);
 
     let hourly = forecast ? forecastToHourly(forecast) : [];
-    // Fallback jalur RESMI (Open Data, CORS *) kalau prakiraan internal kosong/gagal.
-    // Bentuk item identik → adapter yang sama bisa dipakai ulang.
-    if (!hourly.length && adm?.adm4) {
-      const official = await bmkgOfficial.prakiraanCuacaAdm4(adm.adm4).catch(() => null);
+    // Fallback jalur RESMI (Open Data) kalau prakiraan internal kosong/gagal.
+    if (!hourly.length && region?.region.codes.adm4) {
+      const official = await api.forecastOfficial(region.region.codes.adm4).catch(() => null);
       if (official) hourly = forecastToHourly(official);
     }
-    const weather = present ? presentWxToWeatherData(present, city, hourly) : null;
-    // Peringatan: nowcast resmi menang (produk dini hari ini, selalu terisi);
+    const weather = present ? currentToWeatherData(present, city, hourly) : null;
+
+    // Peringatan: nowcast menang (produk dini hari ini, hampir selalu terisi);
     // kalau tidak ada yang relevan untuk provinsi ini → pakai warning internal.
-    const nowcast = parseNowcastRss(await nowcastP, adm?.provinsi);
-    const alerts: WarningAlert[] = nowcast.length
-      ? nowcast
-      : warning ? warningToAlerts(warning, city) : [];
+    const nowcastAlerts = region?.region.province
+      ? nowcastToAlerts(await api.nowcast(region.region.province).catch(() => ({ alerts: [] })))
+      : [];
+    const alerts: WarningAlert[] = nowcastAlerts.length
+      ? nowcastAlerts
+      : warning ? alertsToPanel(warning, city) : [];
     void loadCyclone(city, alerts);
 
     const data: BmkgCityData = {
       weather,
       hourly,
       alerts,
-      additional: sunset ? sunsetToAdditional(sunset, present ? { wd: present.data.cuaca.wd, wd_deg: present.data.cuaca.wd_deg } : null) : null,
-      amandemenCount: amandemen?.amandemen?.length ?? 0,
-      maritim: maritim ? { code: maritim.data.code, name: maritim.data.name, wilpel: maritim.data.wilpel } : null,
-      province: adm?.provinsi ?? null,
+      additional: sun
+        ? sunTimesToAdditional(sun, present ? { wd: present.observation.windDirection, wd_deg: present.observation.windDirectionDeg } : null)
+        : null,
+      amandemenCount: amandemen?.count ?? 0,
+      maritim: marine ? { code: marine.marine.code, name: marine.marine.name, wilpel: marine.marine.wilayah } : null,
+      province: region?.region.province ?? null,
       fetchedAt: Date.now(),
     };
     cache.set(key, data);
@@ -185,12 +187,8 @@ export function useBmkgWeather() {
   /** resolve alamat admin BMKG dari GPS; return null → caller pakai fallback */
   async function resolveAddress(lat: number, lon: number): Promise<string | null> {
     try {
-      const adm = await bmkg.adm(lat, lon);
-      return (
-        [adm.desa, adm.kecamatan ? `Kec. ${adm.kecamatan}` : '', adm.kotkab, adm.provinsi]
-          .filter(Boolean)
-          .join(', ') || null
-      );
+      const res = await api.region(lat, lon);
+      return regionToAddress(res.region) || null;
     } catch {
       return null;
     }
@@ -212,5 +210,3 @@ export function useBmkgWeather() {
     resolveAddress,
   };
 }
-
-export type BmkgLocation2 = BmkgLocation;

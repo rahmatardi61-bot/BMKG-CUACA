@@ -324,8 +324,9 @@ const airQualitySummary = computed(() => {
       </div>
     </div>
 
-    <!-- Title Section -->
-    <div class="flex items-center gap-2 mb-2 pt-2">
+    <!-- Title Section — hanya saat semua kartu dirender (dashboard).
+         Widget embed mengirim kartunya saja, tanpa judul section. -->
+    <div v-if="!section" class="flex items-center gap-2 mb-2 pt-2">
       <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Panduan Aktivitas & Analisis Cuaca</h3>
     </div>
 

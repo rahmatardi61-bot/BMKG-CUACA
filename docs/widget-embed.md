@@ -306,6 +306,10 @@ Kartu-kartu ini didesain untuk kolom sidebar dashboard (~380 px), jadi di embed
 lebarnya dibatasi `max-w-[400px]` dan ditengahkan. Kalau dibiarkan selebar
 iframe, ilustrasi latarnya menumpuk teks dan terlihat terpotong.
 
+Judul section `Panduan Aktivitas & Analisis Cuaca` **tidak** ikut dikirim: widget
+berisi kartunya saja. Judul itu hanya muncul di dashboard, tempat ia berfungsi
+sebagai pemisah antar kolom.
+
 ### Kartu yang butuh pilihan pengunjung → pakai default
 
 `maritime-advisor`, `aviation-advisor`, `land-activity`, `around` dan `report` di

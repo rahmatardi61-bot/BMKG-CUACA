@@ -252,7 +252,7 @@ Urutan tabel = urutan render `src/pages/MainDashboard.vue`, supaya membandingkan
 | `alerts` | Peringatan Dini Cuaca | `&city=` | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
 | `current` | Kondisi Cuaca Saat Ini | `&city=` | `loadCity()` → `HeroWeatherCard` | ❌ |
 | `search` | Pencarian Lokasi | — | `EmbedSearch` + `/api/widget-search` → **API BMKG** | ❌ |
-| `major-cities` | Kota-Kota Besar | — | `MajorCitiesCarousel` (landmark statis) | ➖ tanpa data |
+| `major-cities` | Kondisi Terkini + Aktivitas Sekitar | — | `MajorCitiesCarousel` + `AroundActivityPanel` (carousel tempat) | ➖ konten contoh |
 | `current-detail` | Rincian Kondisi Cuaca | `&city=` | `loadCity()` → `CurrentWeather` | ❌ |
 | `forecast` | Prakiraan Cuaca Per Jam | `&city=` | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
 | `satellite` | Citra Satelit Himawari-9 | — | Tile API (mandiri, nol props) | ❌ |

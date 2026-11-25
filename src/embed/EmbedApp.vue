@@ -594,7 +594,14 @@ window.addEventListener('message', (ev: MessageEvent) => {
 
       <!-- 10 kota besar: kartu statis (landmark + nama), tanpa fetch -->
       <div v-else-if="widget === 'major-cities'" class="p-4 overflow-hidden">
-        <MajorCitiesCarousel :selected-city="city" :show-activities="false" />
+        <!-- show-activities=true: sertakan section "Aktivitas Sekitar" (carousel
+             nama tempat) seperti di dashboard. Sebelumnya false sehingga bagian
+             bawah kartu ini hilang tanpa alasan yang terlihat. -->
+        <MajorCitiesCarousel
+          :selected-city="city"
+          :show-activities="true"
+          :weather-data="weather ?? undefined"
+        />
       </div>
 
       <!-- Peta maritim: Leaflet + data wilayah perairan resmi BMKG -->

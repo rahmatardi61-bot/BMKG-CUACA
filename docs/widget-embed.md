@@ -223,32 +223,70 @@ curl -s "https://DOMAIN/embed.html?widget=satellite" > widget-satellite.html
 <script async src="https://DOMAIN/embed.js"></script>
 ```
 
-## Widget yang tersedia (22)
+## Token & auto-refresh
 
-| ID | Nama | Query | Tinggi | Sumber data | Fallback MOCK |
-|---|---|---|---|---|---|
-| `satellite` | Citra Satelit Himawari-9 | — | 420 | Tile API (mandiri, nol props) | ❌ |
-| `earthquake` | Gempa Bumi Terkini | `&city=` | 520 | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
-| `alerts` | Peringatan Dini Cuaca | `&city=` | 340 | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
-| `news` | Berita & Pengumuman | — | 420 | `loadNews()` → `NewsSection :articles` | ✅ artikel mock |
-| `forecast` | Prakiraan Cuaca Per Jam | `&city=` | 540 | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
-| `current` | Kondisi Cuaca Saat Ini | `&city=` | 520 | `loadCity()` → `HeroWeatherCard` | ❌ |
-| `port-tide` | Pasang Surut Pelabuhan | `&city=` | 380 | Open Data `getNearestPelabuhan()` → `PortTideCard` | ❌ (upstream down → pesan jujur) |
-| `air-quality` | Kualitas Udara (ISPU) | `&city=` | 420 | `AirQualityCard` (nilai deterministik per kota) | ✅ **selalu** MOCK |
-| `transport` | Transportasi & Rute | `&city=` | 360 | `TransportWeather :statuses` (`transportStatusesMap`) | ✅ **selalu** MOCK |
-| `major-cities` | Kota-Kota Besar | `&city=` | 400 | `MajorCitiesCarousel` (landmark statis) | ➖ tanpa data |
-| `wave` | Radar Tinggi Gelombang | `&city=` | 480 | `WaveRadarMap` (zona live BMKG) | ❌ |
-| `marine` | Peta Meteorologi Maritim | `&city=` | 600 | `MarineMap` (INAWAVES / Open Data live) | ❌ |
-| `search` | Pencarian Lokasi | — | auto | `EmbedSearch` + `/api/widget-search` (OSM) | ❌ |
-| `activity` | Aktivitas & Rekomendasi | `&city=` | auto | `loadCity()` → `WeatherActivity` + `buildCityAnalysis` | ➖ narasi dihitung sendiri |
-| `current-detail` | Rincian Kondisi Cuaca | `&city=` | auto | `loadCity()` → `CurrentWeather` | ❌ |
-| `app-download` | Unduh Aplikasi BMKG | — | auto | statis (`AppDownloadCTA`) | ➖ tanpa data |
-| `radar` | Radar & Dinamika Atmosfer | `&city=` | 700 | `WeatherRadarMap` (medan sintetis) | ✅ **selalu** MOCK |
-| `maritime-advisor` | Saran Maritim | `&city=&sector=` | auto | `MaritimeAdvisorDrawer` (inline) | ➖ sektor default `shipping` |
-| `aviation-advisor` | Saran Penerbangan | `&city=&sector=` | auto | `AviationAdvisorDrawer` (inline) | ➖ sektor default `commercial` |
-| `land-activity` | Aktivitas Darat & Rute | `&city=&destLat=&destLng=` | 640 | `LandBasedActivities` (inline) | ➖ tujuan contoh |
-| `around` | Detail Aktivitas Sekitar | `&city=` | 640 | `AroundActivityDrawer` (inline) | ➖ satu aktivitas contoh |
-| `report` | Lapor Cuaca | `&city=` | auto | `EmbedWeatherReport` + `useWeatherReport` | ➖ laporan tidak dikirim |
+`/widgets` meminta token saat tombol **Generate token** ditekan — bukan saat
+halaman dibuka. Setelah itu token diperbarui sendiri **60 detik sebelum habis**
+(umur token 300 dtk), sampai halaman ditinggalkan. Kalau permintaan token gagal,
+token lama tetap dipakai: preview yang sudah tampil tidak boleh mati gara-gara
+jaringan.
+
+Token baru dikirim ke iframe yang sudah terpasang lewat
+`postMessage {type:'bmkg-embed-token'}` — **bukan** dengan me-remount iframe.
+Karena itu `gen.at` sengaja **tidak** ikut di `:key` iframe: dulu ikut, dan
+setiap token baru membuat 23 iframe memuat ulang bersamaan.
+
+Ini hanya untuk halaman dokumentasi (simulasi sisi partner). Loader
+`bmkg-embed.js` **tidak** menyegarkan token sendiri — di produksi itu tugas
+backend partner. `BmkgWidget.init()` mengembalikan `Promise<boolean>`; `false`
+berarti token ditolak dan partner perlu minta token baru.
+
+## Widget yang tersedia (23)
+
+Urutan tabel = urutan render `src/pages/MainDashboard.vue`, supaya membandingkan
+`/widgets` dengan `/dashboard` gampang. Urutan yang sama dipakai
+`api/widget-catalog.js` dan daftar di `/widgets`.
+
+| ID | Nama | Query | Sumber data | Fallback MOCK |
+|---|---|---|---|---|
+| `alerts` | Peringatan Dini Cuaca | `&city=` | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
+| `current` | Kondisi Cuaca Saat Ini | `&city=` | `loadCity()` → `HeroWeatherCard` | ❌ |
+| `search` | Pencarian Lokasi | — | `EmbedSearch` + `/api/widget-search` → **API BMKG** | ❌ |
+| `major-cities` | Kota-Kota Besar | — | `MajorCitiesCarousel` (landmark statis) | ➖ tanpa data |
+| `current-detail` | Rincian Kondisi Cuaca | `&city=` | `loadCity()` → `CurrentWeather` | ❌ |
+| `forecast` | Prakiraan Cuaca Per Jam | `&city=` | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
+| `satellite` | Citra Satelit Himawari-9 | — | Tile API (mandiri, nol props) | ❌ |
+| `marine` | Peta Meteorologi Maritim | `&city=` | `MarineMap` (INAWAVES / Open Data live) | ❌ |
+| `radar` | Radar & Dinamika Atmosfer | `&city=` | `WeatherRadarMap` (medan sintetis) | ✅ **selalu** MOCK |
+| `earthquake` | Gempa Bumi Terkini | `&city=` | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
+| `activity` | Aktivitas & Rekomendasi (semua) | `&city=` | `WeatherActivity` (semua kartu) | ➖ narasi dihitung sendiri |
+| `activity-land` | Aktivitas Darat | `&city=` | `WeatherActivity section="land"` | ➖ narasi dihitung sendiri |
+| `activity-coastal` | Aktivitas Pesisir & Laut | `&city=` | `WeatherActivity section="coastal"` | ➖ idem |
+| `activity-shipping` | Aktivitas Pelayaran | `&city=` | `WeatherActivity section="shipping"` | ➖ idem |
+| `activity-aviation` | Aktivitas Penerbangan | `&city=` | `WeatherActivity section="aviation"` | ➖ idem |
+| `transport` | Transportasi & Rute | `&city=` | `TransportWeather :statuses` (`transportStatusesMap`) | ✅ **selalu** MOCK |
+| `port-tide` | Pasang Surut Pelabuhan | `&city=` | Open Data `getNearestPelabuhan()` → `PortTideCard` | ❌ (upstream down → pesan jujur) |
+| `wave` | Radar Tinggi Gelombang | `&city=` | `WaveRadarMap` (zona live BMKG) | ❌ |
+| `maritime-advisor` | Saran Maritim | `&city=&sector=` | `MaritimeAdvisorDrawer` (inline) | ➖ sektor default `shipping` |
+| `aviation-advisor` | Saran Penerbangan | `&city=&sector=` | `AviationAdvisorDrawer` (inline) | ➖ sektor default `commercial` |
+| `land-activity` | Aktivitas Darat & Rute | `&city=&destLat=&destLng=` | `LandBasedActivities` (inline) | ➖ tujuan contoh |
+| `around` | Detail Aktivitas Sekitar | `&city=` | `AroundActivityDrawer` (inline) | ➖ satu aktivitas contoh |
+| `report` | Lapor Cuaca | `&city=` | `EmbedWeatherReport` + `useWeatherReport` | ➖ laporan tidak dikirim |
+
+Tinggi kartu tidak lagi ditulis di tabel ini: sejak auto-resize, iframe
+menyesuaikan tinggi isinya (`bmkg-widget-height`). `data-height` hanya dipakai
+di `/widgets` sebagai tinggi awal preview.
+
+### Section aktivitas dipecah per kartu
+
+Di dashboard, `WeatherActivity` adalah **satu kolom berisi 6 kartu** (indeks
+kenyamanan, ringkasan kualitas udara, lalu darat / pesisir & laut / pelayaran /
+penerbangan). Supaya bisa dipasang terpisah, empat kartu aktivitas diberi
+widget sendiri.
+
+Caranya bukan menduplikasi 500 baris markup: `WeatherActivity` menerima prop
+`section` (`land` / `coastal` / `shipping` / `aviation`) dan memberi `v-if` pada
+tiap kartu. `activity` tanpa prop = semua kartu, sama seperti dashboard.
 
 ### Kartu yang butuh pilihan pengunjung → pakai default
 
@@ -377,11 +415,17 @@ Angular, dan WordPress/HTML statis. Untuk konten dinamis (SPA): panggil
 - Halaman host tiruan (`file://`, CSS putih, font beda): 2 iframe terpasang,
   tinggi auto (420/888 px), **CSS host tidak terpengaruh**, 0 error.
 - `/embed` tanpa login; `city=Atlantis` → fallback `DKI Jakarta`.
-- **22 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 22/22 render tanpa
+- **23 widget** diuji satu per satu (`?widget=…&city=Surabaya`): 23/23 render tanpa
   error JS, tanpa "Gagal menyiapkan widget", tanpa watermark API key. Tinggi hasil
   ukur berkisar 98 px (`alerts` tanpa peringatan) sampai 1327 px (`activity`).
-- `/widgets`: 21 kartu preview (semua kecuali `search`) — seluruh iframe terisi
-  setelah di-scroll (iframe di bawah fold dimuat saat masuk viewport).
+- `/widgets`: 23 kartu preview — seluruh iframe terisi setelah di-scroll (iframe
+  di bawah fold dimuat saat masuk viewport).
+- Pencarian lokasi diuji dengan sumber baru: `q=sleman` → hasil BMKG asli
+  (`Trimulyo`, `Pandowoharjo`, `Tridadi`, `Triharjo`) di dashboard **dan** di
+  widget `search`.
+- Auto-refresh token `/widgets`: token berganti setelah 230 dtk (umur 300 dtk,
+  refresh dipicu pada sisa ≤60 dtk), **iframe tidak di-remount** (dataset penanda
+  bertahan) → tidak ada kedip.
 - `port-tide` sempat tampil "Data pasut tidak tersedia" — **bukan bug**: saat diuji
   `maritim.bmkg.go.id/public_api` memang 503. Empty state jujur.
 - `wave`: basemap CARTO memunculkan watermark "API KEY REQUIRED" → diganti Esri Dark Gray.

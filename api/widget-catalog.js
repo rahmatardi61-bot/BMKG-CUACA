@@ -30,28 +30,30 @@ const json = (body, status = 200) =>
 // id + nama + sifat data. `live: false` = selalu MOCK, harus diberi label oleh
 // halaman pemasang. `needsCity` = menerima ?city= atau ?lat=&lon=.
 const WIDGETS = [
-  { id: 'current', name: 'Kondisi Cuaca Saat Ini', needsCity: true, live: true, mock: null },
-  { id: 'forecast', name: 'Prakiraan Cuaca Per Jam', needsCity: true, live: true, mock: null },
+  // Urutan mengikuti render dashboard (src/pages/MainDashboard.vue), atas → bawah.
   { id: 'alerts', name: 'Peringatan Dini Cuaca', needsCity: true, live: true, mock: null },
-  { id: 'earthquake', name: 'Gempa Bumi Terkini', needsCity: true, live: true, mock: null },
+  { id: 'current', name: 'Kondisi Cuaca Saat Ini', needsCity: true, live: true, mock: null },
+  { id: 'search', name: 'Pencarian Lokasi', needsCity: false, live: true, mock: null },
+  { id: 'major-cities', name: 'Kota-Kota Besar', needsCity: false, live: false, mock: 'landmark statis, tanpa data' },
+  { id: 'current-detail', name: 'Rincian Kondisi Cuaca', needsCity: true, live: true, mock: null },
+  { id: 'forecast', name: 'Prakiraan Cuaca Per Jam', needsCity: true, live: true, mock: null },
   { id: 'satellite', name: 'Citra Satelit Himawari-9', needsCity: false, live: true, mock: null },
+  { id: 'marine', name: 'Peta Meteorologi Maritim', needsCity: true, live: true, mock: null },
+  { id: 'radar', name: 'Radar & Dinamika Atmosfer', needsCity: true, live: false, mock: 'medan angin/suhu sintetis; bukan radar BMKG' },
+  { id: 'earthquake', name: 'Gempa Bumi Terkini', needsCity: true, live: true, mock: null },
+  { id: 'activity', name: 'Aktivitas & Rekomendasi (semua)', needsCity: true, live: true, mock: 'narasi saran dihitung sendiri dari angka live' },
+  { id: 'activity-land', name: 'Aktivitas Darat', needsCity: true, live: true, mock: 'narasi saran dihitung sendiri' },
+  { id: 'activity-coastal', name: 'Aktivitas Pesisir & Laut', needsCity: true, live: true, mock: 'narasi saran dihitung sendiri' },
+  { id: 'activity-shipping', name: 'Aktivitas Pelayaran', needsCity: true, live: true, mock: 'narasi saran dihitung sendiri' },
+  { id: 'activity-aviation', name: 'Aktivitas Penerbangan', needsCity: true, live: true, mock: 'narasi saran dihitung sendiri' },
+  { id: 'transport', name: 'Transportasi & Rute', needsCity: true, live: false, mock: 'BMKG tidak punya API status transportasi' },
   { id: 'port-tide', name: 'Pasang Surut Pelabuhan', needsCity: true, live: true, mock: null },
   { id: 'wave', name: 'Radar Tinggi Gelombang', needsCity: true, live: true, mock: null },
-  { id: 'marine', name: 'Peta Meteorologi Maritim', needsCity: true, live: true, mock: null },
-  { id: 'news', name: 'Berita & Pengumuman BMKG', needsCity: false, live: true, mock: 'gagal 502 → artikel contoh' },
-  { id: 'air-quality', name: 'Kualitas Udara (ISPU)', needsCity: true, live: false, mock: 'selalu MOCK (BMKG tak punya API ISPU)' },
-  { id: 'transport', name: 'Transportasi & Rute', needsCity: true, live: false, mock: 'selalu MOCK' },
-  { id: 'major-cities', name: 'Kota-Kota Besar', needsCity: false, live: false, mock: 'statis, tidak memuat data' },
-  { id: 'search', name: 'Pencarian Lokasi', needsCity: false, live: true, mock: null, helper: true },
-  { id: 'activity', name: 'Aktivitas & Rekomendasi', needsCity: true, live: true, mock: 'angka live, narasi dari data yang sama' },
-  { id: 'current-detail', name: 'Rincian Kondisi Cuaca', needsCity: true, live: true, mock: null },
-  { id: 'app-download', name: 'Unduh Aplikasi BMKG', needsCity: false, live: false, mock: 'statis, tanpa data' },
-  { id: 'radar', name: 'Radar & Dinamika Atmosfer', needsCity: true, live: false, mock: 'medan angin/suhu sintetis, bukan radar BMKG' },
-  { id: 'maritime-advisor', name: 'Saran Maritim (per sektor)', needsCity: true, live: true, mock: 'sektor default: shipping' },
-  { id: 'aviation-advisor', name: 'Saran Penerbangan (per sektor)', needsCity: true, live: true, mock: 'sektor default: commercial' },
-  { id: 'land-activity', name: 'Aktivitas Darat & Rute', needsCity: true, live: false, mock: 'destinasi contoh (Monas); peta live' },
-  { id: 'around', name: 'Detail Aktivitas Sekitar', needsCity: true, live: false, mock: 'satu aktivitas contoh (taman kota)' },
-  { id: 'report', name: 'Lapor Cuaca (form + riwayat)', needsCity: true, live: false, mock: 'laporan tidak dikirim ke server' },
+  { id: 'maritime-advisor', name: 'Saran Maritim', needsCity: true, live: true, mock: 'sektor default shipping, tidak bisa dipilih pemasang' },
+  { id: 'aviation-advisor', name: 'Saran Penerbangan', needsCity: true, live: true, mock: 'sektor default commercial, tidak bisa dipilih pemasang' },
+  { id: 'land-activity', name: 'Aktivitas Darat & Rute', needsCity: true, live: false, mock: 'tujuan perjalanan masih contoh' },
+  { id: 'around', name: 'Detail Aktivitas Sekitar', needsCity: true, live: false, mock: 'satu aktivitas contoh' },
+  { id: 'report', name: 'Lapor Cuaca', needsCity: true, live: false, mock: 'laporan tidak dikirim ke server' },
 ];
 
 async function handle(req) {
@@ -69,7 +71,7 @@ async function handle(req) {
     usage: {
       widget: 'GET /api/embed-js (Bearer) → eval → <div data-bmkg-widget="ID" data-city="Bandung">',
       place: 'widget menerima ?city=Nama (dari cities[]) ATAU ?lat=&lon= (hasil /api/widget-search)',
-      search: 'GET /api/widget-search?q=... (Bearer) → { items: [{name, region, lat, lon}] }',
+      search: 'GET /api/widget-search?q=... (Bearer) → { items: [{ name, region, lat, lon, adm4, source }] } — sumber API BMKG, bukan Nominatim',
     },
   });
 }

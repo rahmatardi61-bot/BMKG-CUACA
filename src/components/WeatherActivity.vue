@@ -28,6 +28,12 @@ const props = defineProps<{
   slideDirection: string;
   currentCityLandmarkSvg: string;
   currentCityShortName: string;
+  /**
+   * Render satu kartu saja. Dipakai widget embed: section aktivitas dipecah
+   * jadi 4 widget terpisah (darat / pesisir / pelayaran / penerbangan).
+   * Tanpa prop ini, semua kartu tampil seperti di dashboard.
+   */
+  section?: 'comfort' | 'air' | 'land' | 'coastal' | 'shipping' | 'aviation';
 }>();
 
 const emit = defineEmits<{
@@ -142,7 +148,8 @@ const airQualitySummary = computed(() => {
 <template>
   <div class="space-y-4" v-api-marker:weather-activity>
     <!-- Index Kenyamanan Card (Futuristic & Compact) -->
-    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+    <div
+      v-if="!section || section === 'comfort'" class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
       <!-- Neon Accent Top Line -->
       <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500/0 via-amber-500/60 to-cyan-500/0"></div>
       
@@ -222,7 +229,8 @@ const airQualitySummary = computed(() => {
     </div>
 
     <!-- Card Resume Kualitas Udara (Futuristic & Compact) -->
-    <div class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
+    <div
+      v-if="!section || section === 'air'" class="relative w-full rounded-[4px] p-4 overflow-hidden border border-slate-200/60 dark:border-brand-navy-800/60 backdrop-blur-xl bg-white/85 dark:bg-brand-navy-900/80 shadow-sm hover:shadow-md transition-all duration-300 group text-left">
       <!-- Neon Accent Top Line (Teal/Emerald Glow) -->
       <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/0 via-teal-500/60 to-cyan-500/0"></div>
 
@@ -330,7 +338,8 @@ const airQualitySummary = computed(() => {
     >
       <div :key="selectedCity" class="flex flex-col gap-4">
         <!-- Card 1: Darat -->
-        <div 
+        <div
+      v-if="!section || section === 'land'" 
           @click="emit('open-land-advisor')"
           class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-orange-500/40 dark:hover:border-orange-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-orange-500/50 dark:active:border-orange-400/50"
         >
@@ -433,7 +442,8 @@ const airQualitySummary = computed(() => {
         </div>
 
         <!-- Card 2: Pesisir & Laut -->
-        <div 
+        <div
+      v-if="!section || section === 'coastal'" 
           @click="emit('open-maritime-advisor', 'shipping')"
           class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-cyan-500/50 dark:active:border-cyan-400/50"
         >
@@ -533,7 +543,8 @@ const airQualitySummary = computed(() => {
         </div>
 
         <!-- Card Baru: Aktivitas Pelayaran -->
-        <div 
+        <div
+      v-if="!section || section === 'shipping'" 
           @click="emit('open-maritime-advisor', 'shipping')"
           class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-blue-500/40 dark:hover:border-blue-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-blue-500/50 dark:active:border-blue-400/50"
         >
@@ -590,7 +601,8 @@ const airQualitySummary = computed(() => {
         </div>
 
         <!-- Card 3: Penerbangan -->
-        <div 
+        <div
+      v-if="!section || section === 'aviation'" 
           @click="emit('open-aviation-advisor', 'commercial')"
           class="gpu-card group relative bg-white/75 dark:bg-brand-navy-900/65 backdrop-blur-md border border-slate-200/50 dark:border-brand-navy-700/30 rounded-[4px] p-5 shadow-sm hover:shadow-md hover:border-indigo-500/40 dark:hover:border-indigo-400/40 transition-[shadow,border-color,transform] duration-300 flex flex-col gap-4 text-left cursor-pointer overflow-hidden active:scale-[0.98] active:duration-75 active:border-indigo-500/50 dark:active:border-indigo-400/50"
         >

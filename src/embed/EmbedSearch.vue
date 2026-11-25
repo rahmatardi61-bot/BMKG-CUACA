@@ -45,7 +45,7 @@ async function run(force = false): Promise<void> {
 
 function onInput(): void {
   if (timer) clearTimeout(timer);
-  timer = setTimeout(() => void run(), 320); // debounce: jangan hammer Nominatim
+  timer = setTimeout(() => void run(), 320); // debounce: jangan menembak server tiap ketukan
 }
 
 function choose(hit: Hit): void {
@@ -105,7 +105,7 @@ onUnmounted(() => {
 
     <p v-if="warning" class="mt-2 text-[10.5px] text-amber-600 dark:text-amber-400">{{ warning }}</p>
     <p class="mt-3 text-[10px] text-slate-400">
-      Sumber: daftar kota widget + OpenStreetMap (lewat server BMKG).
+      Sumber: API pencarian BMKG (desa/kelurahan resmi) + daftar kota widget.
     </p>
   </div>
 </template>

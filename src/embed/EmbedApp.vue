@@ -27,8 +27,8 @@
 import { defineAsyncComponent, computed, ref, onMounted } from 'vue';
 import { useBmkgWeather, CITY_COORDS } from '../composables/useBmkgWeather';
 import { adoptToken } from '../services/embedToken';
-import type { WarningAlert, NewsArticle, HourlyForecast } from '../types/weather';
-import { newsArticles, transportStatusesMap } from '../data/mockData';
+import type { WarningAlert, HourlyForecast } from '../types/weather';
+import { transportStatusesMap } from '../data/mockData';
 import type { WeatherData } from '../types/weather';
 import { MapPin, Construction, ExternalLink, ShieldCheck, FlaskConical, ShieldAlert, Sun, Cloud, CloudRain, CloudSun, Wind } from 'lucide-vue-next';
 import { buildCityAnalysis } from '../services/analysisNarrative';
@@ -38,7 +38,6 @@ import { getAdditionalWeatherData } from '../data/weatherHelpers';
 const SatelliteMap = defineAsyncComponent(() => import('../components/SatelliteMap.vue'));
 const EarthquakeHistory = defineAsyncComponent(() => import('../components/EarthquakeHistory.vue'));
 const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel.vue'));
-const NewsSection = defineAsyncComponent(() => import('../components/NewsSection.vue'));
 const ForecastPanel = defineAsyncComponent(() => import('../components/ForecastPanel.vue'));
 const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWeatherCard.vue'));
 const PortTideCard = defineAsyncComponent(() => import('../components/PortTideCard.vue'));
@@ -51,7 +50,6 @@ const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue
 const EmbedSearch = defineAsyncComponent(() => import('./EmbedSearch.vue'));
 const WeatherActivity = defineAsyncComponent(() => import('../components/WeatherActivity.vue'));
 const CurrentWeather = defineAsyncComponent(() => import('../components/CurrentWeather.vue'));
-const AppDownloadCTA = defineAsyncComponent(() => import('../components/AppDownloadCTA.vue'));
 const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
 const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
@@ -99,11 +97,13 @@ const city = ref(initialPlace.label);
 const placeCoords = ref<{ lat: number; lon: number } | undefined>(initialPlace.coords);
 
 // Kartu yang sudah siap di-embed
+// Urutan di sini mengikuti urutan render dashboard (MainDashboard.vue), supaya
+// membandingkan /widgets dengan /dashboard gampang.
 const READY = [
-  'satellite', 'earthquake', 'alerts', 'news', 'forecast',
-  'current', 'port-tide', 'air-quality', 'transport', 'major-cities',
-  'wave', 'marine', 'search',
-  'activity', 'current-detail', 'app-download', 'radar',
+  'alerts', 'current', 'search', 'major-cities', 'current-detail', 'forecast',
+  'satellite', 'marine', 'radar', 'earthquake',
+  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
+  'transport', 'port-tide', 'wave',
   'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
 const isReady = READY.includes(widget);
@@ -111,21 +111,22 @@ const isReady = READY.includes(widget);
 const CITY_WIDGETS = [
   'earthquake', 'alerts', 'forecast', 'current', 'port-tide',
   'air-quality', 'transport', 'wave', 'marine',
-  'activity', 'current-detail', 'radar',
+  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
+  'current-detail', 'radar',
   'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
 ];
 const needCity = CITY_WIDGETS.includes(widget);
 // Widget yang datanya bergantung pada loadCity (satu fetch dipakai bersama)
 const FETCH_WIDGETS = [
   'alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport',
-  'activity', 'current-detail',
+  'activity', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
+  'current-detail',
 ];
 
 // Widget berbasis data (alerts/news) menyiapkan datanya sendiri — komponennya
 // murni presentasional (props), pola sama seperti dashboard.
 const bmkg = useBmkgWeather();
 const alerts = ref<WarningAlert[]>([]);
-const articles = ref<NewsArticle[]>([]);
 const forecasts = ref<HourlyForecast[]>([]);
 const weather = ref<WeatherData | null>(null);
 const loading = ref(false);
@@ -221,12 +222,7 @@ async function loadData() {
   if (!(await ensureToken())) return; // gagal token → tampilkan layar error, bukan data
   loading.value = true;
   try {
-    if (widget === 'news') {
-      await bmkg.loadNews();
-      // WP BMKG sering 502 → pakai artikel mock seperti dashboard (App.vue activeArticles)
-      isMock.value = !bmkg.liveNews.value.length;
-      articles.value = isMock.value ? newsArticles.slice(0, 4) : bmkg.liveNews.value;
-    } else if (FETCH_WIDGETS.includes(widget)) {
+    if (FETCH_WIDGETS.includes(widget)) {
       // coords dari ?lat/?lon bila ada; kalau tidak, loadCity memakai CITY_COORDS
       await bmkg.loadCity(city.value, placeCoords.value);
       if (widget === 'alerts') {
@@ -234,7 +230,9 @@ async function loadData() {
       } else if (widget === 'forecast') {
         forecasts.value = bmkg.liveHourly.value.slice(0, 12);
         isMock.value = false; // prakiraan kosong → pesan jujur, bukan angka karangan
-      } else if (widget === 'current' || widget === 'current-detail' || widget === 'activity') {
+      } else if (widget === 'current' || widget === 'current-detail' || widget === 'activity'
+        || widget === 'activity-land' || widget === 'activity-coastal'
+        || widget === 'activity-shipping' || widget === 'activity-aviation') {
         weather.value = bmkg.liveWeather.value;
       } else if (widget === 'port-tide') {
         // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
@@ -308,6 +306,17 @@ const activityLandmark = computed(() => {
   return match?.svg ?? '';
 });
 const activityShortName = computed(() => city.value.split(',')[0].trim());
+/** Widget section aktivitas → hanya satu kartu yang dirender. */
+const activitySection = computed(() => {
+  const map: Record<string, 'land' | 'coastal' | 'shipping' | 'aviation'> = {
+    'activity-land': 'land',
+    'activity-coastal': 'coastal',
+    'activity-shipping': 'shipping',
+    'activity-aviation': 'aviation',
+  };
+  return map[widget] ?? null;
+});
+
 const landDestination = computed(() => {
   const c = placeCoords.value ?? CITY_COORDS[city.value] ?? CITY_COORDS['DKI Jakarta'];
   const lat = Number.isFinite(DEST_OVERRIDE.lat) && DEST_OVERRIDE.lat !== 0 ? DEST_OVERRIDE.lat : c.lat + 0.03;
@@ -429,10 +438,6 @@ window.addEventListener('message', (ev: MessageEvent) => {
         </div>
         <AlertsPanel v-else :alerts="alerts" />
       </template>
-      <template v-else-if="widget === 'news'">
-        <div v-if="loading || !articles.length" class="p-6 text-center text-[12px] text-slate-500">Memuat berita…</div>
-        <NewsSection v-else :articles="articles" />
-      </template>
       <template v-else-if="widget === 'forecast'">
         <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat prakiraan…</div>
         <div v-else-if="!forecasts.length" class="p-6 flex flex-col items-center text-center gap-1.5">
@@ -495,7 +500,7 @@ window.addEventListener('message', (ev: MessageEvent) => {
       </template>
 
       <!-- Aktivitas & rekomendasi: angka live, narasi dihitung dari data yang sama -->
-      <template v-else-if="widget === 'activity'">
+      <template v-else-if="widget === 'activity' || activitySection">
         <div v-if="loading || !weather" class="p-6 text-center text-[12px] text-slate-500">
           Memuat rekomendasi aktivitas…
         </div>
@@ -509,6 +514,7 @@ window.addEventListener('message', (ev: MessageEvent) => {
           :current-city-landmark-svg="activityLandmark"
           :current-city-short-name="activityShortName"
           :maritim-live="null"
+          :section="activitySection"
         />
       </template>
 
@@ -526,11 +532,6 @@ window.addEventListener('message', (ev: MessageEvent) => {
           Rincian cuaca {{ city }} belum tersedia.
         </div>
       </template>
-
-      <!-- Kartu unduh aplikasi: murni statis, tanpa token & tanpa kota -->
-      <div v-else-if="widget === 'app-download'" class="p-4">
-        <AppDownloadCTA class="h-full" />
-      </div>
 
       <!-- Peta lapisan (radar/satelit/angin): data field SINTETIS → selalu MOCK -->
       <WeatherRadarMap

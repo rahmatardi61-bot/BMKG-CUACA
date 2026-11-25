@@ -1,3 +1,5 @@
+import { getToken } from '../services/embedToken';
+
 export type POICategory = 'all' | 'wilayah' | 'tempat';
 
 export interface SearchResultItem {
@@ -634,114 +636,54 @@ export function filterLocalPOIs(query: string, category: POICategory = 'all'): S
 }
 
 /**
- * Perform live geocoder search with OpenStreetMap Nominatim API
- * Categorizes results into 'wilayah' (Kelurahan/Desa/Kecamatan) or 'tempat' (Nama Tempat/Fasilitas/POI)
+ * Pencarian daring — sumber: API BMKG (/api/widget-search → www.bmkg.go.id).
+ * Menggantikan Nominatim/OpenStreetMap: datanya desa/kelurahan resmi BMKG
+ * beserta kode adm4, jadi hasil pencarian sama dengan yang dipakai widget.
+ *
+ * Kategori 'tempat' (kampus, stadion, mal) tidak ada di API BMKG — untuk
+ * kategori itu hanya daftar lokal yang dipakai, tanpa pencarian daring.
  */
 export async function searchOnlinePOIs(query: string, category: POICategory = 'all'): Promise<SearchResultItem[]> {
   const cleanQ = query.trim();
   if (!cleanQ || cleanQ.length < 2) return [];
+  if (category === 'tempat') return [];
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 sec timeout
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQ)}&countrycodes=id&limit=8&addressdetails=1`;
-    
-    const response = await fetch(url, {
+    const token = await getToken().catch(() => '');
+    const response = await fetch(`/api/widget-search?q=${encodeURIComponent(cleanQ)}`, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
-        'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8'
-      }
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     });
-    
     clearTimeout(timeoutId);
     if (!response.ok) return [];
 
-    const data = await response.json();
-    if (!Array.isArray(data)) return [];
+    const data = (await response.json()) as { items?: Array<Record<string, unknown>> };
+    const rows = data.items ?? [];
 
-    const mappedResults: SearchResultItem[] = data.map((item: any) => {
-      const type = (item.type || '').toLowerCase();
-      const osmClass = (item.class || '').toLowerCase();
-      const name = item.name || item.display_name.split(',')[0] || cleanQ;
-      const addr = item.address || {};
-
-      // Detect category: Kelurahan/Desa (wilayah) vs Nama Tempat (tempat)
-      let cat: 'wilayah' | 'tempat' = 'wilayah';
-      let catLabel = 'Kelurahan & Desa';
-      let tag = 'Lokasi';
-
-      const isPlace = 
-        osmClass === 'amenity' || 
-        osmClass === 'leisure' || 
-        osmClass === 'tourism' || 
-        osmClass === 'aeroway' || 
-        osmClass === 'railway' || 
-        osmClass === 'historic' || 
-        osmClass === 'shop' || 
-        osmClass === 'office' ||
-        osmClass === 'sport' ||
-        type.includes('stadium') ||
-        type.includes('university') ||
-        type.includes('school') ||
-        type.includes('hospital') ||
-        type.includes('hotel') ||
-        type.includes('mall');
-
-      if (isPlace) {
-        cat = 'tempat';
-        catLabel = 'Nama Tempat';
-        if (type.includes('university') || type.includes('college') || type.includes('school')) {
-          tag = 'Pendidikan';
-        } else if (type.includes('stadium') || type.includes('sports') || type.includes('pitch')) {
-          tag = 'Fasilitas Olahraga';
-        } else if (type.includes('restaurant') || type.includes('cafe') || type.includes('food')) {
-          tag = 'Kuliner';
-        } else if (osmClass === 'tourism' || type.includes('attraction') || type.includes('museum')) {
-          tag = 'Tempat Wisata';
-        } else if (osmClass === 'aeroway' || osmClass === 'railway' || type.includes('station') || type.includes('airport')) {
-          tag = 'Transportasi';
-        } else {
-          tag = 'Nama Tempat';
-        }
-      } else {
-        cat = 'wilayah';
-        catLabel = 'Kelurahan & Desa';
-        tag = addr.village ? 'Desa' : (addr.suburb ? 'Kelurahan' : (addr.city_district ? 'Kecamatan' : 'Wilayah'));
-      }
-
-      // Build readable sublocation
-      const subParts: string[] = [];
-      if (addr.village && addr.village !== name) subParts.push(addr.village);
-      if (addr.suburb && addr.suburb !== name && !subParts.includes(addr.suburb)) subParts.push(`Kel. ${addr.suburb}`);
-      if (addr.city_district && !subParts.some(p => p.includes(addr.city_district))) subParts.push(`Kec. ${addr.city_district}`);
-      if (addr.city || addr.county) subParts.push(addr.city || addr.county);
-      if (addr.state) subParts.push(addr.state);
-
-      const subLocation = subParts.length > 0 ? subParts.join(', ') : item.display_name.split(',').slice(1, 4).join(',').trim();
-      const fullAddress = `${name}, ${subLocation}`;
-
+    return rows.map((item) => {
+      const name = String(item.name ?? '');
+      const region = String(item.region ?? '');
+      const adm4 = item.adm4 ? String(item.adm4) : '';
       return {
-        id: `osm-${item.place_id || Math.random()}`,
+        id: `bmkg-${adm4 || `${item.lat},${item.lon}`}`,
         name,
-        category: cat,
-        categoryLabel: catLabel,
-        subLocation,
-        fullAddress,
-        tag,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon)
+        category: 'wilayah' as const,
+        categoryLabel: 'Kelurahan & Desa',
+        subLocation: region,
+        fullAddress: [name, region].filter(Boolean).join(', '),
+        tag: item.source === 'bmkg-cities' ? 'Kota (widget)' : 'Desa',
+        lat: Number(item.lat),
+        lng: Number(item.lon),
       };
     });
-
-    // Apply category filter if requested
-    if (category !== 'all') {
-      return mappedResults.filter(r => r.category === category);
-    }
-    return mappedResults;
-  } catch (e) {
-    // Network fail / offline fallback - silent fail, local data continues
+  } catch {
+    // offline / timeout — daftar lokal tetap dipakai
     return [];
   }
 }

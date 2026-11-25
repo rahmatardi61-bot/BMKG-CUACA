@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { getToken, decodeJwt, verifyOnServer } from '../services/embedToken';
 import { Copy, Check, Code2, Eye, Globe, ExternalLink, ShieldCheck, Layers, MapPin, Activity, Moon, Sun, AlertTriangle, FlaskConical, Database, ListChecks, KeyRound, Lock, ArrowUp } from 'lucide-vue-next';
 
@@ -31,10 +31,17 @@ const left = computed(() => {
 });
 const hasToken = computed(() => !!gen.value.token && left.value > 0);
 
-async function generateToken() {
-  gen.value = { loading: true, token: '', at: 0 };
+/**
+ * Ambil token. `keep` = pertahankan token lama saat mint gagal (dipakai
+ * auto-refresh: token yang masih hidup lebih baik daripada kosong).
+ */
+async function fetchToken(keep = false) {
+  gen.value = { ...gen.value, loading: true };
   genError.value = '';
-  verdict.value = null;
+  if (!keep) {
+    gen.value = { loading: true, token: '', at: 0 };
+    verdict.value = null;
+  }
   try {
     const token = await getToken(true);
     gen.value = { loading: false, token, at: Date.now() };
@@ -42,10 +49,42 @@ async function generateToken() {
     window.clearInterval(ticker);
     ticker = window.setInterval(() => { now.value = Date.now(); }, 1000);
   } catch (e) {
-    gen.value = { loading: false, token: '', at: 0 };
     genError.value = String(e instanceof Error ? e.message : e).slice(0, 160);
+    gen.value = { ...gen.value, loading: false };
+    if (!keep) {
+      gen.value = { loading: false, token: '', at: 0 };
+      verdict.value = null;
+    }
   }
 }
+const generateToken = () => fetchToken();
+
+// Auto-refresh: setelah tombol Generate ditekan pertama kali, token diperbarui
+// sendiri 60 detik sebelum habis, sampai halaman ditinggalkan. Kalau mint gagal,
+// token lama tetap dipakai (jangan sampai preview mati gara-gara jaringan).
+const REFRESH_BEFORE = 60;
+let refreshing = false;
+const canAutoRefresh = computed(() => !!gen.value.token);
+watch([left, canAutoRefresh], async ([sisa, ada]) => {
+  if (!ada || refreshing || sisa === 0 || sisa > REFRESH_BEFORE) return;
+  refreshing = true;
+  await fetchToken(true);
+  refreshing = false;
+});
+
+// Token diperbarui → teruskan ke iframe yang sudah tampil. Tanpa ini iframe
+// tetap memakai token lama sampai di-reload, padahal justru itu yang mau dicegah.
+watch(() => gen.value.token, (token) => {
+  if (!token) return;
+  document.querySelectorAll<HTMLIFrameElement>('iframe[data-embed-preview]').forEach((f) => {
+    f.contentWindow?.postMessage({ type: 'bmkg-embed-token', token }, '*');
+  });
+});
+
+onUnmounted(() => {
+  window.clearInterval(ticker);
+  window.removeEventListener('message', onWidgetMessage);
+});
 
 // Serahkan token ke iframe lewat postMessage (bukan URL) — handshake:
 // iframe kirim 'bmkg-embed-ready', kita balas 'bmkg-embed-token'.
@@ -77,21 +116,7 @@ type Widget = {
 const alwaysMock = computed(() => WIDGETS.filter(w => !w.live));
 
 const WIDGETS: Widget[] = [
-  {
-    id: 'satellite',
-    name: 'Citra Satelit Himawari-9',
-    desc: 'Peta satelit interaktif: 8 parameter channel, 18 frame (3 jam terakhir), kontrol animasi. Data langsung dari API BMKG.',
-    height: 420,
-    live: true
-  },
-  {
-    id: 'earthquake',
-    name: 'Gempa Bumi Terkini',
-    desc: 'Gempa terbaru dari TEWS BMKG + peta lokasi. Menampilkan gempa terdekat dari kota yang dipilih.',
-    city: true,
-    height: 520,
-    live: true
-  },
+  // ── Urutan mengikuti render dashboard (MainDashboard.vue), atas → bawah ──
   {
     id: 'alerts',
     name: 'Peringatan Dini Cuaca',
@@ -101,70 +126,19 @@ const WIDGETS: Widget[] = [
     live: true
   },
   {
-    id: 'news',
-    name: 'Berita & Pengumuman BMKG',
-    desc: 'Artikel dan video terbaru dari kanal resmi BMKG.',
-    height: 420,
-    live: true,
-    mockFallback: 'Layanan berita BMKG (WordPress) cukup sering gagal (502). Bila itu terjadi, widget menampilkan artikel contoh dan menandainya dengan label MOCK.'
-  },
-  {
-    id: 'forecast',
-    name: 'Prakiraan Cuaca Per Jam',
-    desc: 'Prakiraan suhu, kelembapan, dan peluang hujan per jam untuk wilayah terpilih.',
-    city: true,
-    height: 540,
-    live: true
-  },
-  {
     id: 'current',
     name: 'Kondisi Cuaca Saat Ini',
-    desc: 'Kartu utama dashboard: suhu, kondisi langit, angin, kelembapan, plus ringkasan 7 hari.',
+    desc: 'Kartu utama: suhu, kondisi langit, suhu terasa, min/max harian, angin, kelembapan. Termasuk tombol Lapor Cuaca.',
     city: true,
     height: 520,
     live: true
   },
   {
-    id: 'port-tide',
-    name: 'Pasang Surut Pelabuhan',
-    desc: 'Jadwal pasut pelabuhan terdekat dari Open Data resmi BMKG.',
-    city: true,
-    height: 380,
+    id: 'search',
+    name: 'Pencarian Lokasi',
+    desc: 'Kolom pencarian desa/kelurahan dari API BMKG. Pilihan pengunjung memindahkan semua widget di halaman pemasang.',
+    height: 120,
     live: true
-  },
-  {
-    id: 'wave',
-    name: 'Radar Tinggi Gelombang',
-    desc: 'Peta perairan Indonesia dengan tinggi gelombang per wilayah laut (live BMKG).',
-    city: true,
-    height: 480,
-    live: true
-  },
-  {
-    id: 'marine',
-    name: 'Peta Meteorologi Maritim',
-    desc: 'Peta INAWAVES: prakiraan gelombang & cuaca perairan, lengkap dengan layer.',
-    city: true,
-    height: 600,
-    live: true
-  },
-  {
-    id: 'air-quality',
-    name: 'Kualitas Udara (ISPU)',
-    desc: 'Indeks kualitas udara per polutan (PM2.5, PM10, O₃, NO₂, CO, SO₂).',
-    city: true,
-    height: 420,
-    live: false,
-    mockFallback: 'BMKG tidak menyediakan API ISPU publik. Nilai dihitung deterministik per kota (bukan pengukuran resmi), jadi widget SELALU menampilkan label MOCK.'
-  },
-  {
-    id: 'transport',
-    name: 'Transportasi & Rute',
-    desc: 'Status moda transportasi (jalan, kereta, laut, udara) di kota terpilih.',
-    city: true,
-    height: 360,
-    live: false,
-    mockFallback: 'Status transportasi tidak tersedia lewat API publik BMKG. Data pada widget ini adalah contoh, selalu berlabel MOCK.'
   },
   {
     id: 'major-cities',
@@ -172,15 +146,6 @@ const WIDGETS: Widget[] = [
     desc: 'Kartu 10 kota besar Indonesia dengan landmark. Statis — tidak memuat data apa pun.',
     height: 400,
     live: false
-  },
-  {
-    id: 'activity',
-    name: 'Aktivitas & Rekomendasi',
-    desc: 'Rekomendasi aktivitas luar ruang, indeks kenyamanan panas, dan saran pakaian untuk kota terpilih.',
-    city: true,
-    height: 620,
-    live: true,
-    mockFallback: 'Angka suhu/angin/kelembapan live dari BMKG. Narasi saran dihitung dari angka itu dengan aturan kami sendiri — bukan produk resmi BMKG.'
   },
   {
     id: 'current-detail',
@@ -191,11 +156,27 @@ const WIDGETS: Widget[] = [
     live: true
   },
   {
-    id: 'app-download',
-    name: 'Unduh Aplikasi BMKG',
-    desc: 'Kartu ajakan mengunduh Info BMKG (Google Play + App Store). Murni statis, tanpa token.',
-    height: 260,
-    live: false
+    id: 'forecast',
+    name: 'Prakiraan Cuaca Per Jam',
+    desc: 'Prakiraan per jam BMKG sampai beberapa hari, lengkap dengan grafik suhu.',
+    city: true,
+    height: 540,
+    live: true
+  },
+  {
+    id: 'satellite',
+    name: 'Citra Satelit Himawari-9',
+    desc: 'Peta satelit interaktif: 8 parameter channel, 18 frame (3 jam terakhir), kontrol animasi. Data langsung dari API BMKG.',
+    height: 420,
+    live: true
+  },
+  {
+    id: 'marine',
+    name: 'Peta Meteorologi Maritim',
+    desc: 'Peta perairan Indonesia dengan prakiraan gelombang dan angin dari BMKG (INAWAVES / Open Data).',
+    city: true,
+    height: 600,
+    live: true
   },
   {
     id: 'radar',
@@ -206,6 +187,86 @@ const WIDGETS: Widget[] = [
     live: false,
     mockFallback: 'Medan angin & suhu dihitung sintetis di browser dari jangkar kota. Ini BUKAN produk radar BMKG — widget selalu berlabel MOCK.'
   },
+  {
+    id: 'earthquake',
+    name: 'Gempa Bumi Terkini',
+    desc: 'Gempa terbaru dari TEWS BMKG + peta lokasi. Menampilkan gempa terdekat dari kota yang dipilih.',
+    city: true,
+    height: 520,
+    live: true
+  },
+  // ── Section aktivitas dipecah per kartu (dashboard: satu kolom berisi 4 kartu) ──
+  {
+    id: 'activity',
+    name: 'Aktivitas & Rekomendasi (semua)',
+    desc: 'Seluruh section seperti di dashboard: indeks kenyamanan, ringkasan kualitas udara, plus kartu darat, pesisir, pelayaran, penerbangan.',
+    city: true,
+    height: 620,
+    live: true,
+    mockFallback: 'Angka suhu/angin/kelembapan live dari BMKG. Narasi saran dihitung dari angka itu dengan aturan kami sendiri — bukan produk resmi BMKG.'
+  },
+  {
+    id: 'activity-land',
+    name: 'Aktivitas Darat',
+    desc: 'Satu kartu: kesiapan aktivitas darat (jalan kaki, bersepeda, berkendara) beserta saran pakaian.',
+    city: true,
+    height: 320,
+    live: true,
+    mockFallback: 'Narasi saran dihitung dari angka cuaca live memakai aturan kami sendiri.'
+  },
+  {
+    id: 'activity-coastal',
+    name: 'Aktivitas Pesisir & Laut',
+    desc: 'Satu kartu: tinggi gelombang, kecepatan angin, dan kesiapan aktivitas pesisir.',
+    city: true,
+    height: 320,
+    live: true,
+    mockFallback: 'Narasi saran dihitung dari angka cuaca live memakai aturan kami sendiri.'
+  },
+  {
+    id: 'activity-shipping',
+    name: 'Aktivitas Pelayaran',
+    desc: 'Satu kartu: ringkasan kondisi pelayaran — gelombang, angin, dan peringatan perairan.',
+    city: true,
+    height: 320,
+    live: true,
+    mockFallback: 'Narasi saran dihitung dari angka cuaca live memakai aturan kami sendiri.'
+  },
+  {
+    id: 'activity-aviation',
+    name: 'Aktivitas Penerbangan',
+    desc: 'Satu kartu: ringkasan kondisi penerbangan — visibilitas, angin, dan awan di bandara terdekat.',
+    city: true,
+    height: 320,
+    live: true,
+    mockFallback: 'Narasi saran dihitung dari angka cuaca live memakai aturan kami sendiri.'
+  },
+  {
+    id: 'transport',
+    name: 'Transportasi & Rute',
+    desc: 'Status jalan raya, kereta, dan maritim untuk kota terpilih.',
+    city: true,
+    height: 360,
+    live: false,
+    mockFallback: 'BMKG tidak menerbitkan status transportasi lewat API publik. Angka & label dihitung dari cuaca kota, bukan pengumuman resmi operator.'
+  },
+  {
+    id: 'port-tide',
+    name: 'Pasang Surut Pelabuhan',
+    desc: 'Pasang surut pelabuhan terdekat dari BMKG Open Data, lengkap dengan grafik ketinggian.',
+    city: true,
+    height: 380,
+    live: true
+  },
+  {
+    id: 'wave',
+    name: 'Radar Tinggi Gelombang',
+    desc: 'Peta zona gelombang BMKG dengan tinggi dan kategori per perairan.',
+    city: true,
+    height: 480,
+    live: true
+  },
+  // ── Widget hasil pecahan drawer/modal: di dashboard baru muncul setelah klik ──
   {
     id: 'maritime-advisor',
     name: 'Saran Maritim',
@@ -231,7 +292,7 @@ const WIDGETS: Widget[] = [
     city: true,
     height: 640,
     live: false,
-    mockFallback: 'Tujuan perjalanan masih contoh tetap (Monumen Nasional) — partner belum bisa mengoper destinasi sendiri.'
+    mockFallback: 'Tujuan perjalanan masih contoh tetap (dekat kota terpilih) — partner belum bisa mengoper destinasi sendiri.'
   },
   {
     id: 'around',
@@ -252,6 +313,7 @@ const WIDGETS: Widget[] = [
     mockFallback: 'Laporan tidak dikirim ke server mana pun — murni demo interaksi. Riwayat awal berisi dua contoh.'
   }
 ];
+
 
 // Kartu dashboard yang BELUM siap di-embed — ditampilkan jujur, bukan disembunyikan
 // Sengaja TIDAK dijadikan widget: isinya drawer interaktif / bergantung preferensi
@@ -639,12 +701,13 @@ async function copy(text: string, key: string) {
             <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">PREVIEW LANGSUNG</p>
             <iframe
               v-if="hasToken"
-              :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}-${gen.at}`"
+              :key="`${w.id}-${w.city ? selCity : ''}-${previewKey}-${isDark}`"
               :src="srcUrl(w)"
               :height="w.height"
               width="100%"
               style="border:0;border-radius:8px;display:block;background:#fff"
               :title="`Preview ${w.name}`"
+              data-embed-preview
               loading="lazy"
               @load="passToken"
             ></iframe>

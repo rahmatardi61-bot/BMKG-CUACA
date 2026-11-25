@@ -305,6 +305,25 @@ const activityLandmark = computed(() => {
   return match?.svg ?? '';
 });
 const activityShortName = computed(() => city.value.split(',')[0].trim());
+/** Pilih tempat dari "Aktivitas Sekitar" → buka detailnya di dalam widget ini. */
+const aroundPicked = ref<Record<string, unknown> | null>(null);
+
+/**
+ * Pilih kota dari carousel "Kondisi Terkini". Dashboard mengganti kota seluruh
+ * halaman; di embed caranya sama lewat `bmkg-widget-place`, sehingga SEMUA widget
+ * di halaman pemasang ikut pindah (loader meneruskannya ke iframe lain).
+ */
+function pickCity(name: string) {
+  city.value = name;
+  placeCoords.value = undefined;
+  aroundPicked.value = null; // detail tempat kota lama jangan tertinggal
+  const c = CITY_COORDS[name];
+  if (c) {
+    window.parent?.postMessage({ type: 'bmkg-widget-place', label: name, lat: c.lat, lon: c.lon }, '*');
+  }
+  if (needCity) void loadData();
+}
+
 /** Widget section aktivitas → hanya satu kartu yang dirender. */
 const activitySection = computed(() => {
   const map: Record<string, 'comfort' | 'air' | 'land' | 'coastal' | 'shipping' | 'aviation'> = {
@@ -601,7 +620,29 @@ window.addEventListener('message', (ev: MessageEvent) => {
           :selected-city="city"
           :show-activities="true"
           :weather-data="weather ?? undefined"
+          @select-city="pickCity"
+          @select-course="aroundPicked = $event"
         />
+        <!-- Detail tempat: di dashboard ini drawer terpisah, di embed kita
+             tampilkan di dalam widget yang sama supaya klik ada hasilnya.
+             Mode inline menyembunyikan tombol tutup milik drawer, jadi diberi
+             tombol sendiri di sini. -->
+        <template v-if="aroundPicked">
+          <div class="mt-3 flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 px-3 py-2">
+            <span class="text-[11px] font-bold text-slate-500">DETAIL TEMPAT</span>
+            <button
+              @click="aroundPicked = null"
+              class="text-[11px] font-bold px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-brand-cyan hover:text-brand-cyan transition-colors"
+            >Tutup</button>
+          </div>
+          <AroundActivityDrawer
+            :is-open="true"
+            :activity="aroundPicked"
+            :selected-city="city"
+            inline
+            @close="aroundPicked = null"
+          />
+        </template>
       </div>
 
       <!-- Peta maritim: Leaflet + data wilayah perairan resmi BMKG -->

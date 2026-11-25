@@ -306,6 +306,16 @@ Kartu-kartu ini didesain untuk kolom sidebar dashboard (~380 px), jadi di embed
 lebarnya dibatasi `max-w-[400px]` dan ditengahkan. Kalau dibiarkan selebar
 iframe, ilustrasi latarnya menumpuk teks dan terlihat terpotong.
 
+Widget `major-cities` mengirim dua aksi yang di dashboard ada:
+
+- **pilih kota** → kota aktif berganti, dan lewat `bmkg-widget-place` **semua
+  widget di halaman pemasang ikut pindah** (loader meneruskan pesannya)
+- **pilih tempat** di "Aktivitas Sekitar" → `AroundActivityDrawer` dibuka
+  `inline` di dalam widget yang sama (tinggi 479 → ±1175 px), lengkap dengan
+  peta, indeks kenyamanan, dan prakiraan 4 jam. Mode `inline` menyembunyikan
+  tombol tutup milik drawer, jadi widget menyediakan tombol **Tutup** sendiri.
+  Ganti kota otomatis menutup detail supaya tidak tertinggal dari kota lama.
+
 Judul section `Panduan Aktivitas & Analisis Cuaca` **tidak** ikut dikirim: widget
 berisi kartunya saja. Judul itu hanya muncul di dashboard, tempat ia berfungsi
 sebagai pemisah antar kolom.

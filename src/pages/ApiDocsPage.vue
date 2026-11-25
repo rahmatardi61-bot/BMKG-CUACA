@@ -129,29 +129,29 @@ function curlFor(e: EndpointDoc) {
         <h2 class="text-lg font-black">{{ ENDPOINTS.length }} endpoint, {{ GROUPS.length }} kelompok</h2>
         <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
           Nama endpoint mengikuti <strong>isi responsnya</strong>, bukan nama asli BMKG.
-          Di balik layar kita memanggil
+          Lapisan ini memanggil
           <code class="font-mono text-[11px]">api/df/v1/forecast/coord</code>,
-          <code class="font-mono text-[11px]">api/presentwx/coord</code> dan sejenisnya —
-          semua nama & bentuk field itu sudah diterjemahkan di sini.
+          <code class="font-mono text-[11px]">api/presentwx/coord</code> dan sejenisnya;
+          seluruh nama dan struktur field tersebut telah diterjemahkan di sini.
         </p>
 
         <div class="mt-3 grid sm:grid-cols-3 gap-2">
           <div class="rounded-lg border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 px-3 py-2">
-            <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Satu gerbang auth</p>
+            <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Satu gerbang autentikasi</p>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-              Semua endpoint butuh <code class="font-mono">Authorization: Bearer</code> — token Keycloak, sama seperti widget.
+              Seluruh endpoint memerlukan <code class="font-mono">Authorization: Bearer</code>, yaitu token Keycloak yang sama seperti widget.
             </p>
           </div>
           <div class="rounded-lg border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 px-3 py-2">
             <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Tanpa data contoh</p>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-              Kalau BMKG gagal, jawabannya error. Mock hanya ada di widget/dashboard, tidak di lapisan API.
+              Apabila BMKG gagal, respons yang dikembalikan berupa kesalahan. Data contoh hanya ada pada widget dan dashboard, tidak pada lapisan API.
             </p>
           </div>
           <div class="rounded-lg border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 px-3 py-2">
             <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">Katalog dari server</p>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-              <code class="font-mono">GET /api</code> mengembalikan daftar endpoint ini dalam JSON — untuk mesin & AI.
+              <code class="font-mono">GET /api</code> mengembalikan daftar endpoint ini dalam format JSON untuk konsumsi mesin.
             </p>
           </div>
         </div>
@@ -159,7 +159,7 @@ function curlFor(e: EndpointDoc) {
         <p class="mt-2 inline-flex items-start gap-1.5 text-[11.5px] leading-snug text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 rounded-md px-2.5 py-1.5">
           <FlaskConical class="w-3 h-3 shrink-0 mt-0.5" />
           <span><strong class="font-bold">Versi POC.</strong>
-          Token dibuat untuk pengembangan internal. Di produksi token datang dari backend partner, bukan halaman ini.</span>
+          Token pada halaman ini hanya untuk pengembangan internal. Pada lingkungan produksi, token diperoleh dari backend mitra, bukan dari halaman ini.</span>
         </p>
       </section>
 
@@ -169,11 +169,11 @@ function curlFor(e: EndpointDoc) {
         class="rounded-xl border border-rose-500/35 bg-rose-500/8 p-3.5"
       >
         <h3 class="text-xs font-black flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
-          <ShieldAlert class="w-3.5 h-3.5" /> Halaman ini ketinggalan
+          <ShieldAlert class="w-3.5 h-3.5" /> Halaman ini belum mutakhir
         </h3>
         <p class="text-[11.5px] text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
-          Server punya {{ catalogCount }} endpoint, halaman ini menampilkan {{ ENDPOINTS.length }}.
-          Belum didokumentasikan di sini:
+          Server menyediakan {{ catalogCount }} endpoint, halaman ini menampilkan {{ ENDPOINTS.length }}.
+          Endpoint berikut belum terdokumentasikan di sini:
         </p>
         <p class="font-mono text-[11px] text-rose-600 dark:text-rose-300 mt-1 break-all">{{ missingOnPage.join(', ') }}</p>
       </section>
@@ -187,8 +187,8 @@ function curlFor(e: EndpointDoc) {
               <span class="text-[10px] font-bold text-slate-500 px-1.5 py-0.5 rounded bg-slate-500/10 border border-slate-400/20">SIMULASI PARTNER</span>
             </h3>
             <p class="text-[11.5px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-              Tekan tombol, lalu semua contoh <code class="font-mono text-[10.5px]">curl</code> di bawah
-              otomatis memakai token itu. Tanpa token, semua endpoint menjawab
+              Tekan tombol untuk membuat token; seluruh contoh <code class="font-mono text-[10.5px]">curl</code> di bawah
+              kemudian memakai token tersebut. Tanpa token, setiap endpoint menjawab
               <code class="font-mono text-[10.5px]">401</code>.
             </p>
           </div>
@@ -294,22 +294,22 @@ function curlFor(e: EndpointDoc) {
       <!-- Aturan yang tidak boleh dilanggar -->
       <section class="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 space-y-2">
         <h3 class="text-xs font-black flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
-          <AlertTriangle class="w-3.5 h-3.5" /> Dua hal yang mudah disalahpahami
+          <AlertTriangle class="w-3.5 h-3.5" /> Dua ketentuan yang perlu diperhatikan
         </h3>
         <div class="space-y-2 text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed">
           <p>
             <strong class="font-bold">1. `precipitation` bukan peluang hujan.</strong>
-            Nilainya 0–100 dari curah hujan (mm × 20, dibatasi 100). 2 mm menjadi 40.
-            Kalau aplikasi menampilkannya sebagai "peluang hujan 40%", itu salah tafsir —
-            sebut saja <em>intensitas hujan</em>.
+            Nilainya 0–100 yang diturunkan dari curah hujan (mm × 20, dibatasi 100); 2 mm menjadi 40.
+            Menampilkannya sebagai "peluang hujan 40%" merupakan salah tafsir dan sebaiknya
+            disebut sebagai <em>intensitas hujan</em>.
           </p>
           <p>
             <strong class="font-bold">2. `derived` bukan data BMKG.</strong>
-            <code class="font-mono">feelLike</code> adalah aproksimasi heat index;
+            <code class="font-mono">feelLike</code> merupakan aproksimasi heat index;
             <code class="font-mono">uvIndex</code> hanya diturunkan dari tutupan awan
-            (tanpa jam, tanpa lintang). Keduanya disimpan dalam objek
-            <code class="font-mono">derived</code> justru supaya kelihatan bedanya.
-            Jangan tampilkan sebagai data resmi.
+            (tanpa memperhitungkan jam maupun lintang). Keduanya ditempatkan pada objek
+            <code class="font-mono">derived</code> agar perbedaannya jelas secara struktural.
+            Nilainya tidak untuk ditampilkan sebagai data resmi.
           </p>
         </div>
       </section>
@@ -318,8 +318,9 @@ function curlFor(e: EndpointDoc) {
       <section class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 p-4">
         <h3 class="text-xs font-black mb-1.5">Bentuk error</h3>
         <p class="text-[11.5px] text-slate-600 dark:text-slate-400 leading-relaxed">
-          Selalu <code class="font-mono text-[10.5px]">{ error, code, reason }</code> — jangan andalkan teks
-          <code class="font-mono text-[10.5px]">error</code>, pakai <code class="font-mono text-[10.5px]">code</code>.
+          Formatnya selalu <code class="font-mono text-[10.5px]">{ error, code, reason }</code>. Gunakan
+          <code class="font-mono text-[10.5px]">code</code> sebagai acuan, bukan teks
+          <code class="font-mono text-[10.5px]">error</code> yang dapat berubah.
         </p>
         <div class="mt-2 grid sm:grid-cols-2 gap-1.5">
           <p class="text-[11px]"><code class="font-mono font-bold">UNAUTHORIZED</code> <span class="text-slate-500">401 — token tidak ada / tidak sah</span></p>

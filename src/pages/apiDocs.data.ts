@@ -84,7 +84,7 @@ export const ENDPOINTS: EndpointDoc[] = [
   }
 }`,
     fields: [...REGION_FIELDS, ...OBSERVATION_FIELDS],
-    warn: 'feelLike dan uvIndex TIDAK berasal dari BMKG — keduanya dihitung di server (heat index kasar; UV hanya dari tutupan awan). Jangan tampilkan sebagai data resmi.',
+    warn: 'Nilai feelLike dan uvIndex bukan berasal dari BMKG. Keduanya dihitung pada lapisan server (heat index sederhana; UV hanya dari tutupan awan) dan tidak untuk ditampilkan sebagai data resmi.',
   },
   {
     path: '/api/weather/forecast',
@@ -115,13 +115,13 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'hours[].windDirection', type: 'string' },
       { name: 'hours[].visibility', type: 'number | null' },
     ],
-    warn: 'Di upstream, `cuaca` berbentuk array bersarang (satu array per hari). Di sini sudah rata jadi `hours[]` — jangan mencari struktur lama.',
+    warn: 'Pada upstream, `cuaca` berbentuk array bersarang dengan satu array per hari. Di sini data telah diratakan menjadi `hours[]`; struktur lama tidak lagi digunakan.',
   },
   {
     path: '/api/weather/alerts',
     group: 'weather',
     title: 'Peringatan dini cuaca',
-    desc: 'Peringatan per wilayah. Sering kosong — itu artinya memang tidak ada peringatan.',
+    desc: 'Peringatan per wilayah. Sering kali kosong, yang berarti tidak ada peringatan.',
     query: ['lat', 'lon'],
     auth: true,
     sample: 'curl -H "Authorization: Bearer $TOKEN" \\\n  "https://DOMAIN/api/weather/alerts?lat=-6.2&lon=106.8"',
@@ -158,7 +158,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'alerts[].severity', type: 'string', note: 'dipetakan dari judul, bukan field resmi' },
       { name: 'alerts[].region', type: 'string', note: 'diambil dari judul setelah "di …"' },
     ],
-    warn: 'RSS tidak punya field severity & expires. Severity di sini hasil pemetaan kata kunci dari judul — perkiraan, bukan bulletin resmi.',
+    warn: 'RSS tidak menyediakan field severity maupun expires. Nilai severity di sini merupakan hasil pemetaan kata kunci dari judul dan bersifat perkiraan, bukan bulletin resmi.',
   },
   {
     path: '/api/weather/weekly-temperature',
@@ -176,13 +176,13 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: '[].date', type: 'string', note: 'timestamp ISO apa adanya dari BMKG (belum dirapikan jadi YYYY-MM-DD)' },
       { name: '[].temperature', type: 'number', note: '°C, tidak dibulatkan — mis. 26.72541300455698' },
     ],
-    warn: 'lat & lon WAJIB. Tanpa keduanya upstream menjawab HTTP 500, bukan 400 — jadi server kami yang menerjemahkannya jadi 502.',
+    warn: 'Parameter lat dan lon bersifat wajib. Tanpa keduanya upstream menjawab HTTP 500, bukan 400, sehingga lapisan ini menerjemahkannya menjadi 502.',
   },
   {
     path: '/api/weather/cyclones',
     group: 'weather',
     title: 'Siklon tropis',
-    desc: 'Siklon aktif beserta bulletin. Kosong = tidak ada siklon.',
+    desc: 'Siklon aktif beserta bulletin. Kosong berarti tidak ada siklon aktif.',
     query: [],
     auth: true,
     sample: 'curl -H "Authorization: Bearer $TOKEN" \\\n  "https://DOMAIN/api/weather/cyclones"',
@@ -199,7 +199,7 @@ export const ENDPOINTS: EndpointDoc[] = [
     path: '/api/weather/amendment',
     group: 'weather',
     title: 'Amandemen prakiraan',
-    desc: 'Revisi prakiraan yang dikeluarkan BMKG untuk titik ini. Kosong = tidak ada revisi.',
+    desc: 'Revisi prakiraan yang dikeluarkan BMKG untuk titik ini. Kosong berarti tidak ada revisi.',
     query: ['lat', 'lon'],
     auth: true,
     sample: 'curl -H "Authorization: Bearer $TOKEN" \\\n  "https://DOMAIN/api/weather/amendment?lat=-6.2&lon=106.8"',
@@ -210,7 +210,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'count', type: 'number', note: 'jumlah revisi; 0 = tidak ada' },
       { name: 'items', type: 'array', note: 'teruskan apa adanya dari BMKG — bentuk item belum pernah teramati' },
     ],
-    warn: 'Terbukti selalu kosong saat kontrak ini disusun (0 item di 5 titik, 25 Nov 2026). Jangan bangun UI yang bergantung pada item terisi.',
+    warn: 'Pada penyusunan kontrak ini, seluruh pengujian (5 titik, 25 November 2026) menghasilkan respons kosong. Antarmuka pengguna sebaiknya tidak bergantung pada terisinya items.',
   },
   {
     path: '/api/weather/forecast-official',
@@ -226,7 +226,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'hours[]', type: 'object[]', note: 'bentuk field sama persis dengan /api/weather/forecast' },
       { name: 'region', type: 'object', note: 'terisi dari parameter adm4, bukan dari koordinat' },
     ],
-    warn: 'Endpoint cadangan: pakai /api/weather/forecast lebih dulu. Jangan dua-duanya sekaligus — boros dan bisa memberi angka berbeda.',
+    warn: 'Endpoint cadangan. Gunakan /api/weather/forecast terlebih dahulu; pemanggilan keduanya secara bersamaan tidak dianjurkan karena menambah beban dan berpotensi menghasilkan angka berbeda.',
   },
   {
     path: '/api/sky/sun-times',
@@ -248,7 +248,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'firstLight / lastLight', type: 'string | null', note: 'twilight' },
       { name: 'moonPhase / moonIllumination', type: 'string | null' },
     ],
-    warn: 'BMKG mengirim "5:26:06 AM". Di sini sudah 24 jam — jangan parse ulang sebagai 12 jam.',
+    warn: 'BMKG mengirim waktu dalam format "5:26:06 AM". Di sini seluruh waktu telah dikonversi ke format 24 jam; tidak perlu diuraikan ulang sebagai format 12 jam.',
   },
   {
     path: '/api/marine/nearest',
@@ -286,7 +286,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'port.slots[]', type: 'array', note: 'mode terdekat: pasut' },
       { name: 'distanceKm', type: 'number', note: 'perkiraan kasar (derajat × 111)' },
     ],
-    warn: 'Upstream maritim.bmkg.go.id sedang 503 saat endpoint ini dibuat. Tidak ada data contoh — jawabannya 502 apa adanya.',
+    warn: 'Upstream maritim.bmkg.go.id menjawab HTTP 503 pada saat endpoint ini dibuat. Contoh respons tidak disertakan dan kegagalan dikembalikan sebagai 502 beserta alasannya.',
   },
   {
     path: '/api/marine/waves',
@@ -303,7 +303,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'zones[].code', type: 'string', note: 'cocokkan dengan marine/nearest' },
       { name: 'zones[].today … h3', type: 'string | null', note: 'kategori tekstual' },
     ],
-    warn: 'Upstream maritim.bmkg.go.id sedang 503. Tidak ada data contoh.',
+    warn: 'Upstream maritim.bmkg.go.id menjawab HTTP 503. Contoh respons tidak disertakan.',
   },
   {
     path: '/api/geo/region',
@@ -340,7 +340,7 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'observation.conditionCode', type: 'string', note: 'kode cuaca BMKG, bukan teks' },
       { name: 'distanceKm', type: 'number', note: 'hanya mode koordinat' },
     ],
-    warn: 'manifest_times.json sedang 404. Tidak ada data contoh. conditionCode tidak diterjemahkan ke teks — itu urusan UI.',
+    warn: 'Berkas manifest_times.json menjawab HTTP 404. Contoh respons tidak disertakan. Nilai conditionCode tidak diterjemahkan menjadi teks karena penerjemahan merupakan tanggung jawab antarmuka.',
   },
   {
     path: '/api/news',
@@ -362,6 +362,6 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'posts[]', type: 'array', note: 'WordPress BMKG; sering kosong' },
       { name: 'warnings[]', type: 'string[]', note: 'sebab bagian yang kosong' },
     ],
-    warn: 'WordPress BMKG sering 502. Bila kosong, `warnings` menjelaskan sebabnya. TIDAK ada artikel contoh — kalau kosong, memang kosong.',
+    warn: 'WordPress BMKG kerap menjawab HTTP 502. Apabila kosong, field `warnings` memuat sebabnya. Artikel contoh tidak disertakan karena kekosongan berarti tidak ada data.',
   },
 ];

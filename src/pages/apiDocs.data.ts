@@ -31,7 +31,7 @@ export type EndpointDoc = {
 };
 
 export const GROUPS: Array<{ id: EndpointDoc['group']; label: string; desc: string }> = [
-  { id: 'weather', label: 'weather', desc: 'Cuaca darat: kondisi, prakiraan, peringatan, siklon' },
+  { id: 'weather', label: 'weather', desc: 'Cuaca darat: kondisi, prakiraan, peringatan, siklon, amandemen' },
   { id: 'sky', label: 'sky', desc: 'Matahari & bulan' },
   { id: 'marine', label: 'marine', desc: 'Laut: wilayah perairan, pelabuhan, gelombang' },
   { id: 'geo', label: 'geo', desc: 'Wilayah & stasiun pengamatan' },
@@ -192,6 +192,39 @@ export const ENDPOINTS: EndpointDoc[] = [
       { name: 'cyclones[].bulletin', type: 'string', note: 'URL dokumen BMKG, bukan teks' },
       { name: 'cyclones[].gale', type: 'string[]', note: 'wilayah terdampak' },
     ],
+  },
+  {
+    path: '/api/weather/amendment',
+    group: 'weather',
+    title: 'Amandemen prakiraan',
+    desc: 'Revisi prakiraan yang dikeluarkan BMKG untuk titik ini. Kosong = tidak ada revisi.',
+    query: ['lat', 'lon'],
+    auth: true,
+    sample: 'curl -H "Authorization: Bearer $TOKEN" \\\n  "https://DOMAIN/api/weather/amendment?lat=-6.2&lon=106.8"',
+    sampleRes: `{ "region": { "province": "DKI Jakarta", … },
+  "count": 0,
+  "items": [] }`,
+    fields: [
+      { name: 'count', type: 'number', note: 'jumlah revisi; 0 = tidak ada' },
+      { name: 'items', type: 'array', note: 'teruskan apa adanya dari BMKG — bentuk item belum pernah teramati' },
+    ],
+    warn: 'Terbukti selalu kosong saat kontrak ini disusun (0 item di 5 titik, 25 Nov 2026). Jangan bangun UI yang bergantung pada item terisi.',
+  },
+  {
+    path: '/api/weather/forecast-official',
+    group: 'weather',
+    title: 'Prakiraan jalur resmi (cadangan)',
+    desc: 'Sumber Open Data api.bmkg.go.id. Bentuknya sama dengan /api/weather/forecast — hanya dipakai bila prakiraan internal kosong.',
+    query: ['adm4'],
+    auth: true,
+    sample: 'curl -H "Authorization: Bearer $TOKEN" \\\n  "https://DOMAIN/api/weather/forecast-official?adm4=31.73.07.1002"',
+    sampleRes: `{ "region": { "adm4": "31.73.07.1002", … },
+  "hours": [ { "date": "2026-11-25", "time": "14:00", "temp": 30, … }, … ] }`,
+    fields: [
+      { name: 'hours[]', type: 'object[]', note: 'bentuk field sama persis dengan /api/weather/forecast' },
+      { name: 'region', type: 'object', note: 'terisi dari parameter adm4, bukan dari koordinat' },
+    ],
+    warn: 'Endpoint cadangan: pakai /api/weather/forecast lebih dulu. Jangan dua-duanya sekaligus — boros dan bisa memberi angka berbeda.',
   },
   {
     path: '/api/sky/sun-times',

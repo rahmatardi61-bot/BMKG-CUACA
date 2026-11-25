@@ -76,7 +76,7 @@ jangan dipakai untuk klaim resmi.
 | `GET /api/weather/nowcast` | `province?` | `{ total, alerts[] }` |
 | `GET /api/weather/weekly-temperature` | `lat`, `lon` | `{ daily[], weekly[] }` |
 | `GET /api/weather/cyclones` | — | `{ cyclones[] }` |
-| `GET /api/weather/amendment` | `lat`, `lon` | `{ region, count, items[] }` |
+| `GET /api/weather/amendment` | `lat`, `lon` | `{ region, count, items[] }` — `items` **belum pernah teramati terisi** |
 | `GET /api/weather/forecast-official` | `adm4` | `{ region, hours[] }` (jalur cadangan) |
 | `GET /api/sky/sun-times` | `lat`, `lon` | `{ sunrise, sunset, moonPhase, … }` |
 | `GET /api/marine/nearest` | `lat`, `lon` | `{ marine }` |

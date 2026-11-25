@@ -18,6 +18,8 @@ const applyTheme = (dark: boolean) => {
 };
 onMounted(() => applyTheme(localStorage.getItem('bmkg-widget-theme') !== 'light'));
 
+// Jangan tulis 'https://' + origin: origin sudah memuat skema, hasilnya
+// https://http://localhost:5173 — contoh curl yang tidak bisa dijalankan.
 const origin = window.location.origin;
 const copied = ref('');
 async function copy(text: string, key: string) {
@@ -83,7 +85,7 @@ const shown = computed(() =>
 const groupLabel = (id: EndpointDoc['group']) => GROUPS.find((g) => g.id === id)?.label ?? id;
 
 function curlFor(e: EndpointDoc) {
-  return e.sample.replace(/\$TOKEN/g, token.value || 'TOKEN_KEYCLOAK_ANDA').replace(/DOMAIN/g, origin);
+  return e.sample.replace(/\$TOKEN/g, token.value || 'TOKEN_KEYCLOAK_ANDA').replace(/https:\/\/DOMAIN/g, origin);
 }
 </script>
 
@@ -114,7 +116,7 @@ function curlFor(e: EndpointDoc) {
     <main class="max-w-6xl mx-auto px-5 py-6 space-y-6">
       <!-- Intro -->
       <section>
-        <h2 class="text-lg font-black">13 endpoint, 5 kelompok</h2>
+        <h2 class="text-lg font-black">{{ ENDPOINTS.length }} endpoint, {{ GROUPS.length }} kelompok</h2>
         <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
           Nama endpoint mengikuti <strong>isi responsnya</strong>, bukan nama asli BMKG.
           Di balik layar kita memanggil

@@ -543,7 +543,7 @@ async function copy(text: string, key: string) {
       </section>
 
       <!-- ═══ 2. SEMATKAN WIDGET ══════════════════════════════════════════ -->
-      <section class="flex items-center gap-2 flex-wrap">
+      <section class="rounded-xl border border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-900/40 px-4 py-3 flex items-center gap-2 flex-wrap">
         <h3 class="text-[13px] font-black flex items-center gap-2 mr-auto">
           <span class="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-black flex items-center justify-center shrink-0">2</span>
           Sematkan widget
@@ -849,10 +849,12 @@ ngAfterViewInit() {
     </main>
 
     <!-- Navigasi cepat. Bulat: klik = ke atas. Hover/fokus = daftar widget untuk lompat. -->
-    <div class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 group/rail">
+    <div class="fixed bottom-5 right-5 z-40 group/rail">
+      <!-- pb-2: jarak visual tombol<->panel, tapi area hover tetap menyambung -->
       <div
-        class="invisible opacity-0 translate-y-1 group-hover/rail:visible group-hover/rail:opacity-100 group-hover/rail:translate-y-0 group-focus-within/rail:visible group-focus-within/rail:opacity-100 group-focus-within/rail:translate-y-0 transition-all duration-150 w-60 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-900/20 p-1.5"
+        class="absolute bottom-full right-0 pb-2 invisible opacity-0 translate-y-1 pointer-events-none group-hover/rail:visible group-hover/rail:opacity-100 group-hover/rail:translate-y-0 group-hover/rail:pointer-events-auto group-focus-within/rail:visible group-focus-within/rail:opacity-100 group-focus-within/rail:translate-y-0 group-focus-within/rail:pointer-events-auto transition-all duration-150"
       >
+        <div class="w-60 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-900/20 p-1.5">
         <p class="px-2 pt-1 pb-1.5 text-[10px] font-black tracking-wider text-slate-500">LOMPAT KE WIDGET ({{ WIDGETS.length }})</p>
         <button
           v-for="w in WIDGETS"
@@ -864,7 +866,8 @@ ngAfterViewInit() {
         <button
           @click="jumpTo('setup')"
           class="w-full text-left px-2 py-1.5 mt-1 rounded-md text-[11.5px] font-bold text-brand-cyan hover:bg-brand-cyan hover:text-slate-950 transition-colors border-t border-slate-200 dark:border-slate-700 pt-2"
-        >↑ Setup awal</button>
+          >↑ Setup awal</button>
+        </div>
       </div>
       <button
         @click="jumpTo('top')"

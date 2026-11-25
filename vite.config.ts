@@ -1,6 +1,6 @@
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve, join } from 'node:path'
+import { resolve, relative } from 'node:path'
 import { existsSync } from 'node:fs'
 
 // ── BMKG proxy (dev) ────────────────────────────────────────────────────────
@@ -85,35 +85,48 @@ try {
 const apiRoutes: Plugin = {
   name: 'vercel-api-dev',
   configureServer(server) {
-    // Semua handler di api/*.ts bisa dipanggil di dev (5173) sama seperti di
-    // Vercel/server.mjs — supaya perilaku token & proxy tidak berbeda.
-    const ROUTES = [
-    '/api/embed-token', '/api/embed-js', '/api/embed-verify', '/api/embed-panel.js',
-    '/api/widget-catalog', '/api/widget-search', '/api/bmkg',
-  ];
-    for (const route of ROUTES) {
-      server.middlewares.use(route, async (req, res) => {
-        try {
-          // Beberapa handler ditulis JS murni (tanpa tipe): *.js / embed-panel.js.
-          // Sisanya TS. Dicari berurutan, bukan ditebak dari nama route.
-          const candidates = route.endsWith('.js') ? [route] : [`${route}.ts`, `${route}.js`];
-          const file = candidates.find((f) => existsSync(join(__dirname, f))) ?? candidates[0];
-          const { default: mod } = await server.ssrLoadModule(file);
-          // Vercel: `export default { fetch }`; dukung juga fungsi polos
-          const handler = typeof mod === 'function' ? mod : mod.fetch;
-          const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
-          const out = await handler(
-            new Request(url, { method: req.method, headers: req.headers as Record<string, string> }),
-          );
-          const body = Buffer.from(await out.arrayBuffer());
-          res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) });
-          res.end(req.method === 'HEAD' ? undefined : body);
-        } catch (e) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Handler gagal', detail: String(e).slice(0, 300) }));
-        }
-      });
+    // Semua handler di api/** bisa dipanggil di dev (5173) sama seperti di
+    // Vercel/server.mjs. Rutenya DIPINDAI dari folder api/, bukan daftar
+    // hardcoded — menambah endpoint cukup menambah file.
+    const API_DIR = resolve(__dirname, 'api');
+
+    function fileFor(rel: string): string | null {
+      const base = resolve(API_DIR, rel);
+      if (!base.startsWith(API_DIR)) return null; // tolak path traversal
+      const candidates = /\.[jt]s$/.test(rel)
+        ? [base]
+        : [`${base}.js`, `${base}.ts`, `${base}/index.js`, `${base}/index.ts`];
+      return candidates.find((f) => existsSync(f)) ?? null;
     }
+
+    server.middlewares.use(async (req, res, next) => {
+      const pathname = (req.originalUrl ?? req.url ?? '').split('?')[0];
+      const isApi = pathname.startsWith('/api/') || pathname === '/api-bmkg';
+      if (!isApi) return next();
+
+      // legacy /api-bmkg → api/bmkg
+      const file = fileFor(pathname === '/api-bmkg' ? 'bmkg' : pathname.slice('/api/'.length));
+      // Bukan file handler? Bisa jadi path upstream BMKG yang diteruskan ke
+      // server.proxy di bawah (/api/df/*, /api/public/*, …). Jangan ditelan di sini,
+      // kalau ditelan widget kehilangan datanya (regresi: 404 untuk semua widget).
+      if (!file) return next();
+
+      try {
+        // ssrLoadModule memakai path relatif root (bukan absolut di Windows/mac)
+        const { default: mod } = await server.ssrLoadModule(`/${relative(__dirname, file)}`);
+        const handler = typeof mod === 'function' ? mod : mod.fetch;
+        const url = new URL(req.originalUrl ?? req.url ?? '/', 'http://localhost');
+        const out = await handler(
+          new Request(url, { method: req.method, headers: req.headers as Record<string, string> }),
+        );
+        const body = Buffer.from(await out.arrayBuffer());
+        res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) });
+        res.end(req.method === 'HEAD' ? undefined : body);
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Handler gagal', detail: String(e).slice(0, 300) }));
+      }
+    });
   },
 };
 

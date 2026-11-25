@@ -8,16 +8,44 @@ import { stat } from 'node:fs/promises'
 import { pipeline } from 'node:stream/promises'
 import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
-import bmkgMod from './api/bmkg.ts'
-import embedTokenMod from './api/embed-token.ts'
-import embedJsMod from './api/embed-js.ts'
-import embedVerifyMod from './api/embed-verify.ts'
-import embedPanelMod from './api/embed-panel.js'
-import widgetCatalogMod from './api/widget-catalog.js'
-import widgetSearchMod from './api/widget-search.js'
+import { readdirSync } from 'node:fs'
+import { pathToFileURL } from 'node:url'
 
 // Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
 const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
+
+// ── Routing /api/* ─────────────────────────────────────────────────────────
+// Dulu tiap endpoint diimpor statis. Sekarang dipindai dari folder api/:
+// menambah endpoint = menambah file, tanpa menyentuh server ini. Bentuk URL
+// sama dengan Vercel: api/weather/forecast.js → /api/weather/forecast.
+const API_DIR = resolve('api')
+const API_MAP = new Map() // '/api/weather/forecast' → '/abs/path/api/weather/forecast.js'
+
+function scanApi(dir = API_DIR, prefix = '/api') {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      scanApi(full, `${prefix}/${entry.name}`)
+      continue
+    }
+    const ext = extname(entry.name)
+    if (ext !== '.js' && ext !== '.ts') continue
+    const route = `${prefix}/${entry.name.slice(0, -ext.length)}`
+    // index.js di dalam folder juga menempati route foldernya
+    API_MAP.set(entry.name === `index${ext}` ? prefix : route, full)
+  }
+}
+scanApi()
+
+const modCache = new Map()
+/** @returns {Promise<Function|null>} */
+async function apiHandler(pathname) {
+  // legacy: /api-bmkg → api/bmkg
+  const file = API_MAP.get(pathname) ?? (pathname === '/api-bmkg' ? API_MAP.get('/api/bmkg') : null)
+  if (!file) return null
+  if (!modCache.has(file)) modCache.set(file, import(pathToFileURL(file).href))
+  return asFetch((await modCache.get(file)).default)
+}
 
 const DIST = resolve('dist')
 const PORT = Number(process.env.PORT) || 8080
@@ -91,50 +119,21 @@ async function serveFile(req, res, pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
 
-  if (url.pathname === '/api/embed-token') {
-    try {
-      const out = await asFetch(embedTokenMod)(new Request(url, { method: req.method, headers: req.headers }))
-      const body = Buffer.from(await out.arrayBuffer())
-      res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
-      res.end(req.method === 'HEAD' ? undefined : body)
-    } catch (e) {
-      res.writeHead(502, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: String(e) }))
+  if (url.pathname.startsWith('/api/') || url.pathname === '/api-bmkg') {
+    const handler = await apiHandler(url.pathname)
+    if (!handler) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Endpoint tidak ada', code: 'NOT_FOUND' }))
+      return
     }
-    return
-  }
-
-  // embed-panel publik: loader + panel token untuk halaman contoh (tanpa Bearer)
-  const GATED = {
-    '/api/embed-js': asFetch(embedJsMod),
-    '/api/embed-verify': asFetch(embedVerifyMod),
-    '/api/embed-panel.js': asFetch(embedPanelMod),
-    '/api/widget-catalog': asFetch(widgetCatalogMod),
-    '/api/widget-search': asFetch(widgetSearchMod),
-  };
-  if (GATED[url.pathname]) {
     try {
-      const out = await GATED[url.pathname](new Request(url, { method: req.method, headers: req.headers }))
+      const out = await handler(new Request(url, { method: req.method, headers: req.headers }))
       const body = Buffer.from(await out.arrayBuffer())
       res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
       res.end(req.method === 'HEAD' ? undefined : body)
     } catch (e) {
       res.writeHead(502, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: String(e) }))
-    }
-    return
-  }
-
-  if (url.pathname === '/api/bmkg' || url.pathname === '/api-bmkg') {
-    // handler membaca path upstream dari ?path= (lihat api/bmkg.ts); /api-bmkg = legacy
-    try {
-      const out = await asFetch(bmkgMod)(new Request(url, { method: req.method, headers: req.headers }))
-      const body = Buffer.from(await out.arrayBuffer())
-      res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
-      res.end(req.method === 'HEAD' ? undefined : body)
-    } catch (e) {
-      res.writeHead(502, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: String(e) }))
+      res.end(JSON.stringify({ error: 'Handler gagal', detail: String(e).slice(0, 300) }))
     }
     return
   }

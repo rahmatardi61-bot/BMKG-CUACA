@@ -14,34 +14,11 @@
 // - path `alerts/*` (nowcast RSS) diarahkan ke www.bmkg.go.id (tanpa CORS di sana)
 // Dipakai di Vercel (folder api/ terdeteksi otomatis) dan server.mjs (Docker).
 import { bearer, verifyJwt } from '../lib/jwt.js';
+import { bmkgFetch } from '../lib/upstream.js';
 
 export const config = { runtime: 'nodejs' };
 
-const UPSTREAM = 'https://cuaca.bmkg.go.id';
-const NOWCAST_UPSTREAM = 'https://www.bmkg.go.id';
-const DWT_UPSTREAM = 'https://publik.bmkg.go.id';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFjNWFkZWUxYzY5MzM0NjY2N2EzZWM0MWRlMjBmZWZhNDcxOTNjYzcyZDgwMGRiN2ZmZmFlMWVhYjcxZGYyYjQiLCJpYXQiOjE3MDE1ODMzNzl9.D1VNpMoTUVFOUuQW0y2vSjttZwj0sKBX33KyrkaRMcQ';
-const UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36';
-
 const JSON_HEADERS = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
-
-// ponytail: cache token global per-instance edge (cold start jarang, TTL 25m < exp 30m)
-const tokenState: { value: string; exp: number } = { value: '', exp: 0 };
-
-async function getPubTok(): Promise<string> {
-  if (tokenState.value && Date.now() < tokenState.exp) return tokenState.value;
-  try {
-    const html = await (await fetch(UPSTREAM + '/', { headers: { 'User-Agent': UA, Accept: 'text/html' } })).text();
-    const seg = html.slice(html.indexOf('publicToken'));
-    const tok = seg.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/)?.[0];
-    if (tok) Object.assign(tokenState, { value: tok, exp: Date.now() + 25 * 60 * 1000 });
-  } catch {
-    /* biarkan tanpa token → upstream 401 → client fallback mock */
-  }
-  return tokenState.value;
-}
 
 async function handle(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -66,30 +43,16 @@ async function handle(req: Request): Promise<Response> {
   const path = url.searchParams.get('path') ?? '';
   if (!path) return new Response(JSON.stringify({ error: 'parameter path wajib' }), { status: 400, headers: JSON_HEADERS });
 
-  const isNowcast = path.startsWith('alerts/');
-  const isDwt = path.startsWith('event/');
   const own = new URLSearchParams(url.search);
   own.delete('path');
-  const host = isNowcast ? NOWCAST_UPSTREAM : isDwt ? DWT_UPSTREAM : UPSTREAM;
-  const target = `${host}/${path}${own.size ? `?${own}` : ''}`;
-
-  const headers: Record<string, string> = isNowcast
-    ? { 'User-Agent': UA, Accept: 'application/xml' }
-    : isDwt
-      ? { 'User-Agent': UA, Accept: 'application/json' } // setara proxy vite /event (tanpa header khusus)
-      : { Referer: UPSTREAM + '/', Origin: UPSTREAM, 'User-Agent': UA, Accept: 'application/json' };
-  if (!isNowcast && !isDwt && path.includes('api/v1/')) headers['X-API-KEY'] = API_KEY;
-  if (!isNowcast && !isDwt && (path.includes('api/public/') || path.includes('v1/public/') || path.includes('v1/user/'))) {
-    const tok = await getPubTok();
-    if (tok) headers['x-public-token'] = tok;
-  }
 
   try {
-    const res = await fetch(target, { headers });
-    const body = await res.text();
-    return new Response(body, {
-      status: res.status,
-      headers: { 'Content-Type': res.headers.get('content-type') || 'application/json', 'Cache-Control': 'no-store' },
+    // Host, header, dan cache token upstream semuanya di lib/upstream.js —
+    // endpoint /api/* (bentuk normal) memakai modul yang sama.
+    const up = await bmkgFetch(path, own);
+    return new Response(up.body, {
+      status: up.status,
+      headers: { 'Content-Type': up.contentType, 'Cache-Control': 'no-store' },
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {

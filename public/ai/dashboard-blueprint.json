@@ -1,0 +1,80 @@
+{
+  "name": "BMKG dashboard (mirror dari /dashboard)",
+  "note": "Ukuran & urutan diukur dari dashboard asli, viewport 1440x900 (kontainer 1280px) dan 390x844.",
+  "consumeVia": "embed.js (token & refresh ditangani otomatis)",
+  "container": {
+    "maxWidth": "80rem",
+    "padding": {
+      "base": "1rem",
+      "sm": "1.5rem",
+      "lg": "2rem"
+    }
+  },
+  "grid": {
+    "cols": {
+      "base": 1,
+      "lg": 3
+    },
+    "gap": "2rem",
+    "breakpointLg": "1024px"
+  },
+  "regions": [
+    {
+      "id": "top",
+      "span": 3,
+      "stack": "space-y-3",
+      "order": [
+        "alerts"
+      ]
+    },
+    {
+      "id": "main",
+      "span": 2,
+      "stack": "space-y-8",
+      "order": [
+        "major-cities",
+        "current",
+        "forecast",
+        "satellite",
+        "marine",
+        "earthquake"
+      ]
+    },
+    {
+      "id": "sidebar",
+      "span": 1,
+      "stack": "space-y-8",
+      "sticky": "top: 6rem",
+      "order": [
+        "activity-comfort",
+        "activity-air",
+        "activity-land",
+        "activity-coastal",
+        "activity-shipping",
+        "activity-aviation",
+        "transport",
+        "port-tide"
+      ]
+    }
+  ],
+  "extraWidgets": [
+    "search",
+    "nearby-places",
+    "current-detail",
+    "earthquake-params",
+    "wave"
+  ],
+  "overlayWidgets": [
+    "maritime-advisor",
+    "aviation-advisor",
+    "land-activity",
+    "around",
+    "report"
+  ],
+  "excluded": {
+    "hero": "tidak ada versi embed",
+    "downloadCta": "tidak ada versi embed",
+    "news": "tidak ada versi embed",
+    "radar": "dinonaktifkan di dashboard"
+  }
+}

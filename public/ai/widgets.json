@@ -1,0 +1,795 @@
+{
+  "generatedFrom": "dashboard /dashboard",
+  "widgets": [
+    {
+      "id": "search",
+      "title": "Pencarian Lokasi",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": false,
+      "mockPart": null,
+      "region": "extra",
+      "placement": "di dalam header dashboard (kolom pencarian)",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"search\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=search"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 105
+        },
+        "mobile": {
+          "w": 358,
+          "h": 120
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "major-cities",
+      "title": "Kota-Kota Besar",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": false,
+      "mockPart": "landmark statis, tanpa data",
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"major-cities\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=major-cities"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 479
+        },
+        "mobile": {
+          "w": 358,
+          "h": 482
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "nearby-places",
+      "title": "Aktivitas Sekitar (Tempat & Peta)",
+      "sumber": "MOCOMM",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "daftar tempat kurasi statis",
+      "region": "extra",
+      "placement": "menempel di kartu \"Kondisi Cuaca Saat Ini\"",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"nearby-places\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=nearby-places&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 294
+        },
+        "mobile": {
+          "w": 358,
+          "h": 280
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "kartu tempat",
+        "opens": "AroundActivityDrawer (inline di dalam kartu)",
+        "chain": [
+          "klik tempat",
+          "drawer detail tempat"
+        ]
+      }
+    },
+    {
+      "id": "alerts",
+      "title": "Peringatan Dini Cuaca",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "top",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"alerts\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=alerts&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 1216,
+          "h": 173
+        },
+        "mobile": {
+          "w": 358,
+          "h": 173
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "current",
+      "title": "Kondisi Cuaca Saat Ini",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"current\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=current&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 558
+        },
+        "mobile": {
+          "w": 358,
+          "h": 1023
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "current-detail",
+      "title": "Rincian Kondisi Cuaca",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "extra",
+      "placement": "di dalam kartu \"Kondisi Cuaca Saat Ini\"",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"current-detail\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=current-detail&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 575
+        },
+        "mobile": {
+          "w": 358,
+          "h": 700
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "forecast",
+      "title": "Prakiraan Cuaca Per Jam",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"forecast\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=forecast&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 540
+        },
+        "mobile": {
+          "w": 358,
+          "h": 563
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "satellite",
+      "title": "Citra Satelit Himawari-9",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": false,
+      "mockPart": null,
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"satellite\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=satellite"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 390
+        },
+        "mobile": {
+          "w": 358,
+          "h": 420
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "marine",
+      "title": "Peta Meteorologi Maritim",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"marine\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=marine&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 694
+        },
+        "mobile": {
+          "w": 358,
+          "h": 610
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "earthquake",
+      "title": "Gempa Bumi Terkini",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "main",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"earthquake\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=earthquake&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 929
+        },
+        "mobile": {
+          "w": 358,
+          "h": 1456
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "item gempa / tombol peta",
+        "opens": "modal detail kejadian atau peta full-screen",
+        "chain": [
+          "klik item gempa",
+          "detail kejadian"
+        ],
+        "chainAlt": [
+          "klik peta",
+          "peta full-screen"
+        ]
+      }
+    },
+    {
+      "id": "earthquake-params",
+      "title": "Laporan Parameter Gempa",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "extra",
+      "placement": "sidebar di kartu \"Gempa Bumi Terkini\"",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"earthquake-params\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=earthquake-params&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 434
+        },
+        "mobile": {
+          "w": 358,
+          "h": 443
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "activity-comfort",
+      "title": "Indeks Kenyamanan",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "narasi rekomendasi dihitung sendiri dari angka live",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-comfort\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-comfort&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 259
+        },
+        "mobile": {
+          "w": 358,
+          "h": 259
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "activity-air",
+      "title": "Kualitas Udara (ringkasan)",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "BMKG tidak menyediakan API ISPU; angka estimasi",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-air\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-air&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 295
+        },
+        "mobile": {
+          "w": 358,
+          "h": 295
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "activity-land",
+      "title": "Aktivitas Darat",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "narasi saran dihitung sendiri",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-land\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-land&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 234
+        },
+        "mobile": {
+          "w": 358,
+          "h": 234
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "kartu Aktivitas Darat",
+        "opens": "LandBasedActivities (full-screen)",
+        "chain": [
+          "klik kartu",
+          "overview",
+          "cari tempat",
+          "pilih tempat",
+          "rute"
+        ]
+      }
+    },
+    {
+      "id": "activity-coastal",
+      "title": "Aktivitas Pesisir & Laut",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "narasi saran dihitung sendiri",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-coastal\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-coastal&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 254
+        },
+        "mobile": {
+          "w": 358,
+          "h": 273
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "kartu Aktivitas Pesisir & Laut",
+        "opens": "MaritimeAdvisorDrawer",
+        "chain": [
+          "klik kartu",
+          "drawer sektor maritim"
+        ]
+      }
+    },
+    {
+      "id": "activity-shipping",
+      "title": "Aktivitas Pelayaran",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "narasi saran dihitung sendiri",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-shipping\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-shipping&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 254
+        },
+        "mobile": {
+          "w": 358,
+          "h": 254
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "kartu Aktivitas Pelayaran",
+        "opens": "MaritimeAdvisorDrawer",
+        "chain": [
+          "klik kartu",
+          "drawer sektor pelayaran"
+        ]
+      }
+    },
+    {
+      "id": "activity-aviation",
+      "title": "Aktivitas Penerbangan",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "narasi saran dihitung sendiri",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"activity-aviation\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=activity-aviation&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 234
+        },
+        "mobile": {
+          "w": 358,
+          "h": 254
+        }
+      },
+      "interaction": {
+        "parentGesture": true,
+        "click": "kartu Aktivitas Penerbangan",
+        "opens": "AviationAdvisorDrawer",
+        "chain": [
+          "klik kartu",
+          "drawer bandara"
+        ]
+      }
+    },
+    {
+      "id": "transport",
+      "title": "Transportasi & Rute",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "BMKG tidak punya API status transportasi",
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"transport\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=transport&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 444
+        },
+        "mobile": {
+          "w": 358,
+          "h": 459
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "port-tide",
+      "title": "Pasang Surut Pelabuhan",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "sidebar",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"port-tide\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=port-tide&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 384,
+          "h": 173
+        },
+        "mobile": {
+          "w": 358,
+          "h": 173
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "wave",
+      "title": "Radar Tinggi Gelombang",
+      "sumber": "BMKG",
+      "status": "live",
+      "needsCity": true,
+      "mockPart": null,
+      "region": "extra",
+      "placement": "kartu peta maritim (pengganti radar yang dinonaktifkan)",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"wave\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=wave&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 800,
+          "h": 504
+        },
+        "mobile": {
+          "w": 358,
+          "h": 536
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": null,
+        "opens": null,
+        "chain": []
+      }
+    },
+    {
+      "id": "maritime-advisor",
+      "title": "Saran Maritim",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "sektor default shipping, tidak bisa dipilih pemasang",
+      "region": "overlay",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"maritime-advisor\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=maritime-advisor&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 900,
+          "h": 997
+        },
+        "mobile": {
+          "w": 390,
+          "h": 1056
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": "-",
+        "opens": "drawer penuh (widget ini sendiri overlay)",
+        "chain": [
+          "render langsung"
+        ]
+      }
+    },
+    {
+      "id": "aviation-advisor",
+      "title": "Saran Penerbangan",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "sektor default commercial, tidak bisa dipilih pemasang",
+      "region": "overlay",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"aviation-advisor\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=aviation-advisor&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 900,
+          "h": 1029
+        },
+        "mobile": {
+          "w": 390,
+          "h": 1083
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": "-",
+        "opens": "drawer penuh (widget ini sendiri overlay)",
+        "chain": [
+          "render langsung"
+        ]
+      }
+    },
+    {
+      "id": "land-activity",
+      "title": "Aktivitas Darat & Rute",
+      "sumber": "BMKG",
+      "status": "mixed",
+      "needsCity": true,
+      "mockPart": "tujuan perjalanan masih contoh",
+      "region": "overlay",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"land-activity\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=land-activity&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 900,
+          "h": 674
+        },
+        "mobile": {
+          "w": 390,
+          "h": 674
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": "-",
+        "opens": "panel penuh (widget ini sendiri overlay)",
+        "chain": [
+          "render langsung"
+        ]
+      }
+    },
+    {
+      "id": "around",
+      "title": "Detail Aktivitas Sekitar",
+      "sumber": "MOCOMM",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "satu aktivitas contoh",
+      "region": "overlay",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"around\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=around&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 900,
+          "h": 674
+        },
+        "mobile": {
+          "w": 390,
+          "h": 674
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": "-",
+        "opens": "drawer detail tempat (langsung terbuka)",
+        "chain": [
+          "render langsung"
+        ]
+      }
+    },
+    {
+      "id": "report",
+      "title": "Lapor Cuaca",
+      "sumber": "BMKG",
+      "status": "mock",
+      "needsCity": true,
+      "mockPart": "laporan tidak dikirim ke server",
+      "region": "overlay",
+      "embed": {
+        "script": "<script src=\"https://<host>/embed.js\" defer></script>",
+        "element": "<div data-bmkg-widget=\"report\" data-city=\"DKI Jakarta\" data-theme=\"dark\"></div>",
+        "url": "/embed.html?widget=report&city=DKI%20Jakarta"
+      },
+      "iframe": {
+        "desktop": {
+          "w": 900,
+          "h": 1234
+        },
+        "mobile": {
+          "w": 390,
+          "h": 1267
+        }
+      },
+      "interaction": {
+        "parentGesture": false,
+        "click": "-",
+        "opens": "drawer form laporan (langsung terbuka)",
+        "chain": [
+          "render langsung"
+        ]
+      }
+    }
+  ]
+}

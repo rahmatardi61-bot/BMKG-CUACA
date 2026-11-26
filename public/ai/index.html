@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Konsumsi Widget BMKG — panduan untuk AI</title>
+<style>
+ body{margin:0;background:#0b1220;color:#dbe3ef;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+ .wrap{max-width:900px;margin:0 auto;padding:32px 20px 80px}
+ h1{font-size:20px;color:#7dd3fc} a{color:#7dd3fc}
+ pre{white-space:pre-wrap;word-break:break-word;background:#111a2b;border:1px solid #1f2b3d;border-radius:10px;padding:20px}
+ .links{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0 24px;font-size:13px}
+ .links a{background:#111a2b;border:1px solid #1f2b3d;border-radius:8px;padding:8px 12px;text-decoration:none}
+</style></head>
+<body><div class="wrap">
+<h1>Konsumsi Widget BMKG — panduan untuk AI</h1>
+<div class="links">
+ <a href="/ai-docs.md">/ai-docs.md</a>
+ <a href="/ai/widgets.json">/ai/widgets.json</a>
+ <a href="/ai/dashboard-blueprint.json">/ai/dashboard-blueprint.json</a>
+</div>
+<pre id="doc">memuat…</pre>
+<script>
+fetch('/ai-docs.md').then(r=>r.text()).then(t=>{document.getElementById('doc').textContent=t})
+ .catch(e=>{document.getElementById('doc').textContent='Gagal memuat: '+e});
+</script>
+</div></body></html>

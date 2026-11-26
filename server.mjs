@@ -10,6 +10,7 @@ import { createGzip, constants as zlibConstants } from 'node:zlib'
 import { extname, join, normalize, resolve } from 'node:path'
 import { existsSync, readdirSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { withRequest, log } from './lib/observability.js'
 
 // Vercel memakai bentuk web handler `export default { fetch }`; terima keduanya.
 const asFetch = (mod) => (typeof mod === 'function' ? mod : mod.fetch)
@@ -142,11 +143,20 @@ createServer(async (req, res) => {
       // URL diteruskan dengan Host asli: handler yang membaca .origin (mis.
       // /v3/api-docs) harus melihat port yang benar, bukan http://localhost
       const abs = new URL(url.pathname + url.search, `http://${req.headers.host ?? 'localhost'}`)
-      const out = await handler(new Request(abs, { method: req.method, headers: req.headers }))
+      const t0 = Date.now()
+      const { result: out, traceId } = await withRequest(req, () =>
+        handler(new Request(abs, { method: req.method, headers: req.headers })),
+      )
       const body = Buffer.from(await out.arrayBuffer())
-      res.writeHead(out.status, { ...Object.fromEntries(out.headers), 'Content-Length': String(body.length) })
+      res.writeHead(out.status, {
+        ...Object.fromEntries(out.headers),
+        ...(traceId ? { 'X-Trace-Id': traceId } : {}),
+        'Content-Length': String(body.length),
+      })
       res.end(req.method === 'HEAD' ? undefined : body)
+      log('info', 'api', { traceId, path: url.pathname, status: out.status, ms: Date.now() - t0 })
     } catch (e) {
+      log('error', 'api gagal', { path: url.pathname, detail: String(e).slice(0, 200) })
       res.writeHead(502, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ error: 'Handler gagal', detail: String(e).slice(0, 300) }))
     }

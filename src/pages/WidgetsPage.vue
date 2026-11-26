@@ -138,12 +138,43 @@ type Widget = {
   city?: boolean;
   height: number;
   live: boolean;
-  /** widget bisa jatuh ke data contoh bila layanan BMKG gagal */
+  /** Deskripsi historis; ditampilkan hanya sebagai petunjuk tambahan jika belum dihapus. */
   mockFallback?: string;
 };
 
-/** Widget yang tidak punya sumber data resmi — selalu berlabel MOCK. */
-const alwaysMock = computed(() => WIDGETS.filter(w => !w.live));
+/** Widget yang seluruh konten datanya mock/statis, berbeda dari data campuran. */
+const alwaysMock = computed(() => WIDGETS.filter(w => ['major-cities', 'radar', 'activity-air', 'air-quality', 'transport', 'maritime-advisor', 'aviation-advisor', 'around', 'report'].includes(w.id)));
+const mixedData = computed(() => WIDGETS.filter(w => ['earthquake', 'activity-comfort', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation', 'land-activity'].includes(w.id)));
+
+// Audit mencatat konten preview embed, bukan seluruh dashboard. Backticks menandai istilah teknis.
+const DATA_NOTES: Record<string, string[]> = {
+  search: ['Nama wilayah dan hasil pencarian diminta ke `GET /api/widget-search`.', 'Nama, kode wilayah, dan koordinat berasal dari hasil yang dikembalikan endpoint; teks label yang terlihat dirapikan oleh antarmuka.', 'Layanan ini hasil penelusuran endpoint publik yang dapat diakses, bukan API pencarian yang diberikan melalui dokumentasi resmi BMKG.'],
+  alerts: ['Data peringatan dicari dari `GET /api/weather/nowcast` (feed RSS BMKG) dan `GET /api/weather/alerts`.', 'Judul, uraian, wilayah, dan tingkat peringatan berasal dari `title`, `description`, `region`, dan `severity` pada hasil yang telah dinormalisasi.', 'Untuk RSS, tingkat peringatan diperkirakan aplikasi dari kata-kata pada judul; itu bukan field tingkat bahaya yang disediakan feed.', 'Jika tidak ada peringatan yang cocok, widget menyatakan tidak ada data peringatan aktif—bukan membuat peringatan contoh.'],
+  current: ['Suhu, kondisi cuaca, kelembapan, angin, dan jarak pandang berasal dari `GET /api/weather/current`, masing-masing dari `observation.temp`, `condition`, `humidity`, `windSpeed`, dan `visibility`.', 'Suhu terasa (`observation.derived.feelLike`) dan indeks UV (`observation.derived.uvIndex`) dihitung oleh gateway, bukan dikirim BMKG; keduanya perkiraan sederhana.', 'Suhu minimum/maksimum dihitung aplikasi dari prakiraan hari ini (`hours[].temp`). Ikon cuaca dipilih aplikasi dari teks `condition`.', 'Jika sumber gagal, kartu menampilkan bahwa data tidak tersedia; tidak ada angka cuaca pengganti.'],
+  'major-cities': ['Nama kota dan landmark berasal dari daftar statis aplikasi, bukan API cuaca.', 'Kartu ini tidak memuat prakiraan cuaca.'],
+  'current-detail': ['Suhu, kondisi, kelembapan, angin, dan jarak pandang berasal dari `GET /api/weather/current`, pada properti `observation.temp`, `condition`, `humidity`, `windSpeed`, dan `visibility`.', 'Arah angin memakai `observation.windDirection` dan `observation.windDirectionDeg`. Waktu matahari/bulan berasal dari `GET /api/sky/sun-times`; bila gagal, aplikasi memakai jalur statis lokal.', 'Gateway mengubah jarak pandang BMKG dari meter ke kilometer. Jika BMKG tidak mengirim nilainya, hasilnya kosong—bukan berarti jarak pandang nol.'],
+  forecast: ['Prakiraan utama diambil dari `GET /api/weather/forecast`. Jika hasilnya kosong, aplikasi mencoba `GET /api/weather/forecast-official` menggunakan kode wilayah desa.', 'Setiap jam menampilkan `hours[].date`, `time`, `temp`, `condition`, `precipitation`, `humidity`, dan `windSpeed` dari respons gateway.', 'Ikon cuaca dipilih aplikasi dari teks `condition`. Nilai `precipitation` gateway adalah intensitas hujan yang diturunkan dari curah hujan, bukan peluang hujan.', 'Jika kedua sumber gagal atau tidak punya prakiraan, widget menampilkan pesan tidak tersedia; angka tidak diganti data contoh.'],
+  satellite: ['Waktu pengamatan dan citra diambil dari `satellite.bmkg.go.id`.', 'Peta dasar berasal dari ArcGIS, bukan BMKG.', 'Jika citra gagal dimuat, peta tidak menampilkan citra; tidak diganti data cuaca buatan.'],
+  marine: ['Wilayah dan kategori gelombang berasal dari data maritim BMKG di `maritim.bmkg.go.id`.', 'Daftar sektor/pelabuhan untuk peta juga memuat berkas statis lokal.', 'Status mengikuti kategori yang tersedia dari sumber; bukan pengukuran langsung di setiap titik peta.'],
+  radar: ['Medan angin dan suhu pada layer peta dibuat secara sintetis oleh aplikasi.', 'Bukan hasil pengamatan radar atau produk resmi BMKG; label mock berlaku selalu.'],
+  earthquake: ['Daftar gempa terbaru dan gempa dirasakan diminta langsung dari `https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json` dan `gempadirasakan.json`.', 'Angka magnitudo, kedalaman, waktu, lokasi, dan koordinat dibaca dari properti seperti `Magnitude`, `Kedalaman`, `Jam`, `Wilayah`, dan `Coordinates` pada respons BMKG.', 'Jarak dari kota pilihan dihitung aplikasi menggunakan koordinat gempa dan koordinat kota; jarak bukan field jarak dari BMKG.', 'Jika permintaan gagal, kode memiliki fallback data lokal. Karena itu hasil fallback tidak boleh dianggap data gempa terbaru.'],
+  'activity-comfort': ['Suhu dan kelembapan masukan berasal dari `GET /api/weather/current`, yaitu `observation.temp` dan `observation.humidity`.', 'Kategori kenyamanan, warna, dan saran dihitung aplikasi melalui aturan lokal (`getComfortIndex`); bukan angka indeks yang dikirim BMKG.', 'Suhu terasa yang mungkin ditampilkan memakai `observation.derived.feelLike`, hasil perhitungan gateway dan bukan pengukuran BMKG.'],
+  'activity-air': ['Nilai kualitas udara/ISPU pada ringkasan dihitung aplikasi dari cuaca kota; bukan hasil sensor.', 'Tidak ada endpoint kualitas udara yang digunakan untuk kartu ini. Angka AQI dan polutan adalah estimasi/contoh, bukan pengukuran resmi.'],
+  'air-quality': ['Nilai AQI, PM2.5, PM10, ozon, nitrogen dioksida, karbon monoksida, dan sulfur dioksida dibuat oleh rumus lokal di `AirQualityCard`.', 'Suhu cuaca bisa memengaruhi angka PM2.5, tetapi seluruh angka polutan tetap sintetis; tidak ada API atau sensor ISPU yang memasok nilainya.', 'Kategori dan saran kesehatan juga ditentukan aplikasi dari angka sintetis tersebut. Jangan gunakan sebagai informasi kualitas udara aktual.'],
+  'activity-land': ['Masukan cuaca seperti suhu, kondisi, dan angin berasal dari `GET /api/weather/current` (`observation.temp`, `condition`, `windSpeed`).', 'Narasi aktivitas dan kategori kenyamanan dibuat aplikasi dari data cuaca tersebut; bukan advisori resmi BMKG.', 'Sebagian hasil turunan dapat memakai indeks UV perkiraan dari `observation.derived.uvIndex`, bukan pengukuran UV.'],
+  'activity-coastal': ['Suhu, kondisi, dan angin dasarnya berasal dari `GET /api/weather/current` (`observation.temp`, `condition`, `windSpeed`).', 'Preview embed tidak meneruskan data maritim ke kartu (`maritimLive=null`). Karena itu, nilai/kalimat tinggi gelombang dihitung aplikasi dari kecepatan angin (`0.3 + windSpeed × 0.04`), bukan observasi gelombang BMKG.', 'Kategori dan saran aktivitas juga merupakan aturan aplikasi, bukan peringatan resmi.'],
+  'activity-shipping': ['Suhu, kondisi, dan angin dasarnya berasal dari `GET /api/weather/current`.', 'Preview embed tidak meneruskan data maritim (`maritimLive=null`). Angka gelombang pada narasi dihitung aplikasi dari angin (`0.3 + windSpeed × 0.04`), bukan data pengamatan/ prakiraan gelombang live.', 'Status pelayaran dan saran adalah narasi aplikasi, bukan keputusan operator atau advisori resmi BMKG.'],
+  'activity-aviation': ['Cuaca dasar berasal dari `GET /api/weather/current`, lalu dipakai aplikasi untuk menyusun narasi.', 'Tidak ada feed METAR, TAF, atau data operasi bandara live yang dipakai oleh preview ini.', 'Status dan saran penerbangan adalah olahan aplikasi, bukan advisori operasional BMKG atau otoritas penerbangan.'],
+  transport: ['Label `Aman`, `Waspada`, `Awas`, judul, dan narasi diambil dari data statis `transportStatusesMap` di `src/data/mockData.ts`.', 'Widget juga memuat cuaca kota melalui `GET /api/weather/current`, tetapi nilai cuaca itu tidak dipakai untuk mengubah status transportasi yang terlihat.', 'Artinya, status pada kartu ini bukan hasil API kondisi jalan, kereta, penerbangan, atau pelayaran dan bukan laporan operator.'],
+  'port-tide': ['Pelabuhan terdekat dan pasut dimuat dari `maritim.bmkg.go.id/public_api/pelabuhan_list` serta data detail pelabuhan.', 'Jika data tidak tersedia, widget menampilkan pesan kosong; tidak menggantinya dengan angka pasut buatan.'],
+  wave: ['Bentuk wilayah, kategori gelombang, dan data perairan berasal dari Open Data Maritim BMKG.', 'Angka angin pada peta dihitung aplikasi dari kategori gelombang (`wave × 6`); bukan data angin BMKG.'],
+  'maritime-advisor': ['Embed memilih sektor awal `shipping`; sektor juga dapat dikirim lewat parameter `sector`.', 'Cuaca dan aturan rekomendasi diproses aplikasi. Hasilnya bukan rekomendasi operasional resmi BMKG.'],
+  'aviation-advisor': ['Embed memilih sektor awal `commercial`; sektor juga dapat dikirim lewat parameter `sector`.', 'Narasi dihitung aplikasi dari data cuaca terbatas; bukan feed METAR/TAF atau advisori operasi penerbangan live.'],
+  'land-activity': ['Titik awal, nama tujuan contoh `Taman Kota`, dan sejumlah atribut lokasi berasal dari preset yang tersimpan di aplikasi.', 'Rute jalan dicari lewat OSRM; daftar tempat memakai Overpass; pencarian alamat memakai Nominatim. Ketiganya layanan peta eksternal, bukan sumber BMKG.', 'Untuk cuaca di titik rute, aplikasi meminta `GET /api/weather/forecast` dengan koordinat `lat` dan `lon`. Suhu, kondisi, dan angin diambil dari `hours[].temp`, `condition`, dan `windSpeed`.', 'Jika forecast gagal, tabel cuaca dapat memakai `hourlyForecastsMap` contoh. Jika rute OSRM tidak memberi cukup alternatif, sebagian rute dibuat sebagai perkiraan geometris oleh aplikasi.'],
+  around: ['Pada preview embed, nama tempat `Taman Kota`, jarak, kenyamanan, peringatan hujan/UV, dan prakiraan awal diisi dari objek contoh `AROUND_ACTIVITY` di aplikasi.', 'Koordinat tempat dibuat dengan menambahkan offset ke koordinat kota; bukan hasil pencarian lokasi atau API POI.', 'Tidak ada permintaan forecast BMKG dari jalur preview detail ini yang mengganti nilai contoh tersebut. Jadi nilai cuaca dan narasi yang terlihat pada kartu awal bukan data live BMKG.'],
+  report: ['Form dan riwayat contoh disimpan di sisi browser saja.', 'Laporan tidak dikirim ke server dan bukan pengamatan BMKG.']
+};
+const noteParts = (text: string) => text.split(/(`[^`]+`)/g).filter(Boolean);
 
 const WIDGETS: Widget[] = [
   // ── Urutan mengikuti render dashboard (MainDashboard.vue), atas → bawah ──
@@ -410,6 +441,8 @@ const DATA_SOURCES = [
 
 const origin = window.location.origin;
 const mode = ref<'script' | 'iframe'>('script');
+const detailTab = ref<Record<string, 'code' | 'data'>>({});
+const selectTab = (id: string, tab: 'code' | 'data') => { detailTab.value[id] = tab; };
 const selCity = ref('DKI Jakarta');
 const CITIES = ['DKI Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Semarang', 'Makassar', 'Palembang', 'Batam', 'Pekanbaru', 'Denpasar'];
 
@@ -700,10 +733,17 @@ async function copy(text: string, key: string) {
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
               <span
-                v-if="w.mockFallback"
-                class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                title="Widget ini bisa menampilkan data contoh (MOCK)"
-              >MOCK fallback</span>
+                :class="['text-[10px] font-bold px-1.5 py-0.5 rounded border',
+                  alwaysMock.some(x => x.id === w.id) ? 'bg-rose-500/10 text-rose-600 border-rose-500/30' : mixedData.some(x => x.id === w.id) ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30']"
+              >{{ alwaysMock.some(x => x.id === w.id) ? 'MOCK / STATIS' : mixedData.some(x => x.id === w.id) ? 'CAMPURAN / OLAHAN' : 'API / SUMBER LIVE' }}</span>
+              <button
+                @click="selectTab(w.id, 'code')"
+                :class="['text-[10px] font-bold px-2 py-1 rounded border', (detailTab[w.id] ?? 'code') === 'code' ? 'bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan' : 'border-slate-200 dark:border-slate-700 text-slate-500']"
+              >Kode</button>
+              <button
+                @click="selectTab(w.id, 'data')"
+                :class="['text-[10px] font-bold px-2 py-1 rounded border', detailTab[w.id] === 'data' ? 'bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan' : 'border-slate-200 dark:border-slate-700 text-slate-500']"
+              >Sumber data</button>
               <button
                 @click="previewKey++"
                 class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-cyan px-2.5 py-1.5 rounded border border-slate-200 dark:border-slate-800 transition-colors flex items-center gap-1"
@@ -724,8 +764,8 @@ async function copy(text: string, key: string) {
             >{{ c }}</button>
           </div>
 
-          <!-- Kode sematkan — full width, karena potongannya pendek -->
-          <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/60">
+          <!-- Kode sematkan: tab default -->
+          <div v-if="(detailTab[w.id] ?? 'code') === 'code'" class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/60">
             <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">
               KODE SEMATKAN
               <span class="font-normal normal-case tracking-normal text-slate-400">— setelah setup di bagian 1</span>
@@ -746,7 +786,17 @@ async function copy(text: string, key: string) {
             </div>
           </div>
 
-          <!-- Preview live — full width di bawah kode -->
+          <div v-else class="px-4 py-3 border-b border-slate-200 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-950/30">
+            <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-2">SUMBER &amp; STATUS DATA</p>
+            <ul class="list-disc pl-5 space-y-1.5 text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed">
+              <li v-for="(note, i) in DATA_NOTES[w.id]" :key="i">
+                <template v-for="(part, j) in noteParts(note)" :key="j"><code v-if="part.startsWith('`')" class="font-mono text-[10.5px] rounded bg-slate-200/70 dark:bg-slate-800 px-1 py-0.5">{{ part.slice(1, -1) }}</code><template v-else>{{ part }}</template></template>
+              </li>
+            </ul>
+            <p class="text-[10px] text-slate-500 mt-2">Catatan ini menjelaskan nilai pada preview yang terlihat. “Dari API” berarti field respons digunakan aplikasi; nilai yang dihitung ulang, diperkirakan, atau diisi statis ditandai terpisah. Pemetaan ini hasil penelusuran dan pengujian kami atas sumber publik, bukan kontrak atau konfirmasi resmi BMKG.</p>
+          </div>
+
+          <!-- Preview live — hanya di tab kode agar daftar tetap ringkas -->
           <div class="p-4 bg-slate-50 dark:bg-slate-950/30">
             <p class="text-[11px] font-bold tracking-wider text-slate-500 mb-1.5">PREVIEW LANGSUNG</p>
             <iframe
@@ -782,16 +832,12 @@ async function copy(text: string, key: string) {
           <AlertTriangle class="w-3.5 h-3.5" /> Tentang data contoh (MOCK)
         </h3>
         <p class="text-[11.5px] text-slate-700 dark:text-slate-300 leading-relaxed">
-          Sebagian widget mengambil data langsung dari layanan BMKG. Bila layanan tersebut
-          sedang tidak tersedia, widget tetap tampil agar tidak kosong — tetapi menampilkan
-          <strong class="font-bold">data contoh</strong> dan memberi label
-          <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">MOCK</span>
-          di bagian atas widget.
+          Label daftar membedakan data statis/mock dari widget campuran (API, hasil olahan aplikasi, dan/atau bagian statis). Buka tab “Sumber data” pada tiap widget untuk melihat rincian. Kode dan preview tetap menjadi tampilan default.
         </p>
         <ul class="text-[11px] text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed list-disc list-inside">
-          <li><strong class="text-slate-800 dark:text-slate-200">Berita &amp; Pengumuman</strong> — layanan berita BMKG (WordPress) sering gagal; artikel contoh dipakai sebagai cadangan.</li>
+          <li><strong class="text-slate-800 dark:text-slate-200">Kualitas udara</strong> — AQI/polutan dihitung di aplikasi; bukan hasil pengukuran sensor/API ISPU.</li>
           <li><strong class="text-slate-800 dark:text-slate-200">Peringatan Dini Cuaca</strong> — tidak memakai data contoh. Bila tidak ada peringatan aktif, widget menampilkan pesan "Tidak ada peringatan dini aktif" (data tetap asli).</li>
-          <li><strong class="text-slate-800 dark:text-slate-200">Prakiraan Cuaca, Gempa, Satelit</strong> — tanpa data contoh. Bila gagal, widget menampilkan pesan bahwa data belum tersedia.</li>
+          <li><strong class="text-slate-800 dark:text-slate-200">Berita, prakiraan, dan beberapa widget</strong> — perilaku fallback berbeda; detail sumber dan kolom data dijelaskan di tab “Sumber data” tiap widget.</li>
         </ul>
       </section>
 
@@ -811,9 +857,14 @@ async function copy(text: string, key: string) {
             <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget siap di-embed</p>
           </div>
           <div class="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2">
-            <p class="text-lg font-black text-amber-500 leading-none">{{ alwaysMock.length }}</p>
-            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget selalu MOCK</p>
+            <p class="text-lg font-black text-rose-500 leading-none">{{ alwaysMock.length }}</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget selalu mock / statis</p>
           </div>
+          <div class="rounded-lg border border-orange-500/25 bg-orange-500/5 px-3 py-2">
+            <p class="text-lg font-black text-orange-500 leading-none">{{ mixedData.length }}</p>
+            <p class="text-[10.5px] text-slate-500 mt-1 leading-tight">widget campuran / olahan</p>
+          </div>
+          <p class="col-span-2 sm:col-span-4 text-[10.5px] text-slate-500">Angka ini audit konten preview embed. Label lama “MOCK fallback” mencampur mock permanen, hasil turunan, fallback, dan batasan konfigurasi; hitungannya tidak sebanding dengan angka widget <code>live: false</code>.</p>
         </div>
 
         <!-- asal data: seberapa resmi isinya -->

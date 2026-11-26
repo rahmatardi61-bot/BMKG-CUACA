@@ -252,18 +252,18 @@ daftar hasil (maks 256 px, bisa di-scroll) langsung terlihat. Urutan yang sama d
 | ID | Nama | Query | Sumber data | Fallback MOCK |
 |---|---|---|---|---|
 | `search` | Pencarian Lokasi | — | `EmbedSearch` + `/api/widget-search` → **API BMKG** | ❌ |
+| `major-cities` | Kondisi Terkini | — | `MajorCitiesCarousel` + `AroundActivityPanel` (carousel tempat) | ➖ konten contoh |
+| `nearby-places` | Aktivitas Sekitar (Tempat & Peta) | `&city=` | `AroundActivityPanel` + `AroundActivityDrawer` (inline) | ➖ daftar tempat kurasi statis |
 | `alerts` | Peringatan Dini Cuaca | `&city=` | `loadCity()` → `AlertsPanel :alerts` | ❌ (kosong → "tidak ada peringatan") |
 | `current` | Kondisi Cuaca Saat Ini | `&city=` | `loadCity()` → `HeroWeatherCard` | ❌ |
-| `major-cities` | Kondisi Terkini + Aktivitas Sekitar | — | `MajorCitiesCarousel` + `AroundActivityPanel` (carousel tempat) | ➖ konten contoh |
 | `current-detail` | Rincian Kondisi Cuaca | `&city=` | `loadCity()` → `CurrentWeather` | ❌ |
 | `forecast` | Prakiraan Cuaca Per Jam | `&city=` | `loadCity()` → `ForecastPanel :forecasts` | ❌ (kosong → pesan jujur) |
 | `satellite` | Citra Satelit Himawari-9 | — | Tile API (mandiri, nol props) | ❌ |
 | `marine` | Peta Meteorologi Maritim | `&city=` | `MarineMap` (INAWAVES / Open Data live) | ❌ |
-| `radar` | Radar & Dinamika Atmosfer | `&city=` | `WeatherRadarMap` (medan sintetis) | ✅ **selalu** MOCK |
 | `earthquake` | Gempa Bumi Terkini | `&city=` | TEWS (`EarthquakeHistory` fetch sendiri) | ❌ |
+| `earthquake-params` | Laporan Parameter Gempa | `&city=` | TEWS autogempa (`EarthquakeParameterCard`) | ❌ (gagal → pesan jujur) |
 | `activity-comfort` | Indeks Kenyamanan | `&city=` | `WeatherActivity section="comfort"` | ➖ narasi dihitung sendiri |
 | `activity-air` | Kualitas Udara (ringkasan) | `&city=` | `WeatherActivity section="air"` | ✅ **selalu** MOCK |
-| `air-quality` | Kualitas Udara (ISPU) | `&city=` | `AirQualityCard` — kartu mandiri | ✅ **selalu** MOCK |
 | `activity-land` | Aktivitas Darat | `&city=` | `WeatherActivity section="land"` | ➖ narasi dihitung sendiri |
 | `activity-coastal` | Aktivitas Pesisir & Laut | `&city=` | `WeatherActivity section="coastal"` | ➖ idem |
 | `activity-shipping` | Aktivitas Pelayaran | `&city=` | `WeatherActivity section="shipping"` | ➖ idem |
@@ -295,10 +295,9 @@ kartu itu kini jadi widget sendiri — **tidak ada lagi widget paketan**:
 | Aktivitas Pelayaran | `activity-shipping` |
 | Aktivitas Penerbangan | `activity-aviation` |
 
-`air-quality` (kartu ISPU mandiri, `AirQualityCard`) **tidak** dirender di
-dashboard — hanya tersedia sebagai widget. Bedanya dengan `activity-air`:
-`activity-air` kartu ringkas milik section aktivitas, `air-quality` kartu ISPU
-lebih besar dengan meter AQI dan ambang PM2.5/PM10.
+Widget `air-quality` (kartu ISPU mandiri) dan `radar` sudah dihapus: keduanya
+tidak punya pasangan di dashboard. Kualitas udara tetap tersedia lewat
+`activity-air`, dan peta radar tidak lagi ditawarkan sebagai widget.
 
 Caranya bukan menduplikasi 500 baris markup: `WeatherActivity` menerima prop
 `section` (`comfort` / `air` / `land` / `coastal` / `shipping` / `aviation`) dan
@@ -336,7 +335,7 @@ tutup disembunyikan, dan `fullscreen-map-container` (yang memaksa `100vh`) tidak
 dipakai. Tanpa ini, drawer muncul sebagai overlay setinggi iframe dengan latar gelap
 dan tombol X yang tidak melakukan apa pun.
 
-`alerts`/`news`/`forecast`/`current`/`port-tide`/`air-quality`/`transport` = komponen
+`alerts`/`news`/`forecast`/`current`/`port-tide`/`transport` = komponen
 **presentasional** (props), jadi EmbedApp menyiapkan datanya sendiri — pola sama seperti
 dashboard, tanpa mengubah komponen aslinya. `satellite`/`earthquake`/`wave`/`marine`
 mengambil datanya sendiri (dan `earthquake`/`wave`/`marine` butuh kota untuk titik peta).
@@ -361,11 +360,10 @@ Tiga widget memakai data MOCK, dengan alasan berbeda:
 | Widget | Kenapa MOCK |
 |---|---|
 | `news` | Endpoint WordPress BMKG sering 502 → fallback artikel contoh |
-| `air-quality` | BMKG tidak punya API ISPU publik; nilai dihitung deterministik per kota |
 | `transport` | Tidak ada API status transportasi publik |
 
-`air-quality` dan `transport` **selalu** memberi label MOCK karena datanya memang bukan
-pengukuran resmi — bukan fallback saat gagal. Untuk `air-quality`, waktu "Dilukur pukul
+`transport` **selalu** memberi label MOCK karena datanya memang bukan pengukuran
+resmi — bukan fallback saat gagal. Untuk kartu kualitas udara (AQI) di `activity-air`, waktu "Diukur pukul
 …" juga hasil hitungan, bukan jam pengukuran sungguhan.
 
 Bila `news` gagal:
@@ -390,7 +388,7 @@ Angka ini juga tampil di halaman `/widgets` supaya bisa dipakai sebagai bahan di
 | Widget siap di-embed | 12 |
 | Bisa dibuat, belum dikerjakan | 5 |
 | Butuh klik pengunjung (tidak mungkin jadi widget) | 4 |
-| Widget yang selalu MOCK | 2 (`air-quality`, `transport`) |
+| Widget yang selalu MOCK (data utama) | 8 (lihat `/widgets` → tab Sumber data) |
 
 ### Asal data — seberapa resmi isinya
 
@@ -405,15 +403,13 @@ Angka ini juga tampil di halaman `/widgets` supaya bisa dipakai sebagai bahan di
 Konsekuensi: perubahan kecil di sisi BMKG (header, struktur halaman, CORS) bisa mematikan
 widget tanpa peringatan.
 
-### Bisa dibuat, belum dikerjakan (5)
+### Bisa dibuat, belum dikerjakan (3)
 
 | Kartu | Alasan belum |
 |---|---|
 | Current Weather Overview | Isinya hampir sama dengan widget `current` → akan jadi duplikat |
 | Aktivitas & Rekomendasi | Narasi dihitung dari `cityAnalysisMap` (mock) → harus berlabel MOCK |
-| Radar Cuaca | Partikel angin & suhu stasiun dihitung di browser, bukan produk radar BMKG → MOCK |
 | Peta Angin | Sama: medan angin adalah animasi hasil hitungan, bukan observasi |
-| Around Activity | Daftar lapangan golf dari data contoh; komponennya sudah tidak dipakai di dashboard |
 
 ### Butuh klik pengunjung — tidak akan pernah jadi widget (4)
 

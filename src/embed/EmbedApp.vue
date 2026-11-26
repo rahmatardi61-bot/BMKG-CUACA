@@ -6,13 +6,14 @@
 //   ?widget=satellite                → peta satelit Himawari-9 (mandiri, nol props)
 //   ?widget=earthquake&city=Jakarta  → gempa live TEWS (kota = penentu "terdekat")
 //   ?widget=current&city=Bandung     → kartu cuaca saat ini (suhu, angin, kelembapan)
-//   ?widget=forecast|alerts|air-quality|transport|port-tide  → data per kota
+//   ?widget=forecast|alerts|transport|port-tide  → data per kota
 //   ?widget=wave|marine              → peta maritim (Leaflet, live BMKG)
 //   ?widget=major-cities             → 10 kota besar (statis, tanpa fetch)
 //   ?widget=activity                 → aktivitas & rekomendasi per kota
 //   ?widget=current-detail           → rincian kondisi (angin, lembap, visibilitas)
 //   ?widget=app-download             → kartu ajakan unduh aplikasi (statis)
-//   ?widget=radar                    → peta lapisan radar/satelit/angin (MOCK sintetis)
+//   ?widget=earthquake-params        → panel parameter gempa terbaru (autogempa)
+//   ?widget=nearby-places            → daftar tempat sekitar + peta detail
 //   ?widget=maritime-advisor&sector=shipping   → saran maritim (default: shipping)
 //   ?widget=aviation-advisor&sector=commercial → saran penerbangan (default: commercial)
 //   ?widget=land-activity&dest=…     → aktivitas darat (default: destinasi contoh)
@@ -41,7 +42,6 @@ const AlertsPanel = defineAsyncComponent(() => import('../components/AlertsPanel
 const ForecastPanel = defineAsyncComponent(() => import('../components/ForecastPanel.vue'));
 const HeroWeatherCard = defineAsyncComponent(() => import('../components/HeroWeatherCard.vue'));
 const PortTideCard = defineAsyncComponent(() => import('../components/PortTideCard.vue'));
-const AirQualityCard = defineAsyncComponent(() => import('../components/AirQualityCard.vue'));
 const TransportWeather = defineAsyncComponent(() => import('../components/TransportWeather.vue'));
 const MajorCitiesCarousel = defineAsyncComponent(() => import('../components/MajorCitiesCarousel.vue'));
 // Leaflet dimuat hanya bila widget peta dipilih (jangan bebankan widget teks)
@@ -50,11 +50,12 @@ const MarineMap = defineAsyncComponent(() => import('../components/MarineMap.vue
 const EmbedSearch = defineAsyncComponent(() => import('./EmbedSearch.vue'));
 const WeatherActivity = defineAsyncComponent(() => import('../components/WeatherActivity.vue'));
 const CurrentWeather = defineAsyncComponent(() => import('../components/CurrentWeather.vue'));
-const WeatherRadarMap = defineAsyncComponent(() => import('../components/WeatherRadarMap.vue'));
 const MaritimeAdvisorDrawer = defineAsyncComponent(() => import('../components/MaritimeAdvisorDrawer.vue'));
 const AviationAdvisorDrawer = defineAsyncComponent(() => import('../components/AviationAdvisorDrawer.vue'));
 const LandBasedActivities = defineAsyncComponent(() => import('../components/LandBasedActivities.vue'));
 const AroundActivityDrawer = defineAsyncComponent(() => import('../components/AroundActivityDrawer.vue'));
+const AroundActivityPanel = defineAsyncComponent(() => import('../components/AroundActivityPanel.vue'));
+const EarthquakeParameterCard = defineAsyncComponent(() => import('../components/EarthquakeParameterCard.vue'));
 const EmbedWeatherReport = defineAsyncComponent(() => import('./EmbedWeatherReport.vue'));
 
 const params = new URLSearchParams(window.location.search);
@@ -101,25 +102,25 @@ const placeCoords = ref<{ lat: number; lon: number } | undefined>(initialPlace.c
 // membandingkan /widgets dengan /dashboard gampang.
 const READY = [
   'search', 'alerts', 'current', 'major-cities', 'current-detail', 'forecast',
-  'satellite', 'marine', 'radar', 'earthquake',
-  'activity-comfort', 'activity-air', 'air-quality',
+  'satellite', 'marine', 'earthquake', 'earthquake-params',
+  'activity-comfort', 'activity-air',
   'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation',
   'transport', 'port-tide', 'wave',
-  'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
+  'maritime-advisor', 'aviation-advisor', 'land-activity', 'nearby-places', 'around', 'report',
 ];
 const isReady = READY.includes(widget);
 // Widget yang butuh kota: semua yang menampilkan nama/titik wilayah
 const CITY_WIDGETS = [
   'earthquake', 'alerts', 'forecast', 'current', 'port-tide',
-  'air-quality', 'transport', 'wave', 'marine',
+  'earthquake-params', 'transport', 'wave', 'marine', 'nearby-places',
   'activity-comfort', 'activity-air', 'activity-land', 'activity-coastal',
-  'activity-shipping', 'activity-aviation', 'current-detail', 'radar',
-  'maritime-advisor', 'aviation-advisor', 'land-activity', 'around', 'report',
+  'activity-shipping', 'activity-aviation', 'current-detail',
+  'maritime-advisor', 'aviation-advisor', 'land-activity', 'nearby-places', 'around', 'report',
 ];
 const needCity = CITY_WIDGETS.includes(widget);
 // Widget yang datanya bergantung pada loadCity (satu fetch dipakai bersama)
 const FETCH_WIDGETS = [
-  'alerts', 'forecast', 'current', 'port-tide', 'air-quality', 'transport',
+  'alerts', 'forecast', 'current', 'port-tide', 'transport', 'nearby-places',
   'activity-comfort', 'activity-air', 'activity-land', 'activity-coastal',
   'activity-shipping', 'activity-aviation', 'current-detail',
 ];
@@ -132,13 +133,12 @@ const forecasts = ref<HourlyForecast[]>([]);
 const weather = ref<WeatherData | null>(null);
 const loading = ref(false);
 // true bila widget menampilkan data MOCK/fallback — ditandai di UI (bukan disembunyikan)
-const isMock = ref(widget === 'radar'); // peta layer memakai field sintetis
+const isMock = ref(false);
 
 // Alasan MOCK berbeda per widget — jangan menyalahkan "layanan mati" untuk data
 // yang memang tidak pernah ada (ISPU, status transportasi, medan sintetis).
 const MOCK_NOTE: Record<string, string> = {
-  radar: 'Data contoh (MOCK) — medan angin & suhu dihitung sintetis, bukan radar BMKG',
-  'air-quality': 'Data contoh (MOCK) — BMKG tidak menyediakan API ISPU',
+  'nearby-places': 'Data contoh (MOCK) — daftar tempat masih kurasi statis',
   transport: 'Data contoh (MOCK) — status transportasi tidak tersedia resmi',
   news: 'Data contoh (MOCK) — berita BMKG sedang tidak dapat dimuat',
 };
@@ -237,10 +237,6 @@ async function loadData() {
         // loadCity memicu loadPort fire & forget — di sini ditunggu agar tidak kosong
         const c = placeCoords.value ?? CITY_COORDS[city.value];
         await bmkg.loadPort(c.lat, c.lon);
-      } else if (widget === 'air-quality') {
-        weather.value = bmkg.liveWeather.value;
-        // kartu ISPU menghitung nilai deterministik per kota (bukan data resmi) → selalu MOCK
-        isMock.value = true;
       } else if (widget === 'transport') {
         weather.value = bmkg.liveWeather.value;
         isMock.value = true; // status transportasi BMKG tidak tersedia via API publik
@@ -307,6 +303,8 @@ const activityLandmark = computed(() => {
 const activityShortName = computed(() => city.value.split(',')[0].trim());
 /** Pilih tempat dari "Aktivitas Sekitar" → buka detailnya di dalam widget ini. */
 const aroundPicked = ref<Record<string, unknown> | null>(null);
+// Bentuk objek tempat dari AroundActivityPanel (GolfCourse); drawer hanya meneruskan.
+const nearbyPicked = ref<Record<string, any> | null>(null);
 
 /**
  * Pilih kota dari carousel "Kondisi Terkini". Dashboard mengganti kota seluruh
@@ -471,6 +469,9 @@ window.addEventListener('message', (ev: MessageEvent) => {
       </template>
       <EarthquakeHistory v-else-if="widget === 'earthquake'" :selected-city="city" />
 
+      <!-- Laporan parameter gempa: panel yang di dashboard menempel di sidebar EarthquakeHistory -->
+      <EarthquakeParameterCard v-else-if="widget === 'earthquake-params'" :selected-city="city" />
+
       <!-- Cuaca saat ini: kartu hero dashboard, tanpa dropdown kota (1 kota per widget) -->
       <template v-else-if="widget === 'current'">
         <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat cuaca…</div>
@@ -502,13 +503,6 @@ window.addEventListener('message', (ev: MessageEvent) => {
           </p>
         </div>
         <PortTideCard v-else :port="bmkg.livePort.value" :selected-city="city" />
-      </template>
-
-      <!-- Kualitas udara: nilai dihitung deterministik per kota → selalu berlabel MOCK -->
-      <template v-else-if="widget === 'air-quality'">
-        <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat kualitas udara…</div>
-        <AirQualityCard v-else-if="weather" :weather-data="weather" :selected-city="city" />
-        <div v-else class="p-6 text-center text-[11px] text-slate-500">Data cuaca kota {{ city }} belum tersedia.</div>
       </template>
 
       <!-- Transportasi: status contoh (tidak ada API resmi) → selalu berlabel MOCK -->
@@ -557,13 +551,6 @@ window.addEventListener('message', (ev: MessageEvent) => {
         </div>
       </template>
 
-      <!-- Peta lapisan (radar/satelit/angin): data field SINTETIS → selalu MOCK -->
-      <WeatherRadarMap
-        v-else-if="widget === 'radar'"
-        :selected-city="city"
-        :weather-data="weather ?? undefined"
-      />
-
       <!-- Saran maritim: inline + sektor default (partner belum bisa memilih) -->
       <MaritimeAdvisorDrawer
         v-else-if="widget === 'maritime-advisor'"
@@ -594,6 +581,27 @@ window.addEventListener('message', (ev: MessageEvent) => {
         @close="() => {}"
       />
 
+      <!-- Aktivitas sekitar: daftar tempat + peta saat satu tempat dipilih -->
+      <template v-else-if="widget === 'nearby-places'">
+        <div class="p-3">
+          <div v-if="loading" class="p-6 text-center text-[12px] text-slate-500">Memuat aktivitas sekitar…</div>
+          <template v-else>
+            <AroundActivityPanel
+              :selected-city="city"
+              :weather-data="weather ?? undefined"
+              @select-course="nearbyPicked = $event"
+            />
+            <template v-if="nearbyPicked">
+              <div class="mt-3 flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 px-3 py-2">
+                <span class="text-[11px] font-bold text-slate-500">PETA TEMPAT</span>
+                <button class="text-[11px] font-bold px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-brand-cyan hover:text-brand-cyan transition-colors" @click="nearbyPicked = null">Tutup</button>
+              </div>
+              <AroundActivityDrawer :is-open="true" :activity="nearbyPicked" :selected-city="city" inline @close="nearbyPicked = null" />
+            </template>
+          </template>
+        </div>
+      </template>
+
       <!-- Detail aktivitas sekitar: contoh taman kota -->
       <AroundActivityDrawer
         v-else-if="widget === 'around'"
@@ -605,11 +613,13 @@ window.addEventListener('message', (ev: MessageEvent) => {
       />
 
       <!-- Lapor cuaca: form + riwayat, dirender inline -->
-      <EmbedWeatherReport
-        v-else-if="widget === 'report'"
-        :selected-city="city"
-        :weather-temp="weather?.temp"
-      />
+      <!-- Lapor Cuaca: drawer dashboard lebarnya 480 px, jadi iframe dibatasi sama -->
+      <div v-else-if="widget === 'report'" class="max-w-[480px] mx-auto">
+        <EmbedWeatherReport
+          :selected-city="city"
+          :weather-temp="weather?.temp"
+        />
+      </div>
 
       <!-- 10 kota besar: kartu statis (landmark + nama), tanpa fetch -->
       <div v-else-if="widget === 'major-cities'" class="p-4 overflow-hidden">

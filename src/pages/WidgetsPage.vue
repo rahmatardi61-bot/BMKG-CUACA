@@ -143,7 +143,7 @@ type Widget = {
 };
 
 /** Widget yang seluruh konten datanya mock/statis, berbeda dari data campuran. */
-const alwaysMock = computed(() => WIDGETS.filter(w => ['major-cities', 'radar', 'activity-air', 'air-quality', 'transport', 'maritime-advisor', 'aviation-advisor', 'around', 'report'].includes(w.id)));
+const alwaysMock = computed(() => WIDGETS.filter(w => ['major-cities', 'activity-air', 'transport', 'maritime-advisor', 'aviation-advisor', 'around', 'report'].includes(w.id)));
 const mixedData = computed(() => WIDGETS.filter(w => ['earthquake', 'activity-comfort', 'activity-land', 'activity-coastal', 'activity-shipping', 'activity-aviation', 'land-activity'].includes(w.id)));
 
 // Audit mencatat konten preview embed, bukan seluruh dashboard. Backticks menandai istilah teknis.
@@ -156,11 +156,11 @@ const DATA_NOTES: Record<string, string[]> = {
   forecast: ['Prakiraan utama diambil dari `GET /api/weather/forecast`. Jika hasilnya kosong, aplikasi mencoba `GET /api/weather/forecast-official` menggunakan kode wilayah desa.', 'Setiap jam menampilkan `hours[].date`, `time`, `temp`, `condition`, `precipitation`, `humidity`, dan `windSpeed` dari respons gateway.', 'Ikon cuaca dipilih aplikasi dari teks `condition`. Nilai `precipitation` gateway adalah intensitas hujan yang diturunkan dari curah hujan, bukan peluang hujan.', 'Jika kedua sumber gagal atau tidak punya prakiraan, widget menampilkan pesan tidak tersedia; angka tidak diganti data contoh.'],
   satellite: ['Waktu pengamatan dan citra diambil dari `satellite.bmkg.go.id`.', 'Peta dasar berasal dari ArcGIS, bukan BMKG.', 'Jika citra gagal dimuat, peta tidak menampilkan citra; tidak diganti data cuaca buatan.'],
   marine: ['Wilayah dan kategori gelombang berasal dari data maritim BMKG di `maritim.bmkg.go.id`.', 'Daftar sektor/pelabuhan untuk peta juga memuat berkas statis lokal.', 'Status mengikuti kategori yang tersedia dari sumber; bukan pengukuran langsung di setiap titik peta.'],
-  radar: ['Medan angin dan suhu pada layer peta dibuat secara sintetis oleh aplikasi.', 'Bukan hasil pengamatan radar atau produk resmi BMKG; label mock berlaku selalu.'],
   earthquake: ['Daftar gempa terbaru dan gempa dirasakan diminta langsung dari `https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json` dan `gempadirasakan.json`.', 'Angka magnitudo, kedalaman, waktu, lokasi, dan koordinat dibaca dari properti seperti `Magnitude`, `Kedalaman`, `Jam`, `Wilayah`, dan `Coordinates` pada respons BMKG.', 'Jarak dari kota pilihan dihitung aplikasi menggunakan koordinat gempa dan koordinat kota; jarak bukan field jarak dari BMKG.', 'Jika permintaan gagal, kode memiliki fallback data lokal. Karena itu hasil fallback tidak boleh dianggap data gempa terbaru.'],
+  'earthquake-params': ['Data diambil dari `https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json`, sumber yang sama dengan widget Gempa Bumi Terkini.', 'Kekuatan, kedalaman, waktu, episentrum, potensi tsunami, dan daftar MMI dibaca dari properti respons BMKG (`Magnitude`, `Kedalaman`, `Tanggal`, `Jam`, `Wilayah`, `Potensi`, `Dirasakan`).', 'Jarak dihitung aplikasi dari koordinat gempa dan koordinat kota; bukan field jarak dari BMKG.', 'Jika respons gagal, kartu menyatakan data belum tersedia; tidak memakai gempa contoh.'],
+  'nearby-places': ['Daftar tempat berasal dari kurasi statis aplikasi (`GolfCourse`/taman kota), bukan API POI BMKG.', 'Saat satu tempat dipilih, peta Leaflet memakai ubin OpenStreetMap dan koordinat tempat contoh.', 'Tidak ada prakiraan cuaca per titik pada jalur ini; nilai cuaca yang muncul mengikuti data kota bila tersedia.'],
   'activity-comfort': ['Suhu dan kelembapan masukan berasal dari `GET /api/weather/current`, yaitu `observation.temp` dan `observation.humidity`.', 'Kategori kenyamanan, warna, dan saran dihitung aplikasi melalui aturan lokal (`getComfortIndex`); bukan angka indeks yang dikirim BMKG.', 'Suhu terasa yang mungkin ditampilkan memakai `observation.derived.feelLike`, hasil perhitungan gateway dan bukan pengukuran BMKG.'],
   'activity-air': ['Nilai kualitas udara/ISPU pada ringkasan dihitung aplikasi dari cuaca kota; bukan hasil sensor.', 'Tidak ada endpoint kualitas udara yang digunakan untuk kartu ini. Angka AQI dan polutan adalah estimasi/contoh, bukan pengukuran resmi.'],
-  'air-quality': ['Nilai AQI, PM2.5, PM10, ozon, nitrogen dioksida, karbon monoksida, dan sulfur dioksida dibuat oleh rumus lokal di `AirQualityCard`.', 'Suhu cuaca bisa memengaruhi angka PM2.5, tetapi seluruh angka polutan tetap sintetis; tidak ada API atau sensor ISPU yang memasok nilainya.', 'Kategori dan saran kesehatan juga ditentukan aplikasi dari angka sintetis tersebut. Jangan gunakan sebagai informasi kualitas udara aktual.'],
   'activity-land': ['Masukan cuaca seperti suhu, kondisi, dan angin berasal dari `GET /api/weather/current` (`observation.temp`, `condition`, `windSpeed`).', 'Narasi aktivitas dan kategori kenyamanan dibuat aplikasi dari data cuaca tersebut; bukan advisori resmi BMKG.', 'Sebagian hasil turunan dapat memakai indeks UV perkiraan dari `observation.derived.uvIndex`, bukan pengukuran UV.'],
   'activity-coastal': ['Suhu, kondisi, dan angin dasarnya berasal dari `GET /api/weather/current` (`observation.temp`, `condition`, `windSpeed`).', 'Preview embed tidak meneruskan data maritim ke kartu (`maritimLive=null`). Karena itu, nilai/kalimat tinggi gelombang dihitung aplikasi dari kecepatan angin (`0.3 + windSpeed × 0.04`), bukan observasi gelombang BMKG.', 'Kategori dan saran aktivitas juga merupakan aturan aplikasi, bukan peringatan resmi.'],
   'activity-shipping': ['Suhu, kondisi, dan angin dasarnya berasal dari `GET /api/weather/current`.', 'Preview embed tidak meneruskan data maritim (`maritimLive=null`). Angka gelombang pada narasi dihitung aplikasi dari angin (`0.3 + windSpeed × 0.04`), bukan data pengamatan/ prakiraan gelombang live.', 'Status pelayaran dan saran adalah narasi aplikasi, bukan keputusan operator atau advisori resmi BMKG.'],
@@ -177,15 +177,30 @@ const DATA_NOTES: Record<string, string[]> = {
 const noteParts = (text: string) => text.split(/(`[^`]+`)/g).filter(Boolean);
 
 const WIDGETS: Widget[] = [
-  // ── Urutan mengikuti render dashboard (MainDashboard.vue), atas → bawah ──
-  // Pencarian ditaruh paling atas: di dashboard ia memang ada di header.
+  // ── Urutan mengikuti alur dashboard (MainDashboard.vue), atas → bawah ──
+  // Pencarian di header, lalu Kondisi Terkini + tempat/peta, baru sisanya.
   {
     id: 'search',
     name: 'Pencarian Lokasi',
     desc: 'Kolom pencarian desa/kelurahan dari API BMKG. Pilihan pengunjung memindahkan semua widget di halaman pemasang.',
-    // 120 px hanya cukup untuk kotak input; daftar hasil butuh ruang
     height: 400,
     live: true
+  },
+  {
+    id: 'major-cities',
+    name: 'Kota-Kota Besar',
+    desc: 'Kartu 10 kota besar Indonesia dengan landmark. Statis — tidak memuat data apa pun.',
+    height: 400,
+    live: false
+  },
+  {
+    id: 'nearby-places',
+    name: 'Aktivitas Sekitar (Tempat & Peta)',
+    desc: 'Daftar tempat di sekitar kota terpilih; klik satu tempat untuk membuka detail beserta peta lokasinya.',
+    city: true,
+    height: 700,
+    live: false,
+    mockFallback: 'Daftar tempat masih kurasi statis; peta memakai Leaflet.'
   },
   {
     id: 'alerts',
@@ -202,13 +217,6 @@ const WIDGETS: Widget[] = [
     city: true,
     height: 520,
     live: true
-  },
-  {
-    id: 'major-cities',
-    name: 'Kota-Kota Besar',
-    desc: 'Kartu 10 kota besar Indonesia dengan landmark. Statis — tidak memuat data apa pun.',
-    height: 400,
-    live: false
   },
   {
     id: 'current-detail',
@@ -242,15 +250,6 @@ const WIDGETS: Widget[] = [
     live: true
   },
   {
-    id: 'radar',
-    name: 'Radar & Dinamika Atmosfer',
-    desc: 'Peta animasi lapisan radar, satelit, dan angin dengan kontrol waktu, ketinggian, dan model.',
-    city: true,
-    height: 700,
-    live: false,
-    mockFallback: 'Medan angin & suhu dihitung sintetis di browser dari jangkar kota. Ini BUKAN produk radar BMKG — widget selalu berlabel MOCK.'
-  },
-  {
     id: 'earthquake',
     name: 'Gempa Bumi Terkini',
     desc: 'Gempa terbaru dari TEWS BMKG + peta lokasi. Menampilkan gempa terdekat dari kota yang dipilih.',
@@ -258,7 +257,14 @@ const WIDGETS: Widget[] = [
     height: 520,
     live: true
   },
-  // ── Section aktivitas: tiap kartu jadi widget sendiri (tidak ada paketan) ──
+  {
+    id: 'earthquake-params',
+    name: 'Laporan Parameter Gempa',
+    desc: 'Panel parameter gempa terbaru: kekuatan, kedalaman, potensi tsunami, episentrum, dan wilayah yang merasakan (skala MMI).',
+    city: true,
+    height: 460,
+    live: true
+  },
   {
     id: 'activity-comfort',
     name: 'Indeks Kenyamanan',
@@ -274,15 +280,6 @@ const WIDGETS: Widget[] = [
     desc: 'Ringkasan ISPU: AQI, PM2.5, PM10, skala, dan saran untuk kelompok sensitif. Kartu seperti di dashboard.',
     city: true,
     height: 300,
-    live: false,
-    mockFallback: 'BMKG tidak menyediakan API ISPU. Angka dihitung deterministik dari cuaca kota — estimasi, bukan pengukuran.'
-  },
-  {
-    id: 'air-quality',
-    name: 'Kualitas Udara (ISPU)',
-    desc: 'Kartu ISPU mandiri: meter AQI lebih besar, ambang PM2.5/PM10, dan penjelasan status. Tidak dirender di dashboard — hanya tersedia sebagai widget.',
-    city: true,
-    height: 420,
     live: false,
     mockFallback: 'BMKG tidak menyediakan API ISPU. Angka dihitung deterministik dari cuaca kota — estimasi, bukan pengukuran.'
   },
@@ -347,7 +344,6 @@ const WIDGETS: Widget[] = [
     height: 480,
     live: true
   },
-  // ── Widget hasil pecahan drawer/modal: di dashboard baru muncul setelah klik ──
   {
     id: 'maritime-advisor',
     name: 'Saran Maritim',
@@ -392,7 +388,7 @@ const WIDGETS: Widget[] = [
     height: 700,
     live: false,
     mockFallback: 'Laporan tidak dikirim ke server mana pun — murni demo interaksi. Riwayat awal berisi dua contoh.'
-  }
+  },
 ];
 
 

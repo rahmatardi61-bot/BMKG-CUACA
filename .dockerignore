@@ -25,8 +25,11 @@ orig_bak_images
 *.log
 npm-debug.log*
 
-# Environment files — JANGAN di-exclude: .env (VITE_*) dibaca vite saat build
-# .env
+# Environment files — DIBUANG dari build context. Vite tidak butuh .env saat
+# build: VITE_BMKG_PROXY sudah di-set sebagai ENV di Dockerfile. Menyertakan
+# .env berarti kredensial masuk ke layer build-stage.
+.env
+.env.*
 
 # Git
 .git

@@ -1,0 +1,29 @@
+# Staging: app + Loki di satu host.
+#   cp .env.example .env   (lalu isi; LOKI_URL=http://loki:3100)
+#   docker compose up -d --build
+services:
+  app:
+    build: .
+    container_name: bmkg-cuaca
+    env_file: [.env]
+    environment:
+      # dipaksa di sini supaya `.env` lokal yang berisi 127.0.0.1 tidak ikut terpakai
+      LOKI_URL: http://loki:3100
+    ports: ["4021:4021"]
+    depends_on: [loki]
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: bmkg-loki
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+    # Grafana (host lain) perlu membaca log ke sini. App tetap pakai http://loki:3100.
+    # Batasi di firewall ke IP Grafana saja; hapus baris ini kalau tidak perlu akses luar.
+    ports: ["3100:3100"]
+    restart: unless-stopped
+
+volumes:
+  loki-data:
